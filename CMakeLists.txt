@@ -1,0 +1,28 @@
+cmake_minimum_required(VERSION 3.20)
+project(HexChess VERSION 0.2.0 LANGUAGES CXX)
+set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
+
+add_library(hexchess_rules shared/src/geometry.cpp shared/src/glinski_rules.cpp shared/variants/glinski.cpp)
+target_include_directories(hexchess_rules PUBLIC shared/include)
+add_executable(engine-one engines/engine-1/main.cpp engines/engine-1/protocol.cpp engines/engine-1/search.cpp)
+target_include_directories(engine-one PRIVATE shared/third_party)
+target_link_libraries(engine-one PRIVATE hexchess_rules)
+set_target_properties(engine-one PROPERTIES
+  RUNTIME_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/engines/engine-1"
+  RUNTIME_OUTPUT_DIRECTORY_DEBUG "${CMAKE_SOURCE_DIR}/engines/engine-1"
+  RUNTIME_OUTPUT_DIRECTORY_RELEASE "${CMAKE_SOURCE_DIR}/engines/engine-1")
+if(MINGW)
+  target_link_options(engine-one PRIVATE -static-libgcc -static-libstdc++)
+endif()
+
+include(CTest)
+if(BUILD_TESTING)
+  add_executable(geometry-tests tests/rules/geometry.cpp)
+  target_link_libraries(geometry-tests PRIVATE hexchess_rules)
+  add_test(NAME geometry COMMAND geometry-tests)
+  add_executable(glinski-tests tests/rules/glinski.cpp engines/engine-1/search.cpp)
+  target_link_libraries(glinski-tests PRIVATE hexchess_rules)
+  add_test(NAME glinski COMMAND glinski-tests)
+endif()

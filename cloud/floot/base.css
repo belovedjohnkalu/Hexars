@@ -1,0 +1,45 @@
+:root {
+  /* Overlay layers */
+  --z-overlay: 400;
+  --z-spotlight: 1000; /* Tutorial spotlights/guided help */
+  /* System layers */
+  --z-critical: 2000; /* Critical system notifications */
+  /* spacing */
+  --spacing-1: 0.25rem;
+  --spacing-2: 0.5rem;
+  --spacing-3: 0.75rem;
+  --spacing-4: 1rem;
+  --spacing-6: 1.5rem;
+  --spacing-8: 2rem;
+  --spacing-12: 3rem;
+  --spacing-16: 4rem;
+  --spacing-20: 5rem;
+}
+:root {
+  --background: #151d1a; --foreground: #e8ebe5;
+  --surface: #1b241e; --surface-foreground: #e8ebe5;
+  --sidebar: #121915; --sidebar-foreground: #c8cebd;
+  --card: #20291f; --card-foreground: #e0e5d4;
+  --popup: #222c20; --popup-foreground: #e8ebe5;
+  --primary: #d2bc91; --primary-foreground: #222b1e;
+  --secondary: #283126; --secondary-foreground: #d8deca;
+  --accent: #d2bc91; --accent-foreground: #222b1e;
+  --muted: #293322; --muted-foreground: #a0aa98;
+  --success: #a9cc91; --success-foreground: #182015;
+  --error: #d99b86; --error-foreground: #231814;
+  --warning: #c5a776; --warning-foreground: #241d14;
+  --info: #aebd9a; --info-foreground: #1a2218;
+  --info-hover: #bbcba8; --info-active: #92a77d;
+  --border: #333d30;
+  --font-family-base: "Segoe UI", system-ui, sans-serif;
+  --font-family-display: Georgia, "Times New Roman", serif;
+  --font-family-monospace: Consolas, monospace;
+  --font-family-cursive: cursive;
+  --shadow: 0 3px 12px #00000015; --shadow-md: 0 8px 24px #00000022;
+  --shadow-lg: 0 16px 40px #00000033; --shadow-focus: 0 0 0 3px #d2bc9133;
+  --radius-sm: 4px; --radius: 6px; --radius-md: 10px; --radius-lg: 14px; --radius-full: 999px;
+  --animation-duration-fast: 120ms; --animation-duration-normal: 200ms; --animation-duration-slow: 350ms;
+  --chart-color-1: #d2bc91; --chart-color-2: #a9cc91; --chart-color-3: #9ca88b;
+  --chart-color-4: #85704b; --chart-color-5: #d99b86;
+}
+.dark {}

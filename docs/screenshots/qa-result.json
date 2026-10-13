@@ -1,0 +1,21 @@
+{
+  "passed": true,
+  "checks": [
+    "HTTP success",
+    "real C++ engine connection",
+    "91 cells",
+    "keyboard selection",
+    "coordinates",
+    "flip",
+    "themes",
+    "ping",
+    "copy manager command",
+    "engine library",
+    "roadmap",
+    "mobile overflow",
+    "accessible mobile navigation",
+    "offline snapshot",
+    "reconnect"
+  ],
+  "errors": []
+}

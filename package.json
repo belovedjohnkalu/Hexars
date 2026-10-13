@@ -1,0 +1,25 @@
+{
+  "name": "hexchess",
+  "version": "0.2.0",
+  "private": true,
+  "type": "module",
+  "workspaces": [
+    "web",
+    "manager"
+  ],
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "scripts": {
+    "build:engine": "node scripts/build-native.mjs",
+    "build:cloud": "node scripts/build-native.mjs --cloud",
+    "build": "npm run build:engine && npm run build --workspace web",
+    "dev": "npm run dev --workspace web",
+    "manager": "npm run start --workspace manager",
+    "test:native": "node scripts/build-native.mjs --test",
+    "test:manager": "node --test tests/engine/*.test.mjs",
+    "test:web": "npm run test --workspace web",
+    "test": "npm run test:native && npm run test:manager && npm run test:web",
+    "package:source": "node scripts/package-source.mjs"
+  }
+}

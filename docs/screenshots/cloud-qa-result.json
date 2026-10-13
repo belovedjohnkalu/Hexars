@@ -1,0 +1,43 @@
+{
+  "date": "2026-10-13T03:18:26.007Z",
+  "origin": "https://hexchess-lab-9d7c.floot.app",
+  "checks": [
+    "Public HTTPS site",
+    "91 authoritative cells",
+    "36 initial pieces",
+    "Native EngineOne 0.2 identity",
+    "Human move plus real cloud engine reply",
+    "Board flip",
+    "All coordinate labels",
+    "Board themes",
+    "Copy persistent game link",
+    "Saved game resumes on another device",
+    "Mobile layout has no horizontal overflow",
+    "iPhone installation instructions",
+    "Complete historical seven-ply checkmate through cloud API",
+    "Undo restores playable position",
+    "Open saved game restores earlier cloud game",
+    "Play Black with cloud engine opening",
+    "Install manifest standalone and icons",
+    "Icon available 192x192",
+    "Icon available 512x512",
+    "Apple home-screen metadata",
+    "No browser JavaScript errors",
+    "No failed production responses",
+    "Regular Chrome reports no installability errors",
+    "Android installation instructions"
+  ],
+  "errors": [],
+  "badResponses": [],
+  "installability": {
+    "installabilityErrors": [
+      {
+        "errorId": "in-incognito",
+        "errorArguments": []
+      }
+    ]
+  },
+  "regularChromeInstallability": {
+    "installabilityErrors": []
+  }
+}

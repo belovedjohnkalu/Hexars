@@ -1,0 +1,54 @@
+.board {
+  display: block;
+  width: 100%;
+  max-width: 600px;
+  margin: 0 auto;
+  overflow: visible;
+  filter: drop-shadow(0 7px 9px #00000018);
+}
+.cell {
+  cursor: pointer;
+  outline: none;
+}
+.cell[aria-disabled="true"] {
+  cursor: default;
+}
+.hex {
+  transition:
+    filter var(--animation-duration-fast),
+    stroke-width var(--animation-duration-fast);
+}
+.cell:hover .hex {
+  filter: brightness(1.07);
+}
+.cell:focus-visible .hex {
+  stroke: #fff3c9;
+  stroke-width: 3;
+}
+.piece {
+  font-family: "Segoe UI Symbol", "DejaVu Sans", serif;
+  font-size: 35px;
+  paint-order: stroke fill;
+  user-select: none;
+}
+.white {
+  fill: #fff9eb;
+  stroke: #453d2d;
+  stroke-width: 0.8;
+}
+.black {
+  fill: #20271d;
+  stroke: #ebd7b1;
+  stroke-width: 0.4;
+}
+.coordinate {
+  font-family: var(--font-family-monospace);
+  font-size: 7px;
+  fill: #423c2a;
+  user-select: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .hex {
+    transition: none;
+  }
+}
