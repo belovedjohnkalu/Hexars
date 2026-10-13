@@ -59,7 +59,7 @@ async function client(port, origin = "http://localhost:5173") {
 test("Engine 1 understands ping, id, board, unknown commands, CRLF, and quit", async () => {
   const lines = await runEngine("ping\r\nid\nboard\ninvalid\nquit\nping\n");
   assert.equal(lines[0], "pong");
-  assert.equal(lines[1], "id Tactical 0.3");
+  assert.equal(lines[1], "id Tactical 0.4");
   const board = JSON.parse(lines[2]);
   assert.equal(board.cells.length, 91);
   assert.deepEqual(board.players, [0, 1]);
@@ -80,7 +80,7 @@ test("Manager routes correlated responses through the real C++ process", async (
   const pong = await second.next();
   const geometry = await first.next();
   assert.equal(identity.type, "engine.id");
-  assert.equal(identity.value, "Tactical 0.3");
+  assert.equal(identity.value, "Tactical 0.4");
   assert.equal(identity.requestId, "first-id");
   assert.equal(pong.type, "engine.pong");
   assert.equal(pong.requestId, "second-ping");

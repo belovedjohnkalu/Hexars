@@ -23,6 +23,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "../components/Dialog";
+import { ChessPiece } from "../components/ChessPiece";
 import { CloudBoard } from "../components/CloudBoard";
 import { useCloudGame } from "../helpers/useCloudGame";
 import { publishedOrigin } from "../helpers/publishedOrigin";
@@ -85,8 +86,11 @@ export default function HEXARS() {
     setPromotions([]);
   }, [game?.stateId]);
   useEffect(() => {
-    if (data) setFlipped(data.mode === "engine" && data.humanPlayer === 1);
+    if (data?.mode === "engine") setFlipped(data.humanPlayer === 1);
   }, [data?.gameId]);
+  useEffect(() => {
+    if (data?.mode === "two_players" && !ended) setFlipped(game?.activePlayer === 1);
+  }, [data?.gameId, data?.mode, game?.activePlayer, ended]);
   useEffect(
     () => () => {
       if (copiedTimer.current) clearTimeout(copiedTimer.current);
@@ -149,7 +153,7 @@ export default function HEXARS() {
           className={`${styles.playerPiece} ${player === 0 ? styles.whitePiece : styles.blackPiece}`}
           aria-hidden="true"
         >
-          {player === 0 ? "♔" : "♚"}
+          <ChessPiece type="king" player={player} theme={theme} />
         </span>
         <span>
           <strong>
@@ -235,17 +239,17 @@ export default function HEXARS() {
           name="description"
           content="A quiet place to play hexagonal chess. Play on your phone, share a game, and make yourself at home."
         />
-        <meta name="theme-color" content="#f6f5f3" />
+        <meta name="theme-color" content="#111318" />
         <meta name="mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-title" content="HEXARS" />
-        <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="black" />
         <link rel="manifest" href="/manifest.json" />
         <link
           rel="apple-touch-icon"
-          href="/_cdn/static/8ab008bb-f192-4902-aa0c-91a99f716694-hexars-180.png"
+          href="/_cdn/static/bbff6547-57ce-49ce-8f0a-92ee7a03d999-hexars-dark-180.png"
         />
-        <link rel="icon" href="/_cdn/static/e53c8055-4775-4794-9f7a-4c0a3483d95f-hexars-192.png" />
+        <link rel="icon" href="/_cdn/static/f72178ec-847d-48d7-ada5-e64a1ed04bd4-hexars-dark-192.png" />
       </Helmet>
       <header className={styles.header}>
         <button
@@ -324,6 +328,30 @@ export default function HEXARS() {
             <p className={styles.hint} aria-live="polite">
               {hint}
             </p>
+            <div
+              className={styles.moveKey}
+              aria-label="Board outline colours"
+              aria-hidden={!selected && !game?.check}
+              style={{ opacity: selected || game?.check ? 1 : 0 }}
+            >
+              {[
+                ["Move", "#76baff"],
+                ["Capture", "#ffac79"],
+                ["Check", "#ff718c"],
+              ].map(([label, colour]) => (
+                <span key={label}>
+                  <svg viewBox="0 0 16 16" aria-hidden="true">
+                    <polygon
+                      points="8,1 14,4.5 14,11.5 8,15 2,11.5 2,4.5"
+                      fill="none"
+                      stroke={colour}
+                      strokeWidth="1.7"
+                    />
+                  </svg>
+                  {label}
+                </span>
+              ))}
+            </div>
             {ended && game?.result.status === "stalemate" && (
               <p className={styles.scores}>
                 White {game.result.scores[0]} · Black {game.result.scores[1]}
@@ -460,7 +488,9 @@ export default function HEXARS() {
                       checked={newSide === 0}
                       onChange={() => setNewSide(0)}
                     />
-                    <span>♔</span>
+                    <span>
+                      <ChessPiece type="king" player={0} theme={theme} />
+                    </span>
                     <strong>White</strong>
                     <small>You go first</small>
                   </label>
@@ -472,7 +502,9 @@ export default function HEXARS() {
                       checked={newSide === 1}
                       onChange={() => setNewSide(1)}
                     />
-                    <span>♚</span>
+                    <span>
+                      <ChessPiece type="king" player={1} theme={theme} />
+                    </span>
                     <strong>Black</strong>
                     <small>Tactical goes first</small>
                   </label>
@@ -480,7 +512,7 @@ export default function HEXARS() {
               ) : (
                 <p className={styles.sheetNote}>
                   Take turns on this device, or share the game link with a friend. Anyone with the
-                  link can move either colour.
+                  link can move either colour. The board turns to face the next player.
                 </p>
               )}
               <Button
@@ -763,7 +795,13 @@ export default function HEXARS() {
                   void cloud.play({ from: move.from, to: move.to, promotion: move.promotion });
                 }}
               >
-                <span>{{ queen: "♕", rook: "♖", bishop: "♗", knight: "♘" }[move.promotion!]}</span>
+                <span>
+                  <ChessPiece
+                    type={move.promotion!}
+                    player={game?.activePlayer ?? 0}
+                    theme={theme}
+                  />
+                </span>
                 <strong>{move.promotion![0].toUpperCase() + move.promotion!.slice(1)}</strong>
               </button>
             ))}

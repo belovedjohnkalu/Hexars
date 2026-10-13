@@ -1,4 +1,4 @@
-# HEXARS · cloud edition 0.3
+# HEXARS · cloud edition 0.4
 
 **Play now: https://hexars.floot.app**
 
@@ -15,7 +15,7 @@ Games are saved in the cloud. **Share game** lets you resume on another device; 
 
 ## Design
 
-HEXARS stands for Hearth, Embers, Xenon, Adobe, Rhombus and Sleek. The interface uses warm off-white surfaces, iPhone-style system type, soft blue-grey hexagons, restrained clay accents and rounded controls. Rules, board colours, opponent profiles, saved games and installation live in simple sheets; developer diagnostics are omitted from player flows. Pieces slide, the board rotates, and sheets fade smoothly, with reduced-motion support. The alternative board palettes are Adobe (warm clay) and Hearth (soft stone).
+HEXARS stands for Hearth, Embers, Xenon, Adobe, Rhombus and Sleek. The interface uses deep charcoal surfaces, iPhone-style system type, soft blue-grey hexagons, restrained clay accents and rounded controls. Rules, board colours, opponent profiles, saved games and installation live in simple sheets; developer diagnostics are omitted from player flows. Large vector pieces share the same shapes across both sides, with theme-aware fills and contrasting edges. Inset hexagons mark moves, captures and checks; checking captures combine both colours. Pass-and-play automatically faces the next player. Pieces slide, the board rotates, and sheets fade smoothly, with reduced-motion support. The alternative board palettes are Adobe (warm clay) and Hearth (soft stone).
 
 The six opponent names are Tactical, Positional, Defensive, Materialist, Unconventional and Universal. Only Tactical is playable today. Floot requires a paid plan to remove its hosting badge; the current free-plan deployment retains it. The old address has been replaced; home-screen installations should be re-added from the new address. Existing saved game links can be pasted into Continue another game.
 
@@ -77,6 +77,6 @@ The cloud backend runs on Floot's Node server runtime with Postgres. Cloudflare 
 
 Native tests passed 6,062 assertions over 5,775 random plies, four complete random games, and two complete Engine-1-versus-random games. Twelve native-protocol/manager integration tests and three frontend tests passed, as did TypeScript, Vite build, and CMake/CTest.
 
-Published-site browser checks verified real C++ replies, both human sides, a complete seven-ply historical checkmate, undo, cross-device resume, mobile layout, themes, and installation metadata/instructions. The HEXARS redesign passed 38 published browser checks. See [progress](docs/progress.md) and [browser check record](docs/screenshots/hexars-qa.json). Actual installation on a physical iPhone/Android device is not automated by those checks.
+Published-site browser checks verified real C++ replies, both human sides, a complete seven-ply historical checkmate, undo, cross-device resume, mobile layout, themes, and installation metadata/instructions. The dark HEXARS release passed 44 published browser checks. See [progress](docs/progress.md) and [browser check record](docs/screenshots/hexars-dark-qa.json). Actual installation on a physical iPhone/Android device is not automated by those checks.
 
 `npm run package:source` exports the current Git commit to `artifacts/hexars-source.zip`, excluding dependencies and compiled binaries.

@@ -4,15 +4,27 @@
   max-width: 600px;
   margin: auto;
   overflow: visible;
-  filter: drop-shadow(0 12px 20px #5467800b);
+  filter: drop-shadow(0 14px 22px #00000025);
+  touch-action: manipulation;
+}
+.board,
+.board * {
+  -webkit-tap-highlight-color: transparent;
+  -webkit-user-select: none;
+  user-select: none;
 }
 .canvas {
   transform-origin: 300px 300px;
   transition: transform 650ms cubic-bezier(0.22, 1, 0.36, 1);
 }
+.cell,
+.cell:focus,
+.cell:focus-visible {
+  outline: none !important;
+  box-shadow: none !important;
+}
 .cell {
   cursor: pointer;
-  outline: none;
 }
 .cell[aria-disabled="true"] {
   cursor: default;
@@ -20,23 +32,39 @@
 .hex {
   transition:
     fill 380ms ease,
-    stroke 220ms ease,
-    stroke-width 220ms ease,
     filter 220ms ease;
 }
 .cell:hover:not([aria-disabled="true"]) .hex {
-  filter: brightness(1.035);
+  filter: brightness(1.07);
 }
-.cell:focus-visible .hex {
-  stroke: #4776a9;
-  stroke-width: 2.8;
+.indicator {
+  animation: fadeIn 200ms ease both;
 }
-.lastMove,
-.selection {
-  transition: opacity 300ms ease;
+.indicatorColour {
+  stroke: #76baff;
 }
-.destination {
-  animation: fadeIn 240ms ease both;
+.indicator[data-indicator="capture"] .indicatorColour {
+  stroke: #ffac79;
+}
+.indicator[data-indicator="check"] .indicatorColour,
+.indicator[data-indicator="check-move"] .indicatorColour,
+.indicator[data-indicator="capture-check"] .indicatorColour {
+  stroke: #ff718c;
+}
+.indicator[data-indicator="selected"] .indicatorColour {
+  stroke: #f0dbb7;
+}
+.indicator[data-indicator="last-move"] .indicatorColour {
+  stroke: #afbdd0;
+  stroke-width: 1.4;
+  opacity: 0.75;
+}
+.keyboardRing {
+  opacity: 0;
+  transition: opacity 160ms ease;
+}
+.cell:focus-visible .keyboardRing {
+  opacity: 1;
 }
 .piecePosition {
   transition: transform 420ms cubic-bezier(0.22, 1, 0.36, 1);
@@ -45,27 +73,17 @@
   transition: transform 650ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 .piece {
-  font-family: "Segoe UI Symbol", "DejaVu Sans", serif;
-  font-size: 35px;
-  paint-order: stroke fill;
-  user-select: none;
-}
-.white {
-  fill: #fff;
-  stroke: #4c5e78;
-  stroke-width: 1.1;
-}
-.black {
-  fill: #2b3c54;
-  stroke: #eff3fa;
-  stroke-width: 0.3;
+  overflow: visible;
+  filter: drop-shadow(0 1px 1px #00000065);
 }
 .coordinate {
   font-family: var(--font-family-base);
   font-size: 7px;
-  font-weight: 550;
-  fill: #485a72;
-  user-select: none;
+  font-weight: 600;
+  fill: #eff3fa;
+  paint-order: stroke fill;
+  stroke: #121a27;
+  stroke-width: 1.5;
 }
 .captured {
   animation: captureOut 240ms ease forwards;
@@ -83,13 +101,12 @@
 @media (prefers-reduced-motion: reduce) {
   .canvas,
   .hex,
-  .lastMove,
-  .selection,
+  .keyboardRing,
   .piecePosition,
   .pieceFacing {
     transition: none;
   }
-  .destination {
+  .indicator {
     animation: none;
   }
   .captured {

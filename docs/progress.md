@@ -1,4 +1,4 @@
-# Development progress · cloud edition 0.3
+# Development progress · cloud edition 0.4
 
 Published: **https://hexars.floot.app**
 
@@ -44,3 +44,9 @@ Light iPhone-style interface, plain-language controls, named playing styles, mod
 Published address: https://hexars.floot.app. Floot’s free plan prevents permanent badge removal. Saved game rows are preserved; copied old game links can be opened in the new app. Existing home-screen icons should be replaced with the new site.
 
 Published HEXARS checks: 38 passed, including the new native identity, readable primary action, both human sides, checkmate, saved-game links, board palettes, iPhone layout, all six style names, plain-language results, installation identity and reduced motion. No browser errors or failed requests. [Desktop](screenshots/hexars-desktop.png), [iPhone](screenshots/hexars-iphone.png), [record](screenshots/hexars-qa.json).
+
+## Dark board and piece refinement
+
+Dark theme is now the default, including sheets and home-screen launch colours. Six original vector silhouettes are reused by both sides, the board, player strips and promotion picker. Every theme uses two-tone outlines for visibility. Legal destinations are inset hexagons: blue for ordinary moves, orange for captures, pink for checks, both colours for checking captures. C++ supplies capture/check metadata, including en passant. Pointer focus/tap rectangles are suppressed; keyboard focus uses an inset hexagon. Shared pass-and-play auto-flips after each continuing turn. Native protocol/manager checks: 14 passed.
+
+Published dark-release checks: 44 passed across desktop and iPhone-sized browser contexts. All three board palettes passed piece fill/edge contrast checks for both sides. Verified ordinary moves/captures/checks, combined checking captures, automatic turn-by-turn orientation, completion through mate, undo, touch selection without native rectangles, keyboard focus/navigation, reduced motion and dark installation metadata. No browser errors or failed requests. [Desktop](screenshots/hexars-dark-desktop.png), [iPhone](screenshots/hexars-dark-iphone.png), [check record](screenshots/hexars-dark-qa.json).

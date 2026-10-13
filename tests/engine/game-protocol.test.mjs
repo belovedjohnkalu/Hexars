@@ -30,7 +30,7 @@ function engine(t) {
 test("Versioned protocol identifies the engine and exposes authoritative starting pieces", async (t) => {
   const request = engine(t);
   const hello = await request({ type: "hello" });
-  assert.equal(hello.engine, "Tactical 0.3");
+  assert.equal(hello.engine, "Tactical 0.4");
   const start = await request({ type: "new_game", variant: "glinski" });
   assert.equal(start.game.board.cells.length, 91);
   assert.equal(start.game.board.cells.filter((cell) => cell.piece).length, 36);
@@ -93,7 +93,7 @@ test("Search returns a legal correlated move within a bounded budget", async (t)
   assert.equal(decision.type, "bestmove");
   assert.equal(decision.stateId, initial.game.stateId);
   assert.ok(
-    initial.game.legalMoves.some((move) => JSON.stringify(move) === JSON.stringify(decision.move)),
+    initial.game.legalMoves.some((move) => move.from.q === decision.move.from.q && move.from.r === decision.move.from.r && move.to.q === decision.move.to.q && move.to.r === decision.move.to.r && move.promotion === decision.move.promotion),
   );
   assert.ok(decision.diagnostics.timeMs < 700);
   assert.ok(decision.diagnostics.nodes > 0);
@@ -103,4 +103,68 @@ test("Search returns a legal correlated move within a bounded budget", async (t)
     move: decision.move,
   });
   assert.equal(after.game.ply, 1);
+});
+
+test("Legal destinations describe normal moves, captures and checking captures", async (t) => {
+  const request = engine(t);
+  let response = await request({ type: "new_game", variant: "glinski" });
+  const quiet = response.game.legalMoves.find(
+    (move) => move.fromNotation === "b1" && move.toNotation === "b3",
+  );
+  assert.equal(quiet.capture, false);
+  assert.equal(quiet.givesCheck, false);
+  for (const [from, to] of [
+    ["e1", "c3"],
+    ["e10", "c6"],
+    ["b1", "b2"],
+    ["b7", "b6"],
+    ["f3", "b1"],
+    ["e7", "e6"],
+  ]) {
+    const move = response.game.legalMoves.find(
+      (move) => move.fromNotation === from && move.toNotation === to,
+    );
+    assert.ok(move);
+    response = await request({ type: "play_move", stateId: response.game.stateId, move });
+  }
+  const mate = response.game.legalMoves.find(
+    (move) => move.fromNotation === "c3" && move.toNotation === "f9",
+  );
+  assert.equal(mate.capture, true);
+  assert.equal(mate.givesCheck, true);
+});
+
+test("En passant is marked as a capture despite an empty destination", async (t) => {
+  const request = engine(t);
+  let response = await request({ type: "new_game", variant: "glinski" });
+  const cells = response.game.board.cells;
+  const state = {
+    ...response.state,
+    occupants: cells.map(() => null),
+    activePlayer: 1,
+    positionHistory: [],
+    ply: 0,
+  };
+  for (const [notation, type, player] of [
+    ["a2", "king", 0],
+    ["l5", "king", 1],
+    ["c7", "pawn", 1],
+    ["b5", "pawn", 0],
+  ]) {
+    state.occupants[cells.findIndex((cell) => cell.notation === notation)] = {
+      type,
+      player,
+      hasMoved: false,
+    };
+  }
+  response = await request({ type: "position", state });
+  const advance = response.game.legalMoves.find(
+    (move) => move.fromNotation === "c7" && move.toNotation === "c5",
+  );
+  response = await request({ type: "play_move", stateId: response.game.stateId, move: advance });
+  assert.equal(response.game.board.cells.find((cell) => cell.notation === "c6").piece, null);
+  const capture = response.game.legalMoves.find(
+    (move) => move.fromNotation === "b5" && move.toNotation === "c6",
+  );
+  assert.equal(capture.capture, true);
 });

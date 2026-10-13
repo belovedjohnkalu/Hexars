@@ -85,7 +85,18 @@ Json describeGame(const GameState& state) {
         cells.push_back(value);
     }
     Json moves=Json::array();
-    if(result.type==ResultType::Ongoing) for(const auto& move:legal) moves.push_back(encodeMove(move));
+    if(result.type==ResultType::Ongoing) for(const auto& move:legal) {
+        auto encoded=encodeMove(move);
+        const auto from=glinskiIndex(move.from), to=glinskiIndex(move.to);
+        const auto moving=state.occupants[from];
+        encoded["capture"]=!state.occupants[to].empty() ||
+            (moving.type==PieceType::Pawn && to==state.enPassantTarget && move.from.q!=move.to.q);
+        // These moves already passed shared legal-move validation. The fast
+        // internal application is used only to describe checking destinations.
+        const auto next=applyCandidateMove(state,move,false);
+        encoded["givesCheck"]=isInCheck(next,next.activePlayer);
+        moves.push_back(std::move(encoded));
+    }
     std::string status="ongoing",reason="";
     switch(result.type) {
         case ResultType::Checkmate: status="checkmate";reason="Checkmate";break;
@@ -104,7 +115,7 @@ Json processRequest(const Json& request, std::optional<GameState>& state) {
     if(!request.is_object()||request.value("protocolVersion",0)!=1||!request.contains("type")||!request.at("type").is_string()) throw std::invalid_argument("Invalid protocol request");
     const auto type=request.at("type").get<std::string>();
     Json response{{"protocolVersion",1},{"requestId",request.value("requestId",std::string{})}};
-    if(type=="hello") { response.update({{"type","hello"},{"engine","Tactical 0.3"},{"capabilities",Json::array({"glinski","legal_moves","search"})}});return response; }
+    if(type=="hello") { response.update({{"type","hello"},{"engine","Tactical 0.4"},{"capabilities",Json::array({"glinski","legal_moves","search"})}});return response; }
     if(type=="supported_variants") {response.update({{"type","supported_variants"},{"variants",Json::array({"glinski"})}});return response;}
     if(type=="new_game") {
         state=createGame(request.value("variant",std::string{"glinski"}));

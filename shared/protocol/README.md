@@ -1,4 +1,4 @@
-# HexChess protocol · version 1 / Tactical 0.3
+# HexChess protocol · version 1 / Tactical 0.4
 
 ## Cloud browser API
 
@@ -14,7 +14,7 @@ One newline-delimited JSON request produces one flushed JSON response on standar
 
 | Request | Behavior |
 | --- | --- |
-| `hello` | Returns engine identity `Tactical 0.3` and capabilities. |
+| `hello` | Returns engine identity `Tactical 0.4` and capabilities. |
 | `supported_variants` | Returns `glinski`. |
 | `new_game` | Creates the historical Gliński position. |
 | `position` | Loads and validates complete serialized state. |
@@ -34,12 +34,12 @@ A game response includes `type: "game"`, `state` for later loading, and `game` f
 {"protocolVersion":1,"type":"go","requestId":"req-2","stateId":"<current-state-id>","limits":{"timeMs":750,"depth":3,"nodeLimit":30000}}
 ```
 
-Move coordinates are `{from:{q,r},to:{q,r}}`, with optional `promotion` set to `queen`, `rook`, `bishop` or `knight`. Responses also include conventional notation. Search diagnostics report depth, nodes, elapsed milliseconds and evaluation; `move` is null when no legal move exists.
+Move coordinates are `{from:{q,r},to:{q,r}}`, with optional `promotion` set to `queen`, `rook`, `bishop` or `knight`. Responses also include conventional notation. Legal destinations include authoritative `capture` and `givesCheck` flags for presentation; these describe validated moves and do not change the move command envelope. En passant carries `capture: true` even though the destination is empty. Search diagnostics report depth, nodes, elapsed milliseconds and evaluation; `move` is null when no legal move exists.
 
 The engine remains synchronous. Native `stop` is not implemented. Cloud cancellation kills the isolated child process; a six-second watchdog enforces a server response boundary. Exit is the legacy `quit` line or end-of-input, not a JSON `quit` message yet.
 
 ## Retained local diagnostic protocol
 
-At `?foundation`, the loopback WebSocket manager accepts versioned JSON frames containing exactly `protocolVersion`, `type`, `requestId`. The allowlisted types remain `engine.ping`, `engine.id`, `engine.board`. Each maps to legacy native `ping`, `id`, `board` text commands. Identity is now `Tactical 0.3`; `board` describes geometry only. This optional manager does not provide the published game's API.
+At `?foundation`, the loopback WebSocket manager accepts versioned JSON frames containing exactly `protocolVersion`, `type`, `requestId`. The allowlisted types remain `engine.ping`, `engine.id`, `engine.board`. Each maps to legacy native `ping`, `id`, `board` text commands. Identity is now `Tactical 0.4`; `board` describes geometry only. This optional manager does not provide the published game's API.
 
 It serializes requests, preserves per-client response correlation, caps payloads/queues, accepts only localhost/127.0.0.1 Vite origins, and reports native exit/timeout. It must remain on loopback. Its protocol and tests are retained to support future local diagnostics without changing cloud gameplay.

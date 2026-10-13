@@ -1,4 +1,5 @@
 .app {
+  color-scheme: dark;
   min-height: 100dvh;
   background: var(--background);
   color: var(--foreground);
@@ -73,7 +74,7 @@
   position: relative;
   display: flex;
   align-items: center;
-  color: #70849d;
+  color: #b0c4e0;
 }
 .mark i {
   position: absolute;
@@ -107,7 +108,7 @@
   background: var(--muted);
 }
 .headerActions .more {
-  background: #eaeaec;
+  background: #252c39;
   width: 42px;
   height: 42px;
   justify-content: center;
@@ -183,13 +184,13 @@
   font-family: "Segoe UI Symbol", "DejaVu Sans", serif;
 }
 .whitePiece {
-  color: #343c48;
-  background: #fff;
-  border: 1px solid #e0e3e8;
+  color: #edf3ff;
+  background: #f1f6ff;
+  border: 1px solid #3a475c;
 }
 .blackPiece {
-  color: #fafafa;
-  background: #384354;
+  color: #1c2431;
+  background: #27364d;
 }
 .player strong {
   display: block;
@@ -221,7 +222,7 @@
   aspect-ratio: 1;
   display: grid;
   place-items: center;
-  background: radial-gradient(ellipse at center, #e6eaf144, transparent 68%);
+  background: radial-gradient(ellipse at center, #26385338, transparent 68%);
 }
 .loading {
   display: flex;
@@ -309,7 +310,7 @@
   border-radius: 14px;
 }
 .quickActions button:hover:not(:disabled) {
-  background: #eaecef;
+  background: #272f3d;
   color: var(--foreground);
 }
 .quickActions button:disabled {
@@ -370,7 +371,7 @@
   font-variant-numeric: tabular-nums;
 }
 .moveRow:nth-child(odd) {
-  background: #eeeff2;
+  background: #242b38;
 }
 .moveRow > span:first-child {
   color: var(--muted-foreground);
@@ -396,7 +397,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  color: #777a81;
+  color: #9ca8bb;
   font-size: 11px;
 }
 .footer > button {
@@ -416,8 +417,8 @@
   gap: 20px;
   border-radius: 14px;
   padding: 14px 18px;
-  color: #923c3d;
-  background: #f8e9e7;
+  color: #ffb5bf;
+  background: #402832;
   font-size: 12px;
   margin-bottom: 24px;
 }
@@ -432,10 +433,11 @@
   white-space: nowrap;
 }
 .sheet {
+  color-scheme: dark;
   padding: 34px;
   width: 430px;
   border-radius: 30px;
-  border: 1px solid #ffffffaa;
+  border: 1px solid #4a566b88;
   font-family: var(--font-family-base);
 }
 .sheet h2 {
@@ -459,7 +461,7 @@
 .segmented {
   display: flex;
   gap: 4px;
-  background: #edeef0;
+  background: #111722;
   border-radius: 13px;
   padding: 4px;
 }
@@ -495,7 +497,7 @@
   position: relative;
   border-radius: 18px;
   border: 1px solid var(--border);
-  background: #fafafa;
+  background: #1c2431;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -507,7 +509,7 @@
 }
 .sideChoice label:has(input:checked) {
   border-color: #8296b2;
-  background: #edf2f8;
+  background: #304460;
 }
 .sideChoice label:has(input:focus-visible) {
   outline: 2px solid var(--info);
@@ -522,7 +524,7 @@
 .sideChoice span {
   font-family: "Segoe UI Symbol", "DejaVu Sans", serif;
   font-size: 34px;
-  color: #374458;
+  color: #e5efff;
 }
 .sideChoice strong {
   font-size: 13px;
@@ -560,7 +562,7 @@
 .settingRow select {
   max-width: 175px;
   color: var(--foreground);
-  background: #f1f2f5;
+  background: #2a3343;
   border: none;
   border-radius: 10px;
   padding: 10px;
@@ -573,7 +575,7 @@
   width: 46px;
   height: 28px;
   margin: 0;
-  background: #d6d9df;
+  background: #435069;
   border-radius: 999px;
   position: relative;
   cursor: pointer;
@@ -585,7 +587,7 @@
   top: 2px;
   left: 2px;
   border-radius: 50%;
-  background: #fff;
+  background: #f1f6ff;
   box-shadow: 0 1px 3px #26304630;
   position: absolute;
   transition: transform 280ms var(--ease);
@@ -607,7 +609,7 @@
   width: 100%;
   border: 0;
   background: none;
-  color: #535861;
+  color: #c3cedf;
   padding: 14px 4px;
   min-height: 48px;
   text-align: left;
@@ -615,7 +617,7 @@
   font-size: 12px;
 }
 .settingLinks button:hover {
-  background: #f4f5f7;
+  background: #2a3342;
 }
 .settingLinks button:disabled {
   opacity: 0.4;
@@ -632,7 +634,7 @@
   font-size: 25px;
   text-align: center;
   line-height: 18px;
-  color: #70849d;
+  color: #b0c4e0;
 }
 .stylesList {
   display: flex;
@@ -650,7 +652,7 @@
   padding: 15px;
   text-align: left;
   color: var(--foreground);
-  background: #f7f7f8;
+  background: #252c39;
 }
 .stylesList > button > span:first-child {
   display: flex;
@@ -670,7 +672,7 @@
   white-space: nowrap;
 }
 .stylesList > .selectedStyle {
-  background: #e9eff7;
+  background: #2b405c;
   color: var(--info);
 }
 .stylesList .sheetNote {
@@ -688,11 +690,11 @@
   width: 70px;
   height: 70px;
   border-radius: 19px;
-  background: #edf1f7;
+  background: #27354a;
   justify-content: center;
   align-items: center;
   position: relative;
-  color: #617b9c;
+  color: #9abbe3;
   box-shadow: 0 4px 16px #2630460c;
 }
 .appIcon i {
@@ -706,7 +708,7 @@
 .instructions {
   margin: 0;
   padding-left: 22px;
-  color: #565b64;
+  color: #b2bfd2;
   font-size: 13px;
   line-height: 1.7;
 }
@@ -728,7 +730,7 @@
 .field input {
   border: 1px solid var(--border);
   border-radius: 13px;
-  background: #f8f9fb;
+  background: #141b27;
   width: 100%;
   padding: 14px;
   font-size: 13px;
@@ -742,7 +744,7 @@
 }
 .rules > p {
   margin: 0 0 20px;
-  color: #434a54;
+  color: #c9d4e6;
 }
 .rules > div {
   margin-top: 18px;
@@ -773,7 +775,7 @@
 }
 .aboutWords > span {
   font-size: 15px;
-  color: #626977;
+  color: #c4d0e2;
 }
 .aboutWords b {
   color: var(--accent);
@@ -789,8 +791,8 @@
   padding: 12px;
   margin-bottom: 0;
   border-radius: 12px;
-  color: #923c3d;
-  background: #f8e9e7;
+  color: #ffb5bf;
+  background: #402832;
   font-size: 12px;
   line-height: 1.6;
 }
@@ -805,10 +807,10 @@
   align-items: center;
   gap: 12px;
   border: 1px solid var(--border);
-  background: #f5f7fa;
+  background: #263144;
   border-radius: 14px;
   padding: 16px 2px;
-  color: #374458;
+  color: #e5efff;
 }
 .promotion span {
   font-size: 36px;
@@ -819,7 +821,7 @@
   font-weight: 550;
 }
 .promotion button:hover {
-  background: #e8eff8;
+  background: #344963;
   border-color: #8296b2;
 }
 @keyframes appear {
@@ -872,7 +874,7 @@
     display: none;
   }
   .headerActions .more {
-    background: #eaeaec;
+    background: #252c39;
   }
   .main {
     padding: 0 16px;
@@ -975,6 +977,7 @@
     font-size: 10px;
   }
   .sheet {
+    color-scheme: dark;
     padding: 30px 24px;
     max-width: calc(100vw - 24px);
     border-radius: 28px;
@@ -1005,4 +1008,47 @@
 }
 .playerTurn {
   animation: appear 240ms var(--ease) both;
+}
+
+.playerPiece svg {
+  width: 27px;
+  height: 31px;
+}
+.sideChoice span {
+  width: 40px;
+  height: 44px;
+  display: block;
+}
+.sideChoice span svg {
+  width: 100%;
+  height: 100%;
+}
+.promotion span {
+  display: block;
+  width: 40px;
+  height: 45px;
+}
+.promotion span svg {
+  width: 100%;
+  height: 100%;
+}
+.moveKey {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  min-height: 22px;
+  margin-top: 6px;
+  color: var(--muted-foreground);
+  font-size: 10px;
+  transition: opacity 200ms ease;
+}
+.moveKey span {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+.moveKey svg {
+  width: 13px;
+  height: 13px;
 }

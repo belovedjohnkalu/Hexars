@@ -33,6 +33,8 @@ export type ChessMove = {
   from: Hex;
   to: Hex;
   promotion?: "queen" | "rook" | "bishop" | "knight";
+  capture?: boolean;
+  givesCheck?: boolean;
   fromNotation?: string;
   toNotation?: string;
 };
