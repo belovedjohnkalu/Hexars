@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from "react";
+import { useId, useMemo, useRef, useState } from "react";
 import type { GameView, Hex, ChessMove, PieceName } from "../endpoints/game_POST.schema";
 import { ChessPiece } from "./ChessPiece";
 import styles from "./CloudBoard.module.css";
@@ -26,6 +26,7 @@ export function CloudBoard({
   disabled?: boolean;
   className?: string;
 }) {
+  const lightingId = useId();
   const [focused, setFocused] = useState("f6");
   const previous = useRef(new Map<string, VisualPiece>());
   const sequence = useRef(0);
@@ -93,10 +94,28 @@ export function CloudBoard({
       aria-label="Gliński hexagonal chessboard"
     >
       <title>Your hexagonal chessboard. Select a piece to see where it can move.</title>
+      <defs>
+        <linearGradient id={lightingId} x1="0" y1="0" x2="0.8" y2="1">
+          <stop offset="0" stopColor="#ffffff" stopOpacity="0.13" />
+          <stop offset="0.45" stopColor="#ffffff" stopOpacity="0" />
+          <stop offset="1" stopColor="#000000" stopOpacity="0.16" />
+        </linearGradient>
+      </defs>
       <g
         className={styles.canvas}
         style={{ transform: flipped ? "rotate(180deg)" : "rotate(0deg)" }}
       >
+        <g data-board-depth="true" pointerEvents="none" aria-hidden="true">
+          {game.board.cells.map((cell) => {
+            const x = 300 + 42 * cell.q;
+            const y = 303 - 28 * Math.sqrt(3) * (cell.r + cell.q / 2);
+            const points = Array.from({ length: 6 }, (_, index) => {
+              const angle = (index * Math.PI) / 3;
+              return `${x + 27.55 * Math.cos(angle)},${y + 27.55 * Math.sin(angle)}`;
+            }).join(" ");
+            return <polygon key={cell.notation} points={points} fill="#0b111c" />;
+          })}
+        </g>
         {game.board.cells.map((cell) => {
           const x = 300 + 42 * cell.q,
             y = 300 - 28 * Math.sqrt(3) * (cell.r + cell.q / 2);
@@ -191,6 +210,20 @@ export function CloudBoard({
                 fill={colours[cell.colour]}
                 stroke="#11182488"
                 strokeWidth={0.7}
+              />
+              <polygon
+                data-cell-lighting="true"
+                points={points}
+                fill={`url(#${lightingId})`}
+                pointerEvents="none"
+              />
+              <polyline
+                points={points.split(" ").slice(3).concat(points.split(" ").slice(0, 1)).join(" ")}
+                fill="none"
+                stroke="#ffffff"
+                strokeOpacity={0.16}
+                strokeWidth={0.8}
+                pointerEvents="none"
               />
               {indicator && (
                 <g className={styles.indicator} data-indicator={indicator} pointerEvents="none">

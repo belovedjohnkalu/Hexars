@@ -1057,3 +1057,109 @@
   width: 13px;
   height: 13px;
 }
+
+/* A shared light source gives the interface quiet, tactile depth. */
+.app {
+  background-image: radial-gradient(ellipse at 40% 0%, #33496a24, transparent 60%);
+}
+.brand {
+  text-shadow: 0 2px 5px #00000070;
+}
+.mark {
+  filter: drop-shadow(0 2px 2px #00000080);
+}
+.heading h1 {
+  text-shadow: 0 2px 8px #00000055;
+}
+.headerActions button,
+.headerActions .more,
+.quickActions button,
+.stylesList > button,
+.sideChoice label,
+.settingRow select {
+  background-image: linear-gradient(155deg, #ffffff0d, #ffffff02 45%, #00000020);
+  box-shadow: inset 0 1px 0 #ffffff12, 0 2px 3px #00000028, 0 8px 18px #00000018;
+}
+.player {
+  border-radius: 15px;
+  background: linear-gradient(120deg, #25304465, #1a202b20);
+  box-shadow: inset 0 1px 0 #ffffff0b, inset 0 -1px 0 #00000030;
+}
+.playerPiece {
+  box-shadow: inset 0 1px 0 #ffffff38, 0 2px 3px #00000055;
+}
+.playerPiece svg,
+.sideChoice svg,
+.promotion svg {
+  filter: drop-shadow(0 2px 1px #00000055);
+}
+.newButton,
+.fullButton {
+  background-image: linear-gradient(160deg, #ffffff55, #ffffff00 55%, #7197c32b);
+  box-shadow: inset 0 1px 0 #ffffffb0, 0 3px 0 #859dbf, 0 9px 20px #00000045;
+}
+.app .newButton:active:not(:disabled),
+.sheet .fullButton:active:not(:disabled) {
+  transform: translateY(2px) scale(0.985);
+  box-shadow: inset 0 1px 0 #ffffff90, 0 1px 0 #859dbf, 0 3px 8px #00000035;
+}
+.quickActions {
+  gap: 8px;
+}
+.quickActions button {
+  background-color: #1c2431;
+}
+.moves {
+  border: 1px solid #ffffff0b;
+  border-radius: 16px;
+  padding: 0 12px;
+  background: linear-gradient(145deg, #242e3d70, #171d2860);
+  box-shadow: inset 0 1px 0 #ffffff07, 0 8px 20px #00000020;
+}
+.moveRow:nth-child(odd) {
+  box-shadow: inset 0 1px 0 #ffffff05;
+}
+.sheet {
+  background-image: linear-gradient(145deg, #ffffff06, transparent 45%, #00000018);
+  box-shadow: inset 0 1px 0 #ffffff1c, 0 3px 0 #10151e, 0 32px 90px #000000a0;
+}
+.segmented,
+.toggle,
+.field input {
+  box-shadow: inset 0 2px 4px #00000060, inset 0 -1px 0 #ffffff10;
+}
+.segmented button[aria-pressed="true"] {
+  background-image: linear-gradient(160deg, #ffffff0e, transparent);
+  box-shadow: inset 0 1px 0 #ffffff20, 0 2px 4px #00000060;
+}
+.toggle::after {
+  background-image: linear-gradient(150deg, #ffffff, #d6e1f1);
+  box-shadow: inset 0 1px 0 #ffffff, 0 2px 4px #00000050;
+}
+.settingLinks button,
+.rules summary {
+  box-shadow: inset 0 -1px 0 #ffffff06;
+}
+.appIcon {
+  box-shadow: inset 0 1px 0 #ffffff32, 0 3px 0 #23344d, 0 12px 24px #00000050;
+}
+@media (hover: hover) and (pointer: fine) {
+  .headerActions button:hover,
+  .quickActions button:hover:not(:disabled),
+  .stylesList > button:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: inset 0 1px 0 #ffffff20, 0 4px 6px #00000030, 0 12px 24px #00000025;
+  }
+  .newButton:hover:not(:disabled),
+  .fullButton:hover:not(:disabled) {
+    box-shadow: inset 0 1px 0 #ffffff, 0 3px 0 #859dbf, 0 12px 28px #00000055;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .app button:hover,
+  .app button:active,
+  .sheet button:hover,
+  .sheet button:active {
+    transform: none !important;
+  }
+}

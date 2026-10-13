@@ -64,3 +64,9 @@ Published a tightly framed board, smaller phone gutters, full-width tablet layou
 A further desktop height constraint is prepared locally (with a partial edit in the Floot editor) but not yet published: Floot refused the final typecheck/publication after exhausting the daily build allowance, resetting at 2026-10-13 05:00 UTC. The live desktop board can extend below the viewport. The published expansion itself succeeded (job 613f424e-447e-4663-8042-95c10cb5d997).
 
 The complete pending desktop constraint passed the local production build and a 1440×1040 browser fit check; upload the final pages/_index.module.css from this repository before the next publication.
+
+## Tactile depth
+
+Prepared beveled board cells with directional lighting and a solid lower edge, satin-shaded pieces with layered shadows, raised controls and player strips, recessed switches and fields, and floating sheets. All themes retain matching piece silhouettes and readable two-tone outlines. Mouse hover lifts controls; pressing the primary action lowers it; reduced-motion preferences stop these effects. Desktop sizing includes the pending board-fit constraint.
+
+Local Vite production build passed. Browser checks: 55 gameplay/theme/accessibility checks and 31 responsive depth checks passed, with real cloud-native gameplay through the development proxy. Verified widths 320, 390, 768 and 1440, both board orientations, unique gradient references, all shading stop contrast, visible legal/check/capture hex outlines, checkmate, undo and reduced motion. [Gameplay record](screenshots/hexars-depth-draft-qa.json), [layout record](screenshots/depth-layout-draft-qa.json). Publication is pending the hosting allowance reset at 2026-10-13 05:00 UTC.

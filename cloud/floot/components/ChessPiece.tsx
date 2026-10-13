@@ -1,3 +1,4 @@
+import { useId } from "react";
 import type { PieceName } from "../endpoints/game_POST.schema";
 
 // One vector silhouette per piece, shared by both sides and every screen.
@@ -14,6 +15,7 @@ export function ChessPiece({
   onBoard?: boolean;
   className?: string;
 }) {
+  const finishId = useId();
   const palette =
     theme === "adobe"
       ? ["#fff0dc", "#2c1d17", "#18100d", "#ffe3bc"]
@@ -34,7 +36,14 @@ export function ChessPiece({
       focusable="false"
       data-piece-shape={type}
     >
-      <g fill={fill} stroke={edge} strokeWidth={1.7} strokeLinejoin="round" strokeLinecap="round">
+      <defs>
+        <linearGradient id={finishId} x1="0" y1="0" x2="0.85" y2="1">
+          <stop offset="0" stopColor={player === 0 ? "#ffffff" : theme === "adobe" ? "#654d3f" : theme === "hearth" ? "#45534a" : "#3c536e"} />
+          <stop offset="0.32" stopColor={fill} />
+          <stop offset="1" stopColor={player === 0 ? palette[3] : palette[2]} />
+        </linearGradient>
+      </defs>
+      <g data-piece-finish="satin" data-base-colour={fill} fill={`url(#${finishId})`} stroke={edge} strokeWidth={1.7} strokeLinejoin="round" strokeLinecap="round">
         {type === "pawn" && (
           <>
             <circle cx={0} cy={-13} r={6.6} />

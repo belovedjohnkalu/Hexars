@@ -3,7 +3,7 @@
   width: 100%;
   margin: auto;
   overflow: visible;
-  filter: drop-shadow(0 14px 22px #00000025);
+  filter: drop-shadow(0 3px 1px #06090eaa) drop-shadow(0 18px 20px #00000055);
   touch-action: manipulation;
 }
 .board,
@@ -73,7 +73,7 @@
 }
 .piece {
   overflow: visible;
-  filter: drop-shadow(0 1px 1px #00000065);
+  filter: drop-shadow(0 1.6px 0.5px #00000090) drop-shadow(0 4px 2.2px #00000070);
 }
 .coordinate {
   font-family: var(--font-family-base);
