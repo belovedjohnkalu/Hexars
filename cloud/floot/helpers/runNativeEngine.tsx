@@ -5,13 +5,14 @@ import { tmpdir, arch, platform } from "node:os";
 import path from "node:path";
 import { createInterface } from "node:readline";
 import type { Json } from "./schema";
-import type { ChessMove, GameView, SearchDiagnostics } from "../endpoints/game_POST.schema";
+import type { ChessMove, GameView, SearchDiagnostics, VariantId } from "../endpoints/game_POST.schema";
 
-const asset = "/_cdn/static/a08a67fe-498b-4a3e-aede-89ac1b7a8e0c-tactical-0.5-linux-x64.bin";
-const checksum = "b69265502631b8ee5639c9c1285be79fd2ddb79ea8d4a0e59cf34fa0e7db06ff";
+const asset = "/_cdn/static/2269ba52-c5cc-4f50-86e9-df446d6e403d-tactical-0.6-linux-x64.bin";
+const checksum = "ec6edf98d810c963fd6dc421fbf133bcbce334b258a5c724185fdda7a99c9b6d";
 type Options = {
   action: "new" | "inspect" | "move" | "search";
   origin: string;
+  variant?: VariantId;
   state?: Json;
   move?: ChessMove;
   signal?: AbortSignal;
@@ -41,7 +42,7 @@ async function executable(origin: string) {
   const response = await fetch(new URL(asset, origin), { signal: AbortSignal.timeout(15000) });
   if (!response.ok) throw new Error("The cloud engine could not be loaded");
   binary = Buffer.from(await response.arrayBuffer());
-  if (binary.length !== 2135352 || createHash("sha256").update(binary).digest("hex") !== checksum)
+  if (binary.length !== 2139704 || createHash("sha256").update(binary).digest("hex") !== checksum)
     throw new Error("Cloud engine checksum mismatch");
   const staging = filename + "-" + randomUUID();
   try {
@@ -130,7 +131,7 @@ export async function runNativeEngine(options: Options): Promise<NativeResult> {
           stage = "position";
           send(
             options.action === "new"
-              ? { type: "new_game", variant: "glinski" }
+              ? { type: "new_game", variant: options.variant ?? "glinski" }
               : { type: "position", state: options.state },
           );
         } else if (stage === "position") {

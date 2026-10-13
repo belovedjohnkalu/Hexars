@@ -91,7 +91,7 @@ export function CloudBoard({
       viewBox="58 26 484 548"
       className={`${styles.board} ${className || ""}`}
       role="group"
-      aria-label="Gliński hexagonal chessboard"
+      aria-label={`${game.variant === "mccooey" ? "McCooey" : "Gliński"} hexagonal chessboard`}
     >
       <title>Your hexagonal chessboard. Select a piece to see where it can move.</title>
       <defs>

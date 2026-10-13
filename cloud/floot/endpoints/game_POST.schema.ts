@@ -1,6 +1,9 @@
 import { z } from "zod";
 import superjson from "superjson";
 
+export const variantSchema = z.enum(["glinski", "mccooey"]);
+export type VariantId = z.infer<typeof variantSchema>;
+
 const hex = z
   .object({ q: z.number().int().min(-5).max(5), r: z.number().int().min(-5).max(5) })
   .strict();
@@ -18,6 +21,7 @@ export const schema = z.discriminatedUnion("action", [
     .object({
       action: z.literal("new"),
       mode: z.enum(["engine", "two_players"]),
+      variant: variantSchema.default("glinski"),
       humanPlayer: z.union([z.literal(0), z.literal(1)]),
     })
     .strict(),
@@ -40,12 +44,12 @@ export type ChessMove = {
 };
 export type GameView = {
   stateId: string;
-  variant: string;
+  variant: VariantId;
   activePlayer: number;
   ply: number;
   check: boolean;
   board: {
-    variant: string;
+    variant: VariantId;
     stage: string;
     players: number[];
     cells: Array<

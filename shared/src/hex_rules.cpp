@@ -10,7 +10,7 @@ static constexpr std::array<Hex, 6> vertex{{{2,-1},{1,-2},{-1,-1},{-2,1},{-1,2},
 static Hex add(Hex a, Hex b, int times = 1) { return {a.q + b.q * times, a.r + b.r * times}; }
 static const Piece empty{};
 static const Piece& occupant(const GameState& state, Hex position) {
-    const int index = glinskiIndex(position);
+    const int index = variantDefinition(state.variant).index(position);
     return index < 0 ? empty : state.occupants[index];
 }
 
@@ -24,11 +24,11 @@ static std::array<Hex, 12> knightDirections() {
 }
 
 static void addMove(const GameState& state, std::vector<Move>& moves, Hex from, Hex to) {
-    if (glinskiIndex(to) < 0) return;
+    if (variantDefinition(state.variant).index(to) < 0) return;
     const auto& target = occupant(state, to);
     if (!target.empty() && (target.player == state.activePlayer || target.type == PieceType::King)) return;
     const auto& source = occupant(state, from);
-    if (source.type == PieceType::Pawn && glinskiPromotionCell(to, source.player)) {
+    if (source.type == PieceType::Pawn && variantDefinition(state.variant).index({to.q, to.r + (source.player == 0 ? 1 : -1)}) < 0) {
         for (const auto promotion : {PieceType::Queen, PieceType::Rook, PieceType::Bishop, PieceType::Knight}) moves.push_back({from, to, promotion});
     } else moves.push_back({from, to});
 }
@@ -38,7 +38,7 @@ static void rays(const GameState& state, std::vector<Move>& moves, Hex from, con
     for (const auto direction : directions) {
         for (int distance = 1; distance <= limit; ++distance) {
             const Hex to = add(from, direction, distance);
-            if (glinskiIndex(to) < 0) break;
+            if (variantDefinition(state.variant).index(to) < 0) break;
             addMove(state, moves, from, to);
             if (!occupant(state, to).empty()) break;
         }
@@ -48,7 +48,7 @@ static void rays(const GameState& state, std::vector<Move>& moves, Hex from, con
 std::vector<Move> generateCandidateMoves(const GameState& state) {
     std::vector<Move> moves;
     moves.reserve(150);
-    const auto& cells = glinskiCells();
+    const auto& cells = variantDefinition(state.variant).cells();
     static const auto knights = knightDirections();
     for (std::size_t index = 0; index < state.occupants.size(); ++index) {
         const auto piece = state.occupants[index];
@@ -63,15 +63,15 @@ std::vector<Move> generateCandidateMoves(const GameState& state) {
             case PieceType::Pawn: {
                 const int forward = piece.player == 0 ? 1 : -1;
                 const Hex one{from.q, from.r + forward};
-                if (glinskiIndex(one) >= 0 && occupant(state, one).empty()) {
+                if (variantDefinition(state.variant).index(one) >= 0 && occupant(state, one).empty()) {
                     addMove(state, moves, from, one);
                     const Hex two{from.q, from.r + 2 * forward};
-                    if (glinskiPawnStart(from, piece.player) && glinskiIndex(two) >= 0 && occupant(state, two).empty()) addMove(state, moves, from, two);
+                    if (variantDefinition(state.variant).pawnDoubleCell(from, piece.player) && (!variantDefinition(state.variant).pawnDoubleRequiresUnmoved || !piece.hasMoved) && variantDefinition(state.variant).index(two) >= 0 && occupant(state, two).empty()) addMove(state, moves, from, two);
                 }
-                const std::array<Hex, 2> captures = piece.player == 0 ? std::array<Hex,2>{{{1,0},{-1,1}}} : std::array<Hex,2>{{{-1,0},{1,-1}}};
+                const auto& captures = variantDefinition(state.variant).pawnCaptures[piece.player];
                 for (const auto direction : captures) {
                     const Hex to = add(from, direction);
-                    const int toIndex = glinskiIndex(to);
+                    const int toIndex = variantDefinition(state.variant).index(to);
                     if (toIndex < 0) continue;
                     const auto target = occupant(state, to);
                     if ((!target.empty() && target.player != piece.player) ||
@@ -91,7 +91,7 @@ static bool attacksAlong(const GameState& state, Hex from, Hex target, const std
     for (const auto direction : directions) {
         for (int distance = 1; distance <= limit; ++distance) {
             const auto to = add(from, direction, distance);
-            if (glinskiIndex(to) < 0) break;
+            if (variantDefinition(state.variant).index(to) < 0) break;
             if (to == target) return true;
             if (!occupant(state, to).empty()) break;
         }
@@ -100,7 +100,7 @@ static bool attacksAlong(const GameState& state, Hex from, Hex target, const std
 }
 
 bool isAttacked(const GameState& state, Hex position, PlayerId attacker) {
-    const auto& cells = glinskiCells();
+    const auto& cells = variantDefinition(state.variant).cells();
     static const auto knights = knightDirections();
     for (std::size_t index = 0; index < state.occupants.size(); ++index) {
         const auto piece = state.occupants[index];
@@ -113,8 +113,8 @@ bool isAttacked(const GameState& state, Hex position, PlayerId attacker) {
             case PieceType::King: if (attacksAlong(state, from, position, edge, 1) || attacksAlong(state, from, position, vertex, 1)) return true; break;
             case PieceType::Knight: for (const auto direction : knights) if (add(from, direction) == position) return true; break;
             case PieceType::Pawn:
-                if (piece.player == 0 && (add(from, {1,0}) == position || add(from, {-1,1}) == position)) return true;
-                if (piece.player == 1 && (add(from, {-1,0}) == position || add(from, {1,-1}) == position)) return true;
+                for (const auto direction : variantDefinition(state.variant).pawnCaptures[piece.player])
+                    if (add(from, direction) == position) return true;
                 break;
             default: break;
         }
@@ -123,7 +123,7 @@ bool isAttacked(const GameState& state, Hex position, PlayerId attacker) {
 }
 
 bool isInCheck(const GameState& state, PlayerId player) {
-    const auto& cells = glinskiCells();
+    const auto& cells = variantDefinition(state.variant).cells();
     for (std::size_t index = 0; index < state.occupants.size(); ++index) {
         const auto piece = state.occupants[index];
         if (piece.type == PieceType::King && piece.player == player) {
@@ -136,7 +136,7 @@ bool isInCheck(const GameState& state, PlayerId player) {
 
 GameState applyCandidateMove(const GameState& state, const Move& move, bool recordHistory) {
     GameState next = state;
-    const int from = glinskiIndex(move.from), to = glinskiIndex(move.to);
+    const int from = variantDefinition(state.variant).index(move.from), to = variantDefinition(state.variant).index(move.to);
     const auto piece = state.occupants[from];
     bool capture = !state.occupants[to].empty();
     if (piece.type == PieceType::Pawn && to == state.enPassantTarget && state.occupants[to].empty()) {
@@ -149,7 +149,7 @@ GameState applyCandidateMove(const GameState& state, const Move& move, bool reco
     if (move.promotion != PieceType::None) next.occupants[to].type = move.promotion;
     next.enPassantTarget = next.enPassantPawn = -1;
     if (piece.type == PieceType::Pawn && std::abs(move.to.r - move.from.r) == 2 && move.to.q == move.from.q) {
-        next.enPassantTarget = glinskiIndex({move.from.q, (move.from.r + move.to.r) / 2});
+        next.enPassantTarget = variantDefinition(state.variant).index({move.from.q, (move.from.r + move.to.r) / 2});
         next.enPassantPawn = to;
     }
     next.halfmoveClock = capture || piece.type == PieceType::Pawn ? 0 : state.halfmoveClock + 1;
@@ -176,15 +176,21 @@ std::vector<Move> generateLegalMoves(const GameState& state) {
 std::uint64_t positionKey(const GameState& state) {
     std::uint64_t hash = 1469598103934665603ULL;
     const auto mix = [&](std::uint64_t value) { hash ^= value; hash *= 1099511628211ULL; };
+    // Preserve existing Gliński hashes so saved games remain loadable.
+    // Other variants get their own repetition domain and effective pawn rights.
+    const auto& variant = variantDefinition(state.variant);
+    if (state.variant != "glinski") for (const unsigned char c : state.variant) mix(c);
     for (std::size_t index = 0; index < state.occupants.size(); ++index) {
         const auto piece = state.occupants[index];
-        mix(piece.empty() ? 0 : static_cast<int>(piece.type) + 8 * piece.player);
+        const bool doubleRight = variant.pawnDoubleRequiresUnmoved && piece.type == PieceType::Pawn &&
+            !piece.hasMoved && variant.pawnDoubleCell(variant.cells()[index], piece.player);
+        mix(piece.empty() ? 0 : static_cast<int>(piece.type) + 8 * piece.player + (doubleRight ? 16 : 0));
     }
     mix(state.activePlayer);
     // An en-passant right changes repetition only when a legal capture exists.
     if (state.enPassantTarget >= 0 && state.enPassantPawn >= 0) {
         for (const auto& move : generateCandidateMoves(state)) {
-            if (glinskiIndex(move.to) == state.enPassantTarget && occupant(state, move.from).type == PieceType::Pawn &&
+            if (variantDefinition(state.variant).index(move.to) == state.enPassantTarget && occupant(state, move.from).type == PieceType::Pawn &&
                 !isInCheck(applyCandidateMove(state, move, false), state.activePlayer)) {
                 mix(static_cast<std::uint64_t>(state.enPassantTarget) + 1);
                 break;
@@ -195,28 +201,29 @@ std::uint64_t positionKey(const GameState& state) {
 }
 
 void validatePosition(const GameState& state) {
-    if (state.variant != "glinski" || state.occupants.size() != glinskiCells().size() ||
+    const auto& variant = variantDefinition(state.variant);
+    if (state.occupants.size() != variant.cells().size() ||
         state.turnOrder != std::vector<PlayerId>{0,1} || state.activePlayer > 1 ||
         state.halfmoveClock < 0 || state.halfmoveClock > 10000 || state.ply < 0 || state.ply > 100000 ||
-        state.positionHistory.size() > 2048) throw std::invalid_argument("Invalid Gliński game state");
+        state.positionHistory.size() > 2048) throw std::invalid_argument("Invalid game state");
     int kings[2]{0,0};
     for (std::size_t index = 0; index < state.occupants.size(); ++index) {
         const auto piece = state.occupants[index];
         if (static_cast<int>(piece.type) > 6 || (!piece.empty() && piece.player > 1)) throw std::invalid_argument("Invalid piece");
         if (piece.type == PieceType::King) ++kings[piece.player];
-        if (piece.type == PieceType::Pawn && glinskiPromotionCell(glinskiCells()[index], piece.player)) throw std::invalid_argument("Unpromoted pawn on last cell");
+        if (piece.type == PieceType::Pawn && variant.index({variant.cells()[index].q, variant.cells()[index].r + (piece.player == 0 ? 1 : -1)}) < 0) throw std::invalid_argument("Unpromoted pawn on last cell");
     }
     if (kings[0] != 1 || kings[1] != 1) throw std::invalid_argument("Each player must have exactly one king");
     if (isInCheck(state, static_cast<PlayerId>(1 - state.activePlayer))) throw std::invalid_argument("Previous player left its king in check");
     if ((state.enPassantTarget == -1) != (state.enPassantPawn == -1) || state.enPassantTarget < -1 ||
-        state.enPassantPawn < -1 || state.enPassantTarget >= 91 || state.enPassantPawn >= 91) throw std::invalid_argument("Invalid en-passant rights");
+        state.enPassantPawn < -1 || state.enPassantTarget >= static_cast<int>(variant.cells().size()) || state.enPassantPawn >= static_cast<int>(variant.cells().size())) throw std::invalid_argument("Invalid en-passant rights");
     if (state.enPassantTarget >= 0) {
         const auto pawn = state.occupants[state.enPassantPawn];
-        const auto target = glinskiCells()[state.enPassantTarget];
-        const auto end = glinskiCells()[state.enPassantPawn];
+        const auto target = variantDefinition(state.variant).cells()[state.enPassantTarget];
+        const auto end = variantDefinition(state.variant).cells()[state.enPassantPawn];
         const int direction = pawn.player == 0 ? 1 : -1;
         if (pawn.type != PieceType::Pawn || pawn.player == state.activePlayer || !state.occupants[state.enPassantTarget].empty() ||
-            end != Hex{target.q,target.r + direction} || !glinskiPawnStart({end.q,end.r - direction * 2},pawn.player)) throw std::invalid_argument("Inconsistent en-passant rights");
+            end != Hex{target.q,target.r + direction} || !variant.pawnDoubleCell({end.q,end.r - direction * 2},pawn.player) || (variant.pawnDoubleRequiresUnmoved && !pawn.hasMoved)) throw std::invalid_argument("Inconsistent en-passant rights");
     }
     if (!state.positionHistory.empty() && state.positionHistory.back() != positionKey(state)) throw std::invalid_argument("Position history does not match state");
 }
@@ -246,9 +253,11 @@ GameResult getGameResult(const GameState& state, const std::vector<Move>& legalM
     if (legalMoves.empty()) {
         GameResult result;
         result.type = ResultType::Stalemate;
-        result.winner = static_cast<int>(1 - state.activePlayer);
-        result.scores[result.winner] = 0.75;
-        result.scores[state.activePlayer] = 0.25;
+        if (variantDefinition(state.variant).fractionalStalemate) {
+            result.winner = static_cast<int>(1 - state.activePlayer);
+            result.scores[result.winner] = 0.75;
+            result.scores[state.activePlayer] = 0.25;
+        }
         return result;
     }
     if (std::count(state.positionHistory.begin(), state.positionHistory.end(), positionKey(state)) >= 3) return {ResultType::Repetition};

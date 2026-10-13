@@ -1,5 +1,6 @@
 #pragma once
 #include "game_state.hpp"
+#include "variant.hpp"
 #include <string_view>
 
 namespace hexchess {

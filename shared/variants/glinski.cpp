@@ -73,8 +73,4 @@ GameState createGlinskiStartingPosition() {
     return state;
 }
 
-GameState createGame(const VariantId& variant) {
-    if (variant != "glinski") throw std::invalid_argument("Variant not implemented");
-    return createGlinskiStartingPosition();
-}
 }

@@ -6,7 +6,7 @@ Desktop browser / phone home-screen app
     ↕ HTTPS game API, correlated mutations
 Cloud Node backend + Postgres saved games
     ↕ versioned newline-delimited JSON over stdin/stdout
-Native Tactical 0.5 process
+Native Tactical 0.6 process
     → shared authoritative C++ Gliński rules
     → independent Engine 1 search/evaluation
 ```
@@ -35,7 +35,7 @@ There is currently no native asynchronous `stop` command. Server cancellation te
 
 Engine 1 is implemented; the other five directories are reserved. They will share rules/protocol while implementing independently designed decision-making. Tactical, positional, defensive, materialist, unconventional, and universal descriptions are provisional.
 
-Only Gliński is playable. Additional historical modules must independently verify starting arrangements, movements, rights and results. Wellisch also needs multiplayer search and historically verified check/elimination/victory semantics. The general state design prepares for that work; it does not claim those rules already exist.
+Gliński and McCooey are playable. Board, pawn-capture directions, initial double-advance rights and stalemate scoring come from shared C++ variant descriptors. Serialized states carry the variant, and McCooey pawn movement rights affect repetition. Additional historical modules must independently verify starting arrangements, movements, rights and results. Wellisch also needs multiplayer search and historically verified check/elimination/victory semantics. The general state design prepares for that work; it does not claim those rules already exist.
 
 ## Development and publication
 

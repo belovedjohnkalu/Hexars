@@ -1,10 +1,10 @@
-# HexChess protocol · version 1 / Tactical 0.5
+# HexChess protocol · version 1 / Tactical 0.6
 
 ## Cloud browser API
 
 The published app uses HTTPS `POST /_api/game`, encoded with SuperJSON. The strict contract is defined in `cloud/floot/endpoints/game_POST.schema.ts`.
 
-Actions: `new`, `get`, `move`, `engine`, `undo`. Existing-game actions require a game UUID and a 64-hex guest access token. Mutations require the current optimistic `version`. The backend rejects stale changes with HTTP 409, illegal moves/malformed input with 400, and unknown credentials with 404. Client requests are capped at 4 KiB.
+Actions: `new`, `get`, `move`, `engine`, `undo`. `new` accepts `variant: "glinski" | "mccooey"` (default Gliński for older clients). Existing games load the variant from their authoritative persisted state. Existing-game actions require a game UUID and a 64-hex guest access token. Mutations require the current optimistic `version`. The backend rejects stale changes with HTTP 409, illegal moves/malformed input with 400, and unknown credentials with 404. Client requests are capped at 4 KiB.
 
 Responses contain authoritative board cells/pieces, legal moves, active player, check/result, native state ID, persisted version, move history and engine diagnostics. The browser cannot submit a replacement authoritative position or an executable path.
 
@@ -14,9 +14,9 @@ One newline-delimited JSON request produces one flushed JSON response on standar
 
 | Request | Behavior |
 | --- | --- |
-| `hello` | Returns engine identity `Tactical 0.5` and capabilities. |
-| `supported_variants` | Returns `glinski`. |
-| `new_game` | Creates the historical Gliński position. |
+| `hello` | Returns engine identity `Tactical 0.6` and capabilities. |
+| `supported_variants` | Returns `glinski` and `mccooey`. |
+| `new_game` | Creates the historical starting position for the requested variant. |
 | `position` | Loads and validates complete serialized state. |
 | `legal_moves` | Describes the current position and legal moves. |
 | `play_move` | Checks legality, applies the move and returns updated state/game. |
@@ -28,7 +28,7 @@ One newline-delimited JSON request produces one flushed JSON response on standar
 {"protocolVersion":1,"type":"new_game","requestId":"req-1","variant":"glinski"}
 ```
 
-A game response includes `type: "game"`, `state` for later loading, and `game` for presentation. Serialized state carries variant, turn order, active player, occupants with movement history, en-passant target/pawn, halfmove clock, ply and repetition history. The current serializer accepts only verified two-player Gliński states; future variants must extend it deliberately.
+A game response includes `type: "game"`, `state` for later loading, and `game` for presentation. Serialized state carries variant, turn order, active player, occupants with movement history, en-passant target/pawn, halfmove clock, ply and repetition history. The current serializer accepts verified two-player Gliński and McCooey states; future variants must extend it deliberately.
 
 ```json
 {"protocolVersion":1,"type":"go","requestId":"req-2","stateId":"<current-state-id>","limits":{"timeMs":750,"depth":3,"nodeLimit":30000}}
@@ -40,6 +40,8 @@ The engine remains synchronous. Native `stop` is not implemented. Cloud cancella
 
 ## Retained local diagnostic protocol
 
-At `?foundation`, the loopback WebSocket manager accepts versioned JSON frames containing exactly `protocolVersion`, `type`, `requestId`. The allowlisted types remain `engine.ping`, `engine.id`, `engine.board`. Each maps to legacy native `ping`, `id`, `board` text commands. Identity is now `Tactical 0.5`; `board` describes geometry only. This optional manager does not provide the published game's API.
+At `?foundation`, the loopback WebSocket manager accepts versioned JSON frames containing exactly `protocolVersion`, `type`, `requestId`. The allowlisted types remain `engine.ping`, `engine.id`, `engine.board`. Each maps to legacy native `ping`, `id`, `board` text commands. Identity is now `Tactical 0.6`; `board` describes geometry only. This optional manager does not provide the published game's API.
 
 It serializes requests, preserves per-client response correlation, caps payloads/queues, accepts only localhost/127.0.0.1 Vite origins, and reports native exit/timeout. It must remain on loopback. Its protocol and tests are retained to support future local diagnostics without changing cloud gameplay.
+
+McCooey pawn `hasMoved` fields are required on loaded positions; effective first-move rights and the variant domain affect repetition keys. Existing Gliński hashes retain compatibility with earlier saved histories.

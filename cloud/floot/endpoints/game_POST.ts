@@ -39,6 +39,7 @@ export async function handle(request: Request) {
     if (input.action === "new") {
       const native = await runNativeEngine({
         action: "new",
+        variant: input.variant,
         origin: request.url,
         signal: request.signal,
       });

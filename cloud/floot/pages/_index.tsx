@@ -28,7 +28,7 @@ import { CloudBoard } from "../components/CloudBoard";
 import { useCloudGame } from "../helpers/useCloudGame";
 import { publishedOrigin } from "../helpers/publishedOrigin";
 import { useInstallApp } from "../helpers/useInstallApp";
-import type { ChessMove, Hex } from "../endpoints/game_POST.schema";
+import type { ChessMove, Hex, VariantId } from "../endpoints/game_POST.schema";
 import styles from "./_index.module.css";
 
 const key = (hex: Hex) => `${hex.q},${hex.r}`;
@@ -53,6 +53,7 @@ export default function HEXARS() {
   const [theme, setTheme] = useState("xenon");
   const [sheet, setSheet] = useState<Sheet>(null);
   const [newMode, setNewMode] = useState<"engine" | "two_players">("engine");
+  const [newVariant, setNewVariant] = useState<VariantId>("glinski");
   const [newSide, setNewSide] = useState<0 | 1>(0);
   const [promotions, setPromotions] = useState<ChessMove[]>([]);
   const [copied, setCopied] = useState(false);
@@ -101,10 +102,11 @@ export default function HEXARS() {
   function openNew() {
     setNewMode(data?.mode === "two_players" ? "two_players" : "engine");
     setNewSide(data?.humanPlayer === 1 ? 1 : 0);
+    setNewVariant(game?.variant ?? "glinski");
     setSheet("new");
   }
   async function startGame() {
-    if (await cloud.newGame(newMode, newSide)) setSheet(null);
+    if (await cloud.newGame(newMode, newSide, newVariant)) setSheet(null);
   }
   function chooseCell(hex: Hex) {
     if (!game || !canPlay) return;
@@ -141,8 +143,8 @@ export default function HEXARS() {
     }
   }
   async function install() {
-    if (app.canPrompt && (await app.install())) return;
-    setSheet("install");
+    if (app.canPrompt) { await app.install(); return; }
+    if (app.canInstall) setSheet("install");
   }
   function player(player: number) {
     const computer = data?.mode === "engine" && player !== data.humanPlayer;
@@ -179,7 +181,7 @@ export default function HEXARS() {
   let status = !game
     ? "Opening your game"
     : ended
-      ? game.result.status === "draw"
+      ? (game.result.status === "draw" || (game.result.status === "stalemate" && game.result.winner < 0))
         ? "A draw."
         : game.result.status === "stalemate"
           ? "No moves left."
@@ -199,7 +201,7 @@ export default function HEXARS() {
       ? game.result.status === "checkmate"
         ? "Checkmate. The king has no safe escape."
         : game.result.status === "stalemate"
-          ? "The player with no moves earns ¼; the other earns ¾."
+          ? game.variant === "mccooey" ? "Stalemate. The next player has no move, and their king is safe. ½ point each." : "The player with no moves earns ¼; the other earns ¾."
           : game.result.reason === "Low-material house rule"
             ? "Automatic draw. Each side has at most one piece besides its king. ½ point each."
             : game.result.reason === "Insufficient material"
@@ -286,7 +288,9 @@ export default function HEXARS() {
       </header>
       <main className={styles.main}>
         <div className={styles.heading}>
-          <p>Gliński’s chess</p>
+          <button className={styles.variantButton} onClick={openNew} aria-label="Choose chess variant">
+            {game?.variant === "mccooey" ? "McCooey’s chess" : "Gliński’s chess"}<ChevronRight size={12} />
+          </button>
           <h1 role="status">
             <span className={styles.statusWord} key={status}>
               {status}
@@ -454,8 +458,8 @@ export default function HEXARS() {
       </main>
       <footer className={styles.footer}>
         <span>Make yourself at home.</span>
-        <button onClick={() => (app.installed ? setSheet("about") : void install())}>
-          {app.installed ? "About HEXARS" : "Add to home screen"}
+        <button onClick={() => (app.canInstall ? void install() : setSheet("about"))}>
+          {app.canInstall ? "Add to home screen" : "About HEXARS"}
           <ArrowUpRight size={13} />
         </button>
       </footer>
@@ -473,6 +477,14 @@ export default function HEXARS() {
           </DialogHeader>
           {activeSheet === "new" && (
             <div className={styles.sheetBody}>
+              <label className={styles.field}>
+                Chess variant
+                <select aria-label="Chess variant" value={newVariant} onChange={(event) => setNewVariant(event.target.value as VariantId)}>
+                  <option value="glinski">Gliński’s chess</option>
+                  <option value="mccooey">McCooey’s chess</option>
+                </select>
+                <small>{newVariant === "mccooey" ? "Seven pawns. Diagonal captures. A fresh way to play." : "The original 91-cell game. Nine pawns per side."}</small>
+              </label>
               <div className={styles.segmented} role="group" aria-label="Who to play">
                 <button aria-pressed={newMode === "engine"} onClick={() => setNewMode("engine")}>
                   Play Tactical
@@ -581,7 +593,7 @@ export default function HEXARS() {
                   <span>Refresh game</span>
                   <ChevronRight size={16} />
                 </button>
-                {!app.installed && (
+                {app.canInstall && (
                   <button onClick={() => void install()}>
                     <Download size={18} />
                     <span>Add to home screen</span>
@@ -617,7 +629,7 @@ export default function HEXARS() {
               </p>
             </div>
           )}
-          {activeSheet === "install" && (
+          {activeSheet === "install" && app.canInstall && (
             <div className={styles.sheetBody}>
               <div className={styles.appPreview}>
                 <span className={styles.appIcon}>
@@ -697,7 +709,8 @@ export default function HEXARS() {
           {activeSheet === "rules" && (
             <div className={styles.rules}>
               <p>
-                Tap one of your pieces. The marked cells show where it can go. Tap a mark to move.
+                {game?.variant === "mccooey" ? "McCooey’s chess. Seven pawns per side." : "Gliński’s chess. Nine pawns per side."}
+                {" "}Tap one of your pieces. The marked cells show where it can go. Tap a mark to move.
               </p>
               <div>
                 <strong>Rook</strong>
@@ -718,9 +731,9 @@ export default function HEXARS() {
               <div>
                 <strong>Pawn</strong>
                 <p>
-                  Moves forward and captures to either forward side. From any of your original pawn
-                  cells, it can move two steps if the path is clear. At the far edge, choose a new
-                  piece.
+                  {game?.variant === "mccooey"
+                    ? "Moves one cell forward and captures along the forward bishop diagonals. On its first move, a pawn can advance two cells if the path is clear. The center pawn can only advance one. At the far edge, choose a new piece."
+                    : "Moves forward and captures to either forward side. From any of your original pawn cells, it can move two steps if the path is clear. At the far edge, choose a new piece."}
                 </p>
               </div>
               <div>
@@ -742,9 +755,10 @@ export default function HEXARS() {
                   moved one. This is only available on the very next turn.
                 </p>
                 <p>
-                  Stalemate: if a player has no legal moves but the king is safe, they earn ¼ point
-                  and the other player earns ¾. Repeated positions and fifty turns without a pawn
-                  move or capture are draws.
+                  {game?.variant === "mccooey"
+                    ? "Stalemate: if a player has no legal moves but their king is safe, both players earn ½ point."
+                    : "Stalemate: if a player has no legal moves but the king is safe, they earn ¼ point and the other player earns ¾."}
+                  {" "}Repeated positions and fifty turns without a pawn move or capture are draws.
                 </p>
               </details>
             </div>
@@ -772,7 +786,7 @@ export default function HEXARS() {
                 ))}
               </div>
               <p className={styles.sheetNote}>
-                HEXARS begins with Gliński’s hexagonal chess. Five more chess variants and five more
+                HEXARS offers Gliński’s and McCooey’s hexagonal chess. Four more chess variants and five more
                 playing styles are on the way.
               </p>
             </div>

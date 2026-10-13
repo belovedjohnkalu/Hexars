@@ -4,6 +4,7 @@ import {
   type InputType,
   type OutputType,
   type ChessMove,
+  type VariantId,
 } from "../endpoints/game_POST.schema";
 
 type Credentials = { gameId: string; accessToken: string };
@@ -111,7 +112,7 @@ export function useCloudGame() {
       const saved = savedCredentials();
       credentials.current = saved;
       void perform(
-        saved ? { action: "get", ...saved } : { action: "new", mode: "engine", humanPlayer: 0 },
+        saved ? { action: "get", ...saved } : { action: "new", mode: "engine", humanPlayer: 0, variant: "glinski" },
       );
     }, 0);
     return () => {
@@ -180,9 +181,9 @@ export function useCloudGame() {
     data,
     busy,
     error,
-    newGame: (mode: "engine" | "two_players", humanPlayer: 0 | 1) => {
+    newGame: (mode: "engine" | "two_players", humanPlayer: 0 | 1, variant: VariantId) => {
       engineKey.current = "";
-      return perform({ action: "new", mode, humanPlayer });
+      return perform({ action: "new", mode, humanPlayer, variant });
     },
     openGame: (link: string) => {
       try {
@@ -204,7 +205,7 @@ export function useCloudGame() {
       return perform(
         credentials.current
           ? { action: "get", ...credentials.current }
-          : { action: "new", mode: "engine", humanPlayer: 0 },
+          : { action: "new", mode: "engine", humanPlayer: 0, variant: "glinski" },
       );
     },
   };

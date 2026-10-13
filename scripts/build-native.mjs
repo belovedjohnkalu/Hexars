@@ -58,8 +58,10 @@ function run(command, args, { input = "" } = {}) {
 try {
   const ruleSources = [
     "shared/src/geometry.cpp",
-    "shared/src/glinski_rules.cpp",
+    "shared/src/hex_rules.cpp",
     "shared/variants/glinski.cpp",
+    "shared/variants/mccooey.cpp",
+    "shared/variants/variant.cpp",
   ].map((source) => path.join(root, source));
   const engineSources = [
     "engines/engine-1/main.cpp",
@@ -97,6 +99,10 @@ try {
       rulesOutput,
     ]);
     process.stdout.write(await run(rulesOutput, []));
+    const mccooeyOutput = path.join(root, "build", windows ? "mccooey-tests.exe" : "mccooey-tests");
+    await run(compiler, [...flags, path.join(root, "tests/rules/mccooey.cpp"),
+      path.join(root, "engines/engine-1/search.cpp"), ...ruleSources, "-o", mccooeyOutput]);
+    process.stdout.write(await run(mccooeyOutput, []));
   }
   if (process.argv.includes("--cloud")) {
     if (process.platform !== "linux" || process.arch !== "x64")

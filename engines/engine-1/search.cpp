@@ -7,7 +7,7 @@ namespace hexchess::engine_one {
 static constexpr int values[]{0,100,350,325,525,1000,0};
 int evaluate(const GameState& state) {
     int score = 0;
-    const auto& cells = glinskiCells();
+    const auto& cells = variantDefinition(state.variant).cells();
     for (std::size_t index = 0; index < state.occupants.size(); ++index) {
         const auto piece = state.occupants[index];
         if (piece.empty()) continue;
@@ -34,9 +34,9 @@ struct Search {
     }
 
     int ordering(const GameState& state, const Move& move) {
-        const auto source = state.occupants[glinskiIndex(move.from)];
-        const auto target = state.occupants[glinskiIndex(move.to)];
-        const bool enPassant = source.type == PieceType::Pawn && glinskiIndex(move.to) == state.enPassantTarget;
+        const auto source = state.occupants[variantDefinition(state.variant).index(move.from)];
+        const auto target = state.occupants[variantDefinition(state.variant).index(move.to)];
+        const bool enPassant = source.type == PieceType::Pawn && variantDefinition(state.variant).index(move.to) == state.enPassantTarget;
         return (target.empty() ? (enPassant ? 1000 : 0) : values[static_cast<int>(target.type)] * 10 - values[static_cast<int>(source.type)]) +
                (move.promotion == PieceType::None ? 0 : values[static_cast<int>(move.promotion)] * 10);
     }
@@ -47,7 +47,7 @@ struct Search {
 
     int terminal(const GameState& state, const GameResult& result, int ply) {
         if (result.type == ResultType::Checkmate) return -100000 + ply;
-        if (result.type == ResultType::Stalemate) return -10000 + ply;
+        if (result.type == ResultType::Stalemate) return result.winner < 0 ? 0 : -10000 + ply;
         (void)state;
         return 0;
     }

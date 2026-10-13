@@ -30,7 +30,7 @@ function engine(t) {
 test("Versioned protocol identifies the engine and exposes authoritative starting pieces", async (t) => {
   const request = engine(t);
   const hello = await request({ type: "hello" });
-  assert.equal(hello.engine, "Tactical 0.5");
+  assert.equal(hello.engine, "Tactical 0.6");
   const start = await request({ type: "new_game", variant: "glinski" });
   assert.equal(start.game.board.cells.length, 91);
   assert.equal(start.game.board.cells.filter((cell) => cell.piece).length, 36);
@@ -241,4 +241,62 @@ test("Automatic material draws hide moves, score half each and stop search", asy
     assert.equal(response.game.result.status, "ongoing");
     assert.ok(response.game.legalMoves.length > 0);
   }
+});
+
+test("McCooey identifies its variant, setup and first-move pawn rights", async (t) => {
+  const request = engine(t);
+  assert.deepEqual((await request({ type: "supported_variants" })).variants, ["glinski", "mccooey"]);
+  const initial = await request({ type: "new_game", variant: "mccooey" });
+  assert.equal(initial.game.variant, "mccooey");
+  assert.equal(initial.game.board.variant, "mccooey");
+  assert.equal(initial.game.board.cells.filter((cell) => cell.piece).length, 32);
+  assert.equal(initial.game.board.cells.filter((cell) => cell.piece?.type === "pawn").length, 14);
+  const centre = initial.game.legalMoves.filter((move) => move.fromNotation === "f4");
+  assert.deepEqual(centre.map((move) => move.toNotation), ["f5"]);
+  assert.ok(initial.game.legalMoves.some((move) => move.fromNotation === "d2" && move.toNotation === "d4"));
+  const loaded = await request({ type: "position", state: initial.state });
+  assert.equal(loaded.game.stateId, initial.game.stateId);
+  const missingRights = structuredClone(initial.state);
+  delete missingRights.occupants.find((piece) => piece?.type === "pawn").hasMoved;
+  assert.equal((await request({ type: "position", state: missingRights })).type, "error");
+  const swapped = structuredClone(initial.state);
+  swapped.variant = "glinski";
+  swapped.positionHistory = [];
+  const other = await request({ type: "position", state: swapped });
+  assert.notEqual(other.game.stateId, initial.game.stateId);
+});
+
+test("McCooey en passant follows the bishop diagonal and marks an empty cell as a capture", async (t) => {
+  const request = engine(t);
+  const initial = await request({ type: "new_game", variant: "mccooey" });
+  const cells = initial.game.board.cells;
+  const state = { ...initial.state, occupants: cells.map(() => null), activePlayer: 1, positionHistory: [] };
+  for (const [notation, type, player] of [["a2", "king", 0], ["l5", "king", 1], ["e8", "pawn", 1], ["d5", "pawn", 0]])
+    state.occupants[cells.findIndex((cell) => cell.notation === notation)] = { type, player, hasMoved: false };
+  let response = await request({ type: "position", state });
+  const advance = response.game.legalMoves.find((move) => move.fromNotation === "e8" && move.toNotation === "e6");
+  response = await request({ type: "play_move", stateId: response.game.stateId, move: advance });
+  const capture = response.game.legalMoves.find((move) => move.fromNotation === "d5" && move.toNotation === "e7");
+  assert.ok(capture);
+  assert.equal(capture.capture, true);
+  assert.equal(response.game.board.cells.find((cell) => cell.notation === "e7").piece, null);
+  response = await request({ type: "play_move", stateId: response.game.stateId, move: capture });
+  assert.equal(response.game.board.cells.find((cell) => cell.notation === "e6").piece, null);
+  assert.equal(response.game.variant, "mccooey");
+});
+
+test("McCooey stalemate scores equally and search stops; ongoing McCooey search returns a legal move", async (t) => {
+  const request = engine(t);
+  const initial = await request({ type: "new_game", variant: "mccooey" });
+  const decision = await request({ type: "go", stateId: initial.game.stateId, limits: { timeMs: 100, depth: 2, nodeLimit: 3000 } });
+  assert.ok(initial.game.legalMoves.some((move) => move.fromNotation === decision.move.fromNotation && move.toNotation === decision.move.toNotation));
+  const state = { ...initial.state, occupants: initial.game.board.cells.map(() => null), activePlayer: 1, positionHistory: [] };
+  for (const [notation, type, player] of [["h8", "king", 0], ["f11", "king", 1], ["e8", "queen", 0]])
+    state.occupants[initial.game.board.cells.findIndex((cell) => cell.notation === notation)] = { type, player, hasMoved: true };
+  const stale = await request({ type: "position", state });
+  assert.equal(stale.game.result.status, "stalemate");
+  assert.equal(stale.game.result.winner, -1);
+  assert.deepEqual(stale.game.result.scores, [0.5, 0.5]);
+  assert.deepEqual(stale.game.legalMoves, []);
+  assert.equal((await request({ type: "go", stateId: stale.game.stateId, limits: { timeMs: 10 } })).move, null);
 });

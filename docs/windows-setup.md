@@ -58,7 +58,7 @@ If PowerShell blocks `npm.ps1`, use `npm.cmd` for these commands; no global exec
 "id" | & ".\engines\engine-1\engine-one.exe"
 ```
 
-Expect `pong` and `id Tactical 0.5`. A missing MSYS2 DLL can be resolved for the current terminal by adding its runtime directory:
+Expect `pong` and `id Tactical 0.6`. A missing MSYS2 DLL can be resolved for the current terminal by adding its runtime directory:
 
 ```powershell
 $env:Path = "C:\msys64\ucrt64\bin;$env:Path"
@@ -80,7 +80,7 @@ Terminal 2, from the same project root:
 npm run dev
 ```
 
-For local diagnostics, open **http://localhost:5173/?foundation**. The website should show a 91-cell board, **Engine responding**, **Tactical 0.5**, and the measured round trip. The board can be inspected with mouse or keyboard. This diagnostic view covers communication and geometry. The default website uses the hosted cloud game.
+For local diagnostics, open **http://localhost:5173/?foundation**. The website should show a 91-cell board, **Engine responding**, **Tactical 0.6**, and the measured round trip. The board can be inspected with mouse or keyboard. This diagnostic view covers communication and geometry. The default website uses the hosted cloud game.
 
 Use Ctrl+C in each terminal to stop its service. The manager asks the engine to quit and terminates it if it fails to shut down.
 
