@@ -87,7 +87,7 @@ export function CloudBoard({
   const sign = flipped ? -1 : 1;
   return (
     <svg
-      viewBox="0 0 600 600"
+      viewBox="58 26 484 548"
       className={`${styles.board} ${className || ""}`}
       role="group"
       aria-label="Gliński hexagonal chessboard"

@@ -6,7 +6,7 @@ Desktop browser / phone home-screen app
     ↕ HTTPS game API, correlated mutations
 Cloud Node backend + Postgres saved games
     ↕ versioned newline-delimited JSON over stdin/stdout
-Native Tactical 0.4 process
+Native Tactical 0.5 process
     → shared authoritative C++ Gliński rules
     → independent Engine 1 search/evaluation
 ```

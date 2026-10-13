@@ -18,7 +18,7 @@ Rooks follow six edge directions. Bishops follow six vertex diagonals and stay o
 
 White pawns capture (+1,0) and (−1,+1); Black uses the opposite directions. A pawn on any original friendly pawn cell may make a clear double advance, including after a capture onto that cell. En passant is available only immediately after a double advance; removing the captured pawn must not expose the moving king. Promotion is mandatory at the forward boundary, to queen, rook, bishop or knight. There is no castling.
 
-Checkmate scores 1–0; stalemate scores ¾ for the delivering player and ¼ for the stalemated player. This application automatically adjudicates threefold repetition and the fifty-move threshold rather than offering claim buttons. Bare kings are drawn. It conservatively does not classify other low-material endings as automatic draws; a lone minor can mate in exceptional hexagonal configurations.
+Checkmate scores 1–0; stalemate scores ¾ for the delivering player and ¼ for the stalemated player. This application automatically adjudicates threefold repetition and the fifty-move threshold rather than offering claim buttons. Bare kings are drawn. Historically, a lone minor can mate in exceptional hexagonal configurations. HEXARS additionally uses a user-requested house rule: each side having at most one bishop, knight, or rook besides its king ends the game as an automatic ½–½ draw. Any pawn, queen or second non-king piece prevents this early draw. A checkmate already delivered takes precedence. This is separate from historical ¾–¼ stalemate scoring.
 
 ## Independent fixtures
 

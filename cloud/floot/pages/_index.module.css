@@ -51,7 +51,7 @@
 }
 .header {
   max-width: 1180px;
-  height: 96px;
+  height: 72px;
   padding: 0 40px;
   margin: auto;
   display: flex;
@@ -116,13 +116,13 @@
   color: var(--foreground);
 }
 .main {
-  max-width: 1010px;
-  margin: 12px auto 0;
-  padding: 0 32px;
+  max-width: 1180px;
+  margin: 8px auto 0;
+  padding: 0 24px;
   animation: appear 520ms var(--ease) both;
 }
 .heading {
-  margin: 8px 0 30px;
+  margin: 4px 0 18px;
 }
 .heading > p {
   margin: 0 0 8px;
@@ -159,18 +159,21 @@
 }
 .playArea {
   display: grid;
-  grid-template-columns: minmax(0, 610px) 240px;
-  gap: 72px;
+  grid-template-columns: minmax(0, 1fr) 220px;
+  gap: 40px;
   align-items: start;
 }
 .boardArea {
   min-width: 0;
+  width: 100%;
+  max-width: min(100%, max(440px, calc((100dvh - 280px) * 0.8832)));
+  margin-inline: auto;
 }
 .player {
   display: flex;
   gap: 10px;
   align-items: center;
-  height: 52px;
+  height: 44px;
   padding: 0 18px;
 }
 .playerPiece {
@@ -219,7 +222,7 @@
 }
 .boardStage {
   min-width: 0;
-  aspect-ratio: 1;
+  aspect-ratio: 484 / 548;
   display: grid;
   place-items: center;
   background: radial-gradient(ellipse at center, #26385338, transparent 68%);
@@ -250,7 +253,7 @@
   color: var(--foreground);
 }
 .controls {
-  padding-top: 68px;
+  padding-top: 44px;
 }
 .eyebrow {
   font-size: 9px;
@@ -858,9 +861,9 @@
     padding: 24px 28px;
   }
 }
-@media (max-width: 640px) {
+@media (max-width: 850px) {
   .header {
-    height: 74px;
+    height: 60px;
     padding: 0 22px;
   }
   .brand {
@@ -877,18 +880,18 @@
     background: #252c39;
   }
   .main {
-    padding: 0 16px;
-    margin-top: 12px;
+    padding: 0 8px;
+    margin-top: 8px;
   }
   .heading {
-    margin: 0 6px 18px;
+    margin: 0 10px 10px;
   }
   .heading > p {
     font-size: 11px;
     margin-bottom: 6px;
   }
   .heading h1 {
-    font-size: 28px;
+    font-size: 26px;
   }
   .playArea {
     display: flex;
@@ -898,10 +901,12 @@
   .boardArea,
   .controls {
     width: 100%;
+    max-width: 720px;
+    margin-inline: auto;
   }
   .player {
     padding: 0 12px;
-    height: 44px;
+    height: 40px;
   }
   .player strong {
     font-size: 12px;
@@ -919,14 +924,14 @@
     border-radius: 9px;
   }
   .boardStage {
-    margin: -6px 0;
+    margin: 0;
   }
   .hint {
-    margin-top: 12px;
+    margin-top: 8px;
     font-size: 11px;
   }
   .controls {
-    padding: 22px 6px 0;
+    padding: 10px 6px 0;
     display: grid;
     grid-template-columns: 1fr 1.55fr;
     gap: 14px;

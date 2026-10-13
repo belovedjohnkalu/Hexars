@@ -6,4 +6,4 @@ Public headers are in `include/hexchess`; `src/glinski_rules.cpp` contains the f
 
 `PlayerId` and `turnOrder` allow broader future state models. Only the two-player Gliński module is currently implemented. Future irregular geometries and three-player rules need their own verified modules.
 
-See `../docs/variants/glinski.md` for rule conventions and tests. The library intentionally does not label lone-bishop/lone-knight endings as ordinary-chess automatic draws: mating constructions can exist on the hexagonal board.
+See `../docs/variants/glinski.md` for rule conventions and tests. Mating constructions can exist with a lone minor on the hexagonal board. The new `LowMaterialDraw` result deliberately identifies HEXARS’s requested early-draw house rule, rather than describing those positions as historically insufficient material. It scores ½–½ and applies when each side has only a king plus at most one bishop, knight or rook; pawns, queens and a second non-king piece exclude it.

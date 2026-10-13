@@ -200,11 +200,15 @@ export default function HEXARS() {
         ? "Checkmate. The king has no safe escape."
         : game.result.status === "stalemate"
           ? "The player with no moves earns ¼; the other earns ¾."
-          : game.result.reason === "Threefold repetition"
-            ? "The same position appeared three times."
-            : game.result.reason === "Fifty-move rule"
-              ? "No pawn move or capture for fifty turns."
-              : "Neither side can win from here."
+          : game.result.reason === "Low-material house rule"
+            ? "Automatic draw. Each side has at most one piece besides its king. ½ point each."
+            : game.result.reason === "Insufficient material"
+              ? "Only the kings remain. ½ point each."
+              : game.result.reason === "Threefold repetition"
+                ? "The same position appeared three times."
+                : game.result.reason === "Fifty-move rule"
+                  ? "No pawn move or capture for fifty turns."
+                  : "Neither side can win from here."
       : game.check && !engineTurn
         ? "Your king is in danger. Move to safety."
         : engineTurn
@@ -249,7 +253,10 @@ export default function HEXARS() {
           rel="apple-touch-icon"
           href="/_cdn/static/bbff6547-57ce-49ce-8f0a-92ee7a03d999-hexars-dark-180.png"
         />
-        <link rel="icon" href="/_cdn/static/f72178ec-847d-48d7-ada5-e64a1ed04bd4-hexars-dark-192.png" />
+        <link
+          rel="icon"
+          href="/_cdn/static/f72178ec-847d-48d7-ada5-e64a1ed04bd4-hexars-dark-192.png"
+        />
       </Helmet>
       <header className={styles.header}>
         <button
@@ -725,6 +732,11 @@ export default function HEXARS() {
               </div>
               <details>
                 <summary>A few special rules</summary>
+                <p>
+                  HEXARS automatic draw: if each side has only its king and, at most, one bishop,
+                  knight, or rook, the game ends with ½ point each. Bare kings also draw. Pawns,
+                  queens, or a second piece keep the game going. A checkmate already delivered wins.
+                </p>
                 <p>
                   En passant: after a pawn moves two steps, an enemy pawn may capture it as if it
                   moved one. This is only available on the very next turn.

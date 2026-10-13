@@ -104,6 +104,7 @@ Json describeGame(const GameState& state) {
         case ResultType::Repetition: status="draw";reason="Threefold repetition";break;
         case ResultType::FiftyMove: status="draw";reason="Fifty-move rule";break;
         case ResultType::InsufficientMaterial: status="draw";reason="Insufficient material";break;
+        case ResultType::LowMaterialDraw: status="draw";reason="Low-material house rule";break;
         default: break;
     }
     return {{"stateId",stateId(state)},{"variant",state.variant},{"activePlayer",state.activePlayer},{"ply",state.ply},
@@ -115,7 +116,7 @@ Json processRequest(const Json& request, std::optional<GameState>& state) {
     if(!request.is_object()||request.value("protocolVersion",0)!=1||!request.contains("type")||!request.at("type").is_string()) throw std::invalid_argument("Invalid protocol request");
     const auto type=request.at("type").get<std::string>();
     Json response{{"protocolVersion",1},{"requestId",request.value("requestId",std::string{})}};
-    if(type=="hello") { response.update({{"type","hello"},{"engine","Tactical 0.4"},{"capabilities",Json::array({"glinski","legal_moves","search"})}});return response; }
+    if(type=="hello") { response.update({{"type","hello"},{"engine","Tactical 0.5"},{"capabilities",Json::array({"glinski","legal_moves","search"})}});return response; }
     if(type=="supported_variants") {response.update({{"type","supported_variants"},{"variants",Json::array({"glinski"})}});return response;}
     if(type=="new_game") {
         state=createGame(request.value("variant",std::string{"glinski"}));

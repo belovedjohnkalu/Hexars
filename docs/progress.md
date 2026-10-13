@@ -1,4 +1,4 @@
-# Development progress · cloud edition 0.4
+# Development progress · cloud edition 0.5
 
 Published: **https://hexars.floot.app**
 
@@ -50,3 +50,17 @@ Published HEXARS checks: 38 passed, including the new native identity, readable 
 Dark theme is now the default, including sheets and home-screen launch colours. Six original vector silhouettes are reused by both sides, the board, player strips and promotion picker. Every theme uses two-tone outlines for visibility. Legal destinations are inset hexagons: blue for ordinary moves, orange for captures, pink for checks, both colours for checking captures. C++ supplies capture/check metadata, including en passant. Pointer focus/tap rectangles are suppressed; keyboard focus uses an inset hexagon. Shared pass-and-play auto-flips after each continuing turn. Native protocol/manager checks: 14 passed.
 
 Published dark-release checks: 44 passed across desktop and iPhone-sized browser contexts. All three board palettes passed piece fill/edge contrast checks for both sides. Verified ordinary moves/captures/checks, combined checking captures, automatic turn-by-turn orientation, completion through mate, undo, touch selection without native rectangles, keyboard focus/navigation, reduced motion and dark installation metadata. No browser errors or failed requests. [Desktop](screenshots/hexars-dark-desktop.png), [iPhone](screenshots/hexars-dark-iphone.png), [check record](screenshots/hexars-dark-qa.json).
+
+## Automatic low-material house rule
+
+The repeated king in the user’s piece list was interpreted as knight. Each side may have only its king plus zero or one bishop, knight or rook; eligible games automatically draw ½–½. Pawns, queens and two non-king pieces on either side keep play active. Actual checkmate already delivered wins; historical stalemate still scores ¾–¼ outside this threshold. The protocol hides legal moves after a material draw, move application rejects further play, and search returns no move. Native verification: 5,737 assertions, 5,340 random plies, eight completed random games and two completed engine games; 15 protocol/manager tests passed.
+
+Published material-draw UI checks: 29 passed. Real cloud startup and human/engine moves were verified; five draw presentations used native-generated fixtures supplied by browser request interception. [Record](screenshots/material-draw-qa.json).
+
+## Larger board
+
+Published a tightly framed board, smaller phone gutters, full-width tablet layout, wider desktop play area and compact surrounding controls. Production checks: 30 passed at 320, 390, 768 and 1440 pixels, including all cells within the SVG, no horizontal overflow, actual cloud moves and pass-and-play rotation. Visible board width grew about 30% on a 390px phone and 88% on a 768px tablet. [Before](screenshots/board-size-before.json), [after](screenshots/board-size-after.json).
+
+A further desktop height constraint is prepared locally (with a partial edit in the Floot editor) but not yet published: Floot refused the final typecheck/publication after exhausting the daily build allowance, resetting at 2026-10-13 05:00 UTC. The live desktop board can extend below the viewport. The published expansion itself succeeded (job 613f424e-447e-4663-8042-95c10cb5d997).
+
+The complete pending desktop constraint passed the local production build and a 1440×1040 browser fit check; upload the final pages/_index.module.css from this repository before the next publication.

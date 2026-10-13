@@ -1,7 +1,6 @@
 .board {
   display: block;
   width: 100%;
-  max-width: 600px;
   margin: auto;
   overflow: visible;
   filter: drop-shadow(0 14px 22px #00000025);

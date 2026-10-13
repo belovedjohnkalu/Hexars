@@ -1,4 +1,4 @@
-# HexChess protocol · version 1 / Tactical 0.4
+# HexChess protocol · version 1 / Tactical 0.5
 
 ## Cloud browser API
 
@@ -14,7 +14,7 @@ One newline-delimited JSON request produces one flushed JSON response on standar
 
 | Request | Behavior |
 | --- | --- |
-| `hello` | Returns engine identity `Tactical 0.4` and capabilities. |
+| `hello` | Returns engine identity `Tactical 0.5` and capabilities. |
 | `supported_variants` | Returns `glinski`. |
 | `new_game` | Creates the historical Gliński position. |
 | `position` | Loads and validates complete serialized state. |
@@ -40,6 +40,6 @@ The engine remains synchronous. Native `stop` is not implemented. Cloud cancella
 
 ## Retained local diagnostic protocol
 
-At `?foundation`, the loopback WebSocket manager accepts versioned JSON frames containing exactly `protocolVersion`, `type`, `requestId`. The allowlisted types remain `engine.ping`, `engine.id`, `engine.board`. Each maps to legacy native `ping`, `id`, `board` text commands. Identity is now `Tactical 0.4`; `board` describes geometry only. This optional manager does not provide the published game's API.
+At `?foundation`, the loopback WebSocket manager accepts versioned JSON frames containing exactly `protocolVersion`, `type`, `requestId`. The allowlisted types remain `engine.ping`, `engine.id`, `engine.board`. Each maps to legacy native `ping`, `id`, `board` text commands. Identity is now `Tactical 0.5`; `board` describes geometry only. This optional manager does not provide the published game's API.
 
 It serializes requests, preserves per-client response correlation, caps payloads/queues, accepts only localhost/127.0.0.1 Vite origins, and reports native exit/timeout. It must remain on loopback. Its protocol and tests are retained to support future local diagnostics without changing cloud gameplay.

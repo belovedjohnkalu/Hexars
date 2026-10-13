@@ -1,0 +1,85 @@
+{
+  "mode": "before",
+  "checks": [
+    "320px has all 91 cells",
+    "320px no horizontal overflow",
+    "320px cells fit SVG",
+    "390px has all 91 cells",
+    "390px no horizontal overflow",
+    "390px cells fit SVG",
+    "768px has all 91 cells",
+    "768px no horizontal overflow",
+    "768px cells fit SVG",
+    "1440px has all 91 cells",
+    "1440px no horizontal overflow",
+    "1440px cells fit SVG",
+    "No browser errors"
+  ],
+  "sizes": [
+    {
+      "width": 320,
+      "height": 740,
+      "svg": {
+        "x": 16,
+        "y": 195,
+        "width": 288,
+        "height": 288
+      },
+      "minX": 45.97599792480469,
+      "maxX": 274.02398681640625,
+      "minY": 211.15386962890625,
+      "maxY": 466.84613037109375,
+      "overflow": false,
+      "viewBox": "0 0 600 600"
+    },
+    {
+      "width": 390,
+      "height": 844,
+      "svg": {
+        "x": 16,
+        "y": 195,
+        "width": 358,
+        "height": 358
+      },
+      "minX": 53.26183319091797,
+      "maxX": 336.7381591796875,
+      "minY": 215.0801544189453,
+      "maxY": 532.9198608398438,
+      "overflow": false,
+      "viewBox": "0 0 600 600"
+    },
+    {
+      "width": 768,
+      "height": 1024,
+      "svg": {
+        "x": 24,
+        "y": 246.75,
+        "width": 476,
+        "height": 476
+      },
+      "minX": 73.54367065429688,
+      "maxX": 450.4563293457031,
+      "minY": 273.4487609863281,
+      "maxY": 696.05126953125,
+      "overflow": false,
+      "viewBox": "0 0 600 600"
+    },
+    {
+      "width": 1440,
+      "height": 1040,
+      "svg": {
+        "x": 252,
+        "y": 260.5,
+        "width": 600,
+        "height": 600
+      },
+      "minX": 314.45001220703125,
+      "maxX": 789.5499877929688,
+      "minY": 294.1539001464844,
+      "maxY": 826.8461303710938,
+      "overflow": false,
+      "viewBox": "0 0 600 600"
+    }
+  ],
+  "errors": []
+}

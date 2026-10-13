@@ -222,23 +222,37 @@ void validatePosition(const GameState& state) {
 }
 
 GameResult getGameResult(const GameState& state, const std::vector<Move>& legalMoves) {
-    if (legalMoves.empty()) {
-        const auto winner = static_cast<int>(1 - state.activePlayer);
+    // A checkmate already delivered by the final move takes precedence.
+    if (legalMoves.empty() && isInCheck(state, state.activePlayer)) {
         GameResult result;
-        result.winner = winner;
-        const bool check = isInCheck(state, state.activePlayer);
-        result.type = check ? ResultType::Checkmate : ResultType::Stalemate;
-        result.scores[winner] = check ? 1.0 : 0.75;
-        result.scores[state.activePlayer] = check ? 0.0 : 0.25;
+        result.type = ResultType::Checkmate;
+        result.winner = static_cast<int>(1 - state.activePlayer);
+        result.scores[result.winner] = 1.0;
+        result.scores[state.activePlayer] = 0.0;
+        return result;
+    }
+    int remaining[2]{0, 0};
+    bool eligible = true;
+    for (const auto piece : state.occupants) {
+        if (piece.empty() || piece.type == PieceType::King) continue;
+        ++remaining[piece.player];
+        eligible = eligible && (piece.type == PieceType::Bishop ||
+            piece.type == PieceType::Knight || piece.type == PieceType::Rook);
+    }
+    if (remaining[0] == 0 && remaining[1] == 0) return {ResultType::InsufficientMaterial};
+    // HEXARS house rule: this is an early draw, not historical stalemate or
+    // a claim that these pieces cannot mate in Gliński's chess.
+    if (eligible && remaining[0] <= 1 && remaining[1] <= 1) return {ResultType::LowMaterialDraw};
+    if (legalMoves.empty()) {
+        GameResult result;
+        result.type = ResultType::Stalemate;
+        result.winner = static_cast<int>(1 - state.activePlayer);
+        result.scores[result.winner] = 0.75;
+        result.scores[state.activePlayer] = 0.25;
         return result;
     }
     if (std::count(state.positionHistory.begin(), state.positionHistory.end(), positionKey(state)) >= 3) return {ResultType::Repetition};
     if (state.halfmoveClock >= 100) return {ResultType::FiftyMove};
-    int nonKings = 0;
-    for (const auto piece : state.occupants) if (!piece.empty() && piece.type != PieceType::King) ++nonKings;
-    // Ordinary-chess minor-piece shortcuts do not apply: Gliński's mobile king
-    // can support a lone minor in exceptional corner mating positions.
-    if (nonKings == 0) return {ResultType::InsufficientMaterial};
     return {};
 }
 

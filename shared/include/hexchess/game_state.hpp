@@ -19,7 +19,7 @@ struct GameState {
     int ply{0};
     std::vector<std::uint64_t> positionHistory;
 };
-enum class ResultType { Ongoing, Checkmate, Stalemate, Repetition, FiftyMove, InsufficientMaterial };
+enum class ResultType { Ongoing, Checkmate, Stalemate, Repetition, FiftyMove, InsufficientMaterial, LowMaterialDraw };
 struct GameResult {
     ResultType type{ResultType::Ongoing};
     int winner{-1};

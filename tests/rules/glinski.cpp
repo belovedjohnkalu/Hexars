@@ -92,9 +92,38 @@ int main() {
     // A lone bishop can mate in a corner. Do not copy orthodox insufficient-material rules.
     auto minorMate=fixture("f9","f11",1);put(minorMate,"g9",PieceType::Bishop,0);
     require(getGameResult(minorMate).type==ResultType::Checkmate,"Exceptional lone-bishop mate missed");
-    auto minor=fixture();put(minor,"f6",PieceType::Bishop,0);require(getGameResult(minor).type==ResultType::Ongoing,"Minor piece incorrectly declared insufficient");
-    auto draw=fixture();put(draw,"f6",PieceType::Rook,0);draw.halfmoveClock=100;require(getGameResult(draw).type==ResultType::FiftyMove,"Fifty-move draw failed");
+    auto minor=fixture();put(minor,"f6",PieceType::Bishop,0);require(getGameResult(minor).type==ResultType::LowMaterialDraw,"Single bishop must trigger HEXARS house draw");
+    auto draw=fixture();put(draw,"f6",PieceType::Queen,0);draw.halfmoveClock=100;require(getGameResult(draw).type==ResultType::FiftyMove,"Fifty-move draw failed");
     draw.halfmoveClock=0;draw.positionHistory={positionKey(draw),positionKey(draw),positionKey(draw)};require(getGameResult(draw).type==ResultType::Repetition,"Repetition draw failed");
+    // Material thresholds are per player, not a combined board count.
+    for (const auto white : {PieceType::None,PieceType::Bishop,PieceType::Knight,PieceType::Rook}) {
+        for (const auto black : {PieceType::None,PieceType::Bishop,PieceType::Knight,PieceType::Rook}) {
+            auto low=fixture();
+            if(white!=PieceType::None)put(low,"f6",white,0);
+            if(black!=PieceType::None)put(low,"i5",black,1);
+            validatePosition(low);
+            const auto result=getGameResult(low);
+            require(result.type==(white==PieceType::None&&black==PieceType::None?ResultType::InsufficientMaterial:ResultType::LowMaterialDraw),"Low-material combination did not draw");
+            require(result.winner==-1&&result.scores[0]==.5&&result.scores[1]==.5,"Automatic draw must score equally");
+            require(!engine_one::search(low,{10,1,100}).move.has_value(),"Engine searched a completed material draw");
+            const auto legal=generateLegalMoves(low);
+            require(!legal.empty(),"Low-material fixture accidentally has no moves");
+            rejects([&]{applyMove(low,legal.front());},"Move after automatic draw accepted");
+        }
+    }
+    for (const auto blockedType : {PieceType::Pawn,PieceType::Queen}) for(PlayerId owner=0;owner<2;++owner) {
+        auto playable=fixture();put(playable,"f6",blockedType,owner);
+        require(getGameResult(playable).type==ResultType::Ongoing,"Pawn or queen incorrectly triggered early draw");
+    }
+    for(PlayerId owner=0;owner<2;++owner) {
+        auto two=fixture();put(two,"f6",PieceType::Rook,owner);put(two,"f4",PieceType::Knight,owner);
+        require(getGameResult(two).type==ResultType::Ongoing,"Two pieces on one side incorrectly triggered early draw");
+    }
+    auto finalCapture=fixture();put(finalCapture,"f6",PieceType::Rook,0);put(finalCapture,"f7",PieceType::Pawn,1);
+    require(getGameResult(finalCapture).type==ResultType::Ongoing,"Pawn-containing game ended early");
+    const auto reduced=applyMove(finalCapture,move("f6","f7"));
+    require(getGameResult(reduced).type==ResultType::LowMaterialDraw,"Capturing last pawn did not end game automatically");
+    require(getGameResult(promoted).type==ResultType::LowMaterialDraw,"Promotion to lone knight did not trigger draw");
     auto noEp=ep;noEp.enPassantTarget=noEp.enPassantPawn=-1;require(positionKey(ep)!=positionKey(noEp),"Capturable en-passant right omitted from key");
     auto pinnedNoEp=epPin;pinnedNoEp.enPassantTarget=pinnedNoEp.enPassantPawn=-1;require(positionKey(epPin)==positionKey(pinnedNoEp),"Illegal en-passant right affected repetition");
     const auto chosen=engine_one::search(initial,{100,2,2000});require(chosen.move.has_value()&&has(initial,*chosen.move),"Engine returned an illegal move");require(chosen.timeMs<700,"Engine ignored time budget");

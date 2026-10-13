@@ -1,0 +1,102 @@
+{
+  "mode": "after",
+  "checks": [
+    "320px has all 91 cells",
+    "320px no horizontal overflow",
+    "320px cells fit SVG",
+    "320px tightly frames board",
+    "320px board fills available width",
+    "320px tap shows legal hexagon",
+    "320px human move and cloud reply",
+    "390px has all 91 cells",
+    "390px no horizontal overflow",
+    "390px cells fit SVG",
+    "390px tightly frames board",
+    "390px board fills available width",
+    "390px tap shows legal hexagon",
+    "390px human move and cloud reply",
+    "Pass-and-play flips enlarged board",
+    "768px has all 91 cells",
+    "768px no horizontal overflow",
+    "768px cells fit SVG",
+    "768px tightly frames board",
+    "768px board fills available width",
+    "768px tap shows legal hexagon",
+    "768px human move and cloud reply",
+    "1440px has all 91 cells",
+    "1440px no horizontal overflow",
+    "1440px cells fit SVG",
+    "1440px tightly frames board",
+    "1440px board fills available width",
+    "1440px tap shows legal hexagon",
+    "1440px human move and cloud reply",
+    "No browser errors"
+  ],
+  "sizes": [
+    {
+      "width": 320,
+      "height": 740,
+      "svg": {
+        "x": 8,
+        "y": 168.5,
+        "width": 304,
+        "height": 344.1875
+      },
+      "minX": 10.79974365234375,
+      "maxX": 309.20025634765625,
+      "minY": 173.3072509765625,
+      "maxY": 507.8802490234375,
+      "overflow": false,
+      "viewBox": "58 26 484 548"
+    },
+    {
+      "width": 390,
+      "height": 844,
+      "svg": {
+        "x": 8,
+        "y": 168.5,
+        "width": 374,
+        "height": 423.453125
+      },
+      "minX": 11.439252853393555,
+      "maxX": 378.56072998046875,
+      "minY": 174.4143524169922,
+      "maxY": 586.038818359375,
+      "overflow": false,
+      "viewBox": "58 26 484 548"
+    },
+    {
+      "width": 768,
+      "height": 1024,
+      "svg": {
+        "x": 24,
+        "y": 168.5,
+        "width": 720,
+        "height": 815.203125
+      },
+      "minX": 30.621347427368164,
+      "maxX": 737.378662109375,
+      "minY": 179.88589477539062,
+      "maxY": 972.3172607421875,
+      "overflow": false,
+      "viewBox": "58 26 484 548"
+    },
+    {
+      "width": 1440,
+      "height": 1040,
+      "svg": {
+        "x": 154,
+        "y": 207.5,
+        "width": 872,
+        "height": 987.296875
+      },
+      "minX": 162.02122497558594,
+      "maxX": 1017.978759765625,
+      "minY": 221.28952026367188,
+      "maxY": 1181.00732421875,
+      "overflow": false,
+      "viewBox": "58 26 484 548"
+    }
+  ],
+  "errors": []
+}

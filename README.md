@@ -1,4 +1,4 @@
-# HEXARS · cloud edition 0.4
+# HEXARS · cloud edition 0.5
 
 **Play now: https://hexars.floot.app**
 
@@ -23,7 +23,7 @@ The six opponent names are Tactical, Positional, Defensive, Materialist, Unconve
 
 - A native-authoritative 91-cell board with 36 historical starting pieces.
 - All six Gliński piece movements, checks and pins, en passant, four promotion choices, and pawn double advances from any friendly original pawn cell.
-- Checkmate, fractional stalemate (¾–¼), automatic threefold repetition, the fifty-move rule, and bare-kings draws. There is no castling.
+- Checkmate, fractional stalemate (¾–¼), automatic threefold repetition, the fifty-move rule, and automatic material draws. HEXARS now ends in a ½–½ draw when each side has only its king plus at most one bishop, knight, or rook. Pawns, queens, or two pieces on either side prevent this house-rule draw; an already-delivered checkmate wins. There is no castling.
 - Human versus Tactical as White or Black, or a shared two-player board.
 - Saved games, move history, undo, board flipping, coordinates, three themes, and keyboard/touch controls.
 - Tactical: material and positional evaluation, iterative-deepening alpha-beta, capture ordering, bounded quiescence, and time/node limits. Current hosted budget: 750 ms, maximum depth 3 and 30,000 nodes.
