@@ -1,6 +1,6 @@
-# HexChess · cloud edition 0.2
+# HEXARS · cloud edition 0.3
 
-**Play now: https://hexchess-lab-9d7c.floot.app**
+**Play now: https://hexars.floot.app**
 
 Gliński’s hexagonal chess is playable on desktop and mobile. React/TypeScript renders the board; authoritative rules and Engine 1’s search run in a standalone C++ executable on the cloud server. No local engine installation is required to play.
 
@@ -9,18 +9,24 @@ Gliński’s hexagonal chess is playable on desktop and mobile. React/TypeScript
 - iPhone/iPad: open the website in Safari → Share → Add to Home Screen → Add.
 - Android: open it in Chrome → ⋮ → Install app or Add to Home screen.
 
-Use the **Install app** control for instructions or a browser installation prompt where available. The home-screen app uses a standalone window. This is an installable web app, not an App Store or Play Store binary. Internet access is required for cloud play.
+Use **Add to home screen** in Settings for instructions or a browser installation prompt where available. The home-screen app uses a standalone window. This is an installable web app, not an App Store or Play Store binary. Internet access is required for cloud play.
 
-Games are saved in the cloud. **Copy game link** lets you resume on another device; **Open saved game** restores a copied link after installation if browser and app storage are separate. Anyone with that link can control the shared game. There are no user accounts or side-specific multiplayer credentials yet.
+Games are saved in the cloud. **Share game** lets you resume on another device; **Settings → Continue another game** restores a copied link after installation if browser and app storage are separate. Anyone with that link can control the shared game. There are no user accounts or side-specific multiplayer credentials yet.
+
+## Design
+
+HEXARS stands for Hearth, Embers, Xenon, Adobe, Rhombus and Sleek. The interface uses warm off-white surfaces, iPhone-style system type, soft blue-grey hexagons, restrained clay accents and rounded controls. Rules, board colours, opponent profiles, saved games and installation live in simple sheets; developer diagnostics are omitted from player flows. Pieces slide, the board rotates, and sheets fade smoothly, with reduced-motion support. The alternative board palettes are Adobe (warm clay) and Hearth (soft stone).
+
+The six opponent names are Tactical, Positional, Defensive, Materialist, Unconventional and Universal. Only Tactical is playable today. Floot requires a paid plan to remove its hosting badge; the current free-plan deployment retains it. The old address has been replaced; home-screen installations should be re-added from the new address. Existing saved game links can be pasted into Continue another game.
 
 ## Playable now
 
 - A native-authoritative 91-cell board with 36 historical starting pieces.
 - All six Gliński piece movements, checks and pins, en passant, four promotion choices, and pawn double advances from any friendly original pawn cell.
 - Checkmate, fractional stalemate (¾–¼), automatic threefold repetition, the fifty-move rule, and bare-kings draws. There is no castling.
-- Human versus Engine 1 as White or Black, or a shared two-player board.
+- Human versus Tactical as White or Black, or a shared two-player board.
 - Saved games, move history, undo, board flipping, coordinates, three themes, and keyboard/touch controls.
-- Engine 1: material and positional evaluation, iterative-deepening alpha-beta, capture ordering, bounded quiescence, and time/node limits. Current hosted budget: 750 ms, maximum depth 3 and 30,000 nodes.
+- Tactical: material and positional evaluation, iterative-deepening alpha-beta, capture ordering, bounded quiescence, and time/node limits. Current hosted budget: 750 ms, maximum depth 3 and 30,000 nodes.
 
 Engines 2–6 and McCooey, Shafran, Brusky, De Vasa, and Wellisch remain planned. Each future engine will be an independent executable with its own search/evaluation design. Engine identities are provisional; strength has not been rated.
 
@@ -71,6 +77,6 @@ The cloud backend runs on Floot's Node server runtime with Postgres. Cloudflare 
 
 Native tests passed 6,062 assertions over 5,775 random plies, four complete random games, and two complete Engine-1-versus-random games. Twelve native-protocol/manager integration tests and three frontend tests passed, as did TypeScript, Vite build, and CMake/CTest.
 
-Published-site browser checks verified real C++ replies, both human sides, a complete seven-ply historical checkmate, undo, cross-device resume, mobile layout, themes, and installation metadata/instructions. See [progress](docs/progress.md) and [browser check record](docs/screenshots/cloud-qa-result.json). Actual installation on a physical iPhone/Android device is not automated by those checks.
+Published-site browser checks verified real C++ replies, both human sides, a complete seven-ply historical checkmate, undo, cross-device resume, mobile layout, themes, and installation metadata/instructions. The HEXARS redesign passed 38 published browser checks. See [progress](docs/progress.md) and [browser check record](docs/screenshots/hexars-qa.json). Actual installation on a physical iPhone/Android device is not automated by those checks.
 
-`npm run package:source` exports the current Git commit to `artifacts/hexchess-cloud-source.zip`, excluding dependencies and compiled binaries.
+`npm run package:source` exports the current Git commit to `artifacts/hexars-source.zip`, excluding dependencies and compiled binaries.

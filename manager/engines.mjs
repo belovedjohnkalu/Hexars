@@ -8,6 +8,7 @@ const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 export const engines = Object.freeze({
   "engine-1": {
     id: "engine-1",
+    name: "Tactical",
     path: path.join(
       root,
       "engines/engine-1",

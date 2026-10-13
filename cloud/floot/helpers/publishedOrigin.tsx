@@ -1,1 +1,1 @@
-export const publishedOrigin = "https://hexchess-lab-9d7c.floot.app";
+export const publishedOrigin = "https://hexars.floot.app";

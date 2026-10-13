@@ -14,10 +14,20 @@
       background-color var(--animation-duration-fast) ease,
       border-color var(--animation-duration-fast) ease,
       color var(--animation-duration-fast) ease,
-      box-shadow var(--animation-duration-fast) ease;
+      box-shadow var(--animation-duration-fast) ease,
+      transform var(--animation-duration-normal) var(--ease);
     outline: none;
     border: 1px solid transparent;
     position: relative;
+  }
+
+  .button:active:not(:disabled) {
+    transform: scale(0.97);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .button {
+      transition: none;
+    }
   }
 
   /* Focus styles - high contrast for accessibility */
@@ -30,7 +40,7 @@
 
   /* Size variants - ensuring proper touch targets */
   .sm {
-    height: 1.5rem;
+    height: 2.5rem;
     padding: 0 var(--spacing-2);
     font-size: 0.875rem;
   }
@@ -58,7 +68,7 @@
 
   .icon-sm {
     width: 1.5rem;
-    height: 1.5rem;
+    height: 2.5rem;
     padding: 0;
   }
 
@@ -90,7 +100,7 @@
   .lg svg,
   .icon-lg svg {
     width: 1.5rem;
-    height: 1.5rem;
+    height: 2.5rem;
   }
 
   /* Primary - White text on solid brand color (high contrast) */
@@ -229,7 +239,7 @@
   }
 
   /* Dark mode - colors automatically adjust due to CSS variable system */
-    :global(.dark) .primary:focus-visible,
+  :global(.dark) .primary:focus-visible,
   :global(.dark) .outline:focus-visible,
   :global(.dark) .ghost:focus-visible {
     box-shadow:
@@ -237,13 +247,13 @@
       0 0 0 4px var(--primary);
   }
 
-    :global(.dark) .destructive:focus-visible {
+  :global(.dark) .destructive:focus-visible {
     box-shadow:
       0 0 0 2px var(--background),
       0 0 0 4px var(--error);
   }
 
-    :global(.dark) .link:focus-visible {
+  :global(.dark) .link:focus-visible {
     box-shadow: 0 0 0 2px var(--primary);
   }
 }

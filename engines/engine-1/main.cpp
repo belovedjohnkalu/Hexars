@@ -25,7 +25,7 @@ int main() {
     while (std::getline(std::cin, command)) {
         if (!command.empty() && command.back() == '\r') command.pop_back();
         if (command == "ping") std::cout << "pong" << std::endl;
-        else if (command == "id") std::cout << "id EngineOne 0.2" << std::endl;
+        else if (command == "id") std::cout << "id Tactical 0.3" << std::endl;
         else if (command == "board") printBoard();
         else if (command == "quit") break;
         else if (!command.empty() && command.front() == '{') {

@@ -74,7 +74,7 @@ try {
     JSON.stringify(snapshot, null, 2) + "\n",
   );
   console.log(
-    `Built EngineOne and exported ${snapshot.cells.length} cells from shared C++ geometry.`,
+    `Built Tactical and exported ${snapshot.cells.length} cells from shared C++ geometry.`,
   );
   if (process.argv.includes("--test")) {
     mkdirSync(path.join(root, "build"), { recursive: true });

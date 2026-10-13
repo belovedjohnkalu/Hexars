@@ -1,13 +1,13 @@
 @import "../../cloud/floot/base.css";
 :root {
-  font-family: Inter, "Segoe UI", Arial, sans-serif;
-  color: #e8ebe5;
-  background: #151d1a;
+  font-family: var(--font-family-base);
+  color: var(--foreground);
+  background: var(--background);
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  color-scheme: dark;
+  color-scheme: light;
 }
 * {
   box-sizing: border-box;
@@ -43,10 +43,10 @@ button {
 button:focus-visible,
 a:focus-visible,
 select:focus-visible {
-  outline: 2px solid #d8bb87;
+  outline: 2px solid var(--info);
   outline-offset: 4px;
 }
 ::selection {
-  background: #a89369;
-  color: #101713;
+  background: #d8e4f2;
+  color: #26374d;
 }

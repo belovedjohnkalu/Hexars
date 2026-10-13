@@ -2,9 +2,13 @@
   display: block;
   width: 100%;
   max-width: 600px;
-  margin: 0 auto;
+  margin: auto;
   overflow: visible;
-  filter: drop-shadow(0 7px 9px #00000018);
+  filter: drop-shadow(0 12px 20px #5467800b);
+}
+.canvas {
+  transform-origin: 300px 300px;
+  transition: transform 650ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 .cell {
   cursor: pointer;
@@ -15,15 +19,30 @@
 }
 .hex {
   transition:
-    filter var(--animation-duration-fast),
-    stroke-width var(--animation-duration-fast);
+    fill 380ms ease,
+    stroke 220ms ease,
+    stroke-width 220ms ease,
+    filter 220ms ease;
 }
-.cell:hover .hex {
-  filter: brightness(1.07);
+.cell:hover:not([aria-disabled="true"]) .hex {
+  filter: brightness(1.035);
 }
 .cell:focus-visible .hex {
-  stroke: #fff3c9;
-  stroke-width: 3;
+  stroke: #4776a9;
+  stroke-width: 2.8;
+}
+.lastMove,
+.selection {
+  transition: opacity 300ms ease;
+}
+.destination {
+  animation: fadeIn 240ms ease both;
+}
+.piecePosition {
+  transition: transform 420ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+.pieceFacing {
+  transition: transform 650ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 .piece {
   font-family: "Segoe UI Symbol", "DejaVu Sans", serif;
@@ -32,23 +51,48 @@
   user-select: none;
 }
 .white {
-  fill: #fff9eb;
-  stroke: #453d2d;
-  stroke-width: 0.8;
+  fill: #fff;
+  stroke: #4c5e78;
+  stroke-width: 1.1;
 }
 .black {
-  fill: #20271d;
-  stroke: #ebd7b1;
-  stroke-width: 0.4;
+  fill: #2b3c54;
+  stroke: #eff3fa;
+  stroke-width: 0.3;
 }
 .coordinate {
-  font-family: var(--font-family-monospace);
+  font-family: var(--font-family-base);
   font-size: 7px;
-  fill: #423c2a;
+  font-weight: 550;
+  fill: #485a72;
   user-select: none;
 }
+.captured {
+  animation: captureOut 240ms ease forwards;
+}
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+}
+@keyframes captureOut {
+  to {
+    opacity: 0;
+  }
+}
 @media (prefers-reduced-motion: reduce) {
-  .hex {
+  .canvas,
+  .hex,
+  .lastMove,
+  .selection,
+  .piecePosition,
+  .pieceFacing {
     transition: none;
+  }
+  .destination {
+    animation: none;
+  }
+  .captured {
+    display: none;
   }
 }

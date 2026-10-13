@@ -1,20 +1,18 @@
 import { useEffect, useRef, useState } from "react";
 import { Helmet } from "react-helmet";
 import {
+  ArrowUpRight,
   BookOpen,
   Check,
   ChevronRight,
-  Cloud,
-  Cpu,
   Download,
   FlipVertical2,
   FolderOpen,
-  Grid2X2,
   Hexagon,
-  Link2,
+  MoreHorizontal,
   Plus,
   RefreshCw,
-  Smartphone,
+  Share2,
   Undo2,
 } from "lucide-react";
 import { Button } from "../components/Button";
@@ -33,51 +31,55 @@ import type { ChessMove, Hex } from "../endpoints/game_POST.schema";
 import styles from "./_index.module.css";
 
 const key = (hex: Hex) => `${hex.q},${hex.r}`;
-const variants = ["Gliński’s", "McCooey’s", "Shafran’s", "Brusky’s", "De Vasa’s", "Wellisch’s"];
-const engines = [
-  ["Engine 1", "Tactical", "Forcing moves, captures, and combinations."],
-  ["Engine 2", "Positional", "Structure and long-term control."],
-  ["Engine 3", "Defensive", "King safety and threat prevention."],
-  ["Engine 4", "Materialist", "Exchanges and material advantages."],
-  ["Engine 5", "Unconventional", "Less familiar, plausible ideas."],
-  ["Engine 6", "Universal", "Adapting to the position."],
+const playStyles = [
+  ["Tactical", "Looks for clever attacks.", "Ready to play"],
+  ["Positional", "Builds a strong position, move by move.", "Coming later"],
+  ["Defensive", "Keeps the king safe and meets your threats.", "Coming later"],
+  ["Materialist", "Protects pieces and makes good trades.", "Coming later"],
+  ["Unconventional", "Finds surprising ways to play.", "Coming later"],
+  ["Universal", "Changes approach as the game changes.", "Coming later"],
 ];
 
-export default function HexChess() {
+type Sheet = "new" | "settings" | "rules" | "styles" | "install" | "open" | "about" | null;
+export default function HEXARS() {
   const cloud = useCloudGame();
   const app = useInstallApp();
   const data = cloud.data;
   const game = data?.game;
   const [selected, setSelected] = useState<Hex | null>(null);
   const [flipped, setFlipped] = useState(false);
-  const [coordinates, setCoordinates] = useState(false);
-  const [theme, setTheme] = useState("walnut");
-  const [newDialog, setNewDialog] = useState(false);
-  const [rulesDialog, setRulesDialog] = useState(false);
-  const [enginesDialog, setEnginesDialog] = useState(false);
+  const [labels, setLabels] = useState(false);
+  const [theme, setTheme] = useState("xenon");
+  const [sheet, setSheet] = useState<Sheet>(null);
   const [newMode, setNewMode] = useState<"engine" | "two_players">("engine");
   const [newSide, setNewSide] = useState<0 | 1>(0);
   const [promotions, setPromotions] = useState<ChessMove[]>([]);
   const [copied, setCopied] = useState(false);
-  const [copyFallback, setCopyFallback] = useState("");
-  const [installDialog, setInstallDialog] = useState(false);
-  const [openDialog, setOpenDialog] = useState(false);
+  const [shareLink, setShareLink] = useState("");
   const [savedLink, setSavedLink] = useState("");
-  const moveList = useRef<HTMLDivElement>(null);
-  const lastMove = data?.moves.at(-1);
-  const ended = game?.result.status !== undefined && game.result.status !== "ongoing";
+  const lastSheet = useRef<Sheet>(null);
+  if (sheet) lastSheet.current = sheet;
+  const activeSheet = sheet || lastSheet.current;
+  const lastPromotions = useRef<ChessMove[]>([]);
+  if (promotions.length) lastPromotions.current = promotions;
+  const visiblePromotions = promotions.length ? promotions : lastPromotions.current;
+  const copiedTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const ended = !!game && game.result.status !== "ongoing";
   const engineTurn =
     !!data && data.mode === "engine" && game?.activePlayer !== data.humanPlayer && !ended;
-  const canControl = !!game && !ended && !cloud.busy && !cloud.error && !engineTurn;
-  const selectedCell = game?.board.cells.find((cell) => selected && key(cell) === key(selected));
-  const selectedMoves =
-    game?.legalMoves.filter((move) => selected && key(move.from) === key(selected)) || [];
-  const turn = game?.activePlayer === 0 ? "White" : "Black";
+  const canPlay = !!game && !ended && !cloud.busy && !cloud.error && !engineTurn;
   const canUndo =
     !!data?.moves.length &&
     !cloud.busy &&
     (data.mode !== "engine" || data.moves.some((move) => move.player === data.humanPlayer));
+  const selectedMoves =
+    game?.legalMoves.filter((move) => selected && key(move.from) === key(selected)) || [];
+  const lastMove = data?.moves.at(-1);
+  const turn = game?.activePlayer === 0 ? "White" : "Black";
 
+  useEffect(() => {
+    document.title = "HEXARS — Chess, a little different";
+  }, []);
   useEffect(() => {
     setSelected(null);
     setPromotions([]);
@@ -85,674 +87,675 @@ export default function HexChess() {
   useEffect(() => {
     if (data) setFlipped(data.mode === "engine" && data.humanPlayer === 1);
   }, [data?.gameId]);
-  useEffect(() => {
-    if (moveList.current) moveList.current.scrollTop = moveList.current.scrollHeight;
-  }, [data?.moves.length]);
+  useEffect(
+    () => () => {
+      if (copiedTimer.current) clearTimeout(copiedTimer.current);
+    },
+    [],
+  );
 
-  function openNewGame() {
+  function openNew() {
     setNewMode(data?.mode === "two_players" ? "two_players" : "engine");
     setNewSide(data?.humanPlayer === 1 ? 1 : 0);
-    setNewDialog(true);
+    setSheet("new");
   }
   async function startGame() {
-    if (await cloud.newGame(newMode, newSide)) {
-      setNewDialog(false);
-      setSelected(null);
-    }
+    if (await cloud.newGame(newMode, newSide)) setSheet(null);
   }
   function chooseCell(hex: Hex) {
-    if (!game || !canControl) return;
-    if (selected) {
-      const options = selectedMoves.filter((move) => key(move.to) === key(hex));
-      if (options.length > 1) {
-        setPromotions(options);
-        return;
-      }
-      if (options.length === 1) {
-        const move = options[0];
-        setSelected(null);
-        void cloud.play({
-          from: move.from,
-          to: move.to,
-          ...(move.promotion ? { promotion: move.promotion } : {}),
-        });
-        return;
-      }
+    if (!game || !canPlay) return;
+    const options = selectedMoves.filter((move) => key(move.to) === key(hex));
+    if (options.length > 1) {
+      setPromotions(options);
+      return;
+    }
+    if (options.length === 1) {
+      const move = options[0];
+      setSelected(null);
+      void cloud.play({
+        from: move.from,
+        to: move.to,
+        ...(move.promotion ? { promotion: move.promotion } : {}),
+      });
+      return;
     }
     const cell = game.board.cells.find((cell) => key(cell) === key(hex));
     setSelected(cell?.piece?.player === game.activePlayer ? hex : null);
   }
-  async function copyGameLink() {
+  async function shareGame() {
     if (!data) return;
     const url = new URL(publishedOrigin);
     url.hash = new URLSearchParams({ game: data.gameId, key: data.accessToken }).toString();
     try {
       await navigator.clipboard.writeText(url.toString());
       setCopied(true);
-      setCopyFallback("");
-      setTimeout(() => setCopied(false), 2500);
+      setShareLink("");
+      if (copiedTimer.current) clearTimeout(copiedTimer.current);
+      copiedTimer.current = setTimeout(() => setCopied(false), 2500);
     } catch {
-      setCopyFallback(url.toString());
+      setShareLink(url.toString());
     }
   }
-  async function installApp() {
+  async function install() {
     if (app.canPrompt && (await app.install())) return;
-    setInstallDialog(true);
+    setSheet("install");
   }
-  function playerName(player: number) {
-    if (data?.mode === "engine") return player === data.humanPlayer ? "You" : "Engine 1";
-    return player === 0 ? "White" : "Black";
-  }
-  function playerStrip(player: number, bottom = false) {
+  function player(player: number) {
+    const computer = data?.mode === "engine" && player !== data.humanPlayer;
     const active = game?.activePlayer === player && !ended;
-    const bot = data?.mode === "engine" && player !== data.humanPlayer;
     return (
-      <div
-        className={`${styles.playerStrip} ${bottom ? styles.bottomPlayer : ""} ${active ? styles.activePlayer : ""}`}
-      >
+      <div className={styles.player}>
         <span
-          className={`${styles.playerIcon} ${player === 0 ? styles.whitePlayer : styles.blackPlayer}`}
+          className={`${styles.playerPiece} ${player === 0 ? styles.whitePiece : styles.blackPiece}`}
+          aria-hidden="true"
         >
           {player === 0 ? "♔" : "♚"}
         </span>
-        <div>
-          <strong>{playerName(player)}</strong>
-          <span>
-            {player === 0 ? "White" : "Black"}
-            {bot ? " · Tactical engine" : " · Human"}
+        <span>
+          <strong>
+            {computer
+              ? "Tactical"
+              : data?.mode === "engine"
+                ? "You"
+                : player === 0
+                  ? "White"
+                  : "Black"}
+          </strong>
+          <small>{player === 0 ? "White" : "Black"}</small>
+        </span>
+        {active && (
+          <span className={styles.playerTurn}>
+            <i className={styles.turnDot} />
+            {computer && cloud.busy ? "Thinking" : game?.check ? "King in danger" : "To move"}
           </span>
-        </div>
-        <div className={styles.playerStatus}>
-          {active && (
-            <>
-              <span className={styles.liveDot} />
-              {game?.check ? "In check" : bot && cloud.busy ? "Thinking…" : "To move"}
-            </>
-          )}
-        </div>
+        )}
       </div>
     );
   }
-  let gameStatus = !game
-    ? "Loading your game…"
+  let status = !game
+    ? "Opening your game"
     : ended
       ? game.result.status === "draw"
-        ? `Draw · ${game.result.reason}`
+        ? "A draw."
         : game.result.status === "stalemate"
-          ? "Stalemate · ¾–¼ scoring"
-          : `${game.result.winner === 0 ? "White" : "Black"} wins by checkmate`
+          ? "No moves left."
+          : data?.mode === "engine"
+            ? game.result.winner === data.humanPlayer
+              ? "You win."
+              : "Tactical wins."
+            : `${game.result.winner === 0 ? "White" : "Black"} wins.`
       : engineTurn
-        ? cloud.busy
-          ? "Engine 1 is thinking…"
-          : "Engine 1 to move"
+        ? "Tactical is thinking"
         : data?.mode === "engine"
-          ? "Your turn"
-          : `${turn} to move`;
-  if (game?.check && !ended && !engineTurn) gameStatus += " · Check";
+          ? "Your move."
+          : `${turn} to move.`;
+  let hint = !game
+    ? "Just a moment."
+    : ended
+      ? game.result.status === "checkmate"
+        ? "Checkmate. The king has no safe escape."
+        : game.result.status === "stalemate"
+          ? "The player with no moves earns ¼; the other earns ¾."
+          : game.result.reason === "Threefold repetition"
+            ? "The same position appeared three times."
+            : game.result.reason === "Fifty-move rule"
+              ? "No pawn move or capture for fifty turns."
+              : "Neither side can win from here."
+      : game.check && !engineTurn
+        ? "Your king is in danger. Move to safety."
+        : engineTurn
+          ? "Finding the next move."
+          : selected
+            ? `Choose a marked cell. ${new Set(selectedMoves.map((move) => key(move.to))).size} possible moves.`
+            : "Tap a piece. Then tap a marked cell.";
+  const titles: Record<Exclude<Sheet, null>, string> = {
+    new: "A new game",
+    settings: "Make it yours",
+    rules: "How to play",
+    styles: "Choose your opponent",
+    install: "HEXARS, one tap away",
+    open: "Continue a game",
+    about: "A different kind of chess",
+  };
+  const descriptions: Record<Exclude<Sheet, null>, string> = {
+    new: "Choose who to play with.",
+    settings: "A few small things, just how you like them.",
+    rules: "Familiar pieces. A board with more possibilities.",
+    styles: "Six different ways to think about a move.",
+    install: "Add HEXARS to your home screen.",
+    open: "Paste a game link to pick up where you left off.",
+    about: "A warm place to play. A little spark of possibility.",
+  };
 
   return (
-    <div className={styles.shell}>
+    <div className={styles.app}>
       <Helmet>
-        <title>HexChess — Play Gliński’s Chess</title>
+        <title>HEXARS — Chess, a little different</title>
         <meta
           name="description"
-          content="Play hexagonal chess on any device. A native C++ engine and authoritative Gliński rules run on the cloud."
+          content="A quiet place to play hexagonal chess. Play on your phone, share a game, and make yourself at home."
         />
-        <meta name="theme-color" content="#151d1a" />
+        <meta name="theme-color" content="#f6f5f3" />
         <meta name="mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
-        <meta name="apple-mobile-web-app-title" content="HexChess" />
-        <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+        <meta name="apple-mobile-web-app-title" content="HEXARS" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="default" />
         <link rel="manifest" href="/manifest.json" />
         <link
           rel="apple-touch-icon"
-          href="/_cdn/static/97d3aa85-40f0-40fc-8c10-0293615d6eec-hexchess-icon-180.png"
+          href="/_cdn/static/8ab008bb-f192-4902-aa0c-91a99f716694-hexars-180.png"
         />
-        <link
-          rel="icon"
-          href="/_cdn/static/6f089aab-9d56-4cdd-8ca3-c5a76c4c6f0f-hexchess-icon-192.png"
-        />
+        <link rel="icon" href="/_cdn/static/e53c8055-4775-4794-9f7a-4c0a3483d95f-hexars-192.png" />
       </Helmet>
-      <aside className={styles.sidebar}>
-        <div className={styles.brand}>
-          <Hexagon size={30} />
-          <span>
-            HEX<span>CHESS</span>
+      <header className={styles.header}>
+        <button
+          className={styles.brand}
+          onClick={() => setSheet("about")}
+          aria-label="About HEXARS"
+        >
+          <span className={styles.mark}>
+            <Hexagon size={24} strokeWidth={1.5} />
+            <i />
           </span>
-        </div>
-        <p className={styles.sidebarKicker}>BEYOND THE SQUARE</p>
-        <nav aria-label="Main navigation">
-          <button
-            className={`${styles.navButton} ${styles.activeNav}`}
-            aria-label="Play chess"
-            aria-current="page"
-            onClick={() =>
-              document.getElementById("chess-board")?.scrollIntoView({ behavior: "smooth" })
-            }
-          >
-            <Hexagon size={19} />
-            <span>Play</span>
-          </button>
-          <button
-            className={styles.navButton}
-            aria-label="Read Gliński rules"
-            onClick={() => setRulesDialog(true)}
-          >
-            <BookOpen size={19} />
+          HEXARS
+        </button>
+        <div className={styles.headerActions}>
+          <button onClick={() => setSheet("rules")} aria-label="How to play">
+            <BookOpen size={18} />
             <span>How to play</span>
           </button>
           <button
-            className={styles.navButton}
-            aria-label="View six engines"
-            onClick={() => setEnginesDialog(true)}
+            className={styles.more}
+            onClick={() => setSheet("settings")}
+            aria-label="Settings"
           >
-            <Cpu size={19} />
-            <span>Engines</span>
-            <small>6</small>
+            <MoreHorizontal size={22} />
           </button>
-        </nav>
-        <div className={styles.sidebarQuote}>
-          <small>A DIFFERENT KIND OF CHESS</small>
-          <p>
-            New geometry.
-            <br />
-            Different possibilities.
-          </p>
-          <div aria-hidden="true">⬡ ⬡ ⬡</div>
         </div>
-        <div className={styles.sidebarBottom}>
-          <Cloud size={15} />
-          <span>Cloud edition · v0.2</span>
-          <p>
-            Open a link.
-            <br />
-            Make your move.
-          </p>
+      </header>
+      <main className={styles.main}>
+        <div className={styles.heading}>
+          <p>Gliński’s chess</p>
+          <h1 role="status">
+            <span className={styles.statusWord} key={status}>
+              {status}
+            </span>
+            {(!game || engineTurn) && (
+              <span className={styles.thinking} aria-hidden="true">
+                <i />
+                <i />
+                <i />
+              </span>
+            )}
+          </h1>
         </div>
-      </aside>
-
-      <div className={styles.mainArea}>
-        <header className={styles.topbar}>
-          <span>
-            Play <i>/</i> <strong>Gliński’s Chess</strong>
-          </span>
-          <div className={styles.cloudBadge}>
-            <span className={styles.liveDot} />
-            <Cloud size={14} />
-            Cloud hosted
+        {cloud.error && (
+          <div className={styles.error} role="alert">
+            <span>{cloud.error}</span>
+            <button disabled={cloud.busy} onClick={() => void cloud.refresh()}>
+              Try again
+              <RefreshCw size={14} />
+            </button>
           </div>
-        </header>
-        <main className={styles.main}>
-          <div className={styles.pageHeading}>
-            <div>
-              <small>SIX VARIANTS. SIX INDEPENDENT ENGINES.</small>
-              <h1>
-                Chess takes a new shape<span>.</span>
-              </h1>
-              <p>Your board, anywhere. Your engine, on the cloud.</p>
+        )}
+        <div className={styles.playArea}>
+          <section className={styles.boardArea} aria-label="Chess game">
+            {player(flipped ? 0 : 1)}
+            <div className={styles.boardStage}>
+              {game ? (
+                <CloudBoard
+                  game={game}
+                  selected={selected}
+                  onCell={chooseCell}
+                  flipped={flipped}
+                  coordinates={labels}
+                  theme={theme}
+                  lastMove={lastMove}
+                  disabled={!canPlay}
+                />
+              ) : (
+                <div className={styles.loading}>
+                  <Hexagon size={54} strokeWidth={1} />
+                  <span>Getting your board ready</span>
+                </div>
+              )}
             </div>
-            <div className={styles.headingActions}>
-              {!app.installed && (
-                <Button
-                  variant="outline"
-                  className={styles.shareButton}
-                  onClick={() => void installApp()}
+            {player(flipped ? 1 : 0)}
+            <p className={styles.hint} aria-live="polite">
+              {hint}
+            </p>
+            {ended && game?.result.status === "stalemate" && (
+              <p className={styles.scores}>
+                White {game.result.scores[0]} · Black {game.result.scores[1]}
+              </p>
+            )}
+          </section>
+          <aside className={styles.controls} aria-label="Game controls">
+            <div className={styles.opponent}>
+              <span className={styles.eyebrow}>
+                {data?.mode === "two_players" ? "PLAYING TOGETHER" : "YOUR OPPONENT"}
+              </span>
+              <button
+                onClick={() => (data?.mode === "two_players" ? openNew() : setSheet("styles"))}
+              >
+                <span>{data?.mode === "two_players" ? "A friend" : "Tactical"}</span>
+                <ChevronRight size={17} />
+              </button>
+              <p>
+                {data?.mode === "two_players"
+                  ? "Share your game link to play together."
+                  : "Looks for clever attacks."}
+              </p>
+            </div>
+            <Button className={styles.newButton} disabled={cloud.busy} onClick={openNew}>
+              <Plus size={17} />
+              New game
+            </Button>
+            <div className={styles.quickActions}>
+              <button disabled={!canUndo} onClick={() => void cloud.undo()}>
+                <Undo2 size={18} />
+                <span>Undo</span>
+              </button>
+              <button disabled={!data || cloud.busy} onClick={() => void shareGame()}>
+                <span className={styles.shareIcon}>
+                  {copied ? <Check size={18} /> : <Share2 size={18} />}
+                </span>
+                <span>{copied ? "Copied" : "Share game"}</span>
+              </button>
+              <button
+                aria-label="Flip board"
+                aria-pressed={flipped}
+                onClick={() => setFlipped(!flipped)}
+              >
+                <FlipVertical2 size={18} />
+                <span>Flip</span>
+              </button>
+            </div>
+            {shareLink && (
+              <label className={styles.field}>
+                Copy this game link
+                <input
+                  readOnly
+                  value={shareLink}
+                  aria-label="Game link to copy"
+                  onFocus={(event) => event.target.select()}
+                />
+              </label>
+            )}
+            <details className={styles.moves}>
+              <summary>
+                Moves{" "}
+                <span>
+                  {data?.moves.length || 0}
+                  <ChevronRight size={14} />
+                </span>
+              </summary>
+              <div aria-label="Played moves">
+                {data?.moves.length ? (
+                  Array.from({ length: Math.ceil(data.moves.length / 2) }, (_, index) => (
+                    <div className={styles.moveRow} key={index}>
+                      <span>{index + 1}.</span>
+                      <span>{data.moves[index * 2]?.notation || "—"}</span>
+                      <span>{data.moves[index * 2 + 1]?.notation || "—"}</span>
+                    </div>
+                  ))
+                ) : (
+                  <p>Your moves will appear here.</p>
+                )}
+              </div>
+            </details>
+            <p className={styles.saved}>
+              {data ? (
+                <>
+                  <span className={styles.savedDot} />
+                  Saved. Come back anytime.
+                </>
+              ) : (
+                "Your game saves as you play."
+              )}
+            </p>
+          </aside>
+        </div>
+      </main>
+      <footer className={styles.footer}>
+        <span>Make yourself at home.</span>
+        <button onClick={() => (app.installed ? setSheet("about") : void install())}>
+          {app.installed ? "About HEXARS" : "Add to home screen"}
+          <ArrowUpRight size={13} />
+        </button>
+      </footer>
+
+      <Dialog
+        open={sheet !== null}
+        onOpenChange={(open) => {
+          if (!open) setSheet(null);
+        }}
+      >
+        <DialogContent key={activeSheet || "none"} className={styles.sheet}>
+          <DialogHeader>
+            <DialogTitle>{activeSheet ? titles[activeSheet] : "HEXARS"}</DialogTitle>
+            <DialogDescription>{activeSheet ? descriptions[activeSheet] : ""}</DialogDescription>
+          </DialogHeader>
+          {activeSheet === "new" && (
+            <div className={styles.sheetBody}>
+              <div className={styles.segmented} role="group" aria-label="Who to play">
+                <button aria-pressed={newMode === "engine"} onClick={() => setNewMode("engine")}>
+                  Play Tactical
+                </button>
+                <button
+                  aria-pressed={newMode === "two_players"}
+                  onClick={() => setNewMode("two_players")}
                 >
-                  <Download size={15} />
-                  Install app
-                </Button>
+                  Play a friend
+                </button>
+              </div>
+              {newMode === "engine" ? (
+                <fieldset className={styles.sideChoice}>
+                  <legend>Your pieces</legend>
+                  <label>
+                    <input
+                      type="radio"
+                      name="side"
+                      value="white"
+                      checked={newSide === 0}
+                      onChange={() => setNewSide(0)}
+                    />
+                    <span>♔</span>
+                    <strong>White</strong>
+                    <small>You go first</small>
+                  </label>
+                  <label>
+                    <input
+                      type="radio"
+                      name="side"
+                      value="black"
+                      checked={newSide === 1}
+                      onChange={() => setNewSide(1)}
+                    />
+                    <span>♚</span>
+                    <strong>Black</strong>
+                    <small>Tactical goes first</small>
+                  </label>
+                </fieldset>
+              ) : (
+                <p className={styles.sheetNote}>
+                  Take turns on this device, or share the game link with a friend. Anyone with the
+                  link can move either colour.
+                </p>
               )}
               <Button
-                variant="outline"
-                className={styles.shareButton}
-                onClick={copyGameLink}
-                disabled={!data}
-              >
-                <Link2 size={15} />
-                {copied ? "Game link copied" : "Copy game link"}
-              </Button>
-            </div>
-          </div>
-          {copyFallback && (
-            <label className={styles.copyFallback}>
-              Select and copy your saved game link
-              <input
-                value={copyFallback}
-                readOnly
-                onFocus={(event) => event.target.select()}
-                aria-label="Saved game link"
-              />
-            </label>
-          )}
-          {cloud.error && (
-            <div className={styles.errorBanner} role="alert">
-              <span>{cloud.error}</span>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => void cloud.refresh()}
+                className={styles.fullButton}
                 disabled={cloud.busy}
+                onClick={() => void startGame()}
               >
-                <RefreshCw size={14} />
-                Retry / refresh
+                {cloud.busy ? "Getting ready…" : "Start playing"}
+                <ChevronRight size={16} />
               </Button>
             </div>
           )}
-
-          <div className={styles.workspace}>
-            <section className={styles.boardPanel} aria-labelledby="board-heading" id="chess-board">
-              <div className={styles.boardHeading}>
-                <div>
-                  <small>VARIANT 01</small>
-                  <h2 id="board-heading">Gliński’s Chess</h2>
-                </div>
-                <span className={styles.modeBadge}>
-                  {data?.mode === "two_players" ? "Two players" : "You vs Engine 1"}
-                </span>
-              </div>
-              <div className={styles.boardMeta}>
-                91 cells <span>·</span> 2 players <span>·</span> 3 cell colours
-              </div>
-              {playerStrip(flipped ? 0 : 1)}
-              <div className={styles.boardStage}>
-                {game ? (
-                  <CloudBoard
-                    game={game}
-                    selected={selected}
-                    onCell={chooseCell}
-                    flipped={flipped}
-                    coordinates={coordinates}
-                    theme={theme}
-                    lastMove={lastMove}
-                    disabled={!canControl}
-                  />
-                ) : (
-                  <div className={styles.loadingBoard}>
-                    <Hexagon size={65} />
-                    <span>
-                      {cloud.error
-                        ? "Ready when the cloud connection returns"
-                        : "Opening your cloud game…"}
-                    </span>
-                    <small>The rules and engine run on the server.</small>
-                  </div>
-                )}
-              </div>
-              {playerStrip(flipped ? 1 : 0, true)}
-              <div className={styles.boardToolbar}>
-                <button
-                  aria-label="Flip board"
-                  aria-pressed={flipped}
-                  onClick={() => setFlipped(!flipped)}
+          {activeSheet === "settings" && (
+            <div className={styles.sheetBody}>
+              <div className={styles.settingRow}>
+                <label htmlFor="board-colour">Board colour</label>
+                <select
+                  id="board-colour"
+                  value={theme}
+                  onChange={(event) => setTheme(event.target.value)}
                 >
-                  <FlipVertical2 size={17} />
-                  <span>Flip board</span>
-                </button>
-                <button
-                  aria-label="Show coordinates"
-                  aria-pressed={coordinates}
-                  onClick={() => setCoordinates(!coordinates)}
-                >
-                  <Grid2X2 size={17} />
-                  <span>Coordinates</span>
-                </button>
-                <label>
-                  <span>Theme</span>
-                  <select
-                    aria-label="Board theme"
-                    value={theme}
-                    onChange={(event) => setTheme(event.target.value)}
-                  >
-                    <option value="walnut">Walnut</option>
-                    <option value="forest">Forest</option>
-                    <option value="slate">Slate</option>
-                  </select>
+                  <option value="xenon">Xenon · cool blue</option>
+                  <option value="adobe">Adobe · warm clay</option>
+                  <option value="hearth">Hearth · soft stone</option>
+                </select>
+              </div>
+              <div className={styles.settingRow}>
+                <label htmlFor="board-labels">
+                  Show board labels<small>Letters and numbers for each cell</small>
                 </label>
+                <input
+                  id="board-labels"
+                  className={styles.toggle}
+                  type="checkbox"
+                  role="switch"
+                  checked={labels}
+                  onChange={(event) => setLabels(event.target.checked)}
+                />
               </div>
-              <div className={styles.boardHint} aria-live="polite">
-                {ended
-                  ? "Start a new game, or undo to explore another continuation."
-                  : engineTurn
-                    ? "Engine 1 calculates its move on the cloud server."
-                    : selectedCell?.piece
-                      ? `${selectedCell.piece.type[0].toUpperCase() + selectedCell.piece.type.slice(1)} on ${selectedCell.notation} · ${new Set(selectedMoves.map((move) => key(move.to))).size} legal destinations`
-                      : "Select a piece to see its legal moves. Tap a marked cell to move."}
-              </div>
-            </section>
-
-            <aside className={styles.rightColumn} aria-label="Game controls and move history">
-              <section className={styles.card}>
-                <div className={styles.cardHeading}>
-                  <h2>Your game</h2>
+              <div className={styles.settingLinks}>
+                <button onClick={() => setSheet("styles")}>
                   <Hexagon size={18} />
-                </div>
-                <div className={`${styles.turnStatus} ${ended ? styles.ended : ""}`} role="status">
-                  <span className={styles.liveDot} />
-                  {gameStatus}
-                </div>
-                {ended && game?.result.status !== "draw" && (
-                  <div className={styles.scores}>
-                    <span>
-                      White <strong>{game?.result.scores[0]}</strong>
-                    </span>
-                    <span>
-                      Black <strong>{game?.result.scores[1]}</strong>
-                    </span>
-                  </div>
-                )}
-                <div className={styles.infoRows}>
-                  <div>
-                    <span>Mode</span>
-                    <strong>
-                      {data?.mode === "two_players"
-                        ? "Two players · shared game"
-                        : "Human vs engine"}
-                    </strong>
-                  </div>
-                  <div>
-                    <span>{data?.mode === "two_players" ? "Turn" : "Your side"}</span>
-                    <strong>
-                      {data?.mode === "two_players"
-                        ? turn
-                        : data?.humanPlayer === 1
-                          ? "Black"
-                          : "White"}
-                    </strong>
-                  </div>
-                  <div>
-                    <span>Moves played</span>
-                    <strong>{data?.moves.length || 0}</strong>
-                  </div>
-                </div>
-                <Button
-                  className={styles.newGameButton}
-                  onClick={openNewGame}
-                  disabled={cloud.busy}
-                >
-                  <Plus size={16} />
-                  New game
+                  <span>Playing styles</span>
                   <ChevronRight size={16} />
-                </Button>
-                <div className={styles.secondaryActions}>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => void cloud.undo()}
-                    disabled={!canUndo}
-                  >
-                    <Undo2 size={14} />
-                    Undo
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => void cloud.refresh()}
-                    disabled={cloud.busy || !data}
-                    aria-label="Refresh saved game"
-                  >
-                    <RefreshCw size={14} />
-                    Refresh
-                  </Button>
-                </div>
-                <p className={styles.savedNote}>
-                  <Cloud size={13} />
-                  {data
-                    ? "Saved in the cloud. Reopen with your game link."
-                    : "No local engine installation required."}
-                </p>
-                <Button
-                  variant="link"
-                  size="sm"
-                  className={styles.openGameButton}
-                  onClick={() => setOpenDialog(true)}
-                  disabled={cloud.busy}
+                </button>
+                <button disabled={cloud.busy} onClick={() => setSheet("open")}>
+                  <FolderOpen size={18} />
+                  <span>Continue another game</span>
+                  <ChevronRight size={16} />
+                </button>
+                <button
+                  disabled={cloud.busy || !data}
+                  onClick={() => {
+                    void cloud.refresh();
+                    setSheet(null);
+                  }}
                 >
-                  <FolderOpen size={13} />
-                  Open saved game
-                </Button>
-              </section>
-
-              <section className={styles.card}>
-                <div className={styles.cardHeading}>
-                  <h2>Engine 1</h2>
-                  <Cpu size={18} />
-                </div>
-                <label className={styles.fieldLabel} htmlFor="engine-choice">
-                  CHESS ENGINE
-                </label>
-                <select id="engine-choice" className={styles.fullSelect} defaultValue="engine-1">
-                  <option value="engine-1">Engine 1 · Tactical</option>
-                  {engines.slice(1).map(([name, style]) => (
-                    <option disabled key={name}>
-                      {name} · {style} (planned)
-                    </option>
-                  ))}
-                </select>
-                <div className={styles.engineIdentity}>
-                  <span>
-                    <Cpu size={24} />
-                  </span>
-                  <div>
-                    <strong>{data?.engine || "Connecting engine…"}</strong>
-                    <small>Native C++ · cloud server</small>
-                  </div>
-                  <Check size={15} className={data ? styles.engineReady : styles.engineWaiting} />
-                </div>
-                <div className={styles.searchStats}>
-                  <div>
-                    <span>Search depth</span>
-                    <strong>{data?.lastSearch?.depth ?? "—"}</strong>
-                  </div>
-                  <div>
-                    <span>Positions searched</span>
-                    <strong>
-                      {data?.lastSearch ? data.lastSearch.nodes.toLocaleString() : "—"}
-                    </strong>
-                  </div>
-                  <div>
-                    <span>Calculation time</span>
-                    <strong>{data?.lastSearch ? `${data.lastSearch.timeMs} ms` : "—"}</strong>
-                  </div>
-                </div>
-                <p className={styles.engineNote}>
-                  One independent executable. Shared rules; its own search and evaluation.
-                </p>
-              </section>
-
-              <section className={`${styles.card} ${styles.movesCard}`}>
-                <div className={styles.cardHeading}>
-                  <h2>Move history</h2>
-                  <small>WHITE / BLACK</small>
-                </div>
-                <div className={styles.moveList} ref={moveList} aria-label="Played moves">
-                  {data?.moves.length ? (
-                    Array.from({ length: Math.ceil(data.moves.length / 2) }, (_, index) => (
-                      <div key={index} className={styles.moveRow}>
-                        <span>{index + 1}.</span>
-                        <strong>{data.moves[index * 2]?.notation || "—"}</strong>
-                        <strong>{data.moves[index * 2 + 1]?.notation || "—"}</strong>
-                      </div>
-                    ))
-                  ) : (
-                    <p>
-                      Every game starts with a possibility.
-                      <br />
-                      Make the first move.
-                    </p>
-                  )}
-                </div>
-              </section>
-              <section className={styles.variantNote}>
-                <span>GLIŃSKI FIRST</span>
-                <p>The other five historical variants are planned.</p>
-                <select aria-label="Chess variant" defaultValue="glinski">
-                  <option value="glinski">Gliński’s Chess · playable</option>
-                  {variants.slice(1).map((name) => (
-                    <option key={name} disabled>
-                      {name} (planned)
-                    </option>
-                  ))}
-                </select>
-              </section>
-            </aside>
-          </div>
-          <footer className={styles.footer}>
-            <span>
-              <Cloud size={12} />
-              Cloud engine. Home-screen access.
-            </span>
-            <button onClick={() => setInstallDialog(true)}>
-              <Smartphone size={12} />
-              {app.installed ? "App installed" : "Add to home screen"}
-            </button>
-            <button onClick={() => setRulesDialog(true)}>
-              Learn the rules
-              <BookOpen size={12} />
-            </button>
-            <span>HexChess / 0.2</span>
-          </footer>
-        </main>
-      </div>
-
-      <Dialog open={newDialog} onOpenChange={setNewDialog}>
-        <DialogContent className={styles.dialog}>
-          <DialogHeader>
-            <DialogTitle>Start a new game</DialogTitle>
-            <DialogDescription>
-              Play Gliński’s Chess against Engine 1, or share a board with another player.
-            </DialogDescription>
-          </DialogHeader>
-          <label className={styles.dialogField}>
-            Game mode
-            <select
-              aria-label="New game mode"
-              value={newMode}
-              onChange={(event) => setNewMode(event.target.value as "engine" | "two_players")}
-            >
-              <option value="engine">You vs Engine 1</option>
-              <option value="two_players">Two players · shared game</option>
-            </select>
-          </label>
-          {newMode === "engine" && (
-            <label className={styles.dialogField}>
-              Your side
-              <select
-                aria-label="Your side"
-                value={newSide}
-                onChange={(event) => setNewSide(Number(event.target.value) as 0 | 1)}
-              >
-                <option value={0}>White · you move first</option>
-                <option value={1}>Black · engine moves first</option>
-              </select>
-            </label>
+                  <RefreshCw size={18} />
+                  <span>Refresh game</span>
+                  <ChevronRight size={16} />
+                </button>
+                {!app.installed && (
+                  <button onClick={() => void install()}>
+                    <Download size={18} />
+                    <span>Add to home screen</span>
+                    <ChevronRight size={16} />
+                  </button>
+                )}
+                <button onClick={() => setSheet("about")}>
+                  <span className={styles.miniMark}>◇</span>
+                  <span>About HEXARS</span>
+                  <ChevronRight size={16} />
+                </button>
+              </div>
+            </div>
           )}
-          <Button
-            onClick={() => void startGame()}
-            disabled={cloud.busy}
-            className={styles.dialogStart}
-          >
-            {cloud.busy ? "Opening game…" : "Start game"}
-            <ChevronRight size={16} />
-          </Button>
-          {cloud.error && <p className={styles.dialogError}>{cloud.error}</p>}
-        </DialogContent>
-      </Dialog>
-
-      <Dialog open={installDialog} onOpenChange={setInstallDialog}>
-        <DialogContent className={styles.dialog}>
-          <DialogHeader>
-            <DialogTitle>HexChess on your home screen</DialogTitle>
-            <DialogDescription>
-              Launch from an app icon, in its own window. The C++ engine stays on the cloud.
-            </DialogDescription>
-          </DialogHeader>
-          <div className={styles.installSteps}>
-            {app.platform === "ios" ? (
-              <>
-                <strong>iPhone or iPad</strong>
-                <p>
-                  Open HexChess in Safari. Tap <b>Share</b>, choose <b>Add to Home Screen</b>, then
-                  tap <b>Add</b>.
-                </p>
-              </>
-            ) : app.platform === "android" ? (
-              <>
-                <strong>Android</strong>
-                <p>
-                  In Chrome, open the <b>⋮ menu</b> and choose <b>Install app</b> or{" "}
-                  <b>Add to Home screen</b>.
-                </p>
-              </>
-            ) : (
-              <>
-                <strong>Phone</strong>
-                <p>
-                  iPhone: Safari → Share → Add to Home Screen.
+          {activeSheet === "styles" && (
+            <div className={styles.stylesList}>
+              {playStyles.map(([name, description, availability], index) => (
+                <button
+                  key={name}
+                  disabled={index !== 0}
+                  onClick={() => setSheet(null)}
+                  className={index === 0 ? styles.selectedStyle : ""}
+                >
+                  <span>
+                    <strong>{name}</strong>
+                    <small>{description}</small>
+                  </span>
+                  <span>{index === 0 ? <Check size={19} /> : <small>{availability}</small>}</span>
+                </button>
+              ))}
+              <p className={styles.sheetNote}>
+                Tactical is ready now. Five more personalities are on the way.
+              </p>
+            </div>
+          )}
+          {activeSheet === "install" && (
+            <div className={styles.sheetBody}>
+              <div className={styles.appPreview}>
+                <span className={styles.appIcon}>
+                  <Hexagon size={38} strokeWidth={1.3} />
+                  <i />
+                </span>
+                <strong>HEXARS</strong>
+              </div>
+              {app.platform === "ios" ? (
+                <ol className={styles.instructions}>
+                  <li>
+                    Open this page in <strong>Safari</strong>.
+                  </li>
+                  <li>
+                    Tap <strong>Share</strong> → <strong>Add to Home Screen</strong>.
+                  </li>
+                  <li>
+                    Tap <strong>Add</strong>. Your new icon is ready.
+                  </li>
+                </ol>
+              ) : app.platform === "android" ? (
+                <ol className={styles.instructions}>
+                  <li>
+                    Open this page in <strong>Chrome</strong>.
+                  </li>
+                  <li>
+                    Tap the <strong>⋮ menu</strong> → <strong>Install app</strong>.
+                  </li>
+                  <li>
+                    If you see <strong>Add to Home screen</strong>, choose that.
+                  </li>
+                </ol>
+              ) : (
+                <p className={styles.sheetNote}>
+                  <strong>iPhone:</strong> Safari → Share → Add to Home Screen.
                   <br />
-                  Android: Chrome → ⋮ → Install app.
+                  <br />
+                  <strong>Android:</strong> Chrome → ⋮ → Install app.
+                  <br />
+                  <br />
+                  <strong>Computer:</strong> use your browser’s install button.
                 </p>
-                <strong>Computer</strong>
-                <p>Use the install icon in the address bar, or your browser’s install-app menu.</p>
-              </>
-            )}
-            <p className={styles.installNote}>
-              Cloud play uses an internet connection. To continue an existing game after
-              installation, use <b>Open saved game</b> with its copied game link.
+              )}
+              <p className={styles.sheetNote}>
+                You’ll need an internet connection to play. To bring a game into the app, copy its
+                link, then choose Settings → Continue another game.
+              </p>
+            </div>
+          )}
+          {activeSheet === "open" && (
+            <div className={styles.sheetBody}>
+              <label className={styles.field}>
+                Game link
+                <input
+                  type="url"
+                  aria-label="Saved game link"
+                  placeholder="Paste your game link"
+                  value={savedLink}
+                  onChange={(event) => setSavedLink(event.target.value)}
+                />
+              </label>
+              <Button
+                className={styles.fullButton}
+                disabled={cloud.busy || !savedLink.trim()}
+                onClick={async () => {
+                  if (await cloud.openGame(savedLink)) {
+                    setSheet(null);
+                    setSavedLink("");
+                  }
+                }}
+              >
+                {cloud.busy ? "Opening…" : "Continue playing"}
+                <ChevronRight size={16} />
+              </Button>
+            </div>
+          )}
+          {activeSheet === "rules" && (
+            <div className={styles.rules}>
+              <p>
+                Tap one of your pieces. The marked cells show where it can go. Tap a mark to move.
+              </p>
+              <div>
+                <strong>Rook</strong>
+                <p>Moves in straight lines through the sides of the hexagons.</p>
+              </div>
+              <div>
+                <strong>Bishop</strong>
+                <p>Moves through the corners. It stays on the same colour.</p>
+              </div>
+              <div>
+                <strong>Queen & king</strong>
+                <p>The queen combines both paths. The king takes one step along either.</p>
+              </div>
+              <div>
+                <strong>Knight</strong>
+                <p>Jumps over pieces. Select it to see its twelve possible directions.</p>
+              </div>
+              <div>
+                <strong>Pawn</strong>
+                <p>
+                  Moves forward and captures to either forward side. From any of your original pawn
+                  cells, it can move two steps if the path is clear. At the far edge, choose a new
+                  piece.
+                </p>
+              </div>
+              <div>
+                <strong>Protect your king</strong>
+                <p>
+                  Check means the king is threatened. Checkmate means there’s no safe escape.
+                  There’s no castling—the usual king-and-rook move—in this game.
+                </p>
+              </div>
+              <details>
+                <summary>A few special rules</summary>
+                <p>
+                  En passant: after a pawn moves two steps, an enemy pawn may capture it as if it
+                  moved one. This is only available on the very next turn.
+                </p>
+                <p>
+                  Stalemate: if a player has no legal moves but the king is safe, they earn ¼ point
+                  and the other player earns ¾. Repeated positions and fifty turns without a pawn
+                  move or capture are draws.
+                </p>
+              </details>
+            </div>
+          )}
+          {activeSheet === "about" && (
+            <div className={styles.sheetBody}>
+              <div className={styles.aboutWords}>
+                {["Hearth", "Embers", "Xenon", "Adobe", "Rhombus", "Sleek"].map((word, index) => (
+                  <span key={word}>
+                    <b>{word[0]}</b>
+                    {word.slice(1)}
+                    <small>
+                      {
+                        [
+                          "A place to feel at home.",
+                          "A spark of curiosity.",
+                          "A cool, clear perspective.",
+                          "Warmth in the details.",
+                          "A different angle.",
+                          "Less, beautifully.",
+                        ][index]
+                      }
+                    </small>
+                  </span>
+                ))}
+              </div>
+              <p className={styles.sheetNote}>
+                HEXARS begins with Gliński’s hexagonal chess. Five more chess variants and five more
+                playing styles are on the way.
+              </p>
+            </div>
+          )}
+          {(activeSheet === "new" || activeSheet === "open") && cloud.error && (
+            <p className={styles.sheetError} role="alert">
+              {cloud.error}
             </p>
-          </div>
+          )}
         </DialogContent>
       </Dialog>
-
-      <Dialog open={openDialog} onOpenChange={setOpenDialog}>
-        <DialogContent className={styles.dialog}>
-          <DialogHeader>
-            <DialogTitle>Open a saved game</DialogTitle>
-            <DialogDescription>
-              Paste the game link from another device or from before installing the app.
-            </DialogDescription>
-          </DialogHeader>
-          <label className={styles.dialogField}>
-            Saved game link
-            <input
-              aria-label="Saved game link to open"
-              type="url"
-              value={savedLink}
-              onChange={(event) => setSavedLink(event.target.value)}
-              placeholder="https://…#game=…"
-            />
-          </label>
-          <Button
-            className={styles.dialogStart}
-            disabled={cloud.busy || !savedLink.trim()}
-            onClick={async () => {
-              if (await cloud.openGame(savedLink)) {
-                setOpenDialog(false);
-                setSavedLink("");
-              }
-            }}
-          >
-            {cloud.busy ? "Opening game…" : "Open game"}
-            <FolderOpen size={15} />
-          </Button>
-          {cloud.error && <p className={styles.dialogError}>{cloud.error}</p>}
-        </DialogContent>
-      </Dialog>
-
       <Dialog
         open={promotions.length > 0}
         onOpenChange={(open) => {
           if (!open) setPromotions([]);
         }}
       >
-        <DialogContent className={styles.dialog}>
+        <DialogContent className={styles.sheet}>
           <DialogHeader>
-            <DialogTitle>Promote your pawn</DialogTitle>
-            <DialogDescription>Choose the piece for your pawn’s final cell.</DialogDescription>
+            <DialogTitle>Choose a new piece</DialogTitle>
+            <DialogDescription>
+              Your pawn has reached the far edge. What would you like it to become?
+            </DialogDescription>
           </DialogHeader>
-          <div className={styles.promotionOptions}>
-            {promotions.map((move) => (
-              <Button
-                variant="outline"
+          <div className={styles.promotion}>
+            {visiblePromotions.map((move) => (
+              <button
                 key={move.promotion}
                 onClick={() => {
                   setPromotions([]);
@@ -761,90 +764,8 @@ export default function HexChess() {
                 }}
               >
                 <span>{{ queen: "♕", rook: "♖", bishop: "♗", knight: "♘" }[move.promotion!]}</span>
-                {move.promotion}
-              </Button>
-            ))}
-          </div>
-        </DialogContent>
-      </Dialog>
-
-      <Dialog open={rulesDialog} onOpenChange={setRulesDialog}>
-        <DialogContent className={`${styles.dialog} ${styles.rulesDialog}`}>
-          <DialogHeader>
-            <DialogTitle>A familiar game. A new geometry.</DialogTitle>
-            <DialogDescription>
-              Gliński’s Chess uses 91 cells, three colours, and three bishops per side.
-            </DialogDescription>
-          </DialogHeader>
-          <ol className={styles.rulesList}>
-            <li>
-              <strong>Select, then move.</strong> Select a piece and choose a highlighted legal
-              cell. The server checks every move.
-            </li>
-            <li>
-              <strong>Rooks follow edges; bishops follow vertices.</strong> The queen combines them.
-              The king takes one step in either pattern, and the knight has twelve possible jumps.
-            </li>
-            <li>
-              <strong>Pawns advance straight ahead.</strong> They capture through a forward side
-              edge. Any friendly pawn starting cell permits a clear two-cell advance—even after a
-              capture onto it.
-            </li>
-            <li>
-              <strong>En passant and promotion apply.</strong> En passant is available immediately
-              after the qualifying double advance. Promotion offers queen, rook, bishop, or knight.
-            </li>
-            <li>
-              <strong>No castling.</strong> Protect the king using the hexagonal board’s twelve
-              directions.
-            </li>
-            <li>
-              <strong>Stalemate scores ¾–¼.</strong> The player delivering it receives ¾. Repetition
-              and the fifty-move rule are handled automatically here.
-            </li>
-          </ol>
-          <p className={styles.rulesSources}>
-            Historical references:{" "}
-            <a
-              href="https://en.wikipedia.org/wiki/Hexagonal_chess#Gli%C5%84ski's_hexagonal_chess"
-              target="_blank"
-              rel="noreferrer"
-            >
-              Gliński overview
-            </a>{" "}
-            ·{" "}
-            <a
-              href="https://www.chessvariants.org/hexagonal.dir/hexagonal.html"
-              target="_blank"
-              rel="noreferrer"
-            >
-              Chess Variants
-            </a>
-          </p>
-        </DialogContent>
-      </Dialog>
-
-      <Dialog open={enginesDialog} onOpenChange={setEnginesDialog}>
-        <DialogContent className={`${styles.dialog} ${styles.engineDialog}`}>
-          <DialogHeader>
-            <DialogTitle>Six ways to think</DialogTitle>
-            <DialogDescription>
-              Each will be its own executable with an independent strategy. Engine 1 is playable
-              now; the other identities are provisional.
-            </DialogDescription>
-          </DialogHeader>
-          <div className={styles.engineProfiles}>
-            {engines.map(([name, style, detail], index) => (
-              <div key={name}>
-                <span>0{index + 1}</span>
-                <div>
-                  <strong>
-                    {name} · {style}
-                  </strong>
-                  <p>{detail}</p>
-                </div>
-                <small>{index === 0 ? "Playable" : "Planned"}</small>
-              </div>
+                <strong>{move.promotion![0].toUpperCase() + move.promotion!.slice(1)}</strong>
+              </button>
             ))}
           </div>
         </DialogContent>

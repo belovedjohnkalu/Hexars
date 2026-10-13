@@ -94,9 +94,9 @@ export function useCloudGame() {
           }
         }
         setError(
-          failure instanceof Error
-            ? failure.message
-            : "The cloud game could not be loaded. Please retry.",
+          failure && typeof failure === "object" && "status" in failure && failure.status === 404
+            ? "We couldn’t find that game. Check the link, or start a new game."
+            : "We couldn’t finish that request. Check your connection and try again.",
         );
         return false;
       } finally {
@@ -188,12 +188,12 @@ export function useCloudGame() {
       try {
         const hash = new URLSearchParams(new URL(link.trim()).hash.slice(1));
         const saved = { gameId: hash.get("game"), accessToken: hash.get("key") };
-        if (!validCredentials(saved)) throw new Error("Paste a saved HexChess game link.");
+        if (!validCredentials(saved)) throw new Error("Paste a saved HEXARS game link.");
         engineKey.current = "";
         credentials.current = saved;
         return perform({ action: "get", ...saved });
       } catch {
-        setError("Paste a complete saved HexChess game link.");
+        setError("Paste a complete saved HEXARS game link.");
         return Promise.resolve(false);
       }
     },

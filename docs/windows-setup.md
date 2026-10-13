@@ -1,6 +1,6 @@
 # Windows development · VS Code and PowerShell
 
-To play, open https://hexchess-lab-9d7c.floot.app. No compiler or local manager is required. These instructions are for developing/testing the source.
+To play, open https://hexars.floot.app. No compiler or local manager is required. These instructions are for developing/testing the source.
 
 ## 1. Install prerequisites
 
@@ -31,7 +31,7 @@ Node.js must be 22.12+; a current LTS is recommended. If `pacman` fails, confirm
 
 ## 2. Open the source
 
-Extract `hexchess-cloud-source.zip` into a new directory. Do not overwrite an existing project. For example, extracting into your home directory creates `$HOME\hexchess`.
+Extract `hexars-source.zip` into a new directory. Do not overwrite an existing project. For example, extracting into your home directory creates `$HOME\hexchess`.
 
 ```powershell
 Set-Location "$HOME\hexchess"
@@ -58,7 +58,7 @@ If PowerShell blocks `npm.ps1`, use `npm.cmd` for these commands; no global exec
 "id" | & ".\engines\engine-1\engine-one.exe"
 ```
 
-Expect `pong` and `id EngineOne 0.2`. A missing MSYS2 DLL can be resolved for the current terminal by adding its runtime directory:
+Expect `pong` and `id Tactical 0.3`. A missing MSYS2 DLL can be resolved for the current terminal by adding its runtime directory:
 
 ```powershell
 $env:Path = "C:\msys64\ucrt64\bin;$env:Path"
@@ -80,7 +80,7 @@ Terminal 2, from the same project root:
 npm run dev
 ```
 
-For local diagnostics, open **http://localhost:5173/?foundation**. The website should show a 91-cell board, **Engine responding**, **EngineOne 0.2**, and the measured round trip. The board can be inspected with mouse or keyboard. This diagnostic view covers communication and geometry. The default website uses the hosted cloud game.
+For local diagnostics, open **http://localhost:5173/?foundation**. The website should show a 91-cell board, **Engine responding**, **Tactical 0.3**, and the measured round trip. The board can be inspected with mouse or keyboard. This diagnostic view covers communication and geometry. The default website uses the hosted cloud game.
 
 Use Ctrl+C in each terminal to stop its service. The manager asks the engine to quit and terminates it if it fails to shut down.
 

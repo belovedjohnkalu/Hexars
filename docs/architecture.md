@@ -6,7 +6,7 @@ Desktop browser / phone home-screen app
     ↕ HTTPS game API, correlated mutations
 Cloud Node backend + Postgres saved games
     ↕ versioned newline-delimited JSON over stdin/stdout
-Native EngineOne 0.2 process
+Native Tactical 0.3 process
     → shared authoritative C++ Gliński rules
     → independent Engine 1 search/evaluation
 ```

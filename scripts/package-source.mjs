@@ -5,7 +5,7 @@ import { fileURLToPath } from "node:url";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const directory = path.join(root, "artifacts");
-const archive = path.join(directory, "hexchess-cloud-source.zip");
+const archive = path.join(directory, "hexars-source.zip");
 mkdirSync(directory, { recursive: true });
 const child = spawn(
   "git",

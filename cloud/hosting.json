@@ -2,9 +2,12 @@
   "provider": "Floot",
   "project_id": "9d7c0966-4648-49f3-845c-b4a9296d0358",
   "execution": "native-cpp-linux-x64-on-cloud-server",
-  "engine_asset": "/_cdn/static/d6fd7736-3e49-4257-b8ec-406b2a087730-engine-one-0.2-linux-x64.bin",
-  "engine_sha256": "ed24406875fce7ffa86f883fd89454f058322926cf6cf92bff85921d4592fedc",
-  "published_url": "https://hexchess-lab-9d7c.floot.app",
+  "engine_asset": "/_cdn/static/81e55cc8-bdd6-4e05-ac6c-63e39688b9be-tactical-0.3-linux-x64.bin",
+  "engine_sha256": "df94baf0f8192be31822cb3b8067df0376d32f746b5546ca1ab69ee789ffca3b",
+  "published_url": "https://hexars.floot.app",
   "installable_web_app": true,
-  "native_app_store_package": false
+  "native_app_store_package": false,
+  "previous_url": "https://hexchess-lab-9d7c.floot.app",
+  "app_name": "HEXARS",
+  "engine_name": "Tactical"
 }

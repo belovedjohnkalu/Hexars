@@ -7,8 +7,8 @@ import { createInterface } from "node:readline";
 import type { Json } from "./schema";
 import type { ChessMove, GameView, SearchDiagnostics } from "../endpoints/game_POST.schema";
 
-const asset = "/_cdn/static/d6fd7736-3e49-4257-b8ec-406b2a087730-engine-one-0.2-linux-x64.bin";
-const checksum = "ed24406875fce7ffa86f883fd89454f058322926cf6cf92bff85921d4592fedc";
+const asset = "/_cdn/static/81e55cc8-bdd6-4e05-ac6c-63e39688b9be-tactical-0.3-linux-x64.bin";
+const checksum = "df94baf0f8192be31822cb3b8067df0376d32f746b5546ca1ab69ee789ffca3b";
 type Options = {
   action: "new" | "inspect" | "move" | "search";
   origin: string;

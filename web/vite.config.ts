@@ -14,8 +14,8 @@ export default defineConfig({
     strictPort: true,
     proxy: {
       "/engine": { target: "ws://127.0.0.1:8765", ws: true },
-      "/_api": { target: "https://hexchess-lab-9d7c.floot.app", changeOrigin: true, agent: cloudAgent },
-      "/_cdn": { target: "https://hexchess-lab-9d7c.floot.app", changeOrigin: true, agent: cloudAgent },
+      "/_api": { target: "https://hexars.floot.app", changeOrigin: true, agent: cloudAgent },
+      "/_cdn": { target: "https://hexars.floot.app", changeOrigin: true, agent: cloudAgent },
     },
   },
 });
