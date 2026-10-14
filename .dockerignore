@@ -1,0 +1,10 @@
+**/node_modules
+**/dist
+**/build
+**/.env
+**/.env.*
+.git
+artifacts
+.tools
+engines/engine-*/engine-one
+engines/engine-*/*.exe

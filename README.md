@@ -1,8 +1,8 @@
-# HEXARS · cloud edition 0.7
+# HEXARS · cloud edition
 
 **Play now: https://hexars.floot.app**
 
-The live 0.8.1 release includes Gliński and McCooey. Development release 0.9.0 also implements Shafran; publication is pending the Floot build-limit reset at 05:00 UTC on 2026-10-14. React/TypeScript renders the board; authoritative rules and Engine 1’s search run in a standalone C++ executable on the cloud server. No local engine installation is required to play.
+The existing live release includes Gliński and McCooey. The development source also implements Shafran and is being migrated to GitHub, Cloudflare Pages and Supabase. The new stack has not been published yet. React/TypeScript renders the board; authoritative rules and Engine 1’s search run in a standalone C++ executable on the cloud server. No local engine installation is required to play.
 
 ## Install on your phone
 
@@ -41,7 +41,7 @@ npm ci
 npm run dev
 ```
 
-Open http://localhost:5173. The default Vite website uses the same playable frontend as the published app and proxies its API and icons to the live cloud backend. The backend remains hosted; Vite is not a local replacement for its database/server runtime.
+Open http://localhost:5173. The Vite website now uses the independent frontend in `web/src`. To play locally, configure Supabase and run the native API alongside Vite; follow [the cloud migration guide](docs/cloud-migration.md). The old Floot site remains online during preparation. Frontend assets and font files are served locally.
 
 To compile and check native code:
 
@@ -58,7 +58,11 @@ The original local manager is retained as a diagnostic foundation. Start `npm ru
 ## Source layout
 
 ```text
-cloud/floot/                Published React UI, API endpoints, native process bridge, DB types
+cloud/floot/                Preserved legacy release and rollback source
+api/                        Node API, Supabase storage, fixed native executable bridge
+supabase/migrations/        Postgres schema and owner RLS
+cloud/engine-worker/        Optional Cloudflare container hosting with cf
+.github/workflows/          Native, web, API and container checks
 cloud/icons/                Home-screen icons
 cloud/schema.sql            Cloud game-table schema
 web/                        Vite entry point for playable UI and optional foundation diagnostics

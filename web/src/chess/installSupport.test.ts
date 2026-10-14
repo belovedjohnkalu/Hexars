@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { supportsManualHomeScreen } from "../../../cloud/floot/helpers/installSupport";
+import { supportsManualHomeScreen } from "../helpers/installSupport";
 const iphone = "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 Version/17.0 Mobile/15E148 Safari/604.1";
 const ipad = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15) AppleWebKit/605.1.15 Version/17.0 Safari/605.1.15";
 const environment = { secureContext: true, topLevel: true, maxTouchPoints: 5 };

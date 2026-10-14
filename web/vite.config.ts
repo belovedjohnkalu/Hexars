@@ -1,12 +1,12 @@
-import { defineConfig } from "vite";
+import { defineConfig, loadEnv } from "vite";
 import react from "@vitejs/plugin-react";
-import { HttpsProxyAgent } from "https-proxy-agent";
 
-// Cloud workspaces may require outbound traffic to use their configured proxy.
-const outboundProxy = process.env.HTTPS_PROXY || process.env.https_proxy;
-const cloudAgent = outboundProxy ? new HttpsProxyAgent(outboundProxy) : undefined;
 
-export default defineConfig({
+
+
+export default defineConfig(({ mode }) => {
+const config = loadEnv(mode, process.cwd(), "HEXARS_");
+return {
   plugins: [react()],
   server: {
     host: "127.0.0.1",
@@ -14,8 +14,11 @@ export default defineConfig({
     strictPort: true,
     proxy: {
       "/engine": { target: "ws://127.0.0.1:8765", ws: true },
-      "/_api": { target: "https://hexars.floot.app", changeOrigin: true, agent: cloudAgent },
-      "/_cdn": { target: "https://hexars.floot.app", changeOrigin: true, agent: cloudAgent },
+      "/api": {
+        target: config.HEXARS_DEV_API || "http://127.0.0.1:8080", changeOrigin: true,
+        headers: config.HEXARS_GATEWAY_SECRET ? { "X-Hexars-Gateway": config.HEXARS_GATEWAY_SECRET } : {},
+      },
     },
   },
+};
 });

@@ -98,3 +98,30 @@ Published minimal-release checks: 44 passed. Verified the three-page UI, native 
 ## Shafran and smoother turns — pending publication
 
 Development release 0.9.0 implements tap-again deselection, piece translation before pass-and-play rotation, the homepage logo and native Shafran gameplay. Four CTest targets, 22 protocol/manager checks, six frontend checks, 31 focused local browser checks and 44 local browser regressions passed. Previous production Gliński and McCooey snapshots preserved state IDs. Native Tactical 0.7 was uploaded, but further Floot writes were refused by the daily action allowance. The site remains 0.8.1. See [release status and resume steps](release-0.9.md). Suggested essentials were not implemented.
+
+
+## Cloudflare / GitHub / Supabase migration preparation · 0.10.0
+
+Cloudflare CLI OAuth, GitHub account access and Supabase organization access are
+verified. The chosen Supabase organization is ION (Free). GitHub repository
+creation was rejected by the connected integration’s permissions; Supabase’s
+required cost-check tool is unavailable. Neither a new repository nor a database
+project was created, and nothing has been pushed or deployed to the new stack.
+
+The frontend now lives independently in `web/src`, uses local Inter/icons, and
+communicates with a fixed Pages API proxy. A native Node API validates Supabase
+sessions, delegates rules/search to the bundled C++ executable, and saves through
+a Supabase store with atomic version checks. The SQL migration gives owners read
+access and reserves mutations to the server. Guest sign-in is automatic only
+when opening a game. Container hosting, CI, a web manifest and a network-only
+service worker are prepared. The existing Floot site and game rows are preserved.
+
+Verification: web/API builds and Cloudflare configuration typecheck passed;
+15 API/proxy tests, 22 native protocol/manager tests and six frontend tests passed.
+The API tests use real C++ processes and an in-memory test store, not a live
+Supabase database. Ten local browser checks passed with mocked Supabase sessions
+and real native game validation: previews without sign-up, one guest sign-up,
+deselection, a legal move, reload, saved state, Inter and a 390px viewport.
+The non-root Docker image built and served native 91/91/70-cell previews and
+health successfully. No live Supabase authentication/database integration or
+Cloudflare deployment is claimed. See [migration setup](cloud-migration.md).

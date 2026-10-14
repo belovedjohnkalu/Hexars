@@ -1,11 +1,13 @@
 {
   "name": "hexchess",
-  "version": "0.9.0",
+  "version": "0.10.0",
   "private": true,
   "type": "module",
   "workspaces": [
     "web",
-    "manager"
+    "manager",
+    "api",
+    "cloud/engine-worker"
   ],
   "engines": {
     "node": ">=22.12.0"
@@ -19,7 +21,12 @@
     "test:native": "node scripts/build-native.mjs --test",
     "test:manager": "node --test tests/engine/*.test.mjs",
     "test:web": "npm run test --workspace web",
-    "test": "npm run test:native && npm run test:manager && npm run test:web",
-    "package:source": "node scripts/package-source.mjs"
+    "test": "npm run test:native && npm run test:manager && npm run test:web && npm run test:api",
+    "package:source": "node scripts/package-source.mjs",
+    "build:web": "npm run build --workspace web",
+    "build:api": "npm run build --workspace @hexars/api",
+    "api": "npm run dev --workspace @hexars/api",
+    "test:api": "npm run test --workspace @hexars/api",
+    "check:engine-worker": "npm run build --workspace @hexars/engine-worker"
   }
 }

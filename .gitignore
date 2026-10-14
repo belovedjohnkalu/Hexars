@@ -11,3 +11,6 @@
 engines/engine-*/engine-one
 artifacts/
 .tools/
+.dev.vars
+.dev.vars.*
+.cloudflare/

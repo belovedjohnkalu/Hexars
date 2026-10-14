@@ -1,4 +1,4 @@
-@import "../../cloud/floot/base.css";
+@import "./base.css";
 :root {
   font-family: var(--font-family-base);
   color: var(--foreground);

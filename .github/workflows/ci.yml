@@ -1,0 +1,26 @@
+name: Verify HEXARS
+on:
+  push:
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+      - run: cmake --build build --parallel 2
+      - run: ctest --test-dir build --output-on-failure
+      - run: npm run test:manager
+      - run: npm run test:web
+      - run: npm run test:api
+      - run: npm run build:web
+      - run: npm run build:api
+      - run: npm run check:engine-worker
+      - run: docker build -f api/Dockerfile -t hexars-api:ci .
