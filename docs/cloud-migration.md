@@ -11,7 +11,8 @@ verified. `cloud/floot` is preserved for rollback and data migration.
 
 ## Provider connections
 
-- Cloudflare CLI OAuth is confirmed. Its login is separate from Codex MCP OAuth.
+- Cloudflare CLI OAuth is confirmed. No paid account subscriptions are active.
+  Its login is separate from Codex MCP OAuth.
 - GitHub and Supabase account connections are confirmed. ION is the selected
   Supabase organization (Free plan). Its existing HEXARS project is healthy:
   `qnsqurxygwqlegfihhzh`. Never request or paste secrets in chat.
@@ -19,8 +20,8 @@ verified. `cloud/floot` is preserved for rollback and data migration.
   selected. Publish only after the checks in `.github/workflows/ci.yml` pass.
 
 The user-provided repository `belovedjohnkalu/Hexars` is now available and public.
-The connected account can read and write it. Preserve its initial commit and
-existing files when publishing the source. Source history was checked for
+The source has been uploaded to `main`, preserving the repository’s initial
+commit. GitHub verification run 38518846691 passed. Source history was checked for
 embedded game capability keys and provider secret keys before uploading.
 
 The existing HEXARS Supabase project is now available. The game schema and

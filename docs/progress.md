@@ -138,3 +138,19 @@ security advisor has no findings. No game data has been imported or discarded.
 The local frontend is configured with the project URL and public publishable key.
 Anonymous sign-in is disabled and still needs enabling in Supabase’s Auth settings.
 Server secrets, GitHub upload and the new website deployment remain pending.
+
+
+### GitHub source published and CI verified
+
+Source and its history were uploaded to
+https://github.com/belovedjohnkalu/Hexars on `main`, preserving the repository’s
+initial commit. GitHub verification run 38518846691 passed, including all four
+CMake/CTest targets, protocol/manager tests, frontend tests, API tests, builds,
+Cloudflare configuration typecheck and Docker build. The repository supplied by
+the user is public. Source history was scanned for literal game-capability and
+provider secret keys before publication; no matches were found.
+
+Cloudflare CLI reports no paid account subscriptions. The prepared native-engine
+container needs Workers Paid, and the API still needs its Supabase server key in
+the hosting secret store. Anonymous Auth is disabled in Supabase. The new website
+has not been deployed. The existing Floot app remains online.
