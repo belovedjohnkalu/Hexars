@@ -1,0 +1,2 @@
+# Hexars
+Hexagonal Chess
