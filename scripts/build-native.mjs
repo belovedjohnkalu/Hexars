@@ -61,6 +61,7 @@ try {
     "shared/src/hex_rules.cpp",
     "shared/variants/glinski.cpp",
     "shared/variants/mccooey.cpp",
+    "shared/variants/shafran.cpp",
     "shared/variants/variant.cpp",
   ].map((source) => path.join(root, source));
   const engineSources = [
@@ -103,6 +104,11 @@ try {
     await run(compiler, [...flags, path.join(root, "tests/rules/mccooey.cpp"),
       path.join(root, "engines/engine-1/search.cpp"), ...ruleSources, "-o", mccooeyOutput]);
     process.stdout.write(await run(mccooeyOutput, []));
+  }
+  if (process.argv.includes("--test")) {
+    const output = path.join(root, "build", windows ? "shafran-tests.exe" : "shafran-tests");
+    await run(compiler, [...flags, path.join(root,"tests/rules/shafran.cpp"), path.join(root,"engines/engine-1/search.cpp"), ...ruleSources, "-o",output]);
+    process.stdout.write(await run(output, []));
   }
   if (process.argv.includes("--cloud")) {
     if (process.platform !== "linux" || process.arch !== "x64")

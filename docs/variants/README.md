@@ -1,6 +1,6 @@
 # Historical rules references
 
-Gliński is implemented and tested; see [Gliński conventions](glinski.md). The remaining variants require independent research before implementation.
+Gliński, McCooey and Shafran are implemented and tested. See [Gliński conventions](glinski.md), [McCooey](mccooey.md), and [Shafran](shafran.md). The remaining variants require independent research before implementation.
 
 Starting references:
 

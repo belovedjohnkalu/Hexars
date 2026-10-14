@@ -12,11 +12,16 @@ const VariantDefinition& variantDefinition(const VariantId& id) {
         {{{{{1,1},{-1,2}}}, {{{-1,-1},{1,-2}}}}}, false};
     if (id == "glinski") return glinski;
     if (id == "mccooey") return mccooey;
+    static const VariantDefinition shafran{
+        "shafran", shafranCells, shafranIndex, shafranNotation, shafranPawnStart, true,
+        {{{{{1,1},{-1,2}}}, {{{-1,-1},{1,-2}}}}}, false, shafranPawnInitialAdvance, true};
+    if (id == "shafran") return shafran;
     throw std::invalid_argument("Variant not implemented");
 }
 GameState createGame(const VariantId& variant) {
     if (variant == "glinski") return createGlinskiStartingPosition();
     if (variant == "mccooey") return createMcCooeyStartingPosition();
+    if (variant == "shafran") return createShafranStartingPosition();
     throw std::invalid_argument("Variant not implemented");
 }
 }

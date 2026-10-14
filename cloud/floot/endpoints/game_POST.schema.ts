@@ -1,7 +1,7 @@
 import { z } from "zod";
 import superjson from "superjson";
 
-export const variantSchema = z.enum(["glinski", "mccooey"]);
+export const variantSchema = z.enum(["glinski", "mccooey", "shafran"]);
 export type VariantId = z.infer<typeof variantSchema>;
 
 const hex = z

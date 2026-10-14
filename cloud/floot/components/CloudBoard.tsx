@@ -82,18 +82,19 @@ export function CloudBoard({
       .map((move) => key(move.to)),
   );
   const sign = flipped ? -1 : 1;
+  const centerY = game.variant === "shafran" ? 300+14*Math.sqrt(3) : 300;
   return (
     <svg
-      viewBox="58 26 484 548"
+      viewBox={game.variant === "shafran" ? `100 ${centerY-250} 400 500` : "58 26 484 548"}
       className={`${styles.board} ${className || ""}`}
       role={preview ? "img" : "group"}
       aria-hidden={preview || undefined}
-      aria-label={`${game.variant === "mccooey" ? "McCooey" : "Gliński"} hexagonal chessboard`}
+      aria-label={`${({ glinski: "Gliński", mccooey: "McCooey", shafran: "Shafran" })[game.variant]} hexagonal chessboard`}
     >
       <title>Your hexagonal chessboard. Select a piece to see where it can move.</title>
       <g
         className={styles.canvas}
-        style={{ transform: flipped ? "rotate(180deg)" : "rotate(0deg)" }}
+        style={{ transformOrigin: `300px ${centerY}px`, transform: flipped ? "rotate(180deg)" : "rotate(0deg)" }}
       >
         {game.board.cells.map((cell) => {
           const x = 300 + 42 * cell.q,
@@ -262,6 +263,7 @@ export function CloudBoard({
         {visuals.pieces.map((piece) => (
           <g
             key={piece.id}
+            data-piece-id={piece.id}
             data-piece={piece.type}
             data-player={piece.player}
             className={styles.piecePosition}

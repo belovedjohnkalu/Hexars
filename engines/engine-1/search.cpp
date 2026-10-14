@@ -36,7 +36,7 @@ struct Search {
     int ordering(const GameState& state, const Move& move) {
         const auto source = state.occupants[variantDefinition(state.variant).index(move.from)];
         const auto target = state.occupants[variantDefinition(state.variant).index(move.to)];
-        const bool enPassant = source.type == PieceType::Pawn && variantDefinition(state.variant).index(move.to) == state.enPassantTarget;
+        const bool enPassant = isEnPassantCapture(state,move);
         return (target.empty() ? (enPassant ? 1000 : 0) : values[static_cast<int>(target.type)] * 10 - values[static_cast<int>(source.type)]) +
                (move.promotion == PieceType::None ? 0 : values[static_cast<int>(move.promotion)] * 10);
     }

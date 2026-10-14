@@ -2,7 +2,7 @@
 
 **Play now: https://hexars.floot.app**
 
-Gliński’s and McCooey’s hexagonal chess are playable on desktop and mobile. React/TypeScript renders the board; authoritative rules and Engine 1’s search run in a standalone C++ executable on the cloud server. No local engine installation is required to play.
+The live 0.8.1 release includes Gliński and McCooey. Development release 0.9.0 also implements Shafran; publication is pending the Floot build-limit reset at 05:00 UTC on 2026-10-14. React/TypeScript renders the board; authoritative rules and Engine 1’s search run in a standalone C++ executable on the cloud server. No local engine installation is required to play.
 
 ## Install on your phone
 
@@ -15,7 +15,7 @@ Games are saved in the cloud. **Share game** lets you resume on another device; 
 
 ## Design
 
-HEXARS stands for Hearth, Embers, Xenon, Adobe, Rhombus and Sleek. The dark interface now uses warm charcoal, olive and ivory with large system type and very few words. The homepage shows both authoritative starting positions; choose a board to open `/glinski` or `/mccooey`. Each game has just Home and one menu. Undo, sharing, play mode, side selection, new game and concise rules stay inside that menu.
+HEXARS stands for Hearth, Embers, Xenon, Adobe, Rhombus and Sleek. The dark interface uses blue and black with frosted controls, self-hosted Inter typography and very few words. The development homepage shows three authoritative starting positions; choose a board to open `/glinski`, `/mccooey` or `/shafran`. Each game has just Home and one menu. Undo, sharing, play mode, side selection, new game and concise rules stay inside that menu.
 
 Pieces are original flat Staunton silhouettes, identical for both sides except their fill/outline colors. The board has no beveled depth, gradients or drop shadows. Inset outlines are 4 SVG units thick: mint moves, amber captures, coral checks, pale-yellow selection and bright ivory previous moves. Both endpoints of an opponent’s last move remain fully bright. Smooth movement and rotation respect reduced motion.
 
@@ -25,12 +25,12 @@ Tactical is the current cloud engine. The other five independent engines remain 
 
 - A native-authoritative 91-cell board: 36 starting pieces in Gliński, 32 in McCooey. Choose its starting board on the homepage.
 - All six piece movements, checks and pins, en passant and four promotion choices. Gliński pawns regain a double advance from friendly original pawn cells. McCooey pawns capture along bishop diagonals and double-advance only on their first move, excluding the center pawn.
-- Checkmate, Gliński fractional stalemate (¾–¼), McCooey equal stalemate (½–½), automatic threefold repetition, the fifty-move rule, and automatic material draws. HEXARS now ends in a ½–½ draw when each side has only its king plus at most one bishop, knight, or rook. Pawns, queens, or two pieces on either side prevent this house-rule draw; an already-delivered checkmate wins. There is no castling.
+- Checkmate, Gliński fractional stalemate (¾–¼), McCooey equal stalemate (½–½), automatic threefold repetition, the fifty-move rule, and automatic material draws. HEXARS now ends in a ½–½ draw when each side has only its king plus at most one bishop, knight, or rook. Pawns, queens, or two pieces on either side prevent this house-rule draw; an already-delivered checkmate wins. Gliński and McCooey have no castling; Shafran supports short and long castling on both flanks.
 - Human versus Tactical as White or Black, or a shared two-player board.
 - Separate saved games per variant, shared links, undo, automatic pass-and-play orientation, promotion and keyboard/touch controls.
 - Tactical: material and positional evaluation, iterative-deepening alpha-beta, capture ordering, bounded quiescence, and time/node limits. Current hosted budget: 750 ms, maximum depth 3 and 30,000 nodes.
 
-Engines 2–6 and Shafran, Brusky, De Vasa, and Wellisch remain planned. Each future engine will be an independent executable with its own search/evaluation design. Engine identities are provisional; strength has not been rated.
+Engines 2–6, Brusky, De Vasa and Wellisch remain planned. Each future engine will be an independent executable with its own search/evaluation design. Engine identities are provisional; strength has not been rated.
 
 ## Work on the source
 
@@ -67,7 +67,7 @@ engines/engine-1/            C++ protocol, search, evaluation
 engines/engine-2/ … engine-6/ Reserved independent engines
 shared/include/hexchess/     Geometry, pieces, moves, game state, rules
 shared/src/                 Geometry and shared authoritative variant rules
-shared/variants/            Gliński and McCooey setups and rule descriptors
+shared/variants/            Gliński, McCooey and Shafran setups and rule descriptors
 shared/protocol/            Versioned native and cloud contracts
 tests/                      Native rules, games, protocol, manager, frontend checks
 docs/                       Architecture, rules references, progress, browser evidence
@@ -84,3 +84,5 @@ Published-site browser checks verified real C++ replies, both human sides, a com
 `npm run package:source` exports the current Git commit to `artifacts/hexars-source.zip`, excluding dependencies and compiled binaries.
 
 Browser install offers are retained in an app-level FIFO queue across page changes and menu closure. Only an explicit attempt that obtains the browser choice consumes an offer. Failed attempts stay available for retry. This concerns the website’s browser events; the app cannot alter ChatGPT’s message queue.
+
+Development 0.9.0: tap a selected piece again to deselect. Moves glide for 480ms before the pass-and-play board rotates for 560ms; reduced motion skips the delay. The homepage places the existing HEXARS logo beside the wordmark. Shafran includes its 70-cell board, 36-piece setup, oblique a–i notation, pawn initial advances up to three hexagons, both crossed en-passant cells, four castling choices per side, promotion, legal search and drawn stalemate. No suggested extra features were added. See [Shafran](docs/variants/shafran.md) and [pending release](docs/release-0.9.md).

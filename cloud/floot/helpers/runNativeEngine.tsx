@@ -7,8 +7,8 @@ import { createInterface } from "node:readline";
 import type { Json } from "./schema";
 import type { ChessMove, GameView, SearchDiagnostics, VariantId } from "../endpoints/game_POST.schema";
 
-const asset = "/_cdn/static/2269ba52-c5cc-4f50-86e9-df446d6e403d-tactical-0.6-linux-x64.bin";
-const checksum = "ec6edf98d810c963fd6dc421fbf133bcbce334b258a5c724185fdda7a99c9b6d";
+const asset = "/_cdn/static/38e1b6ba-5580-44df-a511-13ecea7e79fe-tactical-0.7-linux-x64.bin";
+const checksum = "dca41e6c28a444256116a8945867c1c5fb01a214bc2334e484aadda635813010";
 type Options = {
   action: "new" | "inspect" | "move" | "search";
   origin: string;
@@ -42,7 +42,7 @@ async function executable(origin: string) {
   const response = await fetch(new URL(asset, origin), { signal: AbortSignal.timeout(15000) });
   if (!response.ok) throw new Error("The cloud engine could not be loaded");
   binary = Buffer.from(await response.arrayBuffer());
-  if (binary.length !== 2139704 || createHash("sha256").update(binary).digest("hex") !== checksum)
+  if (binary.length !== 2156216 || createHash("sha256").update(binary).digest("hex") !== checksum)
     throw new Error("Cloud engine checksum mismatch");
   const staging = filename + "-" + randomUUID();
   try {
@@ -92,7 +92,7 @@ export async function runNativeEngine(options: Options): Promise<NativeResult> {
       const game = packet.game as GameView;
       if (
         !Array.isArray(game.board?.cells) ||
-        game.board.cells.length !== 91 ||
+        game.board.cells.length !== ({ glinski: 91, mccooey: 91, shafran: 70 } as const)[game.variant] ||
         !Array.isArray(game.legalMoves)
       )
         throw new Error("Invalid cloud game response");

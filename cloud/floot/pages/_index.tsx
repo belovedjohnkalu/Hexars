@@ -8,7 +8,7 @@ import { CloudBoard } from "../components/CloudBoard";
 import { InstallControl } from "../components/InstallControl";
 import { HexLoading } from "../components/HexLoading";
 import styles from "./_index.module.css";
-const names = { glinski: "Gliński", mccooey: "McCooey" };
+const names = { glinski: "Gliński", mccooey: "McCooey", shafran: "Shafran" };
 export default function Home() {
   const navigate = useNavigate();
   const [previews, setPreviews] = useState<OutputType["variants"]>([]);
@@ -33,10 +33,10 @@ export default function Home() {
   }, [navigate]);
   return <div className={styles.app}>
     <AppHead />
-    <header className={styles.header}><h1>HEXARS</h1><InstallControl /></header>
+    <header className={styles.header}><div className={styles.brand}><img src="/_cdn/static/f72178ec-847d-48d7-ada5-e64a1ed04bd4-hexars-dark-192.png" width={48} height={48} alt="" aria-hidden="true" /><h1>HEXARS</h1></div><InstallControl /></header>
     {loadingLink ? <main className={styles.opening} role="status"><HexLoading /><div>Opening…</div></main> : <main className={styles.choices}>
       {error && <p className={styles.notice} role="alert">{gameSessions.fromHash() ? "Link unavailable" : "Boards unavailable"}</p>}
-      {(["glinski", "mccooey"] as const).map(id => {
+      {(["glinski", "mccooey", "shafran"] as const).map(id => {
         const preview = previews.find(value => value.id === id);
         const game: GameView | null = preview ? {
           variant: id, stateId: `preview-${id}`, board: preview.board,

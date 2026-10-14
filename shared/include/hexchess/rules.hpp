@@ -17,6 +17,7 @@ std::vector<Move> generateLegalMoves(const GameState& state);
 std::vector<Move> generateCandidateMoves(const GameState& state);
 bool isAttacked(const GameState& state, Hex position, PlayerId attacker);
 bool isInCheck(const GameState& state, PlayerId player);
+bool isEnPassantCapture(const GameState& state, const Move& move);
 GameState applyMove(const GameState& state, const Move& move);
 // Only rules/search internals use this; public input must call applyMove.
 GameState applyCandidateMove(const GameState& state, const Move& move, bool recordHistory = true);

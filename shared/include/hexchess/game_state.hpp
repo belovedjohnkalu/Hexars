@@ -15,6 +15,9 @@ struct GameState {
     PlayerId activePlayer{0};
     int enPassantTarget{-1};
     int enPassantPawn{-1};
+    // Shafran's three-cell advance exposes two crossed cells for one turn.
+    // The first remains enPassantTarget for backward-compatible saved games.
+    std::vector<int> additionalEnPassantTargets;
     int halfmoveClock{0};
     int ply{0};
     std::vector<std::uint64_t> positionHistory;

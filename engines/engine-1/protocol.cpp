@@ -36,9 +36,11 @@ Json encodeState(const GameState& state) {
         else pieces.push_back({{"type",names[static_cast<int>(piece.type)]},{"player",piece.player},{"hasMoved",piece.hasMoved}});
     }
     Json history=Json::array(); for(const auto key:state.positionHistory) history.push_back(keyString(key));
-    return {{"variant",state.variant},{"occupants",pieces},{"activePlayer",state.activePlayer},{"turnOrder",state.turnOrder},
+    Json value{{"variant",state.variant},{"occupants",pieces},{"activePlayer",state.activePlayer},{"turnOrder",state.turnOrder},
             {"enPassantTarget",state.enPassantTarget},{"enPassantPawn",state.enPassantPawn},{"halfmoveClock",state.halfmoveClock},
             {"ply",state.ply},{"positionHistory",history}};
+    if (state.variant == "shafran") value["additionalEnPassantTargets"] = state.additionalEnPassantTargets;
+    return value;
 }
 
 GameState decodeState(const Json& value) {
@@ -54,6 +56,8 @@ GameState decodeState(const Json& value) {
             const auto type = pieceType(piece.at("type").get<std::string>());
             if (state.variant == "mccooey" && type == PieceType::Pawn && !piece.contains("hasMoved"))
                 throw std::invalid_argument("Missing McCooey pawn movement rights");
+            if (state.variant == "shafran" && (type == PieceType::Pawn || type == PieceType::King || type == PieceType::Rook) && !piece.contains("hasMoved"))
+                throw std::invalid_argument("Missing Shafran movement rights");
             state.occupants.push_back({type,static_cast<PlayerId>(player),piece.value("hasMoved",false)});
         }
     }
@@ -63,6 +67,9 @@ GameState decodeState(const Json& value) {
     if(value.at("turnOrder")!=Json::array({0,1})) throw std::invalid_argument("Invalid turn order");
     state.enPassantTarget=value.at("enPassantTarget").get<int>();
     state.enPassantPawn=value.at("enPassantPawn").get<int>();
+    if (state.variant == "shafran") state.additionalEnPassantTargets = value.at("additionalEnPassantTargets").get<std::vector<int>>();
+    else if (value.contains("additionalEnPassantTargets") && value.at("additionalEnPassantTargets") != Json::array())
+        throw std::invalid_argument("Unexpected en-passant targets");
     state.halfmoveClock=value.at("halfmoveClock").get<int>();
     state.ply=value.at("ply").get<int>();
     const auto& history=value.at("positionHistory");
@@ -90,10 +97,8 @@ Json describeGame(const GameState& state) {
     Json moves=Json::array();
     if(result.type==ResultType::Ongoing) for(const auto& move:legal) {
         auto encoded=encodeMove(move,state.variant);
-        const auto from=variantDefinition(state.variant).index(move.from), to=variantDefinition(state.variant).index(move.to);
-        const auto moving=state.occupants[from];
-        encoded["capture"]=!state.occupants[to].empty() ||
-            (moving.type==PieceType::Pawn && to==state.enPassantTarget && move.from.q!=move.to.q);
+        const auto to=variantDefinition(state.variant).index(move.to);
+        encoded["capture"]=!state.occupants[to].empty() || isEnPassantCapture(state,move);
         // These moves already passed shared legal-move validation. The fast
         // internal application is used only to describe checking destinations.
         const auto next=applyCandidateMove(state,move,false);
@@ -119,8 +124,8 @@ Json processRequest(const Json& request, std::optional<GameState>& state) {
     if(!request.is_object()||request.value("protocolVersion",0)!=1||!request.contains("type")||!request.at("type").is_string()) throw std::invalid_argument("Invalid protocol request");
     const auto type=request.at("type").get<std::string>();
     Json response{{"protocolVersion",1},{"requestId",request.value("requestId",std::string{})}};
-    if(type=="hello") { response.update({{"type","hello"},{"engine","Tactical 0.6"},{"capabilities",Json::array({"glinski","mccooey","legal_moves","search"})}});return response; }
-    if(type=="supported_variants") {response.update({{"type","supported_variants"},{"variants",Json::array({"glinski","mccooey"})}});return response;}
+    if(type=="hello") { response.update({{"type","hello"},{"engine","Tactical 0.7"},{"capabilities",Json::array({"glinski","mccooey","shafran","legal_moves","search"})}});return response; }
+    if(type=="supported_variants") {response.update({{"type","supported_variants"},{"variants",Json::array({"glinski","mccooey","shafran"})}});return response;}
     if(type=="new_game") {
         state=createGame(request.value("variant",std::string{"glinski"}));
     } else if(type=="position") {
