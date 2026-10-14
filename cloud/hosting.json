@@ -13,5 +13,11 @@
   "supported_variants": [
     "glinski",
     "mccooey"
+  ],
+  "ui_version": "0.7.0",
+  "routes": [
+    "/",
+    "/glinski",
+    "/mccooey"
   ]
 }

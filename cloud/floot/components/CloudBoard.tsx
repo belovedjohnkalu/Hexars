@@ -1,4 +1,4 @@
-import { useId, useMemo, useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import type { GameView, Hex, ChessMove, PieceName } from "../endpoints/game_POST.schema";
 import { ChessPiece } from "./ChessPiece";
 import styles from "./CloudBoard.module.css";
@@ -15,6 +15,7 @@ export function CloudBoard({
   lastMove,
   disabled,
   className,
+  preview = false,
 }: {
   game: GameView;
   selected: Hex | null;
@@ -25,8 +26,8 @@ export function CloudBoard({
   lastMove?: ChessMove;
   disabled?: boolean;
   className?: string;
+  preview?: boolean;
 }) {
-  const lightingId = useId();
   const [focused, setFocused] = useState("f6");
   const previous = useRef(new Map<string, VisualPiece>());
   const sequence = useRef(0);
@@ -71,12 +72,7 @@ export function CloudBoard({
     previous.current = next;
     return { pieces: [...next.values()], captured };
   }, [game.stateId, game.board.cells, lastMove]);
-  const colours =
-    theme === "adobe"
-      ? ["#342923", "#614b40", "#936e58"]
-      : theme === "hearth"
-        ? ["#2b3030", "#495252", "#737b73"]
-        : ["#233045", "#3d506c", "#627c9f"];
+  const colours = ["#343c2e", "#5c664a", "#8a9370"];
   const selectedPiece = game.board.cells.find(
     (cell) => selected && key(cell) === key(selected),
   )?.piece;
@@ -90,32 +86,15 @@ export function CloudBoard({
     <svg
       viewBox="58 26 484 548"
       className={`${styles.board} ${className || ""}`}
-      role="group"
+      role={preview ? "img" : "group"}
+      aria-hidden={preview || undefined}
       aria-label={`${game.variant === "mccooey" ? "McCooey" : "Gliński"} hexagonal chessboard`}
     >
       <title>Your hexagonal chessboard. Select a piece to see where it can move.</title>
-      <defs>
-        <linearGradient id={lightingId} x1="0" y1="0" x2="0.8" y2="1">
-          <stop offset="0" stopColor="#ffffff" stopOpacity="0.13" />
-          <stop offset="0.45" stopColor="#ffffff" stopOpacity="0" />
-          <stop offset="1" stopColor="#000000" stopOpacity="0.16" />
-        </linearGradient>
-      </defs>
       <g
         className={styles.canvas}
         style={{ transform: flipped ? "rotate(180deg)" : "rotate(0deg)" }}
       >
-        <g data-board-depth="true" pointerEvents="none" aria-hidden="true">
-          {game.board.cells.map((cell) => {
-            const x = 300 + 42 * cell.q;
-            const y = 303 - 28 * Math.sqrt(3) * (cell.r + cell.q / 2);
-            const points = Array.from({ length: 6 }, (_, index) => {
-              const angle = (index * Math.PI) / 3;
-              return `${x + 27.55 * Math.cos(angle)},${y + 27.55 * Math.sin(angle)}`;
-            }).join(" ");
-            return <polygon key={cell.notation} points={points} fill="#0b111c" />;
-          })}
-        </g>
         {game.board.cells.map((cell) => {
           const x = 300 + 42 * cell.q,
             y = 300 - 28 * Math.sqrt(3) * (cell.r + cell.q / 2);
@@ -165,19 +144,19 @@ export function CloudBoard({
             <g
               key={cell.notation}
               data-cell={cell.notation}
-              role="button"
-              tabIndex={focused === cell.notation ? 0 : -1}
-              aria-label={`${name} on ${cell.notation}${target ? (capture ? ", legal destination, capture" : ", legal destination") : ""}${givesCheck ? ", gives check" : ""}${checked ? ", king in danger" : ""}`}
+              role={preview ? undefined : "button"}
+              tabIndex={preview ? undefined : focused === cell.notation ? 0 : -1}
+              aria-label={`${name} on ${cell.notation}${target ? (capture ? ", legal destination, capture" : ", legal destination") : ""}${givesCheck ? ", gives check" : ""}${checked ? ", king in danger" : ""}${last ? ", last move" : ""}`}
               aria-pressed={!!active}
               aria-disabled={disabled}
               className={styles.cell}
               onFocus={() => setFocused(cell.notation)}
-              onPointerDown={(event) => event.preventDefault()}
-              onClick={() => {
+              onPointerDown={preview ? undefined : (event) => event.preventDefault()}
+              onClick={preview ? undefined : () => {
                 setFocused(cell.notation);
                 if (!disabled) onCell(cell);
               }}
-              onKeyDown={(event) => {
+              onKeyDown={preview ? undefined : (event) => {
                 if (event.key === "Enter" || event.key === " ") {
                   event.preventDefault();
                   if (!disabled) onCell(cell);
@@ -208,52 +187,38 @@ export function CloudBoard({
                 className={styles.hex}
                 points={points}
                 fill={colours[cell.colour]}
-                stroke="#11182488"
+                stroke="#22291b"
                 strokeWidth={0.7}
-              />
-              <polygon
-                data-cell-lighting="true"
-                points={points}
-                fill={`url(#${lightingId})`}
-                pointerEvents="none"
-              />
-              <polyline
-                points={points.split(" ").slice(3).concat(points.split(" ").slice(0, 1)).join(" ")}
-                fill="none"
-                stroke="#ffffff"
-                strokeOpacity={0.16}
-                strokeWidth={0.8}
-                pointerEvents="none"
               />
               {indicator && (
                 <g className={styles.indicator} data-indicator={indicator} pointerEvents="none">
                   <polygon
                     points={inset}
                     fill="none"
-                    stroke="#0c111b"
-                    strokeWidth={4.8}
-                    opacity={0.8}
+                    stroke="#192016"
+                    strokeWidth={6.5}
+                    opacity={1}
                   />
                   <polygon
                     className={styles.indicatorColour}
                     points={inset}
                     fill="none"
-                    strokeWidth={2.2}
+                    strokeWidth={4}
                   />
                   {indicator === "capture-check" && (
                     <polygon
                       points={inset}
                       fill="none"
-                      stroke="#ffac79"
-                      strokeWidth={2.2}
+                      stroke="#ffc566"
+                      strokeWidth={4}
                       strokeDasharray="4 7"
                     />
                   )}
                 </g>
               )}
               <g className={styles.keyboardRing} pointerEvents="none">
-                <polygon points={inset} fill="none" stroke="#0c111b" strokeWidth={4.8} />
-                <polygon points={inset} fill="none" stroke="#9acaff" strokeWidth={2.2} />
+                <polygon points={inset} fill="none" stroke="#192016" strokeWidth={6.5} />
+                <polygon points={inset} fill="none" stroke="#d8ffa6" strokeWidth={4} />
               </g>
               {coordinates && (
                 <text

@@ -42,3 +42,9 @@ Gliński and McCooey are playable. Board, pawn-capture directions, initial doubl
 Floot hosts the UI, Node API and database. The native executable runs in its server environment. `cloud/floot` mirrors app source; Floot supplies router, server environment and generated scaffolding. `web` provides a Vite development entry for the same UI and proxies API/assets to the hosted app. Its static build alone is not the complete cloud backend.
 
 The retained local WebSocket manager binds to loopback and accepts only fixed local Vite origins. Its allowlisted engine registry cannot accept arbitrary executable paths. It remains available at `?foundation` for ping/id/geometry diagnostics, not public internet access.
+
+## Minimal frontend routes
+
+The UI has three pages: `/`, `/glinski`, `/mccooey`. Home uses the read-only `GET /_api/variants` endpoint to render actual native starting boards without creating game rows. Variant pages share `components/Play`. Separate per-variant browser session keys preserve the last game of each variant; legacy shared root links resolve their authoritative variant and move to its page. Existing cloud states and Tactical 0.6 are unchanged.
+
+Unconsumed browser install offers live outside individual page components, in a FIFO queue. Navigation never discards them. Failed attempts are retained; an explicit user attempt with a returned browser choice consumes that offer. ChatGPT’s own prompt queue is outside the app’s control.

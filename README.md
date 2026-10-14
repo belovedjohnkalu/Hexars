@@ -1,4 +1,4 @@
-# HEXARS · cloud edition 0.6
+# HEXARS · cloud edition 0.7
 
 **Play now: https://hexars.floot.app**
 
@@ -9,23 +9,25 @@ Gliński’s and McCooey’s hexagonal chess are playable on desktop and mobile.
 - iPhone/iPad: open the website in Safari → Share → Add to Home Screen → Add.
 - Android: open it in Chrome → ⋮ → Install app or Add to Home screen.
 
-The **Add to home screen** action appears only when the browser supplies an installation prompt or when manual installation is supported in top-level iPhone/iPad Safari. It is hidden in incompatible browsers, embedded frames and an already installed app. The home-screen app uses a standalone window. This is an installable web app, not an App Store or Play Store binary. Internet access is required for cloud play.
+The **Install** action appears only when the browser supplies an installation prompt or when manual installation is supported in top-level iPhone/iPad Safari. It is hidden in incompatible browsers, embedded frames and an already installed app. The home-screen app uses a standalone window. This is an installable web app, not an App Store or Play Store binary. Internet access is required for cloud play.
 
-Games are saved in the cloud. **Share game** lets you resume on another device; **Settings → Continue another game** restores a copied link after installation if browser and app storage are separate. Anyone with that link can control the shared game. There are no user accounts or side-specific multiplayer credentials yet.
+Games are saved in the cloud. **Share game** lets you resume on another device; opening a copied game link restores it after installation if browser and app storage are separate. Anyone with that link can control the shared game. There are no user accounts or side-specific multiplayer credentials yet.
 
 ## Design
 
-HEXARS stands for Hearth, Embers, Xenon, Adobe, Rhombus and Sleek. The interface uses deep charcoal surfaces, iPhone-style system type, soft blue-grey hexagons, restrained clay accents and rounded controls. Beveled cells, satin pieces, raised buttons, recessed switches and floating sheets give the interface tactile depth. Rules, board colours, opponent profiles, saved games and installation live in simple sheets; developer diagnostics are omitted from player flows. Large vector pieces share the same shapes across both sides, with theme-aware fills and contrasting edges. Inset hexagons mark moves, captures and checks; checking captures combine both colours. Pass-and-play automatically faces the next player. Pieces slide, the board rotates, and sheets fade smoothly, with reduced-motion support. The alternative board palettes are Adobe (warm clay) and Hearth (soft stone).
+HEXARS stands for Hearth, Embers, Xenon, Adobe, Rhombus and Sleek. The dark interface now uses warm charcoal, olive and ivory with large system type and very few words. The homepage shows both authoritative starting positions; choose a board to open `/glinski` or `/mccooey`. Each game has just Home and one menu. Undo, sharing, play mode, side selection, new game and concise rules stay inside that menu.
 
-The six opponent names are Tactical, Positional, Defensive, Materialist, Unconventional and Universal. Only Tactical is playable today. Floot requires a paid plan to remove its hosting badge; the current free-plan deployment retains it. The old address has been replaced; home-screen installations should be re-added from the new address. Existing saved game links can be pasted into Continue another game.
+Pieces are original flat Staunton silhouettes, identical for both sides except their fill/outline colors. The board has no beveled depth, gradients or drop shadows. Inset outlines are 4 SVG units thick: mint moves, amber captures, coral checks, pale-yellow selection and bright ivory previous moves. Both endpoints of an opponent’s last move remain fully bright. Smooth movement and rotation respect reduced motion.
+
+Tactical is the current cloud engine. The other five independent engines remain planned. The site’s free hosting badge is provider-controlled and remains present.
 
 ## Playable now
 
-- A native-authoritative 91-cell board: 36 starting pieces in Gliński, 32 in McCooey. Choose the variant in **New game**.
+- A native-authoritative 91-cell board: 36 starting pieces in Gliński, 32 in McCooey. Choose its starting board on the homepage.
 - All six piece movements, checks and pins, en passant and four promotion choices. Gliński pawns regain a double advance from friendly original pawn cells. McCooey pawns capture along bishop diagonals and double-advance only on their first move, excluding the center pawn.
 - Checkmate, Gliński fractional stalemate (¾–¼), McCooey equal stalemate (½–½), automatic threefold repetition, the fifty-move rule, and automatic material draws. HEXARS now ends in a ½–½ draw when each side has only its king plus at most one bishop, knight, or rook. Pawns, queens, or two pieces on either side prevent this house-rule draw; an already-delivered checkmate wins. There is no castling.
 - Human versus Tactical as White or Black, or a shared two-player board.
-- Saved games, move history, undo, board flipping, coordinates, three themes, and keyboard/touch controls.
+- Separate saved games per variant, shared links, undo, automatic pass-and-play orientation, promotion and keyboard/touch controls.
 - Tactical: material and positional evaluation, iterative-deepening alpha-beta, capture ordering, bounded quiescence, and time/node limits. Current hosted budget: 750 ms, maximum depth 3 and 30,000 nodes.
 
 Engines 2–6 and Shafran, Brusky, De Vasa, and Wellisch remain planned. Each future engine will be an independent executable with its own search/evaluation design. Engine identities are provisional; strength has not been rated.
@@ -77,6 +79,8 @@ The cloud backend runs on Floot's Node server runtime with Postgres. Cloudflare 
 
 McCooey native tests passed 4,302 assertions over 4,162 random plies, nine complete random games, two complete Tactical-versus-random games and two historical checkmates. Gliński regression tests passed over 5,340 random plies and eight complete random games. Eighteen native-protocol/manager tests and six frontend tests passed, as did TypeScript, Vite build and all three CMake/CTest targets.
 
-Published-site browser checks verified real C++ replies, both human sides, a complete seven-ply historical checkmate, undo, cross-device resume, mobile layout, themes, and installation metadata/instructions. The dark HEXARS release passed 44 published browser checks. See [progress](docs/progress.md) and [browser check record](docs/screenshots/hexars-dark-qa.json). Actual installation on a physical iPhone/Android device is not automated by those checks.
+Published-site browser checks verified real C++ replies, both human sides, a complete seven-ply historical checkmate, undo, cross-device resume, mobile layout, themes, and installation metadata/instructions. See [progress](docs/progress.md) for each published release and its browser evidence. Actual installation on a physical iPhone/Android device is not automated by those checks.
 
 `npm run package:source` exports the current Git commit to `artifacts/hexars-source.zip`, excluding dependencies and compiled binaries.
+
+Browser install offers are retained in an app-level FIFO queue across page changes and menu closure. Only an explicit attempt that obtains the browser choice consumes an offer. Failed attempts stay available for retry. This concerns the website’s browser events; the app cannot alter ChatGPT’s message queue.

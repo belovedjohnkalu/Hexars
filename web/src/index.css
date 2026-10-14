@@ -47,6 +47,6 @@ select:focus-visible {
   outline-offset: 4px;
 }
 ::selection {
-  background: #d8e4f2;
-  color: #26374d;
+  background: #d9e6a5;
+  color: #26301c;
 }

@@ -1,67 +1,61 @@
 import { useEffect, useState } from "react";
 import { supportsManualHomeScreen } from "./installSupport";
-
 interface InstallEvent extends Event {
   prompt(): Promise<void>;
   userChoice: Promise<{ outcome: "accepted" | "dismissed" }>;
 }
-
+// Browser offers belong to the app, not to a page. Navigation and closing a
+// menu must never discard them. Only an explicit install attempt consumes one.
+const offers: InstallEvent[] = [];
+const subscribers = new Set<() => void>();
+let listening = false, installed = false, installing = false, error = false;
+const notify = () => subscribers.forEach(fn => fn());
+function listen() {
+  if (listening) return;
+  listening = true;
+  const display = window.matchMedia("(display-mode: standalone), (display-mode: fullscreen), (display-mode: minimal-ui)");
+  const update = () => { installed = installed || display.matches || ("standalone" in navigator && navigator.standalone === true); notify(); };
+  update(); display.addEventListener("change", update);
+  window.addEventListener("beforeinstallprompt", event => {
+    const offered = event as InstallEvent;
+    if (typeof offered.prompt !== "function" || !offered.userChoice || !window.isSecureContext || window.self !== window.top) return;
+    event.preventDefault();
+    if (!offers.includes(offered)) offers.push(offered);
+    notify();
+  });
+  window.addEventListener("appinstalled", () => { installed = true; error = false; notify(); });
+}
 export function useInstallApp() {
-  const [prompt, setPrompt] = useState<InstallEvent | null>(null);
-  const [installed, setInstalled] = useState(false);
-  const [manualInstall, setManualInstall] = useState(false);
-  const [platform, setPlatform] = useState<"ios" | "android" | "desktop">("desktop");
+  const [, refresh] = useState(0);
   useEffect(() => {
-    const display = window.matchMedia("(display-mode: standalone), (display-mode: fullscreen), (display-mode: minimal-ui)");
-    let completedHere = false;
-    const update = () =>
-      setInstalled(completedHere || display.matches || ("standalone" in navigator && navigator.standalone === true));
-    update();
-    const ua = navigator.userAgent;
-    setPlatform(/iPhone|iPad|iPod/.test(ua) || (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1)
-      ? "ios" : /Android/.test(ua) ? "android" : "desktop");
-    setManualInstall(supportsManualHomeScreen({
-      userAgent: ua, maxTouchPoints: navigator.maxTouchPoints,
-      secureContext: window.isSecureContext, topLevel: window.self === window.top,
-    }));
-    const beforeInstall = (event: Event) => {
-      const offered = event as InstallEvent;
-      if (typeof offered.prompt !== "function" || !offered.userChoice || !window.isSecureContext || window.self !== window.top) return;
-      event.preventDefault();
-      setPrompt(offered);
-    };
-    const completed = () => {
-      completedHere = true;
-      setInstalled(true);
-      setPrompt(null);
-    };
-    display.addEventListener("change", update);
-    window.addEventListener("beforeinstallprompt", beforeInstall);
-    window.addEventListener("appinstalled", completed);
-    return () => {
-      display.removeEventListener("change", update);
-      window.removeEventListener("beforeinstallprompt", beforeInstall);
-      window.removeEventListener("appinstalled", completed);
-    };
+    const update = () => refresh(value => value + 1);
+    subscribers.add(update); listen(); update();
+    return () => { subscribers.delete(update); };
   }, []);
+  const manual = typeof window !== "undefined" && supportsManualHomeScreen({
+    userAgent: navigator.userAgent, maxTouchPoints: navigator.maxTouchPoints,
+    secureContext: window.isSecureContext, topLevel: window.self === window.top,
+  });
   return {
-    installed,
-    platform,
-    canPrompt: !installed && Boolean(prompt),
-    canInstall: !installed && (Boolean(prompt) || manualInstall),
+    installed, installing, error,
+    platform: manual ? "ios" as const : "desktop" as const,
+    canPrompt: !installed && offers.length > 0,
+    canInstall: !installed && (offers.length > 0 || manual),
     install: async () => {
-      if (!prompt || installed) return false;
-      // A browser's deferred install event can be used only once.
-      const offered = prompt;
-      setPrompt(null);
+      const offered = offers[0];
+      if (!offered || installed || installing) return false;
+      installing = true; error = false; notify();
       try {
         await offered.prompt();
         const choice = await offered.userChoice;
-        if (choice.outcome === "accepted") setInstalled(true);
+        const index = offers.indexOf(offered);
+        if (index >= 0) offers.splice(index, 1);
+        if (choice.outcome === "accepted") installed = true;
         return choice.outcome === "accepted";
       } catch {
-        return false;
-      }
+        // Keep an offer after a failed attempt, rather than silently dropping it.
+        error = true; return false;
+      } finally { installing = false; notify(); }
     },
   };
 }

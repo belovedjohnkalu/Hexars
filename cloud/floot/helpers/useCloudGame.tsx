@@ -7,31 +7,10 @@ import {
   type VariantId,
 } from "../endpoints/game_POST.schema";
 
+import { gameSessions } from "./gameSessions";
 type Credentials = { gameId: string; accessToken: string };
-const storageKey = "hexchess.cloud.game.v1";
-function validCredentials(value: unknown): value is Credentials {
-  if (!value || typeof value !== "object") return false;
-  const credentials = value as Credentials;
-  return (
-    typeof credentials.gameId === "string" &&
-    /^[a-f0-9-]{36}$/.test(credentials.gameId) &&
-    typeof credentials.accessToken === "string" &&
-    /^[a-f0-9]{64}$/.test(credentials.accessToken)
-  );
-}
-function savedCredentials(): Credentials | null {
-  const hash = new URLSearchParams(window.location.hash.slice(1));
-  const link = { gameId: hash.get("game"), accessToken: hash.get("key") };
-  if (validCredentials(link)) return link;
-  try {
-    const stored: unknown = JSON.parse(localStorage.getItem(storageKey) || "null");
-    return validCredentials(stored) ? stored : null;
-  } catch {
-    return null;
-  }
-}
 
-export function useCloudGame() {
+export function useCloudGame(variant: VariantId) {
   const [data, setData] = useState<OutputType | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -45,11 +24,7 @@ export function useCloudGame() {
     current.current = result;
     credentials.current = { gameId: result.gameId, accessToken: result.accessToken };
     setData(result);
-    try {
-      localStorage.setItem(storageKey, JSON.stringify(credentials.current));
-    } catch {
-      /* Game remains available through its cloud link. */
-    }
+    gameSessions.save(result);
     const hash = new URLSearchParams(window.location.hash.slice(1));
     if (hash.has("game")) {
       const url = new URL(window.location.href);
@@ -59,7 +34,7 @@ export function useCloudGame() {
   }, []);
 
   const perform = useCallback(
-    async (body: InputType): Promise<boolean> => {
+    async (body: InputType, initialVariant?: VariantId): Promise<boolean> => {
       const sequence = ++requestSequence.current;
       controller.current?.abort();
       const abort = new AbortController();
@@ -67,8 +42,14 @@ export function useCloudGame() {
       setBusy(true);
       setError(null);
       try {
-        const result = await postGame(body, { signal: abort.signal });
+        let result = await postGame(body, { signal: abort.signal });
         if (sequence !== requestSequence.current) return false;
+        if (initialVariant && result.game.variant !== initialVariant) {
+          // Keep the old variant's game before opening the requested variant.
+          gameSessions.save(result);
+          result = await postGame({ action: "new", mode: "engine", humanPlayer: 0, variant: initialVariant }, { signal: abort.signal });
+          if (sequence !== requestSequence.current) return false;
+        }
         accept(result);
         return true;
       } catch (failure) {
@@ -109,10 +90,12 @@ export function useCloudGame() {
 
   useEffect(() => {
     const timer = setTimeout(() => {
-      const saved = savedCredentials();
+      const linked = gameSessions.fromHash();
+      const saved = linked || gameSessions.stored(variant);
       credentials.current = saved;
       void perform(
-        saved ? { action: "get", ...saved } : { action: "new", mode: "engine", humanPlayer: 0, variant: "glinski" },
+        saved ? { action: "get", ...saved } : { action: "new", mode: "engine", humanPlayer: 0, variant },
+        linked ? undefined : variant,
       );
     }, 0);
     return () => {
@@ -120,11 +103,12 @@ export function useCloudGame() {
       controller.current?.abort();
       ++requestSequence.current;
     };
-  }, [perform]);
+  }, [perform, variant]);
 
   useEffect(() => {
     if (
       !data ||
+      data.game.variant !== variant ||
       busy ||
       error ||
       data.mode !== "engine" ||
@@ -141,7 +125,7 @@ export function useCloudGame() {
       accessToken: data.accessToken,
       version: data.version,
     });
-  }, [data, busy, error, perform]);
+  }, [data, busy, error, perform, variant]);
 
   useEffect(() => {
     if (!data || busy || error) return;
@@ -187,9 +171,8 @@ export function useCloudGame() {
     },
     openGame: (link: string) => {
       try {
-        const hash = new URLSearchParams(new URL(link.trim()).hash.slice(1));
-        const saved = { gameId: hash.get("game"), accessToken: hash.get("key") };
-        if (!validCredentials(saved)) throw new Error("Paste a saved HEXARS game link.");
+        const saved = gameSessions.fromHash(new URL(link.trim()).hash);
+        if (!saved) throw new Error("Paste a saved HEXARS game link.");
         engineKey.current = "";
         credentials.current = saved;
         return perform({ action: "get", ...saved });
@@ -205,7 +188,7 @@ export function useCloudGame() {
       return perform(
         credentials.current
           ? { action: "get", ...credentials.current }
-          : { action: "new", mode: "engine", humanPlayer: 0, variant: "glinski" },
+          : { action: "new", mode: "engine", humanPlayer: 0, variant },
       );
     },
   };
