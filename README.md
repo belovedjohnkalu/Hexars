@@ -34,7 +34,7 @@ Engines 2–6, Brusky, De Vasa and Wellisch remain planned. Each future engine w
 
 ## Work on the source
 
-Node.js 22.12+ and a C++20 G++ compiler are required for development. Install dependencies:
+Node.js 24 LTS is recommended (minimum 22.18), with a C++20 G++ compiler for development. Install dependencies:
 
 ```sh
 npm ci

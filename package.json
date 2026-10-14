@@ -10,7 +10,7 @@
     "cloud/engine-worker"
   ],
   "engines": {
-    "node": ">=22.12.0"
+    "node": ">=22.18.0"
   },
   "scripts": {
     "build:engine": "node scripts/build-native.mjs",
