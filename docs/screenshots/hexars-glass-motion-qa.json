@@ -1,0 +1,14 @@
+{
+  "origin": "https://hexars.floot.app",
+  "checks": [
+    "Home loading draws two animated hexagons",
+    "Loading trace animates",
+    "Reduced motion disables loading animation",
+    "Dark blue theme is applied",
+    "Home cards have frosted glass",
+    "Menu uses glass blur",
+    "Menu fits phone",
+    "Reduced motion removes card and page transitions",
+    "Browser theme color matches blue-black"
+  ]
+}

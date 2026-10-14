@@ -3,7 +3,7 @@ export function AppHead({ title = "HEXARS" }: { title?: string }) {
   return <Helmet>
     <title>{title}</title>
     <meta name="description" content="Choose a board. Play hexagonal chess." />
-    <meta name="theme-color" content="#171b15" />
+    <meta name="theme-color" content="#050810" />
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-title" content="HEXARS" />

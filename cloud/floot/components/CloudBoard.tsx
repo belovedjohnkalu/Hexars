@@ -72,7 +72,7 @@ export function CloudBoard({
     previous.current = next;
     return { pieces: [...next.values()], captured };
   }, [game.stateId, game.board.cells, lastMove]);
-  const colours = ["#343c2e", "#5c664a", "#8a9370"];
+  const colours = ["var(--board-light)", "var(--board-medium)", "var(--board-dark)"];
   const selectedPiece = game.board.cells.find(
     (cell) => selected && key(cell) === key(selected),
   )?.piece;
@@ -187,7 +187,7 @@ export function CloudBoard({
                 className={styles.hex}
                 points={points}
                 fill={colours[cell.colour]}
-                stroke="#22291b"
+                stroke="#060e1b"
                 strokeWidth={0.7}
               />
               {indicator && (
@@ -195,7 +195,7 @@ export function CloudBoard({
                   <polygon
                     points={inset}
                     fill="none"
-                    stroke="#192016"
+                    stroke="#050b15"
                     strokeWidth={6.5}
                     opacity={1}
                   />
@@ -217,8 +217,8 @@ export function CloudBoard({
                 </g>
               )}
               <g className={styles.keyboardRing} pointerEvents="none">
-                <polygon points={inset} fill="none" stroke="#192016" strokeWidth={6.5} />
-                <polygon points={inset} fill="none" stroke="#d8ffa6" strokeWidth={4} />
+                <polygon points={inset} fill="none" stroke="#050b15" strokeWidth={6.5} />
+                <polygon points={inset} fill="none" stroke="#8acaff" strokeWidth={4} />
               </g>
               {coordinates && (
                 <text

@@ -11,6 +11,7 @@ import { CloudBoard } from "./CloudBoard";
 import { ChessPiece } from "./ChessPiece";
 import { InstallControl } from "./InstallControl";
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from "./Dialog";
+import { HexLoading } from "./HexLoading";
 import styles from "./Play.module.css";
 const key = (hex: Hex) => `${hex.q},${hex.r}`;
 export function Play({ variant }: { variant: VariantId }) {
@@ -71,9 +72,9 @@ export function Play({ variant }: { variant: VariantId }) {
       <button className={styles.icon} aria-label="Game menu" title="Game menu" onClick={() => { setMode(data?.mode === "two_players" ? "two_players" : "engine"); setSide(data?.humanPlayer === 1 ? 1 : 0); setMenu(true); }}><MoreHorizontal size={28} /></button>
     </header>
     <main className={styles.main}>
-      <div className={styles.status} role="status" aria-live="polite">{status}{thinking && <span className={styles.pulse} aria-hidden="true" />}</div>
+      <div className={styles.status} role="status" aria-live="polite"><span key={status}>{status}</span>{thinking && <span className={styles.pulse} aria-hidden="true" />}</div>
       <div className={styles.board}>
-        {game ? <CloudBoard game={game} selected={selected} onCell={chooseCell} flipped={flipped} coordinates={false} theme="grove" lastMove={lastMove} disabled={!canPlay} /> : <div className={styles.loading} />}
+        {game ? <CloudBoard game={game} selected={selected} onCell={chooseCell} flipped={flipped} coordinates={false} theme="grove" lastMove={lastMove} disabled={!canPlay} /> : <div className={styles.loading}><HexLoading /></div>}
       </div>
       {ended && <p className={styles.result}>{game?.result.status === "checkmate" ? "Checkmate" : game?.result.status === "stalemate" && variant === "glinski" ? "¾–¼" : "½–½"}</p>}
       {cloud.error && <button className={styles.retry} onClick={() => void cloud.refresh()} disabled={cloud.busy}>Retry</button>}

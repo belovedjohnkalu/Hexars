@@ -1,0 +1,9 @@
+.loader { display: inline-flex; width: 112px; height: 112px; position: relative; }
+.loader svg { width: 100%; overflow: visible; }
+.track, .trace, .core { fill: none; stroke-linecap: round; stroke-linejoin: round; }
+.track { stroke: #7bbaff20; stroke-width: 1.5; }
+.trace { stroke: #9bd0ff; stroke-width: 2.5; stroke-dasharray: 65 225; animation: trace 2.4s linear infinite; filter: drop-shadow(0 0 5px #419fff80); }
+.core { fill: #79bdff12; stroke: #9bd0ff; stroke-width: 1.5; transform-origin: 60px 60px; animation: breathe 2.4s ease-in-out infinite; }
+@keyframes trace { to { stroke-dashoffset: -290; } }
+@keyframes breathe { 50% { opacity: .4; transform: scale(.85); } }
+@media (prefers-reduced-motion: reduce) { .trace, .core { animation: none; } .trace { stroke-dasharray: none; } }

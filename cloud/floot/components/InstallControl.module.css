@@ -3,3 +3,6 @@
 .button:disabled { opacity: .5; }
 .sheet { font-family: var(--font-family-base); width: 360px; padding: 32px; }
 .instructions { font-size: 22px; line-height: 1.6; }
+
+.button { background: var(--glass); border: 1px solid var(--glass-border); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); transition: background-color 280ms ease, opacity 280ms ease, transform 360ms var(--ease); }
+.button:active { transform: scale(.95); }

@@ -2,16 +2,16 @@
   .overlay {
     position: fixed;
     inset: 0;
-    background: #11170fcc;
-    backdrop-filter: blur(3px);
-    -webkit-backdrop-filter: blur(3px);
+    background: #02050c99;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
     z-index: var(--z-overlay) !important;
   }
   .overlay[data-state="open"] {
     animation: overlayIn 240ms ease both;
   }
   .overlay[data-state="closed"] {
-    animation: overlayOut 220ms ease both;
+    animation: overlayOut 260ms ease both;
   }
   .content {
     position: fixed !important;
@@ -22,10 +22,13 @@
     max-width: 90vw;
     max-height: min(85dvh, 760px);
     overflow: auto;
-    background: var(--popup);
+    background: linear-gradient(140deg, #243b5ddd, #0b1428ee 65%);
+    border: 1px solid var(--glass-border);
+    backdrop-filter: blur(32px) saturate(140%);
+    -webkit-backdrop-filter: blur(32px) saturate(140%);
     color: var(--popup-foreground);
     border-radius: var(--radius-md);
-    box-shadow: var(--shadow-lg);
+    box-shadow: inset 0 1px 0 #ffffff1c, 0 24px 100px #00000090;
     z-index: var(--z-overlay) !important;
     padding: var(--spacing-6);
   }
@@ -33,7 +36,7 @@
     animation: contentIn 380ms var(--ease) both;
   }
   .content[data-state="closed"] {
-    animation: contentOut 220ms ease both;
+    animation: contentOut 260ms var(--ease) both;
   }
   .close {
     position: absolute;
