@@ -125,3 +125,16 @@ deselection, a legal move, reload, saved state, Inter and a 390px viewport.
 The non-root Docker image built and served native 91/91/70-cell previews and
 health successfully. No live Supabase authentication/database integration or
 Cloudflare deployment is claimed. See [migration setup](cloud-migration.md).
+
+
+### Supabase project provisioned
+
+The existing HEXARS project in ION became available through the connected account
+(`qnsqurxygwqlegfihhzh`, ACTIVE_HEALTHY). Both SQL migrations were applied.
+Verified: game-table RLS is enabled; anon has no read grant; authenticated users
+have owner-filtered reads and no insert/update/delete grants. Restricted the
+platform RLS event-trigger helper to remove public RPC execution; the follow-up
+security advisor has no findings. No game data has been imported or discarded.
+The local frontend is configured with the project URL and public publishable key.
+Anonymous sign-in is disabled and still needs enabling in Supabase’s Auth settings.
+Server secrets, GitHub upload and the new website deployment remain pending.

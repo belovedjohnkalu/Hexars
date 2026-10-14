@@ -13,27 +13,27 @@ verified. `cloud/floot` is preserved for rollback and data migration.
 
 - Cloudflare CLI OAuth is confirmed. Its login is separate from Codex MCP OAuth.
 - GitHub and Supabase account connections are confirmed. ION is the selected
-  Supabase organization (Free plan); it has no projects yet. The connector’s
-  required cost-check tool is unavailable, blocking its project-creation flow.
-  Never request or paste secrets in chat.
+  Supabase organization (Free plan). Its existing HEXARS project is healthy:
+  `qnsqurxygwqlegfihhzh`. Never request or paste secrets in chat.
 - Store code in a private `hexars` repository unless an existing repository is
   selected. Publish only after the checks in `.github/workflows/ci.yml` pass.
 
-GitHub CLI access is verified as `belovedjohnkalu`, but creating
-`belovedjohnkalu/hexars` was rejected with `Resource not accessible by integration`.
-No repository was created and no source was pushed. Create an empty private
-`hexars` repository in the GitHub dashboard and make it available to the connected
-app. No additional approval for uploading the prepared source is needed.
+The user-provided repository `belovedjohnkalu/Hexars` is now available and public.
+The connected account can read and write it. Preserve its initial commit and
+existing files when publishing the source. Source history was checked for
+embedded game capability keys and provider secret keys before uploading.
 
-Supabase successfully lists ION, but `get_cost` returned `UNAVAILABLE` because
-the provider did not expose that tool. Its required cost-confirmation step for
-creating projects cannot be completed with the current integration. Create the
-HEXARS project in ION through the Supabase dashboard, keeping the current Free
-organization plan, then continue the prepared migration against that project.
+The existing HEXARS Supabase project is now available. The game schema and
+helper-permission migrations have been applied successfully. RLS and client
+mutation restrictions were verified through SQL, and the security advisor
+returns no findings. Guest/anonymous sign-in remains disabled in the project’s
+Auth settings; enable it before playing through the new frontend. The server
+secret key is not yet configured in a deployed API. Local frontend `.env` uses
+the project URL and its publishable key, and is ignored by Git.
 
 ## Supabase
 
-Apply `supabase/migrations/20261014000000_games.sql` to the selected project.
+Both migrations under `supabase/migrations` are applied to the selected HEXARS project.
 Enable anonymous Auth so playing does not require a sign-in form. Guest creation
 happens when opening a game, not on the homepage. Configure anonymous sign-in
 rate limits and the provider's abuse protections for public traffic.
@@ -114,5 +114,5 @@ counts and round-trip position hashes, then enable the new origin. Browser
 storage is origin-specific: saved game links need their host changed to the
 verified new site. Keep the old origin available for rollback.
 
-No export, import, new cloud deployment or public URL change has been performed
-by preparing this migration.
+The Supabase schema is provisioned. No existing game export/import, new website
+deployment or public URL change has been performed.
