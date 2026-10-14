@@ -1,0 +1,33 @@
+{
+  "origin": "http://127.0.0.1:5173",
+  "checks": [
+    "320px actual Inter face loaded",
+    "320px home headings use Inter",
+    "320px home fits",
+    "320px game status and heading use Inter",
+    "320px game fits",
+    "320px menu controls use Inter",
+    "320px menu fits",
+    "320px font is preloaded only once",
+    "390px actual Inter face loaded",
+    "390px home headings use Inter",
+    "390px home fits",
+    "390px game status and heading use Inter",
+    "390px game fits",
+    "390px menu controls use Inter",
+    "390px menu fits",
+    "390px font is preloaded only once",
+    "1440px actual Inter face loaded",
+    "1440px home headings use Inter",
+    "1440px home fits",
+    "1440px game status and heading use Inter",
+    "1440px game fits",
+    "1440px menu controls use Inter",
+    "1440px menu fits",
+    "1440px font is preloaded only once",
+    "No runtime errors",
+    "No failed requests"
+  ],
+  "errors": [],
+  "bad": []
+}
