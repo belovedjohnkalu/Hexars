@@ -154,3 +154,26 @@ Cloudflare CLI reports no paid account subscriptions. The prepared native-engine
 container needs Workers Paid, and the API still needs its Supabase server key in
 the hosting secret store. Anonymous Auth is disabled in Supabase. The new website
 has not been deployed. The existing Floot app remains online.
+
+## ION branding and Vercel Services
+
+The app is now named ION. The homepage, document titles, mobile app labels and
+manifest use ION; private npm workspaces use `@ion/`. Saved-game keys, native
+state identifiers and existing server environment variable names are retained.
+
+Vercel hosts three coordinated services: public `web`, public `gateway` under
+`/api/*`, and private `api`. The gateway uses a runtime service binding to reach
+the API; the API image includes the real C++ engine. The root Dockerfile and CI
+configuration build this arrangement. Game-page rewrites preserve static fonts,
+icons, scripts, manifest and service-worker routes.
+
+Verification: the ION frontend/API build, gateway and optional Cloudflare host
+type checks, 19 API/proxy tests, and six frontend tests pass. The preceding
+service configuration also passed 15 HTTP checks through `vercel dev -L`.
+
+Publishing is blocked by Vercel account access: the connected token returns 403
+for the default ION team (`ion-629c`). The CLI has no prior login. No Vercel
+project or public URL has been created. The Supabase server key is not bound and
+anonymous sign-in is still disabled; these are also required for hosted games.
+The GitHub integration rejected repository renaming, so source remains in the
+existing `belovedjohnkalu/Hexars` repository.

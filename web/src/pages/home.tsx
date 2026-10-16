@@ -33,7 +33,7 @@ export default function Home() {
   }, [navigate]);
   return <div className={styles.app}>
     <AppHead />
-    <header className={styles.header}><div className={styles.brand}><img src="/icons/icon-192.png" width={48} height={48} alt="" aria-hidden="true" /><h1>HEXARS</h1></div><InstallControl /></header>
+    <header className={styles.header}><div className={styles.brand}><img src="/icons/icon-192.png" width={48} height={48} alt="" aria-hidden="true" /><h1>ION</h1></div><InstallControl /></header>
     {loadingLink ? <main className={styles.opening} role="status"><HexLoading /><div>Opening…</div></main> : <main className={styles.choices}>
       {error && <p className={styles.notice} role="alert">{gameSessions.fromHash() ? "Link unavailable" : "Boards unavailable"}</p>}
       {(["glinski", "mccooey", "shafran"] as const).map(id => {

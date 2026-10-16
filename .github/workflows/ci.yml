@@ -1,4 +1,4 @@
-name: Verify HEXARS
+name: Verify ION
 on:
   push:
   pull_request:
@@ -23,4 +23,5 @@ jobs:
       - run: npm run build:web
       - run: npm run build:api
       - run: npm run check:engine-worker
-      - run: docker build -f api/Dockerfile -t hexars-api:ci .
+      - run: npm run check:gateway
+      - run: docker build -f Dockerfile.vercel -t ion-api:ci .

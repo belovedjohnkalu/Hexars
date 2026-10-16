@@ -1,7 +1,7 @@
-# HEXARS hosting migration
+# ION hosting migration
 
 Target: GitHub stores the source, Cloudflare Pages serves `web/dist`, and Supabase
-provides Postgres and Auth. The C++ engine runs in the `api/Dockerfile` Linux image.
+provides Postgres and Auth. The C++ engine runs in the `Dockerfile.vercel` Linux image.
 `cloud/engine-worker` can host that image with Cloudflare Containers. Containers
 require a Workers Paid plan; preparing these files does not purchase a plan or
 deploy a container. The image can also run on another Linux container host.
@@ -60,10 +60,13 @@ part of this migration.
 Build from the repository root:
 
 ```sh
-docker build -f api/Dockerfile -t hexars-api .
+docker build -f Dockerfile.vercel -t hexars-api .
 ```
 
 The image includes Node and a static C++ executable and runs as a non-root user.
+Its default HTTP port is 80; set `PORT` to override it. The optional Cloudflare
+container sets `PORT=8080` explicitly. Vercel configuration is documented in
+[Vercel Services](vercel-services.md).
 Set `SUPABASE_URL`, `SUPABASE_SECRET_KEY`, and a randomly generated
 `HEXARS_GATEWAY_SECRET` of at least 32 characters through the hosting secret
 store. Do not put their values in source or command-line arguments.
@@ -87,7 +90,7 @@ Connect the GitHub repository to Pages and use `main` for production. Confirm
 the actual Pages subdomain returned by Cloudflare; never assume a requested
 name is available. Test the complete preview before switching the public URL.
 
-The web manifest uses local HEXARS icons and Inter. A network-only service worker
+The web manifest uses local ION icons and Inter. A network-only service worker
 enables installation where the browser offers it. It does not cache game data,
 credentials, or promise offline play.
 

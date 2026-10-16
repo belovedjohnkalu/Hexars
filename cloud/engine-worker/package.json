@@ -1,5 +1,5 @@
 {
-  "name": "@hexars/engine-worker",
+  "name": "@ion/engine-worker",
   "version": "0.10.0",
   "private": true,
   "type": "module",

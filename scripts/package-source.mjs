@@ -5,11 +5,11 @@ import { fileURLToPath } from "node:url";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const directory = path.join(root, "artifacts");
-const archive = path.join(directory, "hexars-source.zip");
+const archive = path.join(directory, "ion-source.zip");
 mkdirSync(directory, { recursive: true });
 const child = spawn(
   "git",
-  ["archive", "--format=zip", "--prefix=hexchess/", `--output=${archive}`, "HEAD"],
+  ["archive", "--format=zip", "--prefix=ion/", `--output=${archive}`, "HEAD"],
   { cwd: root, stdio: "inherit", windowsHide: true },
 );
 child.on("error", (error) => {

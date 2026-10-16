@@ -1,7 +1,7 @@
 {
   "id": "/",
-  "name": "HEXARS",
-  "short_name": "HEXARS",
+  "name": "ION",
+  "short_name": "ION",
   "description": "Chess, a little different. A quiet place to play.",
   "start_url": "/",
   "scope": "/",

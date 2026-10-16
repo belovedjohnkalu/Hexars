@@ -69,7 +69,7 @@ export function Play({ variant }: { variant: VariantId }) {
   if (cloud.error) status = game ? "Connection lost" : "Game unavailable";
   if (data && data.game.variant !== variant) return <Navigate to={`/${data.game.variant}#${gameSessions.hash(data)}`} replace />;
   return <div className={styles.app}>
-    <AppHead title={`${name} · HEXARS`} />
+    <AppHead title={`${name} · ION`} />
     <header className={styles.header}>
       <Link to="/" className={styles.icon} aria-label="Home" title="Home"><ArrowLeft size={26} strokeWidth={1.6} /></Link>
       <h1>{name}</h1>

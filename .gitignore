@@ -14,3 +14,4 @@ artifacts/
 .dev.vars
 .dev.vars.*
 .cloudflare/
+.vercel/

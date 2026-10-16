@@ -1,5 +1,5 @@
 {
-  "name": "@hexars/api",
+  "name": "@ion/api",
   "version": "0.10.0",
   "private": true,
   "type": "module",

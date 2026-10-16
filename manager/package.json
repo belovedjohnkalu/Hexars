@@ -1,5 +1,5 @@
 {
-  "name": "@hexchess/manager",
+  "name": "@ion/manager",
   "version": "0.7.0",
   "private": true,
   "type": "module",

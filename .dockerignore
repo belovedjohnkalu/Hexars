@@ -4,6 +4,7 @@
 **/.env
 **/.env.*
 .git
+.vercel
 artifacts
 .tools
 engines/engine-*/engine-one

@@ -1,5 +1,5 @@
 {
-  "name": "@hexchess/web",
+  "name": "@ion/web",
   "version": "0.10.0",
   "private": true,
   "type": "module",

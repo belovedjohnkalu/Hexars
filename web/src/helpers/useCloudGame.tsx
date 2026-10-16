@@ -172,12 +172,12 @@ export function useCloudGame(variant: VariantId) {
     openGame: (link: string) => {
       try {
         const saved = gameSessions.fromHash(new URL(link.trim()).hash);
-        if (!saved) throw new Error("Paste a saved HEXARS game link.");
+        if (!saved) throw new Error("Paste a saved ION game link.");
         engineKey.current = "";
         credentials.current = saved;
         return perform({ action: "get", ...saved });
       } catch {
-        setError("Paste a complete saved HEXARS game link.");
+        setError("Paste a complete saved ION game link.");
         return Promise.resolve(false);
       }
     },

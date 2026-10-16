@@ -2,7 +2,7 @@ import { bindings, defineConfig, defineContainer, exports } from "cf/config";
 
 const api = defineContainer({
   name: "hexars-api",
-  image: { dockerfile: "../../api/Dockerfile", buildContext: "../.." },
+  image: { dockerfile: "../../Dockerfile.vercel", buildContext: "../.." },
   instanceType: "basic",
   maxInstances: 1,
 });

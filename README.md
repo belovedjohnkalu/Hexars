@@ -1,8 +1,18 @@
-# HEXARS · cloud edition
+# ION · hexagonal chess
 
-**Play now: https://hexars.floot.app**
+The app is now named **ION**. The legacy HEXARS release remains at
+https://hexars.floot.app until the Vercel deployment is verified.
 
 The existing live release includes Gliński and McCooey. The development source also implements Shafran and is being migrated to GitHub, Cloudflare Pages and Supabase. The new stack has not been published yet. React/TypeScript renders the board; authoritative rules and Engine 1’s search run in a standalone C++ executable on the cloud server. No local engine installation is required to play.
+
+A [Vercel Services configuration](docs/vercel-services.md) is also prepared for
+review: a public web service, a public API gateway, and a private native API.
+The gateway calls the private API through a runtime service binding. It has not
+been deployed.
+
+Historical saved-game keys, protocol identifiers and `HEXARS_` server variable
+names are preserved so the ION rename does not break existing games or hosting
+configuration. Package workspaces now use `@ion/` names.
 
 ## Install on your phone
 
@@ -15,7 +25,7 @@ Games are saved in the cloud. **Share game** lets you resume on another device; 
 
 ## Design
 
-HEXARS stands for Hearth, Embers, Xenon, Adobe, Rhombus and Sleek. The dark interface uses blue and black with frosted controls, self-hosted Inter typography and very few words. The development homepage shows three authoritative starting positions; choose a board to open `/glinski`, `/mccooey` or `/shafran`. Each game has just Home and one menu. Undo, sharing, play mode, side selection, new game and concise rules stay inside that menu.
+ION uses a dark blue and black interface with frosted controls, self-hosted Inter typography and very few words. The homepage shows three authoritative starting positions; choose a board to open `/glinski`, `/mccooey` or `/shafran`. Each game has just Home and one menu. Undo, sharing, play mode, side selection, new game and concise rules stay inside that menu.
 
 Pieces are original flat Staunton silhouettes, identical for both sides except their fill/outline colors. The board has no beveled depth, gradients or drop shadows. Inset outlines are 4 SVG units thick: mint moves, amber captures, coral checks, pale-yellow selection and bright ivory previous moves. Both endpoints of an opponent’s last move remain fully bright. Smooth movement and rotation respect reduced motion.
 
@@ -25,7 +35,7 @@ Tactical is the current cloud engine. The other five independent engines remain 
 
 - A native-authoritative 91-cell board: 36 starting pieces in Gliński, 32 in McCooey. Choose its starting board on the homepage.
 - All six piece movements, checks and pins, en passant and four promotion choices. Gliński pawns regain a double advance from friendly original pawn cells. McCooey pawns capture along bishop diagonals and double-advance only on their first move, excluding the center pawn.
-- Checkmate, Gliński fractional stalemate (¾–¼), McCooey equal stalemate (½–½), automatic threefold repetition, the fifty-move rule, and automatic material draws. HEXARS now ends in a ½–½ draw when each side has only its king plus at most one bishop, knight, or rook. Pawns, queens, or two pieces on either side prevent this house-rule draw; an already-delivered checkmate wins. Gliński and McCooey have no castling; Shafran supports short and long castling on both flanks.
+- Checkmate, Gliński fractional stalemate (¾–¼), McCooey equal stalemate (½–½), automatic threefold repetition, the fifty-move rule, and automatic material draws. ION ends in a ½–½ draw when each side has only its king plus at most one bishop, knight, or rook. Pawns, queens, or two pieces on either side prevent this house-rule draw; an already-delivered checkmate wins. Gliński and McCooey have no castling; Shafran supports short and long castling on both flanks.
 - Human versus Tactical as White or Black, or a shared two-player board.
 - Separate saved games per variant, shared links, undo, automatic pass-and-play orientation, promotion and keyboard/touch controls.
 - Tactical: material and positional evaluation, iterative-deepening alpha-beta, capture ordering, bounded quiescence, and time/node limits. Current hosted budget: 750 ms, maximum depth 3 and 30,000 nodes.
@@ -85,8 +95,8 @@ McCooey native tests passed 4,302 assertions over 4,162 random plies, nine compl
 
 Published-site browser checks verified real C++ replies, both human sides, a complete seven-ply historical checkmate, undo, cross-device resume, mobile layout, themes, and installation metadata/instructions. See [progress](docs/progress.md) for each published release and its browser evidence. Actual installation on a physical iPhone/Android device is not automated by those checks.
 
-`npm run package:source` exports the current Git commit to `artifacts/hexars-source.zip`, excluding dependencies and compiled binaries.
+`npm run package:source` exports the current Git commit to `artifacts/ion-source.zip`, excluding dependencies and compiled binaries.
 
 Browser install offers are retained in an app-level FIFO queue across page changes and menu closure. Only an explicit attempt that obtains the browser choice consumes an offer. Failed attempts stay available for retry. This concerns the website’s browser events; the app cannot alter ChatGPT’s message queue.
 
-Development 0.9.0: tap a selected piece again to deselect. Moves glide for 480ms before the pass-and-play board rotates for 560ms; reduced motion skips the delay. The homepage places the existing HEXARS logo beside the wordmark. Shafran includes its 70-cell board, 36-piece setup, oblique a–i notation, pawn initial advances up to three hexagons, both crossed en-passant cells, four castling choices per side, promotion, legal search and drawn stalemate. No suggested extra features were added. See [Shafran](docs/variants/shafran.md) and [pending release](docs/release-0.9.md).
+Development 0.9.0: tap a selected piece again to deselect. Moves glide for 480ms before the pass-and-play board rotates for 560ms; reduced motion skips the delay. The homepage places the geometric logo beside the wordmark. Shafran includes its 70-cell board, 36-piece setup, oblique a–i notation, pawn initial advances up to three hexagons, both crossed en-passant cells, four castling choices per side, promotion, legal search and drawn stalemate. No suggested extra features were added. See [Shafran](docs/variants/shafran.md) and [pending release](docs/release-0.9.md).

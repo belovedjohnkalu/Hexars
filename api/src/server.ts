@@ -57,7 +57,7 @@ const server = createServer(async (incoming, outgoing) => {
 });
 server.requestTimeout = 15000;
 server.headersTimeout = 10000;
-server.listen(Number(process.env.PORT || 8080), "0.0.0.0", () => console.log("HEXARS API ready"));
+server.listen(Number(process.env.PORT || 8080), "0.0.0.0", () => console.log("ION API ready"));
 for (const signal of ["SIGTERM", "SIGINT"] as const) {
   process.once(signal, () => {
     server.close(() => process.exit(0));

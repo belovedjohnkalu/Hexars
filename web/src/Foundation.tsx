@@ -118,7 +118,7 @@ export default function App() {
             event.preventDefault();
             setPage("board");
           }}
-          aria-label="HexChess board"
+          aria-label="ION board"
         >
           <span className="brand-mark">
             <Icon name="board" size={28} />
@@ -536,7 +536,7 @@ export default function App() {
               React + TypeScript <span className="footer-arrow">↔</span> Node.js manager{" "}
               <span className="footer-arrow">↔</span> C++ engine
             </span>
-            <span className="footer-version">HexChess / 0.1.0</span>
+            <span className="footer-version">ION / 0.1.0</span>
           </footer>
         </main>
       </div>

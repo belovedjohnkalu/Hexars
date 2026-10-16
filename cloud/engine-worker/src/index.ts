@@ -12,6 +12,7 @@ export class HexarsApi extends Container<Env> {
   constructor(ctx: DurableObjectState<{}>, env: Env) {
     super(ctx, env);
     this.envVars = {
+      PORT: "8080",
       SUPABASE_URL: env.SUPABASE_URL,
       SUPABASE_SECRET_KEY: env.SUPABASE_SECRET_KEY,
       HEXARS_GATEWAY_SECRET: env.HEXARS_GATEWAY_SECRET,
