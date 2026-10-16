@@ -3,7 +3,7 @@ import type { CloudNode } from "../endpoints/cloud_POST.schema";
 const seed: CloudNode[] = [
   { id: "hexagonal-chess", parentId: null, name: "Hexagonal Chess", imageUrl: "/_cdn/static/9522e791-e7fa-41d6-867c-2d4013eb3982-hexars-dark-512.png" },
   { id: "engines", parentId: "hexagonal-chess", name: "Engines" },
-  { id: "tactical", parentId: "engines", name: "Tactical", note: "Looks for threats, captures and combinations. Runs in the cloud." },
+  { id: "tactical", parentId: "engines", name: "Tactical", note: "Plays for threats, captures and combinations." },
   { id: "rules", parentId: "hexagonal-chess", name: "Rules" },
   { id: "glinski-rules", parentId: "rules", name: "Gliński", note: "91 cells. Tap a piece, then a marked hexagon. Pawns capture to either forward side. A starting pawn cell allows a two-step advance. No castling. Promote at the far edge. En passant lasts one turn. Stalemate scores ¾–¼." },
   { id: "mccooey-rules", parentId: "rules", name: "McCooey", note: "91 cells. Pawns capture through corners. Unmoved pawns may advance twice, except the central pawn, as specified by McCooey’s rules. No castling. Promote at the far edge. En passant lasts one turn. Stalemate scores ½–½." },

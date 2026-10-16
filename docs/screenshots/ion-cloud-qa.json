@@ -1,6 +1,6 @@
 {
   "origin": "https://hexars.floot.app",
-  "date": "2026-10-16T05:04:06.078Z",
+  "date": "2026-10-16T05:34:21.737Z",
   "checks": [
     "ION root opens with Hexagonal Chess image",
     "A → B → C hierarchy, independent sibling D, and 0–100 sizing",
@@ -18,48 +18,7 @@
     "The game menu switches to McCooey pass-and-play",
     "Desktop layout stays within the screen",
     "Reduced motion removes transitions",
-    "No browser runtime errors",
-    "Centered cloud at 320, 393, 820 and 1280 px",
-    "Missing clouds offer a return path"
+    "No browser runtime errors"
   ],
-  "errors": [],
-  "finalLayoutChecks": [
-    {
-      "width": 393,
-      "height": 852,
-      "scroll": 632,
-      "visible": 632,
-      "center": 381.99998474121094,
-      "expectedCenter": 382,
-      "inBounds": true
-    },
-    {
-      "width": 320,
-      "height": 740,
-      "scroll": 520,
-      "visible": 520,
-      "center": 325.99999237060547,
-      "expectedCenter": 326,
-      "inBounds": true
-    },
-    {
-      "width": 820,
-      "height": 1180,
-      "scroll": 944,
-      "visible": 944,
-      "center": 547.9959411621094,
-      "expectedCenter": 548,
-      "inBounds": true
-    },
-    {
-      "width": 1280,
-      "height": 900,
-      "scroll": 655,
-      "visible": 655,
-      "center": 412.2928161621094,
-      "expectedCenter": 412.3984375,
-      "inBounds": true
-    }
-  ],
-  "finalPublishedCheck": "2026-10-16T05:06:17.710Z"
+  "errors": []
 }

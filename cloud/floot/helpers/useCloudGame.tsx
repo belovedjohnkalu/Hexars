@@ -92,6 +92,7 @@ export function useCloudGame(variant: VariantId, defaultMode: "engine" | "two_pl
     const timer = setTimeout(() => {
       const linked = gameSessions.fromHash();
       const saved = linked || gameSessions.stored(variant, defaultMode);
+      engineKey.current = "";
       credentials.current = saved;
       void perform(
         saved ? { action: "get", ...saved } : { action: "new", mode: defaultMode, humanPlayer: 0, variant },

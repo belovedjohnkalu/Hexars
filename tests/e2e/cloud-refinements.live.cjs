@@ -1,0 +1,27 @@
+const {chromium}=require('playwright');
+const assert=require('node:assert/strict');
+const fs=require('node:fs');
+(async()=>{
+ const browser=await chromium.launch({headless:true,executablePath:process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE||'/usr/bin/chromium',args:['--no-sandbox'],proxy:{server:process.env.HTTPS_PROXY||'http://proxy:8080'}});
+ const context=await browser.newContext({viewport:{width:393,height:852},isMobile:true,hasTouch:true});
+ const page=await context.newPage(),checks=[];const ok=x=>{checks.push(x);console.log('PASS',x);};
+ await page.goto(process.env.ION_TEST_ORIGIN||'https://hexars.floot.app',{waitUntil:'networkidle'});
+ const input=()=>page.getByLabel('Add a word or a picture name',{exact:true});
+ const item=n=>page.locator('[data-node-id]').filter({has:page.locator('span',{hasText:new RegExp('^'+n+'$')})});
+ const add=async n=>{await input().fill(n);await page.getByRole('button',{name:'Add',exact:true}).click();await item(n).waitFor();};
+ await input().fill('Draft survives');await page.reload({waitUntil:'networkidle'});assert.equal(await input().inputValue(),'Draft survives');ok('Text draft survives reload');
+ await add('Branch');await item('Branch').click();await page.waitForFunction(()=>document.querySelector('h1')?.textContent==='Branch');await add('Child');
+ await page.getByRole('button',{name:'Cloud options for Branch',exact:true}).click();await page.getByRole('menuitem',{name:'Rename',exact:true}).click();
+ await page.getByLabel('Cloud name',{exact:true}).fill('Renamed');await page.getByRole('button',{name:'Save',exact:true}).click();await page.waitForFunction(()=>document.querySelector('h1')?.textContent==='Renamed');ok('Rename preserves children');
+ await page.getByRole('button',{name:'Cloud options for Renamed',exact:true}).click();await page.getByRole('menuitem',{name:'Remove',exact:true}).click();
+ await page.getByRole('dialog').waitFor();assert.equal(await page.getByRole('button',{name:'Keep cloud',exact:true}).evaluate(e=>e===document.activeElement),true);
+ await page.getByRole('button',{name:'Keep cloud',exact:true}).click();await item('Child').waitFor();ok('Branch removal confirms and defaults to Keep cloud');
+ await page.getByRole('button',{name:'Cloud options for Renamed',exact:true}).click();await page.getByRole('menuitem',{name:'Remove',exact:true}).click();await page.getByRole('button',{name:'Remove',exact:true}).click();
+ await page.waitForFunction(()=>document.querySelector('h1')?.textContent==='ION');await page.reload({waitUntil:'networkidle'});
+ await page.getByRole('button',{name:'Cloud options for ION',exact:true}).click();await page.getByRole('menuitem',{name:/Undo/}).click();await item('Renamed').waitFor();await item('Renamed').click();await item('Child').waitFor();ok('Undo after reload restores whole branch');
+ await page.addScriptTag({path:require.resolve('axe-core/axe.min.js')});
+ const violations=await page.evaluate(async()=> (await axe.run(document,{runOnly:{type:'tag',values:['wcag2a','wcag2aa','wcag21aa']}})).violations.map(v=>({id:v.id,impact:v.impact,nodes:v.nodes.map(n=>n.target)})));
+ console.log('AXE',JSON.stringify(violations));assert.equal(violations.length,0);ok('Cloud passes automated WCAG checks');
+ fs.writeFileSync('docs/screenshots/ion-refinements-qa.json',JSON.stringify({date:new Date().toISOString(),checks,violations},null,2));
+ await browser.close();
+})().catch(e=>{console.error(e);process.exit(1)});

@@ -2,7 +2,7 @@ import { Helmet } from "react-helmet";
 import { preload } from "react-dom";
 export function AppHead({ title = "ION" }: { title?: string }) {
   preload("/_cdn/static/6e6c9250-599e-4bf4-a9ae-66ff948afb59-InterVariable.woff2", { as: "font", type: "font/woff2", crossOrigin: "anonymous" });
-  return <Helmet>
+  return <Helmet htmlAttributes={{lang:"en"}}>
     <title>{title}</title>
     <meta name="description" content="A space for your thoughts. Open a cloud and explore." />
     <meta name="theme-color" content="#050810" />

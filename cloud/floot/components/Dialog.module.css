@@ -45,8 +45,8 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 32px;
-    height: 32px;
+    width: 44px;
+    height: 44px;
     border-radius: 50%;
     background: var(--secondary);
 
@@ -62,6 +62,7 @@
     background: var(--muted);
     color: var(--foreground);
   }
+  .close:disabled { opacity: .35; cursor: default; }
   .close:active {
     transform: scale(0.92);
   }

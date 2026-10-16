@@ -53,7 +53,7 @@ Glass is reserved for the add bar and existing game sheets. Words float directly
 Use existing radius tokens, circular utility buttons, and a long pill composer. Pictures retain their shape within a rounded image frame. Chess move indicators remain thick inset hexagons.
 
 ## Components
-Canonical owners: Button, Input, Form, Dialog and InstallControl. CloudCanvas owns spatial navigation; CloudComposer owns creation and validation; useCloudSpace owns async state and retry. Loading uses HexLoading. Status announcements use a polite live region and failures remain visible above the composer. Main scrollbars inherit the global base.css baseline including forced-colors behavior.
+Canonical owners: Button, Input, Form, Dialog, RadioGroup, DropdownMenu and InstallControl. The title is a restrained disclosure for ancestry, Rename, Remove and Undo; keep these controls out of the canvas. CloudCanvas owns spatial navigation; CloudComposer owns creation and validation; useCloudSpace owns async state and retry. Loading uses HexLoading. Status announcements use a polite live region and failures remain visible above the composer. Main scrollbars inherit the global base.css baseline including forced-colors behavior.
 
 Links have visible focus, hover and pressed states. Disabled submit controls retain their footprint. Upload accepts PNG/JPEG/WebP/GIF up to 3 MB, shows an attachment preview, preserves drafts on error, and transfers file bytes directly to private storage. Native file-picker geometry is intentionally OS-owned.
 

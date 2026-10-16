@@ -2,6 +2,7 @@ import { createHash } from "node:crypto";
 import { upload, getUrl, getInfo } from "@floot/storage";
 import { db } from "../helpers/db";
 import { cloudTree } from "../helpers/cloudTree";
+import { cloudChanges } from "../helpers/cloudChanges";
 import { schema, type CloudNode, type OutputType } from "./cloud_POST.schema";
 import type { Json } from "../helpers/schema";
 const headers = { "Content-Type": "application/json", "Cache-Control": "private, no-store" };
@@ -24,7 +25,7 @@ export async function handle(request: Request) {
     if (!row) throw new CloudError("This space is unavailable.", 404);
     let nodes = (Array.isArray(row.nodes) ? row.nodes : []) as unknown as CloudNode[];
     let version = row.version;
-    const all = [...cloudTree.seed, ...nodes];
+    const all = [...cloudTree.seed, ...nodes.filter(n=>!n.removedBy)];
     if (input.action === "upload") {
       if (nodes.length >= 1500) throw new CloudError("This space is full.", 400);
       const filename = "ion/" + row.id + "/" + input.id + "." + extensions[input.contentType];
@@ -35,6 +36,7 @@ export async function handle(request: Request) {
     if (input.action === "add") {
       // A retry of the same creation is safe even after another tab changes the version.
       const existing = nodes.find(n => n.id === input.id);
+      if(existing?.removedBy)throw new CloudError("This item was removed. Edit its name to add it again.",409);
       if (!existing) {
         if (input.version !== row.version) throw new CloudError("Your space changed in another tab. Try again.", 409);
         if (nodes.length >= 1500) throw new CloudError("This space is full.", 400);
@@ -55,16 +57,24 @@ export async function handle(request: Request) {
         version = updated.version;
       }
     }
+    if(input.action==="rename"||input.action==="remove"||input.action==="restore"){
+      const next=cloudChanges.apply(nodes,input,row.version);
+      if(next!==nodes){
+        const updated=await db.updateTable("ionWorkspaces").set({nodes:next as unknown as Json,version:row.version+1,updatedAt:new Date()}).where("id","=",row.id).where("version","=",row.version).returning("version").executeTakeFirst();
+        if(!updated)throw new CloudError("Your space changed. Try again.",409);
+        nodes=next;version=updated.version;
+      }
+    }
     // Signed picture URLs are refreshed on every read, and never stored as authority.
-    const visible = await Promise.all([...cloudTree.seed, ...nodes].map(async node => {
+    const visible = await Promise.all([...cloudTree.seed, ...nodes.filter(n=>!n.removedBy)].map(async node => {
       if (!node.imageKey) return node;
       const result = await getUrl({ visibility: "private", filename: node.imageKey, expiresInSeconds: 3600 });
-      return { ...node, imageKey: undefined, imageUrl: result.ok ? result.url : undefined };
+      return { ...node, isImage: true, imageKey: undefined, imageUrl: result.ok ? result.url : undefined };
     }));
-    return new Response(JSON.stringify({ nodes: visible, version } satisfies OutputType), { headers });
+    return new Response(JSON.stringify({ nodes: visible, version, undo: cloudChanges.undo(nodes) } satisfies OutputType), { headers });
   } catch (error) {
-    const status = error instanceof CloudError ? error.status : error instanceof SyntaxError || (error && typeof error === "object" && "issues" in error) ? 400 : 503;
+    const status = error instanceof Error && "status" in error && typeof error.status === "number" ? error.status : error instanceof SyntaxError || (error && typeof error === "object" && "issues" in error) ? 400 : 503;
     if (status === 503) console.error("ION space request failed", error instanceof Error ? error.message : "Unknown error");
-    return new Response(JSON.stringify({ error: status === 503 ? "Couldn’t open your space. Try again." : error instanceof CloudError ? error.message : "Check your word or picture and try again." }), { status, headers });
+    return new Response(JSON.stringify({ error: status === 503 ? "Couldn’t open your space. Try again." : error instanceof Error && "status" in error ? error.message : "Check your word or picture and try again." }), { status, headers });
   }
 }

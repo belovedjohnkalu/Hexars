@@ -6,3 +6,5 @@
 
 .button { background: var(--glass); border: 1px solid var(--glass-border); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); transition: background-color 280ms ease, opacity 280ms ease, transform 360ms var(--ease); }
 .button:active { transform: scale(.95); }
+.button:focus-visible { outline: 2px solid var(--primary); outline-offset: 3px; }
+.srOnly { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }

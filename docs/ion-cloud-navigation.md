@@ -18,7 +18,7 @@ Custom content is stored on Floot's server. A random browser capability protects
 its workspace; only its SHA-256 hash is stored in the database. Uploaded pictures
 go directly to private storage using presigned transfers. The browser holds the
 workspace capability, so clearing its storage loses access. Account sync,
-workspace sharing, deletion and reparenting are not included in this release.
+workspace sharing and reparenting are not included in this release.
 Chess game links keep their existing sharing behavior.
 
 Source: `cloud/floot` mirrors Floot's virtual items, which run with Floot's seeded
@@ -29,7 +29,7 @@ under `cloud/floot/migrations`. Design and behavior contracts are in
 ## Verification
 
 - Floot TypeScript check: clean.
-- Six Jasmine spec files pass, including hierarchy and sizing, layout at narrow
+- Eight Jasmine spec files pass, including hierarchy and sizing, layout at narrow
   widths, form behavior, IME handling, failed-save retries, stale background reads,
   theme and media-query behavior.
 - Native API checks pass for both variants: initial board, two legal moves,
@@ -49,3 +49,23 @@ The live browser test requires Playwright and Chromium. Set
 `ION_TEST_ORIGIN` to test another Floot address. It writes only to a new isolated
 anonymous workspace. Real iPhone keyboard behavior still benefits from testing
 on hardware; the implementation follows VisualViewport and safe-area insets.
+
+## Experience refinements — 16 October 2026
+
+The title menu exposes ancestry, rename, removal and persistent Undo. Removing a
+branch confirms its child count; its stored content and pictures remain recoverable.
+Text drafts survive tab reloads, picture drafts have an unload guard, uploads can
+be stopped, and failed submissions retain their content. Back restores the original
+word and scroll position. Keyboard focus, modal close targets, image fallbacks,
+long-label layout and visual viewport handling use the shared component system.
+
+Chess menus use accessible opponent/side radios. Replacing a played game requires
+confirmation; failed promotions remain open. Piece movement finishes before
+pass-and-play rotation. Shared-link guidance explains that recipients can move pieces.
+
+Production regression checks cover the complete word/picture-to-chess journey.
+Additional live checks cover draft reload, rename, branch confirmation, Undo after
+reload, and automated WCAG checks. The game menu has no automated WCAG violations;
+Keep playing preserves the board and Tactical correctly opens when playing Black.
+The Premium packaged audit script was unavailable; no formal script result is claimed.
+Real device testing remains useful for iPhone keyboard and installation behavior.
