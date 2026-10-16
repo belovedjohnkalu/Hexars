@@ -88,3 +88,12 @@ body { margin: 0; color: var(--foreground); font-family: var(--font-family-base)
 ::selection { background: #74b9ff45; color: #ffffff; }
 @keyframes hexarsEnter { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: 0s !important; scroll-behavior: auto !important; } }
+
+:root { --glass-solid: #101b2cdb; --scrollbar-thumb: #4c6489; --scrollbar-track: #080e1b; --scrollbar-hover: #98aac5; }
+* { scrollbar-width: thin; scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track); }
+*::-webkit-scrollbar { width: 8px; height: 8px; }
+*::-webkit-scrollbar-track { background: var(--scrollbar-track); }
+*::-webkit-scrollbar-thumb { background: var(--scrollbar-thumb); border: 2px solid var(--scrollbar-track); border-radius: var(--radius-full); }
+*::-webkit-scrollbar-thumb:hover { background: var(--scrollbar-hover); }
+*::-webkit-scrollbar-thumb:active { background: var(--primary); }
+@media (forced-colors: active) { * { scrollbar-color: auto; } }

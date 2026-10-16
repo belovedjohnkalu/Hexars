@@ -10,7 +10,7 @@ import {
 import { gameSessions } from "./gameSessions";
 type Credentials = { gameId: string; accessToken: string };
 
-export function useCloudGame(variant: VariantId) {
+export function useCloudGame(variant: VariantId, defaultMode: "engine" | "two_players" = "engine") {
   const [data, setData] = useState<OutputType | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -47,7 +47,7 @@ export function useCloudGame(variant: VariantId) {
         if (initialVariant && result.game.variant !== initialVariant) {
           // Keep the old variant's game before opening the requested variant.
           gameSessions.save(result);
-          result = await postGame({ action: "new", mode: "engine", humanPlayer: 0, variant: initialVariant }, { signal: abort.signal });
+          result = await postGame({ action: "new", mode: defaultMode, humanPlayer: 0, variant: initialVariant }, { signal: abort.signal });
           if (sequence !== requestSequence.current) return false;
         }
         accept(result);
@@ -85,16 +85,16 @@ export function useCloudGame(variant: VariantId) {
         if (sequence === requestSequence.current) setBusy(false);
       }
     },
-    [accept],
+    [accept, defaultMode],
   );
 
   useEffect(() => {
     const timer = setTimeout(() => {
       const linked = gameSessions.fromHash();
-      const saved = linked || gameSessions.stored(variant);
+      const saved = linked || gameSessions.stored(variant, defaultMode);
       credentials.current = saved;
       void perform(
-        saved ? { action: "get", ...saved } : { action: "new", mode: "engine", humanPlayer: 0, variant },
+        saved ? { action: "get", ...saved } : { action: "new", mode: defaultMode, humanPlayer: 0, variant },
         linked ? undefined : variant,
       );
     }, 0);
@@ -103,7 +103,7 @@ export function useCloudGame(variant: VariantId) {
       controller.current?.abort();
       ++requestSequence.current;
     };
-  }, [perform, variant]);
+  }, [perform, variant, defaultMode]);
 
   useEffect(() => {
     if (
@@ -172,12 +172,12 @@ export function useCloudGame(variant: VariantId) {
     openGame: (link: string) => {
       try {
         const saved = gameSessions.fromHash(new URL(link.trim()).hash);
-        if (!saved) throw new Error("Paste a saved HEXARS game link.");
+        if (!saved) throw new Error("Paste a saved Hexagonal Chess game link.");
         engineKey.current = "";
         credentials.current = saved;
         return perform({ action: "get", ...saved });
       } catch {
-        setError("Paste a complete saved HEXARS game link.");
+        setError("Paste a complete saved Hexagonal Chess game link.");
         return Promise.resolve(false);
       }
     },
@@ -188,7 +188,7 @@ export function useCloudGame(variant: VariantId) {
       return perform(
         credentials.current
           ? { action: "get", ...credentials.current }
-          : { action: "new", mode: "engine", humanPlayer: 0, variant },
+          : { action: "new", mode: defaultMode, humanPlayer: 0, variant },
       );
     },
   };

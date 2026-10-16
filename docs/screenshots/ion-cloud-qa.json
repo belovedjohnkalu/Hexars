@@ -1,0 +1,65 @@
+{
+  "origin": "https://hexars.floot.app",
+  "date": "2026-10-16T05:04:06.078Z",
+  "checks": [
+    "ION root opens with Hexagonal Chess image",
+    "A → B → C hierarchy, independent sibling D, and 0–100 sizing",
+    "Nested words persist after reload",
+    "Ancestor size grows with grandchildren",
+    "Picture upload is saved and rendered",
+    "A picture opens its own empty cloud",
+    "Offline save preserves draft and retries once",
+    "Engines opens the implemented Tactical engine",
+    "Rules opens both available variants",
+    "Boards opens a 91-cell pass-and-play game",
+    "Tapping a selected piece twice deselects it",
+    "A move advances pass-and-play without an engine reply",
+    "Pass-and-play flips the board for Black",
+    "The game menu switches to McCooey pass-and-play",
+    "Desktop layout stays within the screen",
+    "Reduced motion removes transitions",
+    "No browser runtime errors",
+    "Centered cloud at 320, 393, 820 and 1280 px",
+    "Missing clouds offer a return path"
+  ],
+  "errors": [],
+  "finalLayoutChecks": [
+    {
+      "width": 393,
+      "height": 852,
+      "scroll": 632,
+      "visible": 632,
+      "center": 381.99998474121094,
+      "expectedCenter": 382,
+      "inBounds": true
+    },
+    {
+      "width": 320,
+      "height": 740,
+      "scroll": 520,
+      "visible": 520,
+      "center": 325.99999237060547,
+      "expectedCenter": 326,
+      "inBounds": true
+    },
+    {
+      "width": 820,
+      "height": 1180,
+      "scroll": 944,
+      "visible": 944,
+      "center": 547.9959411621094,
+      "expectedCenter": 548,
+      "inBounds": true
+    },
+    {
+      "width": 1280,
+      "height": 900,
+      "scroll": 655,
+      "visible": 655,
+      "center": 412.2928161621094,
+      "expectedCenter": 412.3984375,
+      "inBounds": true
+    }
+  ],
+  "finalPublishedCheck": "2026-10-16T05:06:17.710Z"
+}

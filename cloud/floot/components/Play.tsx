@@ -1,5 +1,5 @@
-import { useEffect, useRef, useState, type CSSProperties } from "react";
-import { Link, Navigate } from "react-router-dom";
+import { useEffect, useRef, useState } from "react";
+import { Link, Navigate, useLocation, useNavigate } from "react-router-dom";
 import { AppHead } from "./AppHead";
 import { ArrowLeft, MoreHorizontal, Undo2, Share2, Check } from "lucide-react";
 import type { ChessMove, Hex, VariantId } from "../endpoints/game_POST.schema";
@@ -12,13 +12,14 @@ import { ChessPiece } from "./ChessPiece";
 import { InstallControl } from "./InstallControl";
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from "./Dialog";
 import { HexLoading } from "./HexLoading";
-import { useBoardFacing } from "../helpers/useBoardFacing";
 import styles from "./Play.module.css";
 const key = (hex: Hex) => `${hex.q},${hex.r}`;
 export function Play({ variant }: { variant: VariantId }) {
   useInstallApp(); // Capture browser offers even while the menu is closed.
-  const cloud = useCloudGame(variant), data = cloud.data, game = data?.game;
-  const name = { glinski: "Gliński", mccooey: "McCooey", shafran: "Shafran" }[variant];
+  const location = useLocation(), navigate = useNavigate();
+  const defaultMode = new URLSearchParams(location.search).get("mode") === "friend" ? "two_players" : "engine";
+  const cloud = useCloudGame(variant, defaultMode), data = cloud.data, game = data?.game;
+  const name = variant === "glinski" ? "Gliński" : "McCooey";
   const [selected, setSelected] = useState<Hex | null>(null);
   const [menu, setMenu] = useState(false);
   const [mode, setMode] = useState<"engine" | "two_players">("engine");
@@ -28,10 +29,8 @@ export function Play({ variant }: { variant: VariantId }) {
   const copiedTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const ended = !!game && game.result.status !== "ongoing";
   const thinking = !!data && data.mode === "engine" && game?.activePlayer !== data.humanPlayer && !ended;
-  const targetFlipped = data?.mode === "two_players" ? game?.activePlayer === 1 : data?.humanPlayer === 1;
-  const facing = useBoardFacing(data?.gameId, game?.ply, targetFlipped);
-  const canPlay = !!game && !ended && !cloud.busy && !cloud.error && !thinking && !facing.turning;
-  const flipped = facing.flipped;
+  const canPlay = !!game && !ended && !cloud.busy && !cloud.error && !thinking;
+  const flipped = data?.mode === "two_players" ? game?.activePlayer === 1 : data?.humanPlayer === 1;
   const candidates = game?.legalMoves.filter(move => selected && key(move.from) === key(selected)) || [];
   const lastMove = data?.moves.at(-1);
   const canUndo = !!data?.moves.length && !cloud.busy && (data.mode === "two_players" || data.moves.some(move => move.player === data.humanPlayer));
@@ -45,8 +44,7 @@ export function Play({ variant }: { variant: VariantId }) {
       const move = moves[0]; setSelected(null);
       void cloud.play({ from: move.from, to: move.to, ...(move.promotion ? { promotion: move.promotion } : {}) });
     } else {
-      const ownPiece = game.board.cells.find(cell => key(cell) === key(hex))?.piece?.player === game.activePlayer;
-      setSelected(current => ownPiece && (!current || key(current) !== key(hex)) ? hex : null);
+      setSelected(selected && key(selected) === key(hex) ? null : game.board.cells.find(cell => key(cell) === key(hex))?.piece?.player === game.activePlayer ? hex : null);
     }
   }
   async function share() {
@@ -69,16 +67,16 @@ export function Play({ variant }: { variant: VariantId }) {
   if (cloud.error) status = game ? "Connection lost" : "Game unavailable";
   if (data && data.game.variant !== variant) return <Navigate to={`/${data.game.variant}#${gameSessions.hash(data)}`} replace />;
   return <div className={styles.app}>
-    <AppHead title={`${name} · HEXARS`} />
+    <AppHead title={`${name} · Hexagonal Chess`} />
     <header className={styles.header}>
-      <Link to="/" className={styles.icon} aria-label="Home" title="Home"><ArrowLeft size={26} strokeWidth={1.6} /></Link>
+      <Link to="/?cloud=hexagonal-chess" className={styles.icon} aria-label="Back to Hexagonal Chess" title="Back"><ArrowLeft size={26} strokeWidth={1.6} /></Link>
       <h1>{name}</h1>
       <button className={styles.icon} aria-label="Game menu" title="Game menu" onClick={() => { setMode(data?.mode === "two_players" ? "two_players" : "engine"); setSide(data?.humanPlayer === 1 ? 1 : 0); setMenu(true); }}><MoreHorizontal size={28} /></button>
     </header>
     <main className={styles.main}>
       <div className={styles.status} role="status" aria-live="polite"><span key={status}>{status}</span>{thinking && <span className={styles.pulse} aria-hidden="true" />}</div>
-      <div className={styles.board} style={{ "--board-ratio": variant === "shafran" ? .8 : 484/548, aspectRatio: variant === "shafran" ? "400 / 500" : "484 / 548" } as CSSProperties}>
-        {game ? <CloudBoard key={data?.gameId} game={game} selected={selected} onCell={chooseCell} flipped={flipped} coordinates={false} theme="grove" lastMove={lastMove} disabled={!canPlay} /> : <div className={styles.loading}><HexLoading /></div>}
+      <div className={styles.board}>
+        {game ? <CloudBoard game={game} selected={selected} onCell={chooseCell} flipped={flipped} coordinates={false} theme="grove" lastMove={lastMove} disabled={!canPlay} /> : <div className={styles.loading}><HexLoading /></div>}
       </div>
       {ended && <p className={styles.result}>{game?.result.status === "checkmate" ? "Checkmate" : game?.result.status === "stalemate" && variant === "glinski" ? "¾–¼" : "½–½"}</p>}
       {cloud.error && <button className={styles.retry} onClick={() => void cloud.refresh()} disabled={cloud.busy}>Retry</button>}
@@ -86,7 +84,7 @@ export function Play({ variant }: { variant: VariantId }) {
     </main>
     <Dialog open={menu} onOpenChange={setMenu}>
       <DialogContent className={styles.sheet}>
-        <DialogTitle className={styles.sheetTitle}>Play</DialogTitle>
+        <DialogTitle className={styles.sheetTitle}>Hexagonal Chess</DialogTitle>
         <DialogDescription className={styles.srOnly}>Game controls</DialogDescription>
         <div className={styles.tools}>
           <button aria-label="Undo" disabled={!canUndo} onClick={() => { void cloud.undo(); setMenu(false); }}><Undo2 size={25} /><span>Undo</span></button>
@@ -94,6 +92,9 @@ export function Play({ variant }: { variant: VariantId }) {
           <InstallControl text />
         </div>
         {shareLink && <input className={styles.link} aria-label="Game link" readOnly value={shareLink} onFocus={event => event.target.select()} />}
+        <div className={styles.segmented} role="group" aria-label="Board">
+          {(["glinski", "mccooey"] as const).map(id => <Link key={id} style={{ flex: 1, textAlign: "center", padding: "12px", color: variant === id ? "var(--foreground)" : "var(--muted-foreground)", textDecoration: "none", fontSize: "20px" }} to={"/"+id+(data?.mode === "two_players" ? "?mode=friend" : "")} aria-current={id === variant ? "page" : undefined}>{id === "glinski" ? "Gliński" : "McCooey"}</Link>)}
+        </div>
         <div className={styles.segmented} role="group" aria-label="Opponent">
           <button aria-pressed={mode === "engine"} onClick={() => setMode("engine")}>Tactical</button>
           <button aria-pressed={mode === "two_players"} onClick={() => setMode("two_players")}>Friend</button>
@@ -105,13 +106,13 @@ export function Play({ variant }: { variant: VariantId }) {
             <span><ChessPiece type="king" player={player} /></span>{player === 0 ? "White" : "Black"}
           </label>)}
         </fieldset>}
-        <button className={styles.primary} disabled={cloud.busy} onClick={() => void cloud.newGame(mode, side, variant).then(ok => { if (ok) setMenu(false); })}>New game</button>
+        <button className={styles.primary} disabled={cloud.busy} onClick={() => void cloud.newGame(mode, side, variant).then(ok => { if (ok) { setMenu(false); navigate("/"+variant+(mode === "two_players" ? "?mode=friend" : ""), {replace:true}); } })}>New game</button>
         <details className={styles.rules}>
           <summary>Rules</summary>
           <p>Tap a piece, then a marked hexagon.</p>
-          <p>{variant === "shafran" ? "Pawns capture through corners. On their first move, pawns can advance to the middle of their file." : variant === "mccooey" ? "Pawns capture through corners. Only unmoved pawns can advance twice; the center pawn cannot." : "Pawns capture to either forward side. A starting pawn cell allows a two-step advance."}</p>
-          <p>{variant === "shafran" ? "Short or long castling on either side." : "No castling."} Promote at the far edge. En passant lasts one turn.</p>
-          <p>{variant === "glinski" ? "Stalemate: ¾–¼." : "Stalemate: ½–½."} Bare kings, or a king with at most one bishop, knight or rook per side: ½–½. Pawns, queens or extra pieces keep play going.</p>
+          <p>{variant === "mccooey" ? "Pawns capture through corners. Only unmoved pawns can advance twice; the center pawn cannot." : "Pawns capture to either forward side. A starting pawn cell allows a two-step advance."}</p>
+          <p>No castling. Promote at the far edge. En passant lasts one turn.</p>
+          <p>{variant === "mccooey" ? "Stalemate: ½–½." : "Stalemate: ¾–¼."} Bare kings, or a king with at most one bishop, knight or rook per side: ½–½. Pawns, queens or extra pieces keep play going.</p>
         </details>
       </DialogContent>
     </Dialog>

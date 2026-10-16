@@ -1,8 +1,8 @@
 {
   "id": "/",
-  "name": "HEXARS",
-  "short_name": "HEXARS",
-  "description": "Chess, a little different. A quiet place to play.",
+  "name": "ION",
+  "short_name": "ION",
+  "description": "Clouds for your thoughts. Hexagonal Chess, ready to play.",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",

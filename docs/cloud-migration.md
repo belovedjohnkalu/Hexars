@@ -1,5 +1,10 @@
 # ION hosting migration
 
+**Paused:** the user chose to continue with Floot. ION's current cloud navigation
+and Hexagonal Chess experience are live at https://hexars.floot.app, with their
+Floot source mirrored in `cloud/floot`. The provider configuration below is
+prepared migration work, not the active deployment.
+
 Target: GitHub stores the source, Cloudflare Pages serves `web/dist`, and Supabase
 provides Postgres and Auth. The C++ engine runs in the `Dockerfile.vercel` Linux image.
 `cloud/engine-worker` can host that image with Cloudflare Containers. Containers

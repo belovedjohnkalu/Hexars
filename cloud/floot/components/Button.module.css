@@ -21,14 +21,8 @@
     position: relative;
   }
 
-  .button:active:not(:disabled) {
-    transform: scale(0.97);
-  }
-  @media (prefers-reduced-motion: reduce) {
-    .button {
-      transition: none;
-    }
-  }
+  .button:active:not(:disabled) { transform: scale(.97); }
+  @media (prefers-reduced-motion: reduce) { .button { transition: none; } }
 
   /* Focus styles - high contrast for accessibility */
   .button:focus-visible {
@@ -239,7 +233,7 @@
   }
 
   /* Dark mode - colors automatically adjust due to CSS variable system */
-  :global(.dark) .primary:focus-visible,
+    :global(.dark) .primary:focus-visible,
   :global(.dark) .outline:focus-visible,
   :global(.dark) .ghost:focus-visible {
     box-shadow:
@@ -247,13 +241,13 @@
       0 0 0 4px var(--primary);
   }
 
-  :global(.dark) .destructive:focus-visible {
+    :global(.dark) .destructive:focus-visible {
     box-shadow:
       0 0 0 2px var(--background),
       0 0 0 4px var(--error);
   }
 
-  :global(.dark) .link:focus-visible {
+    :global(.dark) .link:focus-visible {
     box-shadow: 0 0 0 2px var(--primary);
   }
 }

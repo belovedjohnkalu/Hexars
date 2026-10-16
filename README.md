@@ -1,9 +1,19 @@
-# ION · hexagonal chess
+# ION
 
-The app is now named **ION**. The legacy HEXARS release remains at
-https://hexars.floot.app until the Vercel deployment is verified.
+ION is live on **Floot** at https://hexars.floot.app. Its main navigation is a
+nested cloud of words and pictures. Open **Hexagonal Chess**, then **Boards**
+for pass-and-play, **Engines** for Tactical, or **Rules** for the available variants.
 
-The existing live release includes Gliński and McCooey. The development source also implements Shafran and is being migrated to GitHub, Cloudflare Pages and Supabase. The new stack has not been published yet. React/TypeScript renders the board; authoritative rules and Engine 1’s search run in a standalone C++ executable on the cloud server. No local engine installation is required to play.
+The live Floot release includes Gliński and McCooey. Custom words and pictures
+are private to the browser that created their workspace, with server-side storage.
+Clearing browser storage loses access to that workspace; account sync is not
+implemented. React/TypeScript renders the interface; authoritative rules and
+Tactical's search run in a standalone C++ executable on the cloud server.
+No local engine installation is required to play.
+
+The standalone development source also implements Shafran. The Cloudflare,
+Supabase and Vercel migration is paused at the user's request. The live Floot
+source is mirrored under `cloud/floot`; `web` is the separate migration source.
 
 A [Vercel Services configuration](docs/vercel-services.md) is also prepared for
 review: a public web service, a public API gateway, and a private native API.
@@ -68,7 +78,8 @@ The original local manager is retained as a diagnostic foundation. Start `npm ru
 ## Source layout
 
 ```text
-cloud/floot/                Preserved legacy release and rollback source
+cloud/floot/                Active Floot app source, tests and migrations
+cloud/floot-development/    Preserved unpublished Floot work
 api/                        Node API, Supabase storage, fixed native executable bridge
 supabase/migrations/        Postgres schema and owner RLS
 cloud/engine-worker/        Optional Cloudflare container hosting with cf

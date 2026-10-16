@@ -7,7 +7,7 @@
 .icon:hover { background: var(--muted); }
 .main { max-width: 850px; margin: auto; text-align: center; }
 .status { font-size: clamp(28px,3vw,34px); color: var(--muted-foreground); min-height: 42px; margin: 0 0 10px; display: flex; justify-content: center; align-items: center; gap: 12px; }
-.board { width: min(100%, max(430px, calc((100dvh - 170px) * var(--board-ratio, .8832)))); margin: auto; aspect-ratio: 484 / 548; }
+.board { width: min(100%, max(430px, calc((100dvh - 170px) * .8832))); margin: auto; aspect-ratio: 484 / 548; }
 .pulse { width: 7px; height: 7px; border-radius: 50%; background: var(--accent); animation: pulse 1.2s ease-in-out infinite; }
 .result { font-size: 24px; margin: 18px 0; }
 .loading { height: 100%; width: 100%; display: flex; align-items: center; justify-content: center; background: radial-gradient(ellipse, #338bff14, transparent 65%); clip-path: polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%); }

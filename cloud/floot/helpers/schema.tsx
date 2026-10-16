@@ -37,8 +37,18 @@ export interface HexchessGames {
   version: Generated<number>;
 }
 
+export interface IonWorkspaces {
+  accessTokenHash: string;
+  createdAt: Generated<Timestamp>;
+  id: string;
+  nodes: Generated<Json>;
+  updatedAt: Generated<Timestamp>;
+  version: Generated<number>;
+}
+
 export interface DB {
   hexchessGames: HexchessGames;
+  ionWorkspaces: IonWorkspaces;
 }
 
 

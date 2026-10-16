@@ -3,7 +3,7 @@ import type { VariantId } from "./game_POST.schema";
 import type { OutputType } from "./variants_GET.schema";
 export async function handle(request: Request) {
   try {
-    const ids: VariantId[] = ["glinski", "mccooey", "shafran"];
+    const ids: VariantId[] = ["glinski", "mccooey"];
     // Read-only: native starting positions, no saved-game rows or credentials.
     const variants = await Promise.all(ids.map(async id => {
       const result = await runNativeEngine({ action: "new", variant: id, origin: request.url, signal: request.signal });
