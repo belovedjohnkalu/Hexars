@@ -1,71 +1,56 @@
-# ION cloud navigation
+# ION spatial cloud release — 17 October 2026
 
-Live: https://hexars.floot.app. Floot is the active host; provider migration is paused.
+Live: https://hexars.floot.app. Floot hosts the app, auth, database, storage, realtime
+and native C++ chess engine. GitHub stores the source backup. Provider migration
+is paused; `web` remains a separate development app.
 
-The root begins with the Hexagonal Chess image. Open it for Engines, Rules and
-Boards. Engines contains Tactical. Rules covers Gliński and McCooey. Boards opens
-the last-used available variant in pass-and-play; its menu changes the variant
-or opponent. Existing engine games and friendly games have separate saved slots.
+Words now use 17–30px on phones and 20–38px on desktops. The black void supports
+native two-axis scrolling, drag-to-pan, pinch, Ctrl/Command-wheel zoom and visible
+zoom controls. Back and the 48px insert bar sit in the bottom thumb zone. No fixed
+item-count or nesting cap remains; names are 1–80 characters and pictures up to 3 MB.
 
-Add one word, phrase or picture with the bottom bar. Each ordinary item opens a
-new cloud that can contain its own droplets. All descendants contribute to an
-item's size, compared only with siblings in the current space. Zero percent
-remains readable; equally populated items have equal sizes. Pictures follow the
-same proportional footprint rule. The canvas avoids overlap and grows vertically
-when needed. Browser Back and parent links preserve the hierarchy.
+Hold/right-click an entry for Edit, Move, Copy, Delete. The title menu provides
+keyboard access to the current entry’s actions. Transfers preserve subtrees; copy
+creates fresh IDs, rejects cycles and deduplicates retries. Default entries use
+sparse personal overrides. Deletion retains records and pictures for persistent Undo.
 
-Custom content is stored on Floot's server. A random browser capability protects
-its workspace; only its SHA-256 hash is stored in the database. Uploaded pictures
-go directly to private storage using presigned transfers. The browser holds the
-workspace capability, so clearing its storage loses access. Account sync,
-workspace sharing and reparenting are not included in this release.
-Chess game links keep their existing sharing behavior.
+Confirmed content lives in Postgres. Guest capabilities still work. Sign-in joins
+the browser’s words to a private account workspace; a second device using the same
+account sees it. Each realtime token grants only that account’s update channel.
+Claimed workspaces reject old unauthenticated capabilities. Sign-out clears the
+browser identity, not the cloud account. Owner sign-in is activated with Forgot
+password on /login. Password-reset email for other users needs a verified sending
+domain in Floot’s Email settings; no reset emails were sent during testing.
 
-Source: `cloud/floot` mirrors Floot's virtual items, which run with Floot's seeded
-UI kit, router and server modules. The applied database migration is preserved
-under `cloud/floot/migrations`. Design and behavior contracts are in
-`cloud/floot/static/__dev`.
+Boards contains native starting previews for Gliński and McCooey. Rules contains
+variant droplets, each with Complete rules and an explicit distinction between
+historical rules and the selected low-material house draw. Tactical selection
+returns to the incoming variant or Boards. Games retain separate engine and
+pass-and-play save slots. Only Variants, Rules, Engines, Board Reset and Undo
+surround the board. History requests inspect a saved native position without
+mutating the live game. Result sheets announce winners, stalemate and draws.
 
 ## Verification
 
-- Floot TypeScript check: clean.
-- Eight Jasmine spec files pass, including hierarchy and sizing, layout at narrow
-  widths, form behavior, IME handling, failed-save retries, stale background reads,
-  theme and media-query behavior.
-- Native API checks pass for both variants: initial board, two legal moves,
-  illegal move rejection, stale-version rejection and undo.
-- Workspace API checks pass for idempotency, nesting, stale writes, capability
-  isolation, private image transfer/read and invalid image/parent rejection.
-- `tests/e2e/cloud-navigation.live.cjs` exercises the actual published app with
-  Playwright in an isolated browser workspace. It covers words, grandchildren,
-  pictures, reload persistence, offline recovery, chess destinations, selection,
-  a legal move, automatic flip, variant switching and reduced motion.
-- Phone, tablet and desktop layout screenshots and actual check results are in
-  `docs/screenshots/ion-*`. Final centered-layout checks cover 320–1280 px.
-- DESIGN.md lint: zero errors and zero warnings. `git diff --check` passes.
+- Floot typecheck clean; ten Jasmine spec files pass, including 5,000-level
+  hierarchy counting, transfer cycles, picture preservation and idempotency.
+- Real API checks pass for guest/account joining, cross-device content, isolation,
+  default-entry edits, branch restoration and full rules copying.
+- `spatial-cloud.live.cjs`: 16 actual published-browser checks, including offline
+  recovery, variant previews, moves, swipe history, Tactical routing and rules.
+- `cloud-sync.live.cjs`: six browser checks using independent device contexts,
+  real registration/sign-in, realtime refresh, visitor isolation, sign-out and session expiry.
+- `spatial-gestures.live.cjs`: five actual input checks for holding a word, wheel
+  zoom, drag, CDP touch pinch and app-owned account/recovery validation.
+- `chess-results.live.cjs`: a seven-ply historical native checkmate triggers
+  White Wins; dismissing it preserves the board.
+- Automated WCAG scans on variant and completed-game screens report no violations.
+- DESIGN.md lint has zero errors/warnings. The Premium static audit runs, but its
+  case-insensitive JSX parser misidentifies capital Form providers as native
+  forms and Button-asChild/Radix triggers as actionless buttons. The raw findings
+  and source-by-source adjudication are preserved; no strict-pass claim is made.
 
-The live browser test requires Playwright and Chromium. Set
-`PLAYWRIGHT_CHROMIUM_EXECUTABLE` when using an installed browser, and optionally
-`ION_TEST_ORIGIN` to test another Floot address. It writes only to a new isolated
-anonymous workspace. Real iPhone keyboard behavior still benefits from testing
-on hardware; the implementation follows VisualViewport and safe-area insets.
-
-## Experience refinements — 16 October 2026
-
-The title menu exposes ancestry, rename, removal and persistent Undo. Removing a
-branch confirms its child count; its stored content and pictures remain recoverable.
-Text drafts survive tab reloads, picture drafts have an unload guard, uploads can
-be stopped, and failed submissions retain their content. Back restores the original
-word and scroll position. Keyboard focus, modal close targets, image fallbacks,
-long-label layout and visual viewport handling use the shared component system.
-
-Chess menus use accessible opponent/side radios. Replacing a played game requires
-confirmation; failed promotions remain open. Piece movement finishes before
-pass-and-play rotation. Shared-link guidance explains that recipients can move pieces.
-
-Production regression checks cover the complete word/picture-to-chess journey.
-Additional live checks cover draft reload, rename, branch confirmation, Undo after
-reload, and automated WCAG checks. The game menu has no automated WCAG violations;
-Keep playing preserves the board and Tactical correctly opens when playing Black.
-The Premium packaged audit script was unavailable; no formal script result is claimed.
-Real device testing remains useful for iPhone keyboard and installation behavior.
+Reports and screenshots: docs/screenshots/ion-*spatial*, ion-sync-qa.json,
+ion-gestures-qa.json and ion-results-qa.json. Tests use isolated QA workspaces and
+accounts; never existing user content. Real iPhone keyboard, pinch feel and
+installation still warrant hardware testing. No native store build was requested.

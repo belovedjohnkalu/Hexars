@@ -4,8 +4,8 @@ import type { PieceName } from "../endpoints/game_POST.schema";
 export function ChessPiece({ type, player, onBoard = false, className }: {
   type: PieceName; player: number; onBoard?: boolean; className?: string; theme?: string;
 }) {
-  const fill = player === 0 ? "#f4f7ff" : "#050b15";
-  const edge = player === 0 ? "#050b15" : "#f4f7ff";
+  const fill = player === 0 ? "#f5f5f7" : "#090909";
+  const edge = player === 0 ? "#090909" : "#f5f5f7";
   return (
     <svg viewBox="-24 -27 48 54" x={onBoard ? -24 : undefined} y={onBoard ? -27 : undefined}
       width={onBoard ? 48 : undefined} height={onBoard ? 54 : undefined} className={className}

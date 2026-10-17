@@ -1,3 +1,4 @@
+import { AuthProvider } from "../helpers/useAuth";
 import { ReactNode, useEffect } from "react";
 import { cloudDrafts } from "../helpers/cloudDrafts";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -22,13 +23,13 @@ export const GlobalContextProviders = ({
   useEffect(()=>{const guard=(event:BeforeUnloadEvent)=>{if(cloudDrafts.hasPictures()){event.preventDefault();event.returnValue="";}};window.addEventListener("beforeunload",guard);return()=>window.removeEventListener("beforeunload",guard);},[]);
   return (
     <QueryClientProvider client={queryClient}>
-      <ThemeModeProvider>
+      <AuthProvider><ThemeModeProvider>
         <ScrollToHashElement />
         <TooltipProvider>
           {children}
           <SonnerToaster />
         </TooltipProvider>
-      </ThemeModeProvider>
+      </ThemeModeProvider></AuthProvider>
     </QueryClientProvider>
   );
 };

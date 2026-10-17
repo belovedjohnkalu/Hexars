@@ -17,8 +17,8 @@ export function cloudLayout(items:Item[],width:number,height:number,measure:(tex
   const maxWidth=Math.max(120,Math.min(width-40,narrow?280:440));
   function keys(rect:Rect){const list:string[]=[];for(let x=Math.floor(rect.x/128);x<=Math.floor((rect.x+rect.width)/128);x++)for(let y=Math.floor(rect.y/128);y<=Math.floor((rect.y+rect.height)/128);y++)list.push(x+","+y);return list;}
   for(const item of [...items].sort((a,b)=>b.percent-a.percent||items.indexOf(a)-items.indexOf(b))){
-    const fontSize=(narrow?25:30)+item.percent/100*(narrow?25:42),text=lines(item.name,fontSize,maxWidth-24,measure);
-    const picture=(narrow?112:144)+item.percent*.65,isPicture=item.isImage||item.imageUrl;
+    const fontSize=(narrow?17:20)+item.percent/100*(narrow?13:18),text=lines(item.name,fontSize,maxWidth-24,measure);
+    const picture=(narrow?105:135)+item.percent*.25,isPicture=item.isImage||item.imageUrl;
     const w=isPicture?picture+24:Math.max(64,text.longest+24);
     const caption=lines(item.name,18,w-24,measure);
     const h=isPicture?picture+caption.count*23.4+34:text.count*fontSize*1.18+20;

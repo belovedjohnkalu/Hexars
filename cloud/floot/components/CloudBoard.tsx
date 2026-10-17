@@ -195,30 +195,30 @@ export function CloudBoard({
                   <polygon
                     points={inset}
                     fill="none"
-                    stroke="#050b15"
-                    strokeWidth={6.5}
+                    stroke="#000000"
+                    strokeWidth={5}
                     opacity={1}
                   />
                   <polygon
                     className={styles.indicatorColour}
                     points={inset}
                     fill="none"
-                    strokeWidth={4}
+                    strokeWidth={3}
                   />
                   {indicator === "capture-check" && (
                     <polygon
                       points={inset}
                       fill="none"
                       stroke="#ffc566"
-                      strokeWidth={4}
+                      strokeWidth={3}
                       strokeDasharray="4 7"
                     />
                   )}
                 </g>
               )}
               <g className={styles.keyboardRing} pointerEvents="none">
-                <polygon points={inset} fill="none" stroke="#050b15" strokeWidth={6.5} />
-                <polygon points={inset} fill="none" stroke="#8acaff" strokeWidth={4} />
+                <polygon points={inset} fill="none" stroke="#000000" strokeWidth={5} />
+                <polygon points={inset} fill="none" stroke="var(--primary)" strokeWidth={3} />
               </g>
               {coordinates && (
                 <text

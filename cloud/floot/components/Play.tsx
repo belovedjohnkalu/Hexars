@@ -1,102 +1,76 @@
-import { useEffect, useId, useRef, useState } from "react";
-import { Link, Navigate, useLocation, useNavigate } from "react-router-dom";
-import { ArrowLeft, MoreHorizontal, Undo2, Share2, Check } from "lucide-react";
+import { useEffect, useRef, useState, type PointerEvent } from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { ArrowLeft, ChevronLeft, ChevronRight } from "lucide-react";
 import { AppHead } from "./AppHead";
 import { Button } from "./Button";
-import { Input } from "./Input";
-import { RadioGroup, RadioGroupItem } from "./RadioGroup";
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from "./Dialog";
-import type { ChessMove, Hex, VariantId } from "../endpoints/game_POST.schema";
-import { useInstallApp } from "../helpers/useInstallApp";
-import { useCloudGame } from "../helpers/useCloudGame";
-import { useBoardFacing } from "../helpers/useBoardFacing";
-import { gameSessions } from "../helpers/gameSessions";
-import { publishedOrigin } from "../helpers/publishedOrigin";
+import { Spinner } from "./Spinner";
 import { CloudBoard } from "./CloudBoard";
 import { ChessPiece } from "./ChessPiece";
-import { InstallControl } from "./InstallControl";
-import { HexLoading } from "./HexLoading";
+import { SpatialViewport } from "./SpatialViewport";
+import { useCloudGame } from "../helpers/useCloudGame";
+import { gameOutcome } from "../helpers/gameOutcome";
+import { useBoardFacing } from "../helpers/useBoardFacing";
+import { useInstallApp } from "../helpers/useInstallApp";
+import { postGame, type VariantId, type Hex, type ChessMove, type GameView } from "../endpoints/game_POST.schema";
 import styles from "./Play.module.css";
-const key=(hex:Hex)=>hex.q+","+hex.r;
+const moveInput=(m:ChessMove)=>({from:m.from,to:m.to,...(m.promotion?{promotion:m.promotion}:{})});
+const key=(h:Hex)=>h.q+','+h.r;
 export function Play({variant}:{variant:VariantId}){
-  useInstallApp();const location=useLocation(),navigate=useNavigate(),group=useId();
-  const defaultMode=new URLSearchParams(location.search).get("mode")==="friend"?"two_players":"engine";
-  const cloud=useCloudGame(variant,defaultMode),data=cloud.data,game=data?.game,name=variant==="glinski"?"Gliński":"McCooey";
-  const [selected,setSelected]=useState<Hex|null>(null),[menu,setMenu]=useState(false),[confirmNew,setConfirmNew]=useState(false),[mode,setMode]=useState<"engine"|"two_players">(defaultMode),[side,setSide]=useState<0|1>(0),[promotions,setPromotions]=useState<ChessMove[]>([]);
-  const [copied,setCopied]=useState(false),[shareLink,setShareLink]=useState(""),[shareHelp,setShareHelp]=useState(false);
-  const copiedTimer=useRef<ReturnType<typeof setTimeout>|null>(null),keepPlaying=useRef<HTMLButtonElement>(null),gameMenu=useRef<HTMLButtonElement>(null),newGameButton=useRef<HTMLButtonElement>(null),title=useRef<HTMLHeadingElement>(null);
-  const ended=!!game&&game.result.status!=="ongoing",thinking=!!data&&data.mode==="engine"&&game?.activePlayer!==data.humanPlayer&&!ended;
-  const facing=useBoardFacing(data?.gameId,game?.ply,data?.mode==="two_players"?game?.activePlayer===1:data?.humanPlayer===1);
-  const canPlay=!!game&&!ended&&!cloud.busy&&!cloud.error&&!thinking&&!facing.turning;
-  const candidates=game?.legalMoves.filter(move=>selected&&key(move.from)===key(selected))||[],lastMove=data?.moves.at(-1);
-  const canUndo=!!data?.moves.length&&!cloud.busy&&!facing.turning&&(data.mode==="two_players"||data.moves.some(move=>move.player===data.humanPlayer));
-  useEffect(()=>{setSelected(null);setPromotions([]);},[game?.stateId]);
-  useEffect(()=>{title.current?.focus({preventScroll:true});},[variant]);
-  useEffect(()=>{if(confirmNew)keepPlaying.current?.focus();},[confirmNew]);
-  useEffect(()=>()=>{if(copiedTimer.current)clearTimeout(copiedTimer.current);},[]);
-  function menuChange(open:boolean){if(cloud.busy&&confirmNew)return;if(open){setMode(data?.mode==="two_players"?"two_players":defaultMode==="two_players"&&!data?"two_players":"engine");setSide(data?.humanPlayer===1?1:0);setConfirmNew(false);}setMenu(open);}
-  function chooseCell(hex:Hex){
-    if(!canPlay||!game)return;const moves=candidates.filter(move=>key(move.to)===key(hex));
-    if(moves.length>1){setPromotions(moves);return;}
-    if(moves.length===1){const move=moves[0];setSelected(null);void cloud.play({from:move.from,to:move.to,...(move.promotion?{promotion:move.promotion}:{})});}
-    else setSelected(selected&&key(selected)===key(hex)?null:game.board.cells.find(cell=>key(cell)===key(hex))?.piece?.player===game.activePlayer?hex:null);
-  }
-  async function start(){
-    if(cloud.busy)return;
-    if(await cloud.newGame(mode,side,variant)){setMenu(false);setConfirmNew(false);navigate("/"+variant+(mode==="two_players"?"?mode=friend":""),{replace:true});}
-  }
-  async function share(){
-    if(!data)return;const url=new URL("/"+data.game.variant,publishedOrigin);url.hash=gameSessions.hash(data);setShareHelp(true);
-    try{await navigator.clipboard.writeText(url.toString());setCopied(true);setShareLink("");if(copiedTimer.current)clearTimeout(copiedTimer.current);copiedTimer.current=setTimeout(()=>setCopied(false),2200);}catch{setShareLink(url.toString());}
-  }
-  let status=!game?"Opening…":ended?game.result.status==="draw"||(game.result.status==="stalemate"&&game.result.winner<0)?"Draw":game.result.status==="stalemate"?"Stalemate":data?.mode==="engine"?game.result.winner===data.humanPlayer?"You win":"Tactical wins":game.result.winner===0?"White wins":"Black wins":thinking?"Thinking…":game.check?"Check":data?.mode==="engine"?"Your turn":game.activePlayer===0?"White’s turn":"Black’s turn";
-  if(cloud.error)status=game?"Connection lost":"Game unavailable";
-  if(data&&data.game.variant!==variant)return <Navigate to={"/"+data.game.variant+"#"+gameSessions.hash(data)} replace/>;
-  return <div className={styles.app}>
-    <AppHead title={name+" · Hexagonal Chess"}/>
-    <header className={styles.header}>
-      <Button asChild variant="ghost" size="icon" className={styles.icon}><Link to="/?cloud=hexagonal-chess" state={{focusNode:"boards"}} onClick={event=>{if(!event.metaKey&&!event.ctrlKey&&!event.shiftKey&&!event.altKey&&(location.state as {fromCloud?:string}|null)?.fromCloud==="hexagonal-chess"){event.preventDefault();navigate(-1);}}} aria-label="Back to Hexagonal Chess" title="Back"><ArrowLeft size={25} strokeWidth={1.6}/></Link></Button>
-      <h1 ref={title} tabIndex={-1}>{name}</h1>
-      <Button ref={gameMenu} variant="ghost" size="icon" className={styles.icon} aria-label="Game menu" title="Game menu" onClick={()=>menuChange(true)}><MoreHorizontal size={28}/></Button>
-    </header>
-    <main className={styles.main} aria-label={name+" game"}>
-      <div className={styles.status} role="status" aria-live="polite"><span key={status}>{status}</span>{thinking&&<span className={styles.pulse} aria-hidden="true"/>}</div>
-      <div className={styles.board}>
-        {game?<CloudBoard key={data?.gameId} game={game} selected={selected} onCell={chooseCell} flipped={facing.flipped} coordinates={false} theme="grove" lastMove={lastMove} disabled={!canPlay}/>:<div className={styles.loading}><HexLoading/></div>}
-      </div>
-      {ended&&<p className={styles.result}>{game?.result.status==="checkmate"?"Checkmate":game?.result.status==="stalemate"&&variant==="glinski"?"¾–¼":"½–½"}</p>}
-      {cloud.error&&!menu&&!promotions.length&&<div className={styles.recovery}><p role="alert">{cloud.error}</p><Button variant="outline" disabled={cloud.busy} onClick={()=>void cloud.refresh()}>Retry</Button></div>}
-      <span className={styles.srOnly} data-ply={game?.ply??0}>{game?.ply??0} moves</span>
-    </main>
-    <Dialog open={menu} onOpenChange={menuChange}>
-      <DialogContent className={styles.sheet} closeDisabled={confirmNew&&cloud.busy} onCloseAutoFocus={e=>{e.preventDefault();gameMenu.current?.focus({preventScroll:true});}} onEscapeKeyDown={e=>{if(confirmNew&&cloud.busy)e.preventDefault();}} onPointerDownOutside={e=>{if(confirmNew&&cloud.busy)e.preventDefault();}}>
-        <DialogTitle className={styles.sheetTitle}>{confirmNew?"Start a new game?":"Hexagonal Chess"}</DialogTitle>
-        <DialogDescription className={confirmNew?styles.description:styles.srOnly}>{confirmNew?"Your current board will be replaced.":"Game controls"}</DialogDescription>
-        {confirmNew?<><div className={styles.confirmActions}><Button ref={keepPlaying} variant="ghost" disabled={cloud.busy} onClick={()=>{setConfirmNew(false);requestAnimationFrame(()=>newGameButton.current?.focus());}}>Keep playing</Button><Button disabled={cloud.busy} aria-busy={cloud.busy} onClick={()=>void start()}>{cloud.busy?"Opening…":"New game"}</Button></div>{cloud.error&&<p className={styles.error} role="alert">{cloud.error}</p>}</>:<>
-          <div className={styles.tools}>
-            <Button variant="ghost" aria-label="Undo" title={canUndo?"Undo last turn":"No move to undo yet"} disabled={!canUndo} onClick={()=>void cloud.undo().then(ok=>{if(ok)setMenu(false);})}><Undo2 size={24}/><span>Undo</span></Button>
-            <Button variant="ghost" aria-label="Share" aria-describedby={shareHelp?"game-share-help":undefined} disabled={!data||cloud.busy} onClick={()=>void share()}>{copied?<Check size={24}/>:<Share2 size={24}/>}<span>{copied?"Copied":"Share"}</span></Button>
-            <span className={styles.installSlot}><InstallControl text/></span>
-          </div>
-          {shareHelp&&<p id="game-share-help" className={styles.help} role="status">{copied?"Link copied. ":""}Anyone with the link can move pieces.</p>}
-          {shareLink&&<Input className={styles.link} aria-label="Game link" readOnly value={shareLink} onFocus={event=>event.target.select()}/>}
-          <nav className={styles.segmented} aria-label="Board">{(["glinski","mccooey"] as const).map(id=><Link key={id} to={"/"+id+(data?.mode==="two_players"?"?mode=friend":"")} aria-current={id===variant?"page":undefined}>{id==="glinski"?"Gliński":"McCooey"}</Link>)}</nav>
-          <RadioGroup className={styles.segmented} aria-label="Opponent" value={mode} onValueChange={value=>setMode(value as "engine"|"two_players")}>
-            {([{value:"engine",name:"Tactical"},{value:"two_players",name:"Pass & play"}] as const).map(item=><label key={item.value} className={styles.option} htmlFor={group+item.value}><RadioGroupItem id={group+item.value} className={styles.radioControl} value={item.value} aria-label={item.name}/><span>{item.name}</span></label>)}
-          </RadioGroup>
-          {mode==="engine"&&<RadioGroup className={styles.sides} aria-label="Your side" value={String(side)} onValueChange={value=>setSide(value==="1"?1:0)}>{([0,1] as const).map(player=><label key={player} className={styles.option} htmlFor={group+"side"+player}><RadioGroupItem id={group+"side"+player} className={styles.radioControl} value={String(player)} aria-label={player===0?"White":"Black"}/><span className={styles.smallPiece}><ChessPiece type="king" player={player}/></span><span>{player===0?"White":"Black"}</span></label>)}</RadioGroup>}
-          <Button ref={newGameButton} className={styles.primary} disabled={cloud.busy} aria-busy={cloud.busy} onClick={()=>data?.moves.length?setConfirmNew(true):void start()}>{cloud.busy?"Opening…":"New game"}</Button>
-          {cloud.error&&<p className={styles.error} role="alert">{cloud.error}</p>}
-          <details className={styles.rules}><summary>Rules</summary><p>Tap a piece, then a marked hexagon.</p><p>{variant==="mccooey"?"Pawns capture through corners. Only unmoved pawns can advance twice; the center pawn cannot.":"Pawns capture to either forward side. A starting pawn cell allows a two-step advance."}</p><p>No castling. Promote at the far edge. En passant lasts one turn.</p><p>{variant==="mccooey"?"Stalemate: ½–½.":"Stalemate: ¾–¼."} This app also draws when each side has only a king, or a king and one bishop, knight or rook.</p></details>
-        </>}
-      </DialogContent>
-    </Dialog>
-    <Dialog open={promotions.length>0} onOpenChange={open=>{if(!open&&!cloud.busy)setPromotions([]);}}>
-      <DialogContent className={styles.sheet} closeDisabled={cloud.busy} onCloseAutoFocus={e=>{e.preventDefault();document.querySelector<HTMLElement>('[data-cell][aria-pressed="true"]')?.focus({preventScroll:true});}}>
-        <DialogTitle className={styles.sheetTitle}>Choose a piece</DialogTitle><DialogDescription className={styles.srOnly}>Promote your pawn.</DialogDescription>
-        <div className={styles.promotions}>{promotions.map(move=><Button key={move.promotion} variant="secondary" aria-label={"Promote to "+move.promotion} disabled={cloud.busy} onClick={()=>void cloud.play({from:move.from,to:move.to,promotion:move.promotion}).then(ok=>{if(ok)setPromotions([]);})}><ChessPiece type={move.promotion!} player={game?.activePlayer??0}/></Button>)}</div>
-        {cloud.error&&<p className={styles.error} role="alert">{cloud.error}</p>}
-      </DialogContent>
-    </Dialog>
-  </div>;
+ useInstallApp();const location=useLocation(),navigate=useNavigate();
+ const mode=new URLSearchParams(location.search).get('mode')==='friend'?'two_players':'engine';
+ const cloud=useCloudGame(variant,mode),data=cloud.data,game=data?.game;
+ const [selected,setSelected]=useState<Hex|null>(null),[promotions,setPromotions]=useState<ChessMove[]>([]),[reset,setReset]=useState(false),[resultOpen,setResultOpen]=useState(false);
+ const [review,setReview]=useState<{ply:number;game:GameView}|null>(null),[reviewBusy,setReviewBusy]=useState(false),[reviewError,setReviewError]=useState('');
+ const [size,setSize]=useState({width:390,height:650}),area=useRef<HTMLDivElement>(null),heading=useRef<HTMLHeadingElement>(null),keep=useRef<HTMLButtonElement>(null),endKey=useRef('');
+ const desired=useRef<number|null>(null),sequence=useRef(0),reviewAbort=useRef<AbortController|null>(null),swipe=useRef<{x:number;y:number;dragged:boolean}|null>(null),suppressClick=useRef(false);
+ const shown=review?.game||game,ended=!!game&&game.result.status!=='ongoing',thinking=!!data&&data.mode==='engine'&&game?.activePlayer!==data.humanPlayer&&!ended;
+ const facing=useBoardFacing(data?.gameId,game?.ply,data?.mode==='two_players'?game?.activePlayer===1:data?.humanPlayer===1);
+ const canPlay=!!game&&!ended&&!cloud.busy&&!cloud.error&&!thinking&&!facing.turning&&!review&&!reviewBusy;
+ const candidates=game?.legalMoves.filter(m=>selected&&key(m.from)===key(selected))||[];
+ const canUndo=!!data?.moves.length&&!cloud.busy&&!facing.turning&&!review&&(data.mode==='two_players'||data.moves.some(m=>m.player===data.humanPlayer));
+ const name=variant==='glinski'?'Gliński’s Variant':'McCooey’s Variant';
+ useEffect(()=>{const el=area.current;if(!el)return;const observer=new ResizeObserver(()=>setSize({width:el.clientWidth,height:Math.max(420,el.clientHeight)}));observer.observe(el);return()=>observer.disconnect();},[]);
+ useEffect(()=>{heading.current?.focus({preventScroll:true});},[variant]);
+ useEffect(()=>{setSelected(null);setPromotions([]);},[game?.stateId]);
+ useEffect(()=>{setReview(null);desired.current=null;reviewAbort.current?.abort();setReviewBusy(false);setReviewError('');},[data?.gameId]);
+ useEffect(()=>{if(!ended||!data||!game)return;const id=data.gameId+':'+game.stateId;if(endKey.current!==id){endKey.current=id;setResultOpen(true);}},[ended,data?.gameId,game?.stateId]);
+ useEffect(()=>()=>reviewAbort.current?.abort(),[]);
+ function choose(hex:Hex){if(!canPlay||!game)return;const moves=candidates.filter(m=>key(m.to)===key(hex));if(moves.length>1){setPromotions(moves);return;}if(moves.length===1){setSelected(null);void cloud.play(moveInput(moves[0]));}else setSelected(selected&&key(selected)===key(hex)?null:game.board.cells.find(c=>key(c)===key(hex))?.piece?.player===game.activePlayer?hex:null);}
+ async function history(ply:number){
+  if(!data||!game)return;ply=Math.max(0,Math.min(game.ply,ply));desired.current=ply;setSelected(null);reviewAbort.current?.abort();const seq=++sequence.current;
+  if(ply===game.ply){setReview(null);desired.current=null;setReviewBusy(false);setReviewError('');return;}
+  const controller=new AbortController();reviewAbort.current=controller;setReviewBusy(true);setReviewError('');
+  try{const result=await postGame({action:'review',gameId:data.gameId,accessToken:data.accessToken,ply},{signal:controller.signal});if(seq===sequence.current)setReview({ply,game:result.game});}
+  catch(e){if(!controller.signal.aborted){setReviewError('Couldn’t load that move. Try again.');desired.current=review?.ply??null;}}
+  finally{if(seq===sequence.current)setReviewBusy(false);}
+ }
+ function down(e:PointerEvent<HTMLDivElement>){if(e.button!==0)return;suppressClick.current=false;swipe.current={x:e.clientX,y:e.clientY,dragged:false};}
+ function move(e:PointerEvent<HTMLDivElement>){const start=swipe.current;if(start&&Math.abs(e.clientX-start.x)>40&&Math.abs(e.clientY-start.y)<Math.abs(e.clientX-start.x)*.6){start.dragged=true;suppressClick.current=true;e.currentTarget.setPointerCapture(e.pointerId);}}
+ function up(e:PointerEvent<HTMLDivElement>){const start=swipe.current;swipe.current=null;if(start?.dragged){void history((desired.current??game?.ply??0)+(e.clientX>start.x?-1:1));}if(e.currentTarget.hasPointerCapture(e.pointerId))e.currentTarget.releasePointerCapture(e.pointerId);}
+ async function restart(){if(await cloud.newGame(data?.mode==='two_players'?'two_players':'engine',(data?.humanPlayer===1?1:0),variant)){setReset(false);setResultOpen(false);setReview(null);}}
+ const boardWidth=Math.min(size.width-24,540),boardHeight=boardWidth*548/484,worldWidth=Math.max(size.width,boardWidth+24),worldHeight=Math.max(size.height,boardHeight+160),boardY=(worldHeight-boardHeight)/2;
+ const status=review?`Move ${review.ply} of ${game?.ply}`:!game?'Opening…':ended?'Game over':thinking?'Thinking…':game.check?'Check':data?.mode==='two_players'?game.activePlayer===0?'White’s turn':'Black’s turn':'Your turn';
+ const outcome=game?gameOutcome(game.result,data?.mode||'two_players',data?.humanPlayer??0):{title:'Draw',score:'½ – ½',detail:''};
+ return <div className={styles.app}><AppHead title={name+' · Hexagonal Chess'}/>
+ <header className={styles.header}><h1 ref={heading} tabIndex={-1}>{name}</h1><div className={styles.status} role="status" aria-live="polite">{status}{thinking&&<Spinner size="sm" aria-label="Tactical is thinking"/>}</div></header>
+ <main ref={area} className={styles.space} aria-label={name+' game'}><SpatialViewport width={worldWidth} height={worldHeight} viewKey={'game-'+variant} label="Board space">
+ <nav className={styles.words} aria-label="Game actions" style={{width:worldWidth,height:worldHeight}}>
+ <Button asChild variant="ghost" className={styles.word} style={{left:'20%',top:boardY-42}}><Link to="/?cloud=boards">Variants</Link></Button>
+ <Button asChild variant="ghost" className={styles.word} style={{left:'72%',top:boardY-42}}><Link to={'/?cloud=rules&return='+variant}>Rules</Link></Button>
+ <Button asChild variant="ghost" className={styles.word} style={{left:'50%',top:boardY+boardHeight+34}}><Link to={'/?cloud=engines&return='+variant}>Engines</Link></Button>
+ <Button variant="ghost" className={styles.word+' '+styles.secondaryWord} style={{left:'20%',top:boardY+boardHeight+76}} disabled={cloud.busy} onClick={()=>game?.ply?setReset(true):void restart()}>Board Reset</Button>
+ <Button variant="ghost" className={styles.word+' '+styles.secondaryWord} style={{left:'78%',top:boardY+boardHeight+76}} disabled={!canUndo} onClick={()=>void cloud.undo()}>Undo</Button>
+ </nav>
+ <div data-no-pan className={styles.board} style={{width:boardWidth,left:(worldWidth-boardWidth)/2,top:boardY}} onPointerDown={down} onPointerMove={move} onPointerUp={up} onPointerCancel={()=>{swipe.current=null;}} onClickCapture={e=>{if(suppressClick.current){e.preventDefault();e.stopPropagation();suppressClick.current=false;}}}>
+ {shown?<CloudBoard key={data?.gameId} game={shown} selected={review?null:selected} onCell={choose} flipped={facing.flipped} coordinates={false} theme="neutral" lastMove={data?.moves[(review?.ply??game?.ply??0)-1]} disabled={!canPlay}/>:<div className={styles.loading}><Spinner aria-label="Opening board"/></div>}
+ </div>
+ </SpatialViewport></main>
+ {(review||reviewBusy)&&<div className={styles.history} role="group" aria-label="Move history"><Button variant="ghost" size="icon" aria-label="Previous move" disabled={(desired.current??review?.ply??0)<=0} onClick={()=>void history((desired.current??review?.ply??0)-1)}><ChevronLeft size={18}/></Button><Button variant="ghost" disabled={reviewBusy} onClick={()=>void history(game?.ply??0)}>{reviewBusy?'Opening…':'Present'}</Button><Button variant="ghost" size="icon" aria-label="Next move" onClick={()=>void history((desired.current??review?.ply??0)+1)}><ChevronRight size={18}/></Button></div>}
+ {(cloud.error||reviewError)&&<div role="alert" className={styles.error}>{cloud.error||reviewError}<Button variant="link" onClick={()=>cloud.error?void cloud.refresh():void history(desired.current??review?.ply??game?.ply??0)}>Retry</Button></div>}
+ <footer className={styles.footer}><Button asChild variant="ghost" size="icon"><Link to="/?cloud=boards" aria-label="Back to variants"><ArrowLeft size={22}/></Link></Button></footer><span className={styles.srOnly} data-ply={game?.ply??0} data-review-ply={review?.ply??'present'}>{game?.ply??0} moves</span>
+ <Dialog open={reset} onOpenChange={open=>{if(!cloud.busy)setReset(open);}}><DialogContent closeDisabled={cloud.busy} className={styles.sheet} onOpenAutoFocus={e=>{e.preventDefault();keep.current?.focus();}}><DialogTitle>Reset the board?</DialogTitle><DialogDescription>Your current game will be replaced.</DialogDescription><div className={styles.actions}><Button ref={keep} variant="ghost" disabled={cloud.busy} onClick={()=>setReset(false)}>Keep playing</Button><Button disabled={cloud.busy} onClick={()=>void restart()}>{cloud.busy?'Opening…':'Reset board'}</Button></div>{cloud.error&&<p role="alert">{cloud.error}</p>}</DialogContent></Dialog>
+ <Dialog open={!!promotions.length} onOpenChange={open=>{if(!open&&!cloud.busy)setPromotions([]);}}><DialogContent closeDisabled={cloud.busy} className={styles.sheet}><DialogTitle>Promote</DialogTitle><DialogDescription>Choose your piece.</DialogDescription><div className={styles.promotions}>{promotions.map(m=><Button key={m.promotion} variant="ghost" aria-label={'Promote to '+m.promotion} disabled={cloud.busy} onClick={()=>void cloud.play(moveInput(m)).then(ok=>{if(ok)setPromotions([]);})}><ChessPiece type={m.promotion!} player={game?.activePlayer??0}/></Button>)}</div>{cloud.error&&<p role="alert">{cloud.error}</p>}</DialogContent></Dialog>
+ <Dialog open={resultOpen} onOpenChange={setResultOpen}><DialogContent className={styles.resultSheet}><DialogTitle className={styles.resultTitle}>{outcome.title}</DialogTitle><DialogDescription className={styles.resultScore}>{outcome.score}{outcome.detail&&<span>{outcome.detail}</span>}</DialogDescription><div className={styles.actions}><Button variant="ghost" onClick={()=>setResultOpen(false)}>View board</Button><Button disabled={cloud.busy} onClick={()=>void restart()}>Play again</Button></div></DialogContent></Dialog>
+ </div>;
 }

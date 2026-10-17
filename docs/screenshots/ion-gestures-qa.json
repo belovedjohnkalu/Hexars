@@ -1,0 +1,10 @@
+{
+  "date": "2026-10-17T06:16:03.451Z",
+  "checks": [
+    "Holding a word opens Edit, Move, Copy and Delete",
+    "Control-scroll zooms around the pointer",
+    "Dragging pans without opening a word",
+    "Two-finger pinch enlarges the cloud",
+    "Account and recovery forms use app-owned validation"
+  ]
+}

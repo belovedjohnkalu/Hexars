@@ -1,0 +1,25 @@
+{
+  "profile": "product-admin",
+  "sourceRoots": [
+    "../../components",
+    "../../pages",
+    "../../helpers",
+    "../../endpoints"
+  ],
+  "canonicalMap": "UX-CONTRACT.md",
+  "requiredCapabilities": [
+    "Form",
+    "Scrollbar",
+    "Toast",
+    "CRUD"
+  ],
+  "ownership": {
+    "Form": "Form, Input, Button",
+    "Scrollbar": "base.css",
+    "CRUD": "CloudActions"
+  },
+  "evidence": {
+    "crudFullFlow": "../../../../tests/e2e/spatial-cloud.live.cjs",
+    "failurePaths": "../../../../tests/e2e/spatial-cloud.live.cjs"
+  }
+}

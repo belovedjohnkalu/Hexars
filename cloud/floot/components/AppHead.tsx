@@ -5,7 +5,7 @@ export function AppHead({ title = "ION" }: { title?: string }) {
   return <Helmet htmlAttributes={{lang:"en"}}>
     <title>{title}</title>
     <meta name="description" content="A space for your thoughts. Open a cloud and explore." />
-    <meta name="theme-color" content="#050810" />
+    <meta name="theme-color" content="#000000" />
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-title" content="ION" />

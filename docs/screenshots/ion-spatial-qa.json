@@ -1,0 +1,23 @@
+{
+  "date": "2026-10-17T06:15:58.826Z",
+  "checks": [
+    "Black theme and compact insert bar",
+    "Right-click Edit saves without opening the word",
+    "Parent Back is in the bottom-left thumb zone",
+    "Copy preserves a complete independent branch",
+    "Move removes the old placement and keeps its branch",
+    "Zoom controls and two-axis scrolling work",
+    "Offline save preserves the draft and Retry saves once",
+    "Boards opens both native starting-position previews",
+    "Swipe right reviews history without undoing the move",
+    "Swipe left returns to the present position",
+    "Reset confirmation protects a played game",
+    "Tactical selection returns to the incoming variant",
+    "Rules has both variant droplets and complete rules",
+    "Variant cloud has no automated WCAG violations",
+    "Desktop layout fits its screen",
+    "No browser runtime errors"
+  ],
+  "violations": [],
+  "errors": []
+}

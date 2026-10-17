@@ -23,6 +23,8 @@ export type JsonValue = JsonArray | JsonObject | JsonPrimitive;
 
 export type Timestamp = ColumnType<Date, Date | string, Date | string>;
 
+export type UserRole = "admin" | "user";
+
 export interface HexchessGames {
   accessTokenHash: string;
   createdAt: Generated<Timestamp>;
@@ -37,23 +39,77 @@ export interface HexchessGames {
   version: Generated<number>;
 }
 
+export interface IonCloudAccounts {
+  userId: number;
+  workspaceId: string;
+}
+
 export interface IonWorkspaces {
   accessTokenHash: string;
   createdAt: Generated<Timestamp>;
   id: string;
   nodes: Generated<Json>;
+  ownerId: number | null;
   updatedAt: Generated<Timestamp>;
   version: Generated<number>;
 }
 
+export interface LoginAttempts {
+  attemptedAt: Generated<Timestamp | null>;
+  email: string;
+  id: Generated<number>;
+  success: Generated<boolean | null>;
+}
+
+export interface PasswordResetCodes {
+  attempts: Generated<number>;
+  codeHash: string;
+  createdAt: Generated<Timestamp>;
+  expiresAt: Timestamp;
+  id: Generated<number>;
+  usedAt: Timestamp | null;
+  userId: number;
+}
+
+export interface Sessions {
+  createdAt: Generated<Timestamp | null>;
+  expiresAt: Timestamp;
+  id: string;
+  lastAccessed: Generated<Timestamp | null>;
+  userId: number;
+}
+
+export interface UserPasswords {
+  createdAt: Generated<Timestamp | null>;
+  id: Generated<number>;
+  passwordHash: string;
+  userId: number;
+}
+
+export interface Users {
+  avatarUrl: string | null;
+  createdAt: Generated<Timestamp | null>;
+  displayName: string;
+  email: string;
+  id: Generated<number>;
+  role: Generated<UserRole>;
+  updatedAt: Generated<Timestamp | null>;
+}
+
 export interface DB {
   hexchessGames: HexchessGames;
+  ionCloudAccounts: IonCloudAccounts;
   ionWorkspaces: IonWorkspaces;
+  loginAttempts: LoginAttempts;
+  passwordResetCodes: PasswordResetCodes;
+  sessions: Sessions;
+  userPasswords: UserPasswords;
+  users: Users;
 }
 
 
-
-
+// Use these for zod schema enums or other purposes, since the kysely enums are just types
+export const UserRoleArrayValues: [UserRole, ...UserRole[]] = ["admin","user"];
 // Table/column names whose snake_case spelling kysely's default CamelCasePlugin
 // cannot recover from the camelCase name used in code (an underscore directly
 // before a digit, e.g. reminder_48h_sent ⇄ reminder48hSent). The db helper's

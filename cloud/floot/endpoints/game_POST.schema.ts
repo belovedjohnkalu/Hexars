@@ -25,6 +25,7 @@ export const schema = z.discriminatedUnion("action", [
       humanPlayer: z.union([z.literal(0), z.literal(1)]),
     })
     .strict(),
+  z.object({ action: z.literal("review"), ...session, ply: z.number().int().nonnegative() }).strict(),
   z.object({ action: z.literal("get"), ...session }).strict(),
   z.object({ action: z.literal("move"), ...mutation, move }).strict(),
   z.object({ action: z.literal("engine"), ...mutation }).strict(),

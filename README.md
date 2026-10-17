@@ -1,15 +1,17 @@
 # ION
 
 ION is live on **Floot** at https://hexars.floot.app. Its main navigation is a
-nested cloud of words and pictures. Open **Hexagonal Chess**, then **Boards**
-for pass-and-play, **Engines** for Tactical, or **Rules** for the available variants.
+pannable, zoomable cloud of words and pictures. Open **Hexagonal Chess**, then
+**Boards** to choose Gliński or McCooey, **Engines** to select Tactical, or **Rules**
+for complete rules.
 
-The live Floot release includes Gliński and McCooey. Custom words and pictures
-are private to the browser that created their workspace, with server-side storage.
-Clearing browser storage loses access to that workspace; account sync is not
-implemented. React/TypeScript renders the interface; authoritative rules and
-Tactical's search run in a standalone C++ executable on the cloud server.
-No local engine installation is required to play.
+Every confirmed word and picture is stored on the server. Sign in with the same
+account on another device to see the same private space; open devices update via
+Floot realtime. Existing browser words join the account at sign-in. Anonymous
+spaces still use a browser capability; clearing that browser’s data loses anonymous
+access. There is no application item-count cap. React/TypeScript renders the
+interface; authoritative chess rules and Tactical search run in C++ on the cloud
+server. No local engine installation is required to play.
 
 The standalone development source also implements Shafran. The Cloudflare,
 Supabase and Vercel migration is paused at the user's request. The live Floot
@@ -31,19 +33,27 @@ configuration. Package workspaces now use `@ion/` names.
 
 The **Install** action appears only when the browser supplies an installation prompt or when manual installation is supported in top-level iPhone/iPad Safari. It is hidden in incompatible browsers, embedded frames and an already installed app. The home-screen app uses a standalone window. This is an installable web app, not an App Store or Play Store binary. Internet access is required for cloud play.
 
-Games are saved in the cloud. **Share game** lets you resume on another device; opening a copied game link restores it after installation if browser and app storage are separate. Anyone with that link can control the shared game. There are no user accounts or side-specific multiplayer credentials yet.
+Games are saved in the cloud. **Share game** lets you resume on another device; opening a copied game link restores it after installation if browser and app storage are separate. Anyone with that link can control the shared game. Word spaces now have user accounts. Chess sessions still use separate capability links; side-specific multiplayer credentials and an account game library are not included. The current minimal game surface does not expose a Share button; historical copied links still open.
 
 ## Design
 
-ION uses a dark blue and black interface with frosted controls, self-hosted Inter typography and very few words. The homepage shows three authoritative starting positions; choose a board to open `/glinski`, `/mccooey` or `/shafran`. Each game has just Home and one menu. Undo, sharing, play mode, side selection, new game and concise rules stay inside that menu.
+ION uses pure black, neutral glass, self-hosted Inter, and smaller words. Drag to
+pan, scroll in either direction, pinch or Ctrl/Command-scroll to zoom, or use the
+visible zoom controls. Hold/right-click a word for Edit, Move, Copy or Delete.
+Default entries support sparse personal overrides; branch deletion is reversible.
+The compact insert bar and parent Back sit at the bottom.
 
-Pieces are original flat Staunton silhouettes, identical for both sides except their fill/outline colors. The board has no beveled depth, gradients or drop shadows. Inset outlines are 4 SVG units thick: mint moves, amber captures, coral checks, pale-yellow selection and bright ivory previous moves. Both endpoints of an opponent’s last move remain fully bright. Smooth movement and rotation respect reduced motion.
-
-Tactical is the current cloud engine. The other five independent engines remain planned. The site’s free hosting badge is provider-controlled and remains present.
+Boards opens starting-position pictures for the two published variants. Each
+game places its interactive board among Variants, Rules, Engines, Board Reset
+and Undo. Swipe right for an earlier move, left for a newer one; Present returns
+to live play. A bold result sheet identifies checkmate, stalemate and draws.
+Pieces remain flat, high-contrast silhouettes. Semantic inset outlines distinguish
+moves, captures, check, selection and the previous move. Motion respects reduced
+motion. The Pro hosting badge setting is disabled.
 
 ## Playable now
 
-- A native-authoritative 91-cell board: 36 starting pieces in Gliński, 32 in McCooey. Choose its starting board on the homepage.
+- A native-authoritative 91-cell board: 36 starting pieces in Gliński, 32 in McCooey. Choose its starting picture in Boards.
 - All six piece movements, checks and pins, en passant and four promotion choices. Gliński pawns regain a double advance from friendly original pawn cells. McCooey pawns capture along bishop diagonals and double-advance only on their first move, excluding the center pawn.
 - Checkmate, Gliński fractional stalemate (¾–¼), McCooey equal stalemate (½–½), automatic threefold repetition, the fifty-move rule, and automatic material draws. ION ends in a ½–½ draw when each side has only its king plus at most one bishop, knight, or rook. Pawns, queens, or two pieces on either side prevent this house-rule draw; an already-delivered checkmate wins. Gliński and McCooey have no castling; Shafran supports short and long castling on both flanks.
 - Human versus Tactical as White or Black, or a shared two-player board.

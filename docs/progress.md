@@ -177,3 +177,14 @@ project or public URL has been created. The Supabase server key is not bound and
 anonymous sign-in is still disabled; these are also required for hosted games.
 The GitHub integration rejected repository renaming, so source remains in the
 existing `belovedjohnkalu/Hexars` repository.
+
+## 17 October 2026 — spatial, synchronized ION
+
+Published black word-space UI with smaller type, pan/zoom gestures and native
+scrollbars, compact bottom composer/Back, long-press editing and subtree transfers.
+Removed the item cap. Added private account-backed cross-device cloud storage and
+scoped realtime refresh. Boards now contains both variant previews; Rules includes
+complete variant text; Tactical routes back to the incoming game. Added read-only
+swipe history and bold result sheets. Ten spec files and real browser sync,
+gesture, cloud-to-game and native checkmate checks pass. See ion-cloud-navigation.md
+for exact evidence and limitations. GitHub remote is configured and is the backup.

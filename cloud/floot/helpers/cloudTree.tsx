@@ -1,41 +1,27 @@
 import type { CloudNode } from "../endpoints/cloud_POST.schema";
-
+const glinskiRules="The board has 91 hexagons in three colours. Files are a–l without j. White moves first; players alternate one move. You may not move onto a friendly piece, leave your king in check, or capture a king. A piece capturing an opponent replaces it. Sliding pieces stop at the first occupied cell.\n\nRook: any distance in six straight lines through shared edges. Bishop: any distance in six corner-diagonal lines, staying on one colour; intervening cells along that diagonal must be empty. Queen: rook or bishop movement. King: one rook or bishop step, only to a safe cell. Knight: twelve possible jumps, two edge steps in one direction and one in an adjacent direction; it can jump over pieces. There is no castling.\n\nEach side begins with 18 pieces: king, queen, two rooks, two knights, three bishops and nine pawns. White: Kg1, Qe1, Rc1/Ri1, Nd1/Nh1, Bf1/Bf2/Bf3; pawns b1,c2,d3,e4,f5,g4,h3,i2,k1. Black: Kg10, Qe10, Rc8/Ri8, Nd9/Nh9, Bf11/Bf10/Bf9; pawns b7,c7,d7,e7,f7,g7,h7,i7,k7.\n\nPawns advance one edge step straight forward into an empty cell. They capture one edge step on either forward side. A pawn on any of its side’s original pawn-starting cells can advance twice if both cells are empty, including after capturing onto such a starting cell.\n\nEn passant: on the turn immediately after an opponent’s double pawn advance, an eligible pawn may move to the crossed cell and remove that pawn, provided its own king stays safe. Promotion is required at the forward end of a file: choose queen, rook, bishop or knight, regardless of earlier captures.\n\nCheck means your king is attacked; the next move must escape it. Checkmate means check with no legal escape: the mating player scores 1, the other 0. Stalemate means no legal move without check: the delivering player scores ¾ and the stalemated player ¼.\n\nApp draw rules: threefold repetition and 50 moves by each side without a pawn move or capture are adjudicated automatically. Bare kings draw. The selected house rule also draws when each side has at most one bishop, knight or rook besides its king, with no pawns or queens. An existing checkmate takes precedence. This low-material rule is an app house rule; a lone minor can sometimes mate in historical hexagonal chess.\n\nReferences: Gliński’s hexagonal chess, chessvariants.org/hexagonal.dir/hexagonal.html. These rules describe the application’s implemented two-player game.";
+const mccooeyRules="The board has 91 hexagons in three colours. Files are a–l without j. White moves first; players alternate one move. You may not move onto a friendly piece, leave your king in check, or capture a king. A piece capturing an opponent replaces it. Sliding pieces stop at the first occupied cell.\n\nRook: any distance in six straight lines through shared edges. Bishop: any distance in six corner-diagonal lines, staying on one colour; intervening cells along that diagonal must be empty. Queen: rook or bishop movement. King: one rook or bishop step, only to a safe cell. Knight: twelve possible jumps, two edge steps in one direction and one in an adjacent direction; it can jump over pieces. There is no castling.\n\nEach side begins with 16 pieces: king, queen, two rooks, two knights, three bishops and seven pawns. White: Kg1, Qe1, Rd1/Rh1, Ne2/Ng2, Bf1/Bf2/Bf3; pawns c1,d2,e3,f4,g3,h2,i1. Black: Kg10, Qe10, Rd9/Rh9, Ne9/Ng9, Bf11/Bf10/Bf9; pawns c8,d8,e8,f8,g8,h8,i8.\n\nPawns advance one edge step straight forward into an empty cell. They capture one corner-diagonal step to either forward side, following bishop directions. Pieces on nearby off-diagonal cells do not block that capture.\n\nAn unmoved pawn on its own original starting cell may advance twice if both cells are empty, except the central f-file pawn. The central pawn cannot advance twice under McCooey’s published rules. A pawn never regains the first-move option.\n\nEn passant is available only on the turn immediately after a double advance crosses a cell your pawn attacks. For example, Black e8–e6 allows White d5×e7, removing the pawn on e6. Your king must remain safe. Promotion is required at the forward end of a file to queen, rook, bishop or knight.\n\nCheck requires escaping the attack. Checkmate is check with no legal escape and scores 1–0. Stalemate, with no legal move and no check, is an equal ½–½ draw. There is no castling.\n\nApp draw rules: threefold repetition and 50 moves by each side without a pawn move or capture are automatic. Bare kings draw. The selected house rule also draws when each side has at most one bishop, knight or rook besides its king, with no pawns or queens. An existing checkmate takes precedence. This low-material rule is separate from historical rules.\n\nReference: Dave McCooey’s rules at chessvariants.com/hexagonal.dir/hexchess2.html, including the central pawn exception.";
 const seed: CloudNode[] = [
-  { id: "hexagonal-chess", parentId: null, name: "Hexagonal Chess", imageUrl: "/_cdn/static/9522e791-e7fa-41d6-867c-2d4013eb3982-hexars-dark-512.png" },
-  { id: "engines", parentId: "hexagonal-chess", name: "Engines" },
-  { id: "tactical", parentId: "engines", name: "Tactical", note: "Plays for threats, captures and combinations." },
-  { id: "rules", parentId: "hexagonal-chess", name: "Rules" },
-  { id: "glinski-rules", parentId: "rules", name: "Gliński", note: "91 cells. Tap a piece, then a marked hexagon. Pawns capture to either forward side. A starting pawn cell allows a two-step advance. No castling. Promote at the far edge. En passant lasts one turn. Stalemate scores ¾–¼." },
-  { id: "mccooey-rules", parentId: "rules", name: "McCooey", note: "91 cells. Pawns capture through corners. Unmoved pawns may advance twice, except the central pawn, as specified by McCooey’s rules. No castling. Promote at the far edge. En passant lasts one turn. Stalemate scores ½–½." },
-  { id: "boards", parentId: "hexagonal-chess", name: "Boards", destination: "board" },
+ {id:"hexagonal-chess",parentId:null,name:"Hexagonal Chess",imageUrl:"/_cdn/static/9522e791-e7fa-41d6-867c-2d4013eb3982-hexars-dark-512.png"},
+ {id:"engines",parentId:"hexagonal-chess",name:"Engines"},
+ {id:"tactical",parentId:"engines",name:"Tactical",destination:"tactical"},
+ {id:"boards",parentId:"hexagonal-chess",name:"Boards"},
+ {id:"glinski-board",parentId:"boards",name:"Gliński’s Variant",destination:"glinski",isImage:true},
+ {id:"mccooey-board",parentId:"boards",name:"McCooey’s Variant",destination:"mccooey",isImage:true},
+ {id:"rules",parentId:"hexagonal-chess",name:"Rules"},
+ {id:"glinski-rules",parentId:"rules",name:"Gliński’s Variant"},
+ {id:"mccooey-rules",parentId:"rules",name:"McCooey’s Variant"},
+ {id:"glinski-complete-rules",parentId:"glinski-rules",name:"Complete rules",note:glinskiRules},
+ {id:"mccooey-complete-rules",parentId:"mccooey-rules",name:"Complete rules",note:mccooeyRules},
 ];
-function descendants(nodes: CloudNode[], id: string) {
-  const visited = new Set<string>([id]);
-  const queue = [id];
-  for (let i = 0; i < queue.length; i++) {
-    for (const node of nodes) if (node.parentId === queue[i] && !visited.has(node.id)) {
-      visited.add(node.id); queue.push(node.id);
-    }
-  }
-  return visited.size - 1;
+function descendants(nodes:CloudNode[],id:string){
+ const children=new Map<string,CloudNode[]>();for(const n of nodes)if(n.parentId)children.set(n.parentId,[...(children.get(n.parentId)||[]),n]);
+ const seen=new Set([id]),queue=[id];for(let i=0;i<queue.length;i++)for(const n of children.get(queue[i])||[])if(!seen.has(n.id)){seen.add(n.id);queue.push(n.id);}return seen.size-1;
 }
-function sizes(nodes: CloudNode[], parentId: string | null) {
-  const siblings = nodes.filter(n => n.parentId === parentId);
-  const counts = siblings.map(n => descendants(nodes, n.id));
-  const min = Math.min(...counts), max = Math.max(...counts);
-  return siblings.map((node, i) => ({
-    ...node, count: counts[i],
-    percent: max === min ? 50 : (counts[i] - min) / (max - min) * 100,
-  }));
+function sizes(nodes:CloudNode[],parentId:string|null){
+ const byId=new Map(nodes.map(n=>[n.id,n])),pending=new Map<string,number>(),counts=new Map<string,number>();for(const n of nodes){counts.set(n.id,0);if(n.parentId&&byId.has(n.parentId))pending.set(n.parentId,(pending.get(n.parentId)||0)+1);}
+ const queue=nodes.filter(n=>!pending.get(n.id)).map(n=>n.id);for(let i=0;i<queue.length;i++){const id=queue[i],parent=byId.get(id)?.parentId;if(parent&&byId.has(parent)){counts.set(parent,(counts.get(parent)||0)+(counts.get(id)||0)+1);pending.set(parent,pending.get(parent)!-1);if(!pending.get(parent))queue.push(parent);}}
+ const siblings=nodes.filter(n=>n.parentId===parentId),values=siblings.map(n=>counts.get(n.id)||0),min=Math.min(...values),max=Math.max(...values);
+ return siblings.map((node,i)=>({...node,count:values[i],percent:max===min?50:(values[i]-min)/(max-min)*100}));
 }
-export const cloudTree = { seed, descendants, sizes,
-  path(nodes: CloudNode[], id: string | null) {
-    const result: CloudNode[] = [], seen = new Set<string>();
-    let current = nodes.find(n => n.id === id);
-    while (current && !seen.has(current.id)) {
-      seen.add(current.id); result.unshift(current);
-      current = nodes.find(n => n.id === current!.parentId);
-    }
-    return result;
-  },
-};
+export const cloudTree={seed,resolve(nodes:CloudNode[]){return [...new Map([...seed,...nodes].map(n=>[n.id,n])).values()];},descendants,sizes,path(nodes:CloudNode[],id:string|null){const byId=new Map(nodes.map(n=>[n.id,n])),result:CloudNode[]=[],seen=new Set<string>();let current=id?byId.get(id):undefined;while(current&&!seen.has(current.id)){seen.add(current.id);result.unshift(current);current=current.parentId?byId.get(current.parentId):undefined;}return result;}};

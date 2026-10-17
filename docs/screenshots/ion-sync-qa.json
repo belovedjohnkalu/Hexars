@@ -1,0 +1,11 @@
+{
+  "date": "2026-10-17T06:25:31.128Z",
+  "checks": [
+    "Sign-up brings existing browser words into the private account",
+    "A separate device signs in and sees the same words",
+    "New additions appear on another open device through realtime",
+    "Another visitor cannot see private account words",
+    "Sign-out clears this device while other signed-in devices keep access",
+    "An expired session clears private content and offers sign-in"
+  ]
+}

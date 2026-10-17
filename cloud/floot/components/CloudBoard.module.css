@@ -5,20 +5,20 @@
 .cell { cursor: pointer; }
 .cell[aria-disabled="true"] { cursor: default; }
 .hex { transition: fill 200ms ease; }
-.indicator { animation: fadeIn 240ms var(--ease) both; }
-.indicatorColour { stroke: #8acaff; stroke-width: 4; }
+.indicator { animation: fadeIn 180ms var(--ease) both; }
+.indicatorColour { stroke: var(--primary); stroke-width: 3; }
 .indicator[data-indicator="capture"] .indicatorColour { stroke: #ffc566; }
 .indicator[data-indicator="check"] .indicatorColour,
 .indicator[data-indicator="check-move"] .indicatorColour,
 .indicator[data-indicator="capture-check"] .indicatorColour { stroke: #ff8176; }
 .indicator[data-indicator="selected"] .indicatorColour { stroke: #ffffff; }
-.indicator[data-indicator="last-move"] .indicatorColour { stroke: #bddfff; stroke-width: 4; opacity: 1; }
+.indicator[data-indicator="last-move"] .indicatorColour { stroke: #c8c8d0; stroke-width: 3; opacity: 1; }
 .keyboardRing { opacity: 0; transition: opacity 120ms ease; }
 .cell:focus-visible .keyboardRing { opacity: 1; }
 .piecePosition { transition: transform 420ms cubic-bezier(.22,1,.36,1); }
 .pieceFacing { transition: transform 540ms cubic-bezier(.22,1,.36,1); }
 .piece { overflow: visible; }
-.coordinate { font-family: var(--font-family-base); font-size: 7px; font-weight: 600; fill: #f4f7ff; paint-order: stroke fill; stroke: #050b15; stroke-width: 1.5; }
+.coordinate { font-family: var(--font-family-base); font-size: 7px; font-weight: 600; fill: #f4f7ff; paint-order: stroke fill; stroke: #000000; stroke-width: 1.5; }
 .captured { animation: captureOut 180ms ease forwards; }
 @keyframes fadeIn { from { opacity: 0; } }
 @keyframes captureOut { to { opacity: 0; } }
@@ -28,5 +28,5 @@
   .captured { display: none; }
 }
 
-.board { animation: boardIn 650ms var(--ease) both; }
+.board { animation: boardIn 220ms var(--ease) both; }
 @keyframes boardIn { from { opacity: 0; } to { opacity: 1; } }

@@ -84,7 +84,7 @@ export async function handle(request: Request) {
       .executeTakeFirst();
     if (!row)
       throw new GameError("Game not found. Start a new game or use its saved game link.", 404);
-    if (input.action !== "get" && input.version !== row.version)
+    if (input.action !== "get" && input.action !== "review" && input.version !== row.version)
       throw new GameError("This game changed on another device. Refresh to continue.", 409);
     let moves = (Array.isArray(row.moves) ? row.moves : []) as unknown as MoveRecord[];
     let timeline = Array.isArray(row.timeline) ? row.timeline : [];
@@ -103,6 +103,10 @@ export async function handle(request: Request) {
       (row.mode !== "engine" || activePlayer(row.state) === row.humanPlayer)
     )
       throw new GameError("It is not the engine's turn.", 400);
+    if(input.action==="review"){
+      if(input.ply>timeline.length)throw new GameError("That move is not in this game.",400);
+      if(input.ply<timeline.length)nextState=timeline[input.ply];
+    }
     if (input.action === "undo") {
       if (!timeline.length) throw new GameError("There are no moves to undo.", 400);
       let count = 1;
@@ -166,7 +170,7 @@ export async function handle(request: Request) {
       if (native.diagnostics) lastSearch = native.diagnostics;
     }
 
-    if (input.action !== "get") {
+    if (input.action !== "get" && input.action !== "review") {
       const updated = await db
         .updateTable("hexchessGames")
         .set({

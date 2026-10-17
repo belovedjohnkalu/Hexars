@@ -1,0 +1,126 @@
+{
+  "rawAuditPassed": false,
+  "reviewedFindings": [
+    {
+      "file": "cloud/floot/components/CloudExplorer.tsx",
+      "line": 37,
+      "ruleId": "affordance.actionless-button",
+      "classification": "false positive",
+      "reason": "Shared Button renders a real Link through asChild, or inherits the Radix trigger action. Live navigation/menu checks exercise the rendered action."
+    },
+    {
+      "file": "cloud/floot/components/CloudExplorer.tsx",
+      "line": 42,
+      "ruleId": "affordance.actionless-button",
+      "classification": "false positive",
+      "reason": "Shared Button renders a real Link through asChild, or inherits the Radix trigger action. Live navigation/menu checks exercise the rendered action."
+    },
+    {
+      "file": "cloud/floot/components/CloudExplorer.tsx",
+      "line": 44,
+      "ruleId": "affordance.actionless-button",
+      "classification": "false positive",
+      "reason": "Shared Button renders a real Link through asChild, or inherits the Radix trigger action. Live navigation/menu checks exercise the rendered action."
+    },
+    {
+      "file": "cloud/floot/components/CloudExplorer.tsx",
+      "line": 49,
+      "ruleId": "affordance.actionless-button",
+      "classification": "false positive",
+      "reason": "Shared Button renders a real Link through asChild, or inherits the Radix trigger action. Live navigation/menu checks exercise the rendered action."
+    },
+    {
+      "file": "cloud/floot/components/Play.tsx",
+      "line": 59,
+      "ruleId": "affordance.actionless-button",
+      "classification": "false positive",
+      "reason": "Shared Button renders a real Link through asChild, or inherits the Radix trigger action. Live navigation/menu checks exercise the rendered action."
+    },
+    {
+      "file": "cloud/floot/components/Play.tsx",
+      "line": 60,
+      "ruleId": "affordance.actionless-button",
+      "classification": "false positive",
+      "reason": "Shared Button renders a real Link through asChild, or inherits the Radix trigger action. Live navigation/menu checks exercise the rendered action."
+    },
+    {
+      "file": "cloud/floot/components/Play.tsx",
+      "line": 61,
+      "ruleId": "affordance.actionless-button",
+      "classification": "false positive",
+      "reason": "Shared Button renders a real Link through asChild, or inherits the Radix trigger action. Live navigation/menu checks exercise the rendered action."
+    },
+    {
+      "file": "cloud/floot/components/Play.tsx",
+      "line": 71,
+      "ruleId": "affordance.actionless-button",
+      "classification": "false positive",
+      "reason": "Shared Button renders a real Link through asChild, or inherits the Radix trigger action. Live navigation/menu checks exercise the rendered action."
+    },
+    {
+      "file": "cloud/floot/pages/login.tsx",
+      "line": 25,
+      "ruleId": "affordance.actionless-button",
+      "classification": "false positive",
+      "reason": "Shared Button renders a real Link through asChild, or inherits the Radix trigger action. Live navigation/menu checks exercise the rendered action."
+    },
+    {
+      "file": "cloud/floot/pages/login.tsx",
+      "line": 35,
+      "ruleId": "affordance.actionless-button",
+      "classification": "false positive",
+      "reason": "Shared Button renders a real Link through asChild, or inherits the Radix trigger action. Live navigation/menu checks exercise the rendered action."
+    },
+    {
+      "file": "cloud/floot/components/CloudActions.tsx",
+      "line": 18,
+      "ruleId": "form.novalidate-missing",
+      "classification": "false positive",
+      "reason": "Capital Form is a context provider, not a native form; the nested HTML form has noValidate. Rendered login/recovery forms were checked."
+    },
+    {
+      "file": "cloud/floot/components/CloudComposer.tsx",
+      "line": 39,
+      "ruleId": "form.novalidate-missing",
+      "classification": "false positive",
+      "reason": "Capital Form is a context provider, not a native form; the nested HTML form has noValidate. Rendered login/recovery forms were checked."
+    },
+    {
+      "file": "cloud/floot/components/PasswordLoginForm.tsx",
+      "line": 84,
+      "ruleId": "form.novalidate-missing",
+      "classification": "false positive",
+      "reason": "Capital Form is a context provider, not a native form; the nested HTML form has noValidate. Rendered login/recovery forms were checked."
+    },
+    {
+      "file": "cloud/floot/components/PasswordRegisterForm.tsx",
+      "line": 87,
+      "ruleId": "form.novalidate-missing",
+      "classification": "false positive",
+      "reason": "Capital Form is a context provider, not a native form; the nested HTML form has noValidate. Rendered login/recovery forms were checked."
+    },
+    {
+      "file": "cloud/floot/components/PasswordResetForm.tsx",
+      "line": 90,
+      "ruleId": "form.novalidate-missing",
+      "classification": "false positive",
+      "reason": "Capital Form is a context provider, not a native form; the nested HTML form has noValidate. Rendered login/recovery forms were checked."
+    },
+    {
+      "file": "cloud/floot/components/PasswordResetForm.tsx",
+      "line": 128,
+      "ruleId": "form.novalidate-missing",
+      "classification": "false positive",
+      "reason": "Capital Form is a context provider, not a native form; the nested HTML form has noValidate. Rendered login/recovery forms were checked."
+    },
+    {
+      "file": "cloud/floot/pages/login.tsx",
+      "line": 27,
+      "ruleId": "form.novalidate-missing",
+      "classification": "false positive",
+      "reason": "Capital Form is a context provider, not a native form; the nested HTML form has noValidate. Rendered login/recovery forms were checked."
+    }
+  ],
+  "unresolvedProductFindings": 0,
+  "note": "The unmodified upstream auditor case-folds JSX component names. The raw report is retained; no strict-pass claim is made."
+}

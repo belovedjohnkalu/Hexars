@@ -1,0 +1,59 @@
+{
+  "date": "2026-10-17T06:26:12.323117+00:00",
+  "origin": "https://hexars.floot.app",
+  "flootVersion": 1792218257607,
+  "typecheck": "clean",
+  "specFilesPassed": 10,
+  "publishedBrowserChecks": {
+    "ion-spatial-qa.json": [
+      "Black theme and compact insert bar",
+      "Right-click Edit saves without opening the word",
+      "Parent Back is in the bottom-left thumb zone",
+      "Copy preserves a complete independent branch",
+      "Move removes the old placement and keeps its branch",
+      "Zoom controls and two-axis scrolling work",
+      "Offline save preserves the draft and Retry saves once",
+      "Boards opens both native starting-position previews",
+      "Swipe right reviews history without undoing the move",
+      "Swipe left returns to the present position",
+      "Reset confirmation protects a played game",
+      "Tactical selection returns to the incoming variant",
+      "Rules has both variant droplets and complete rules",
+      "Variant cloud has no automated WCAG violations",
+      "Desktop layout fits its screen",
+      "No browser runtime errors"
+    ],
+    "ion-sync-qa.json": [
+      "Sign-up brings existing browser words into the private account",
+      "A separate device signs in and sees the same words",
+      "New additions appear on another open device through realtime",
+      "Another visitor cannot see private account words",
+      "Sign-out clears this device while other signed-in devices keep access",
+      "An expired session clears private content and offers sign-in"
+    ],
+    "ion-gestures-qa.json": [
+      "Holding a word opens Edit, Move, Copy and Delete",
+      "Control-scroll zooms around the pointer",
+      "Dragging pans without opening a word",
+      "Two-finger pinch enlarges the cloud",
+      "Account and recovery forms use app-owned validation"
+    ],
+    "ion-results-qa.json": {
+      "checkmate": true,
+      "preserved": true
+    }
+  },
+  "defaultEntryBrowserChecks": [
+    "Edit default without duplicates; input focus",
+    "Delete/Undo default branch after reload",
+    "Title menu transfers dialog focus"
+  ],
+  "automatedAccessibilityViolations": 0,
+  "staticPremiumStrictPassed": false,
+  "staticReview": "17 JSX parser false positives, adjudicated against shared components and live checks; see raw audit/adjudication.",
+  "limitations": [
+    "Physical iPhone keyboard and installation not hardware-tested",
+    "Password reset email for non-owner accounts requires verified sending domain",
+    "Accounts sync word spaces; chess sessions retain separate capability links"
+  ]
+}

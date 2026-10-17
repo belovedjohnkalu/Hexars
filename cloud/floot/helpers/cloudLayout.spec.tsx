@@ -7,7 +7,7 @@ describe("Cloud layout", () => {
     for (const item of result.items) {
       expect(item.x).toBeGreaterThanOrEqual(0);
       expect(item.x+item.width).toBeLessThanOrEqual(width);
-      expect(item.fontSize).toBeGreaterThanOrEqual(25);
+      expect(item.fontSize).toBeGreaterThanOrEqual(17);
       expect(item.y).toBeGreaterThanOrEqual(0);
       for (const other of result.items.filter(n=>n.id!==item.id)) {
         const overlap=item.x<other.x+other.width&&item.x+item.width>other.x&&item.y<other.y+other.height&&item.y+item.height>other.y;
