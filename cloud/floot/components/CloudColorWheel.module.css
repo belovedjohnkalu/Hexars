@@ -1,0 +1,9 @@
+.wheel { position:relative; width:100%; height:44px; overflow:clip; touch-action:none; mask-image:linear-gradient(90deg,transparent,#000 15%,#000 85%,transparent); }
+.track.track { position:relative; display:flex; gap:0; width:100%; height:44px; transition:transform 180ms var(--ease); align-items:center; }
+.swatch.swatch { flex-shrink:0; width:44px; height:44px; border:0; background:transparent; border-radius:50%; box-shadow:none; animation:none; }
+.swatch.swatch::before { content:''; position:absolute; width:17px; height:17px; border-radius:50%; top:13.5px; left:13.5px; background:var(--swatch); }
+.swatch.swatch > * { opacity:0; }
+.swatch.swatch[data-state=checked] { box-shadow:none; }
+.swatch.swatch:focus-visible { outline:2px solid var(--swatch); outline-offset:-5px; }
+.selection { position:absolute; left:calc(50% - 15px); top:7px; width:30px; height:30px; border:1.5px solid var(--muted-foreground); border-radius:50%; pointer-events:none; }
+@media(prefers-reduced-motion:reduce) { .track { transition:none; } }

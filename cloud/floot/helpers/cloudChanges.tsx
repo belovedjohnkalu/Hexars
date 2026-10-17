@@ -16,11 +16,11 @@ function applyAll(nodes:CloudNode[],input:Change,currentVersion:number,seeds:Clo
   const node=nodes.find(n=>n.id===input.id);
   if(input.action==="remove"&&node?.removedBy===input.operationId)return nodes;
   if(!node||node.removedBy)return fail("This cloud is no longer here.",404);
-  if(input.action==="rename"&&node.name===input.name)return nodes;
+  if(input.action==="rename"&&node.name===input.name&&(!input.color||node.color===input.color))return nodes;
   if(input.action==="move"&&node.parentId===input.parentId)return nodes;
   if(input.action==="copy"&&nodes.some(n=>n.id===input.operationId))return fail("Choose a new copy operation.",409);
   if(input.version!==currentVersion)return fail("Your space changed. Try again.",409);
-  if(input.action==="rename")return nodes.map(n=>n.id===input.id?{...n,name:input.name}:n);
+  if(input.action==="rename")return nodes.map(n=>n.id===input.id?{...n,name:input.name,...(input.scope==='private'&&input.color?{color:input.color}:{})}:n);
   const ids=new Set([input.id]);
   let grew=true;
   while(grew){grew=false;for(const n of nodes)if(!n.removedBy&&n.parentId&&ids.has(n.parentId)&&!ids.has(n.id)){ids.add(n.id);grew=true;}}
@@ -38,9 +38,10 @@ function applyAll(nodes:CloudNode[],input:Change,currentVersion:number,seeds:Clo
 function undo(nodes:CloudNode[]) {
   const latest=nodes.filter(n=>n.removedBy).sort((a,b)=>(b.removedAt||"").localeCompare(a.removedAt||""))[0];
   if(!latest?.removedBy)return undefined;
+  const expiresAt=Date.parse(latest.removedAt||'')+10000;if(!Number.isFinite(expiresAt)||expiresAt<=Date.now())return undefined;
   const group=nodes.filter(n=>n.removedBy===latest.removedBy),ids=new Set(group.map(n=>n.id));
   const root=group.find(n=>!n.parentId||!ids.has(n.parentId))||latest;
-  return {operationId:latest.removedBy,name:root.name,parentId:root.parentId,count:group.length};
+  return {operationId:latest.removedBy,name:root.name,parentId:root.parentId,count:group.length,expiresAt};
 }
 function apply(stored:CloudNode[],input:Change,currentVersion:number,seeds:CloudNode[]=[]){
  if(!seeds.length)return applyAll(stored,input,currentVersion);

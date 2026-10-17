@@ -1,5 +1,5 @@
 {
-  "date": "2026-10-17T21:10:53.585Z",
+  "date": "2026-10-17T22:34:40.484Z",
   "origin": "https://ion.floot.app",
   "checks": [
     "Home has only Chess, Public and Private, with no insertion, zoom buttons or title popup",
@@ -11,7 +11,7 @@
     "Public additions arrive live on an independent device without reloading",
     "Moving Public to Private removes the public placement live",
     "Remembered account switching restores the correct private space, with one Back action",
-    "Tactical shows five levels before Boards and starts the chosen level",
+    "Tactical shows six levels before Boards and starts the chosen level",
     "A level selected from a game returns to the same variant",
     "Rules are separate illustrated paragraph clouds, including the official central-pawn exception",
     "The variant cloud passes automated accessibility checks",
@@ -20,7 +20,7 @@
   "violations": [],
   "errors": [],
   "qaUsers": [
-    20,
-    21
+    33,
+    35
   ]
 }

@@ -1,0 +1,2 @@
+// Home positions are independent of counts, font loading and response order.
+export function cloudHomeLayout(width:number,height:number){const narrow=width<600,picture=narrow?118:148;return {width,height,items:[{id:'hexagonal-chess',x:width/2-(picture+24)/2,y:height*(narrow?.28:.4)-picture/2,width:picture+24,height:picture+58,fontSize:20},{id:'public',x:width*(narrow?.27:.28)-75,y:height*(narrow?.66:.5)-28,width:150,height:56,fontSize:narrow?23:27},{id:'private',x:width*(narrow?.73:.72)-75,y:height*(narrow?.66:.5)-28,width:150,height:56,fontSize:narrow?23:27}]};}

@@ -1,8 +1,8 @@
 {
-  "date": "2026-10-17T21:11:51.025Z",
+  "date": "2026-10-17T22:19:32.256Z",
   "origin": "https://ion.floot.app",
   "checks": [
-    "Keyboard zoom and two-axis scrolling remain available without zoom buttons",
+    "Keyboard zoom remains available while native scrolling is disabled",
     "Modified wheel zoom remains available",
     "The new domain serves ION favicon and black install metadata",
     "Owner-added chess cloud links retain shared scope and stay read-only for visitors",

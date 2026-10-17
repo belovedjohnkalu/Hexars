@@ -2,6 +2,17 @@
 
 Published: **https://ion.floot.app**
 
+## 2026-10-17 — Colors, fitted pages and a stable Home
+
+Published on https://ion.floot.app. Private has a saved-color wheel; default clouds
+have shared pastel colors. Home anchors stay fixed and wait for initial viewport/data/font readiness.
+Scrolling is replaced by pan/zoom and fitted pages, including rules and compact account flows.
+Rule pictures appear only in the opened paragraph. Pre-Beginner has half Beginner's
+search budget and random legal choices; Pass and Play deselects Tactical. Deletion
+Undo expires ten seconds after deletion. Capacity is exactly 1,024 direct children,
+checked on every creation/transfer/restore path. Explicit signup normalizes email.
+See [release details](ion-refinements-release.md).
+
 ## 2026-10-17 — Public and Private on ION
 
 Published at https://ion.floot.app. Home has exactly Chess, Public and Private.

@@ -1,3 +1,4 @@
+import { useVisualViewport } from "../helpers/useVisualViewport";
 import { AuthProvider } from "../helpers/useAuth";
 import { ReactNode, useEffect } from "react";
 import { cloudDrafts } from "../helpers/cloudDrafts";
@@ -20,6 +21,7 @@ export const GlobalContextProviders = ({
 }: {
   children: ReactNode;
 }) => {
+  useVisualViewport();
   useEffect(()=>{const guard=(event:BeforeUnloadEvent)=>{if(cloudDrafts.hasPictures()){event.preventDefault();event.returnValue="";}};window.addEventListener("beforeunload",guard);return()=>window.removeEventListener("beforeunload",guard);},[]);
   return (
     <QueryClientProvider client={queryClient}>

@@ -2,7 +2,7 @@ import { z } from "zod";
 import superjson from "superjson";
 
 export const schema = z.object({
-  email: z.string().email("Enter a valid email"),
+  email: z.string().trim().toLowerCase().email("Enter a valid email"),
 });
 
 export type OutputType = { ok: true };

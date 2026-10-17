@@ -1,13 +1,28 @@
-.sheet { width: min(420px,calc(100vw - 32px)); max-height: min(85dvh,700px); overflow-y: auto; padding: 30px; font-family: var(--font-family-base); }
-.title { font-size: 28px; letter-spacing: -.045em; }
-.description { font-size: 17px; line-height: 1.55; color: var(--muted-foreground); overflow-wrap: anywhere; }
+.sheet { width: min(420px,calc(100vw - 32px)); max-height: min(85dvh,700px); overflow: clip; padding: 20px; font-family: var(--font-family-base); }
+.title { font-size: 24px; letter-spacing: -.045em; }
+.description { font-size: 14px; line-height: 1.4; color: var(--muted-foreground); overflow-wrap: anywhere; }
 .input.input { min-height: 52px; margin-top: 18px; font-size: 22px; }
-.actions { display: flex; justify-content: flex-end; gap: 12px; margin-top: 24px; }
+.actions { display: flex; justify-content: flex-end; gap: 12px; margin-top: 12px; }
 .actions button { min-width: 100px; min-height: 48px; }
 .error { color: var(--error); font-size: 16px; line-height: 1.5; }
 .srOnly { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
-.destinations { display:flex; flex-direction:column; gap:4px; max-height:32dvh; overflow:auto; margin-top:16px; }
+.destinations { display:flex; flex-direction:column; gap:4px; overflow:clip; margin-top:8px; }
 .destinations button { display:block; text-align:left; min-height:44px; white-space:normal; flex-shrink:0; overflow-wrap:anywhere; }
-.destinations span { display:block; max-width:100%; }
-.scopes { display:flex; gap:8px; margin:12px 0 16px; }
+.destinations span { display:-webkit-box; -webkit-box-orient:vertical; -webkit-line-clamp:2; overflow:clip; max-width:100%; }
+.scopes { display:flex; gap:8px; margin:8px 0; }
 .scopes button { flex:1; min-height:44px; }
+
+@media(max-height:550px) { .sheet { padding:14px; } .description { margin:6px 0; font-size:13px; } .actions { margin-top:8px; } .destinations { margin-top:4px; } }
+
+.find { position:relative; }
+.find input { padding-right:42px; }
+.find > button { position:absolute; right:0; top:0; width:40px; height:100%; }
+
+.sheet[data-compact=true] { padding:14px; }
+.sheet[data-compact=true] .title { font-size:22px; margin-bottom:6px; }
+.sheet[data-compact=true] .description { font-size:13px; line-height:1.35; margin:4px 0; }
+.sheet[data-compact=true] .scopes { margin:4px 0; }
+.sheet[data-compact=true] .scopes button,.sheet[data-compact=true] .actions button { min-height:40px; height:40px; }
+.sheet[data-compact=true] .destinations { margin-top:4px; }
+.sheet[data-compact=true] .destinations button { min-height:40px; font-size:14px; line-height:1.3; padding:6px; }
+.sheet[data-compact=true] .actions { margin-top:6px; }

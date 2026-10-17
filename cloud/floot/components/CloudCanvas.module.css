@@ -1,9 +1,9 @@
-.viewport { position: relative; width: 100%; height: 100%; min-height: 240px; }
+.viewport { position: relative; width: 100%; height: 100%; min-height: 0; }
 .canvas { position: relative; animation: arrive 300ms var(--ease) both; transition: opacity 180ms ease; }
 .canvas.leaving { opacity: 0; }
 .node { position:absolute; left:0; top:0; display:flex; align-items:center; justify-content:center; padding:10px 12px; color:var(--foreground); text-decoration:none; text-align:center; font:500 20px/1.18 var(--font-family-display); letter-spacing:-.035em; border-radius:var(--radius); transform:translate3d(var(--node-x),var(--node-y),0); transition:transform 360ms var(--ease),font-size 360ms var(--ease),color 180ms ease,opacity 180ms ease; cursor:pointer; -webkit-tap-highlight-color:transparent; -webkit-touch-callout:none; user-select:none; }
 .node span { overflow-wrap:anywhere; max-width:100%; }
-.node:hover { color:var(--muted-foreground); }
+.node:hover { filter:brightness(1.18); }
 .node:active { opacity:.65; }
 .node:focus-visible { outline:2px solid var(--primary); outline-offset:3px; }
 .node.fading { opacity:.1; }
@@ -12,10 +12,12 @@
 .pictureFallback { display:grid; place-items:center; height:100%; width:100%; border:1px solid var(--border); border-radius:24%; background:var(--surface); }
 .justAdded { text-decoration:underline; text-underline-offset:6px; }
 .picture img { display:block; width:100%; height:100%; border-radius:24%; object-fit:cover; border:1px solid var(--border); }
-.caption { color:var(--foreground); font-size:16px; line-height:1.3; }
+.caption { color:inherit; font-size:16px; line-height:1.3; }
 .empty { position:absolute; inset:0; display:grid; place-items:center; margin:0; color:var(--muted-foreground); font-size:19px; pointer-events:none; }
 .context { min-width:190px; border-radius:20px; padding:6px; background:var(--glass-solid); backdrop-filter:blur(28px); }
 .context [role=menuitem] { min-height:44px; font-size:17px; padding:10px 16px; cursor:pointer; }
 .danger { color:var(--error); }
 @keyframes arrive { from { opacity:0; } to { opacity:1; } }
 @media(prefers-reduced-motion:reduce) { .canvas,.node { transition:none; animation:none; } }
+
+.canvas[data-home=true] .node { transition:color 180ms ease,opacity 180ms ease; }

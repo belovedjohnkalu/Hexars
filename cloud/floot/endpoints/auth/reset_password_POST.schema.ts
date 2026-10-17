@@ -2,7 +2,7 @@ import { z } from "zod";
 import superjson from "superjson";
 
 export const schema = z.object({
-  email: z.string().email("Enter a valid email"),
+  email: z.string().trim().toLowerCase().email("Enter a valid email"),
   code: z.string().trim().min(1, "Enter the code from the email"),
   newPassword: z.string().min(8, "Use at least 8 characters"),
 });

@@ -9,6 +9,13 @@ colors:
   primary: "#eeeeef"
   muted: "#a1a1a6"
   error: "#ff8176"
+  wordBlue: "#7bb3ff"
+  wordCyan: "#70dce2"
+  wordMint: "#a5dba7"
+  wordAmber: "#f5d17c"
+  wordCoral: "#ffa78b"
+  wordRose: "#f6a4d5"
+  wordLavender: "#c5a1ff"
 typography:
   sans:
     fontFamily: "Inter, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif"
@@ -31,6 +38,27 @@ components:
   composer:
     height: "48px"
     textColor: "{colors.muted}"
+  cloudBlue:
+    size: "17px"
+    textColor: "{colors.wordBlue}"
+  cloudCyan:
+    size: "17px"
+    textColor: "{colors.wordCyan}"
+  cloudMint:
+    size: "17px"
+    textColor: "{colors.wordMint}"
+  cloudAmber:
+    size: "17px"
+    textColor: "{colors.wordAmber}"
+  cloudCoral:
+    size: "17px"
+    textColor: "{colors.wordCoral}"
+  cloudRose:
+    size: "17px"
+    textColor: "{colors.wordRose}"
+  cloudLavender:
+    size: "17px"
+    textColor: "{colors.wordLavender}"
 ---
 # ION Design System
 
@@ -38,13 +66,13 @@ components:
 Product interface for people collecting words and pictures, and playing Hexagonal Chess on phones and desktops. English controls; names accept Unicode. The reference is iPhone's quiet glass controls floating over black space. The signature is entering a word by zooming into its cloud. Avoid dashboards, cards around every word, decorative charts, and excessive chessboard depth. The user's choice of Inter overrides generic display-font advice.
 
 ## Colors
-Runtime source of truth is base.css (mapping model B). This document mirrors --background, --foreground, --surface, --primary, --muted-foreground and --error. Dark only. --glass-solid provides a legible frosted composer; --glass-border defines its rim. Neutral white indicates interaction, with textual error feedback. No per-word rainbow.
+Runtime source of truth is base.css (mapping model B). This document mirrors --background, --foreground, --surface, --primary, --muted-foreground and --error. Dark only. --glass-solid provides a legible frosted composer; --glass-border defines its rim. Neutral white indicates interaction, with textual error feedback. The eight shared --word-* tokens color default clouds and the Private color wheel. Color remains optional and every word retains its readable label.
 
 ## Typography
 Inter is self-hosted and preloaded by AppHead. --font-family-base and --font-family-display supply all UI. Use medium weights and restrained text. Word size is 17–30px on phones and 20–38px on desktops, relative to sibling descendant counts. Images scale by footprint. Long words wrap without changing the hierarchy.
 
 ## Layout
-One cloud fills the screen. Header and composer are stable; SpatialViewport owns two-axis scrolling, drag panning and pinch / modified-wheel zoom. A spatial layout prevents overlap and grows vertically when needed. Respect safe areas and the virtual keyboard. No horizontal page overflow. Hierarchy is in the URL's cloud parameter, preserving browser Back. Fixed-height layout applies only to the cloud explorer, never globally to games or content pages.
+One cloud fills the screen. Header and composer are stable; SpatialViewport owns a transform camera for drag panning, pinch and modified-wheel zoom. Native app scrolling is disabled. A spatial layout prevents overlap; its camera initially fits the entire cloud. Home uses fixed anchors independent of counts and font loading. Respect safe areas and the virtual keyboard. No horizontal page overflow. Hierarchy is in the URL's cloud parameter, preserving browser Back. Fixed-height layout applies only to the cloud explorer, never globally to games or content pages.
 
 ## Elevation & Depth
 Glass is reserved for the add bar and existing game sheets. Words float directly on the dark background. Chess cells stay flat.
@@ -53,7 +81,7 @@ Glass is reserved for the add bar and existing game sheets. Words float directly
 Use existing radius tokens, circular utility buttons, and a long pill composer. Pictures retain their shape within a rounded image frame. Chess move indicators remain thick inset hexagons.
 
 ## Components
-Canonical owners: Button, Input, Form, Dialog, RadioGroup, DropdownMenu and InstallControl. The title is plain text. Holding a permitted word opens its context menu; deletion Undo remains a quiet footer action. CloudCanvas owns spatial navigation; CloudComposer owns creation and validation; useCloudSpace owns async state and retry. Loading uses the shared circular Spinner. Status announcements use a polite live region and failures remain visible above the composer. Main scrollbars inherit the global base.css baseline including forced-colors behavior.
+Canonical owners: Button, Input, Form, Dialog, RadioGroup, DropdownMenu and InstallControl. The title is plain text. Holding a permitted word opens its context menu; deletion Undo remains a quiet footer action. CloudCanvas owns spatial navigation; CloudComposer owns creation and validation; useCloudSpace owns async state and retry. Loading uses the shared circular Spinner. Status announcements use a polite live region and failures remain visible above the composer. PageControls and PagedText make long content reachable without scrolling; global scrollbar tokens remain only as a platform fallback, not an app interaction.
 
 Links have visible focus, hover and pressed states. Disabled submit controls retain their footprint. Upload accepts PNG/JPEG/WebP/GIF up to 3 MB, shows an attachment preview, preserves drafts on error, and transfers file bytes directly to private storage. Native file-picker geometry is intentionally OS-owned.
 
@@ -67,10 +95,13 @@ Motion: 190ms outgoing zoom and 460ms arrival, with eased placement changes. Red
 - Don't imply unavailable engines or variants are playable.
 
 ## October 17 workflow
-The void is a two-dimensional space with native scrollbars, drag-to-pan, pinch and Ctrl/Command-wheel zoom, without visible zoom controls. The viewport remembers its camera per cloud. Compact 48px creation bar and parent Back share the bottom thumb zone. The application is black; flat blue chess cells and the blue chess home image provide its only broad colour. Runtime base.css remains the sole token owner.
+The void is a two-dimensional transform canvas with drag-to-pan, pinch, keyboard and Ctrl/Command-wheel zoom, without scrolling or visible zoom controls. The viewport remembers its camera per cloud. Compact 48px creation bar and parent Back share the bottom thumb zone. The application is black; flat blue chess cells and the blue chess home image retain the chess identity; pastel word colors distinguish destinations. Runtime base.css remains the sole token owner.
 
-Hold or right-click a word for Edit, Move, Copy, Delete. Keyboard users can open the context menu on the focused word. Dialog and ContextMenu own overlays; root-to-descendant cycles are forbidden server-side. Reversible deletion includes the branch. No application word-count cap.
+Hold or right-click a word for Edit, Move, Copy, Delete. Keyboard users can open the context menu on the focused word. Dialog and ContextMenu own overlays; root-to-descendant cycles are forbidden server-side. Reversible deletion includes the branch. A hidden server limit permits exactly 1,024 immediate droplets per cloud; nesting and total workspace size remain independent.
 
-Boards is a void with two authoritative starting-board previews. Tactical opens a five-level ladder, then returns to the incoming variant or Boards. Variant pages place the board among Variants, Rules, Engines, Board Reset, Undo. Swipe history never changes the game. A concise bold result sheet announces checkmate, stalemate and draws.
+Boards is a void with two authoritative starting-board previews. Tactical opens a six-level ladder, then returns to the incoming variant or Boards. Variant pages place the board among Variants, Rules, Engines, Board Reset, Undo and Pass and Play. Swipe history never changes the game. A concise bold result sheet announces checkmate, stalemate and draws.
 
-Sign-in uses the existing Floot auth primitives. Home has exactly Chess, Public and Private with no insertion. Public is globally shared; only the configured owner edits Chess. Each account owns one private cloud workspace. Existing guest words can join it at sign-in. Private realtime grants contain only that account’s channel. Signing out clears browser identity. Remembered accounts use a trusted HttpOnly device cookie with server session associations, never saved passwords. Rules paragraphs each have a cloud and blue diagram. All confirmation sheets are black. The compact composer follows visualViewport height and scroll offset above the keyboard.
+Sign-in uses the existing Floot auth primitives. Home has exactly Chess, Public and Private with no insertion. Public is globally shared; only the configured owner edits Chess. Each account owns one private cloud workspace. Existing guest words can join it at sign-in. Private realtime grants contain only that account’s channel. Signing out clears browser identity. Remembered accounts use a trusted HttpOnly device cookie with server session associations, never saved passwords. Rules paragraphs each have a colored word cloud; blue diagrams appear only after opening a paragraph. Long text uses fitted pages. All confirmation sheets are black. The compact composer follows visualViewport height and scroll offset above the keyboard.
+
+## October 17 refinement
+Private creation uses CloudColorWheel, an authored horizontal RadioGroup wheel with touch, wheel and keyboard access; it changes selection without creating a scroller. Home anchors and reserved footprints prevent startup movement. The borderless ION icon is black edge to edge. Undo expires ten seconds from deletion, including after reload. Password recovery uses compact email/code/password steps so every action fits above the keyboard.

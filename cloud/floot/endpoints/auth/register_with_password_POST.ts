@@ -1,4 +1,5 @@
 // adapt this to the database schema and helpers if necessary
+import { sql } from "kysely";
 import { db } from "../../helpers/db";
 import { schema } from "./register_with_password_POST.schema";
 import { randomBytes } from "crypto";
@@ -18,13 +19,13 @@ export async function handle(request: Request) {
     const existingUser = await db
       .selectFrom("users")
       .select("id")
-      .where("email", "=", email)
+      .where(sql`LOWER(users.email)`, "=", email)
       .limit(1)
       .execute();
 
     if (existingUser.length > 0) {
       return new Response(
-        superjson.stringify({ message: "email already in use" }),
+        superjson.stringify({ message: "This email already has an account. Sign in or use Forgot password." }),
         {
           status: 409,
           headers: {
@@ -101,9 +102,9 @@ export async function handle(request: Request) {
 
     return response;
   } catch (error: unknown) {
-    console.error("Registration error:", error);
+    console.error("Registration failed",error instanceof Error?error.name:"Unknown error");
     const errorMessage =
-      error instanceof Error ? error.message : "Registration failed";
+      error&&typeof error==="object"&&"issues" in error ? "Check your email and use at least 8 characters for the password." : "Couldn’t create the account. Try again.";
     return new Response(
       superjson.stringify({ message: errorMessage }),
       {

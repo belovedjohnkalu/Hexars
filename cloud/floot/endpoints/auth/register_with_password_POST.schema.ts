@@ -3,7 +3,7 @@ import { User } from "../../helpers/User";
 import superjson from "superjson";
 
 export const schema = z.object({
-  email: z.string().email("Email is required"),
+  email: z.string().trim().toLowerCase().email("Email is required"),
   password: z.string().min(8, "Password must be at least 8 characters"),
   displayName: z.string().min(1, "Name is required"),
 });

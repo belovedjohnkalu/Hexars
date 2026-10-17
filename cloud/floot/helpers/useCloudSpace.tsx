@@ -4,7 +4,8 @@ import { cloudTree } from "./cloudTree";
 import { RealtimeClient } from "./RealtimeClient";
 import { channels } from "./realtimeChannels";
 type Credentials={workspaceId:string;accessToken:string};
-type NewNode={id:string;name:string;parentId:string|null;file?:File;uploaded?:boolean};
+import type { CloudColor } from "./cloudColors";
+type NewNode={id:string;name:string;parentId:string|null;file?:File;uploaded?:boolean;color?:CloudColor};
 type Change=Extract<InputType,{action:'rename'|'remove'|'restore'|'move'|'copy'|'transfer'}>;
 const blank=(scope:CloudScope):OutputType=>({nodes:cloudTree.forScope(scope),version:0,scope,canAdd:false});
 const failureMessage=(e:unknown)=>e instanceof Error&&!(e instanceof TypeError)&&!(e instanceof SyntaxError)?e.message:'Couldn’t save. Check your connection and try again.';
@@ -17,6 +18,8 @@ export function useCloudSpace(accountId:number|null=null,authLoading=false,scope
  const [data,setData]=useState<OutputType>(()=>blank(scope)),[loading,setLoading]=useState(true),[ready,setReady]=useState(false),[busy,setBusy]=useState(false),[error,setError]=useState(''),[phase,setPhase]=useState<'idle'|'uploading'|'saving'>('idle');
  const identity=useRef<Credentials|null>(null),current=useRef(data),scopeKey=useRef(''),mounted=useRef(true),locked=useRef(false),uploadController=useRef<AbortController|null>(null);
  const accept=useCallback((value:OutputType)=>{if(value.scope&&scopeKey.current!==value.scope+':'+(value.userId||'guest'))return;if(value.version<current.current.version)return;current.current=value;if(mounted.current)setData(value);},[]);
+ const [undoClock,setUndoClock]=useState(Date.now());
+ useEffect(()=>{const deadline=data.undo?.expiresAt;if(!deadline)return;setUndoClock(Date.now());const t=setTimeout(()=>setUndoClock(Date.now()),Math.max(0,deadline-Date.now())+10);return()=>clearTimeout(t);},[data.undo?.operationId,data.undo?.expiresAt]);
  const load=useCallback(async(signal?:AbortSignal)=>{
   try{const next=scope+':'+(accountId||'guest');if(scopeKey.current!==next){scopeKey.current=next;current.current=blank(scope);setData(current.current);setReady(false);setLoading(true);}identity.current=credentials();
    let connect=false;try{connect=scope==='private'&&!!accountId&&sessionStorage.getItem('ion.connect-space')==='yes';}catch{}
@@ -31,12 +34,12 @@ export function useCloudSpace(accountId:number|null=null,authLoading=false,scope
   try{if(kind==='add'){
    const item=body as NewNode,imageType=item.file?.type as 'image/png'|'image/jpeg'|'image/webp'|'image/gif'|undefined;
    if(item.file&&!item.uploaded){setPhase('uploading');const controller=new AbortController();uploadController.current=controller;const prepared=await postCloud({action:'upload',scope,...identity.current,id:item.id,contentType:imageType!,sizeBytes:item.file.size},{signal:controller.signal});if(!prepared.upload)throw new Error('Couldn’t prepare the picture.');const response=await fetch(prepared.upload.url,{method:'PUT',headers:prepared.upload.headers,body:item.file,signal:controller.signal});if(!response.ok)throw new Error('Couldn’t upload the picture.');item.uploaded=true;uploadController.current=null;}
-   setPhase('saving');const request=()=>postCloud({action:'add',scope,...identity.current!,id:item.id,name:item.name,parentId:item.parentId,version:current.current.version,...(imageType?{imageType}:{})});let value:OutputType;try{value=await request();}catch(e){if(!(e&&typeof e==='object'&&'status'in e&&e.status===409))throw e;await load();value=await request();}accept(value);
+   setPhase('saving');const request=()=>postCloud({action:'add',scope,...identity.current!,id:item.id,name:item.name,parentId:item.parentId,color:item.color,version:current.current.version,...(imageType?{imageType}:{})});let value:OutputType;try{value=await request();}catch(e){if(!(e&&typeof e==='object'&&'status'in e&&e.status===409))throw e;await load();value=await request();}accept(value);
   }else{setPhase('saving');accept(await postCloud({...body,scope,...identity.current,version:current.current.version} as Change));}return true;
   }catch(e){if(e&&typeof e==='object'&&'status'in e&&e.status===409)await load();if(mounted.current)setError(e instanceof Error&&e.name==='AbortError'?'':failureMessage(e));return false;}
   finally{locked.current=false;uploadController.current=null;if(mounted.current){setBusy(false);setPhase('idle');}}
  }
- return {...data,loading,ready,busy,error,phase,add:(node:NewNode)=>mutate(node,'add'),rename:(id:string,name:string)=>mutate({action:'rename',id,name},'change'),remove:(id:string,expectedCount:number,operationId:string)=>mutate({action:'remove',id,expectedCount,operationId},'change'),restore:(operationId:string)=>mutate({action:'restore',operationId},'change'),
+ return {...data,undo:data.undo&&(!data.undo.expiresAt||data.undo.expiresAt>undoClock)?data.undo:undefined,loading,ready,busy,error,phase,add:(node:NewNode)=>mutate(node,'add'),rename:(id:string,name:string,color?:CloudColor)=>mutate({action:'rename',id,name,color},'change'),remove:(id:string,expectedCount:number,operationId:string)=>mutate({action:'remove',id,expectedCount,operationId},'change'),restore:(operationId:string)=>mutate({action:'restore',operationId},'change'),
   relocate:(id:string,parentId:string|null,copy:boolean,operationId:string)=>mutate({action:copy?'copy':'move',id,parentId,operationId},'change'),
   transfer:(id:string,targetScope:'public'|'private',targetParent:string,targetVersion:number,copy:boolean,operationId:string)=>mutate({action:'transfer',id,targetScope,targetParent,targetVersion,mode:copy?'copy':'move',operationId},'change'),
   loadTarget:(targetScope:CloudScope)=>postCloud({action:'load',scope:targetScope,...(identity.current||credentials())}),

@@ -1,4 +1,5 @@
 import { publish } from "@floot/realtime";
+import { assertCloudCapacity } from "../helpers/cloudCapacity";
 import { cloudContext } from "../helpers/cloudContext";
 import { cloudPolicy } from "../helpers/cloudPolicy";
 import { cloudTransfer } from "../helpers/cloudTransfer";
@@ -52,7 +53,7 @@ export async function handle(request: Request) {
         if (input.version !== row.version) throw new CloudError("Your space changed in another tab. Try again.", 409);
           if (input.parentId !== null && !all.some(n => n.id === input.parentId && !n.destination))
           throw new CloudError("Choose an existing cloud.", 400);
-        const node: CloudNode = { id: input.id, parentId: input.parentId, name: input.name,createdBy:context.userId! };
+        const node: CloudNode = { id: input.id, parentId: input.parentId, name: input.name,createdBy:context.userId!,...(input.scope==='private'&&input.color?{color:input.color}:{}) };
         if (input.imageType) {
           const filename = "ion/" + row.id + "/" + context.userId + "/" + input.id + "." + extensions[input.imageType];
           const info = await getInfo({ visibility: "private", filename });
@@ -60,6 +61,7 @@ export async function handle(request: Request) {
             throw new CloudError("Upload the picture again.", 400);
           node.imageKey = filename;
         }
+        assertCloudCapacity([...context.seeds,...nodes],[...context.seeds,...nodes,node]);
         nodes = [...nodes, node];
         const updated = await db.updateTable("ionWorkspaces").set({ nodes: nodes as unknown as Json, version: row.version + 1, updatedAt: new Date() })
           .where("id", "=", row.id).where("version", "=", row.version).returning("version").executeTakeFirst();
@@ -76,6 +78,7 @@ export async function handle(request: Request) {
       let next=cloudChanges.apply(nodes,input,row.version,context.seeds);
       if(input.action==='copy')next=next.map(n=>n.copyOperation===input.operationId?{...n,createdBy:context.userId!}:n);
       if(next!==nodes){
+        assertCloudCapacity([...context.seeds,...nodes],[...context.seeds,...next]);
         const updated=await db.updateTable("ionWorkspaces").set({nodes:next as unknown as Json,version:row.version+1,updatedAt:new Date()}).where("id","=",row.id).where("version","=",row.version).returning("version").executeTakeFirst();
         if(!updated)throw new CloudError("Your space changed. Try again.",409);
         nodes=next;version=updated.version;

@@ -1,7 +1,7 @@
 import { tacticalLevels } from "./tacticalLevels";
 import { spawn } from "node:child_process";
 import { readFile, writeFile, chmod, rename, rm } from "node:fs/promises";
-import { createHash, randomUUID } from "node:crypto";
+import { createHash, randomUUID, randomInt } from "node:crypto";
 import { tmpdir, arch, platform } from "node:os";
 import path from "node:path";
 import { createInterface } from "node:readline";
@@ -148,17 +148,19 @@ export async function runNativeEngine(options: Options): Promise<NativeResult> {
             send({
               type: "go",
               stateId: previousGame.stateId,
-              limits: (tacticalLevels.find(l=>l.level===options.difficulty)||tacticalLevels[2]).limits,
+              limits: (tacticalLevels.find(l=>l.level===options.difficulty)||tacticalLevels.find(l=>l.level===3)!).limits,
             });
           }
         } else if (stage === "search") {
           if (packet.type !== "bestmove" || packet.stateId !== previousGame?.stateId)
             throw new Error("Stale engine search response");
           if (!packet.move) throw new Error("Game has ended");
-          appliedMove = packet.move as ChessMove;
+          const randomMove=options.difficulty===0&&randomInt(2)===0?previousGame!.legalMoves[randomInt(previousGame!.legalMoves.length)]:null;
+          const chosen=randomMove||packet.move as ChessMove;
+          appliedMove={from:chosen.from,to:chosen.to,...(chosen.promotion?{promotion:chosen.promotion}:{})};
           const measured = packet.diagnostics as Omit<SearchDiagnostics, "score">;
           const evaluation = packet.evaluation as { score: number };
-          diagnostics = { ...measured, score: evaluation.score };
+          diagnostics = { ...measured, score: evaluation.score,...(randomMove?{randomized:true}:{}) };
           stage = "applied";
           // The shared C++ rules validate and apply the engine's proposed move.
           send({ type: "play_move", stateId: previousGame!.stateId, move: appliedMove });

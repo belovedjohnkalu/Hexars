@@ -1,3 +1,4 @@
+import { assertCloudCapacity } from "./cloudCapacity";
 import { randomUUID } from "node:crypto";
 import { db } from "./db";
 import { cloudContext } from "./cloudContext";
@@ -25,6 +26,7 @@ export async function cloudTransfer(request:Request,raw:Extract<InputType,{actio
   if(existing.some(n=>n.id===input.operationId))cloudPolicy.fail('Choose a new transfer.',409);
   const ids=new Map(group.map(n=>[n.id,n.id===input.id?input.operationId:randomUUID()]));
   const added=group.map(n=>({...n,id:ids.get(n.id)!,parentId:n.id===input.id?input.targetParent:ids.get(n.parentId!)!,createdBy:uid,canEdit:undefined,copyOperation:input.operationId}));
+  assertCloudCapacity([...cloudTree.forScope(input.targetScope),...existing],[...cloudTree.forScope(input.targetScope),...existing,...added]);
   await tx.updateTable('ionWorkspaces').set({nodes:[...existing,...added] as unknown as Json,version:b.version+1,updatedAt:new Date()}).where('id','=',b.id).execute();
   if(input.mode==='move')await tx.updateTable('ionWorkspaces').set({nodes:stored.filter(n=>!ids.has(n.id)) as unknown as Json,version:a.version+1,updatedAt:new Date()}).where('id','=',a.id).execute();
   await tx.insertInto('ionCloudTransfers').values({operationId:input.operationId,userId:uid,sourceWorkspace:sourceId,targetWorkspace:targetId,sourceNode:input.id,targetParent:input.targetParent,kind:input.mode}).execute();

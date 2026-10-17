@@ -21,7 +21,7 @@
     width: 32rem;
     max-width: 90vw;
     max-height: min(85dvh, 760px);
-    overflow: auto;
+    overflow: clip;
     background: #111113;
     border: 1px solid var(--glass-border);
     backdrop-filter: blur(32px) saturate(140%);

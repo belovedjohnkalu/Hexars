@@ -3,7 +3,7 @@
 ION is live on **Floot** at https://ion.floot.app. Its main navigation is a
 pannable, zoomable cloud of words and pictures. Open **Hexagonal Chess**, then
 **Boards** to choose Gliński or McCooey, **Engines** to select Tactical, or **Rules**
-for separate illustrated rule paragraphs.
+for separate rule paragraphs. Rule lists are words; illustrations appear inside each paragraph, and long text uses fitted pages without scrolling.
 
 Home contains **Hexagonal Chess**, **Public**, and **Private**. Public is readable
 across accounts and devices, with live updates; sign in to contribute. Private is
@@ -14,8 +14,7 @@ content stays private; it is not published automatically.
 
 Every confirmed word and picture is stored on the server. Remember accounts on a
 trusted device to switch without re-entering passwords; forgetting removes that
-shortcut. No passwords are stored in browser storage. There is no application
-item-count cap. React/TypeScript renders the interface; authoritative rules and
+shortcut. No passwords are stored in browser storage. Each cloud accepts 1,024 immediate droplets; total workspace size and nesting are independent. React/TypeScript renders the interface; authoritative rules and
 Tactical search run in C++ on the cloud server. No local engine installation is
 required. A domain change requires signing in again; account content persists.
 
@@ -44,13 +43,13 @@ Games are saved in the cloud. **Share game** lets you resume on another device; 
 ## Design
 
 ION uses pure black, neutral glass, self-hosted Inter, and smaller words. Drag to
-pan, scroll in either direction, pinch or Ctrl/Command-scroll to zoom, or keyboard zoom. Hold/right-click a word for Edit, Move, Copy or Delete.
+pan, pinch or Ctrl/Command-wheel to zoom, or use keyboard zoom. App pages do not scroll. Hold/right-click a word for Edit, Move, Copy or Delete.
 Home roots are fixed; only the owner may change shared Chess entries. Deletion within a space is reversible.
-The compact insert bar and parent Back sit at the bottom.
+The compact insert bar and parent Back sit at the bottom. Private has a horizontal color wheel; word colors are saved with the branch. Home uses fixed positions. Deletion Undo expires after ten seconds.
 
 Boards opens starting-position pictures for the two published variants. Each
 game places its interactive board among Variants, Rules, Engines, Board Reset
-and Undo. Swipe right for an earlier move, left for a newer one; Present returns
+and Undo, plus Pass and Play to deselect Tactical. Swipe right for an earlier move, left for a newer one; Present returns
 to live play. A bold result sheet identifies checkmate, stalemate and draws.
 Pieces remain flat, high-contrast silhouettes. Semantic inset outlines distinguish
 moves, captures, check, selection and the previous move. Motion respects reduced
@@ -63,7 +62,7 @@ motion. The Pro hosting badge setting is disabled.
 - Checkmate, Gliński fractional stalemate (¾–¼), McCooey equal stalemate (½–½), automatic threefold repetition, the fifty-move rule, and automatic material draws. ION ends in a ½–½ draw when each side has only its king plus at most one bishop, knight, or rook. Pawns, queens, or two pieces on either side prevent this house-rule draw; an already-delivered checkmate wins. Gliński and McCooey have no castling; Shafran supports short and long castling on both flanks.
 - Human versus Tactical as White or Black, or a shared two-player board.
 - Separate saved games per variant, shared links, undo, automatic pass-and-play orientation, promotion and keyboard/touch controls.
-- Tactical: material and positional evaluation, iterative-deepening alpha-beta, capture ordering, bounded quiescence, and time/node limits. Five levels before board selection: Beginner (80 ms/depth 1), Easy (200 ms/depth 2), Medium (750 ms/depth 3), Hard (1.5 s/depth 4), Expert (3 s/depth 5), each with its own node limit. These are not Elo ratings.
+- Tactical: material and positional evaluation, iterative-deepening alpha-beta, capture ordering, bounded quiescence, and time/node limits. Six levels before board selection: Pre-Beginner (40 ms/depth 1/125 nodes, with a 50% random legal choice), Beginner (80 ms/depth 1), Easy (200 ms/depth 2), Medium (750 ms/depth 3), Hard (1.5 s/depth 4), Expert (3 s/depth 5), each with its own node limit. These are not Elo ratings.
 
 Engines 2–6, Brusky, De Vasa and Wellisch remain planned. Each future engine will be an independent executable with its own search/evaluation design. Engine identities are provisional; strength has not been rated.
 

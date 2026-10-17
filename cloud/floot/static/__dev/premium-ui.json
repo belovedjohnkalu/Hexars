@@ -19,7 +19,7 @@
     "CRUD": "CloudActions"
   },
   "evidence": {
-    "crudFullFlow": "../../../../tests/e2e/scoped-spaces.live.cjs",
-    "failurePaths": "../../../../tests/cloud/scopes.api.mjs"
+    "crudFullFlow": "../../../../tests/e2e/ion-refinements.live.cjs",
+    "failurePaths": "../../../../tests/cloud/refinements.api.mjs"
   }
 }

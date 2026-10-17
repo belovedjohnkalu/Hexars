@@ -1,0 +1,18 @@
+{
+  "date": "2026-10-17T22:10:59.146Z",
+  "checks": [
+    "Create account submits registration, normalizes email and signs in without a login attempt",
+    "The horizontal color wheel supports keyboard selection and saves the colored word",
+    "The top-left scope button returns directly to Private",
+    "The saved color is the same on a second signed-in device",
+    "Undo deletion disappears at the original ten-second deadline, even across reload",
+    "Home cloud positions stay fixed after load and reload",
+    "Rules display colored words without picture previews or page scrolling",
+    "Opening a rule reveals its illustration and complete text through fitted pages",
+    "Pre-Beginner starts level zero and Pass and Play deselects the engine",
+    "Public and Hexagonal Chess have matching top-left navigation",
+    "The word-only rules cloud passes automated accessibility checks"
+  ],
+  "violations": [],
+  "errors": []
+}

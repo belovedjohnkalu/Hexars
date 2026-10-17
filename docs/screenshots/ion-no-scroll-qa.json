@@ -1,0 +1,11 @@
+{
+  "date": "2026-10-17T22:19:39.091Z",
+  "checks": [
+    "Signup controls fit narrow phones and tablets without page scrolling",
+    "Signup stays within the visual viewport above a simulated keyboard",
+    "The color wheel and composer fit the phone width and sit above the keyboard",
+    "Destination menus page and filter without scrolling or hiding the confirmation action",
+    "Rule text and reading controls fit a short landscape viewport",
+    "Password recovery keeps every step and expired-code recovery usable without scrolling"
+  ]
+}

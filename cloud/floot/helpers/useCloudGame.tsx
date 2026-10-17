@@ -113,6 +113,7 @@ export function useCloudGame(variant: VariantId, defaultMode: "engine" | "two_pl
       busy ||
       error ||
       data.mode !== "engine" ||
+      (!gameSessions.fromHash()&&(defaultMode!=="engine" || data.difficulty!==difficulty)) ||
       data.game.result.status !== "ongoing" ||
       data.game.activePlayer === data.humanPlayer
     )
@@ -126,7 +127,7 @@ export function useCloudGame(variant: VariantId, defaultMode: "engine" | "two_pl
       accessToken: data.accessToken,
       version: data.version,
     });
-  }, [data, busy, error, perform, variant]);
+  }, [data, busy, error, perform, variant,defaultMode,difficulty]);
 
   useEffect(() => {
     if (!data || busy || error) return;

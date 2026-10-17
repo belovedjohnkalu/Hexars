@@ -1,0 +1,11 @@
+{
+  "date": "2026-10-17T22:34:15.218Z",
+  "checks": [
+    "Rules navigation preserves Pass and Play through nested droplets and Back",
+    "Rules navigation preserves the selected Pre-Beginner level",
+    "A saved level-zero game link keeps its engine settings even without level query parameters",
+    "Swiping the horizontal color wheel changes color without scrolling the page",
+    "The Private composer and color wheel pass automated accessibility checks"
+  ],
+  "violations": []
+}
