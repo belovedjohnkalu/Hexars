@@ -1,0 +1,26 @@
+{
+  "date": "2026-10-17T21:10:53.585Z",
+  "origin": "https://ion.floot.app",
+  "checks": [
+    "Home has only Chess, Public and Private, with no insertion, zoom buttons or title popup",
+    "Private asks signed-out visitors to sign in",
+    "Private saves words and their nested droplets",
+    "Composer follows the visual viewport directly above the simulated phone keyboard",
+    "Black confirmation publishes a copy while keeping its private source",
+    "A signed-out device reads the entire public branch",
+    "Public additions arrive live on an independent device without reloading",
+    "Moving Public to Private removes the public placement live",
+    "Remembered account switching restores the correct private space, with one Back action",
+    "Tactical shows five levels before Boards and starts the chosen level",
+    "A level selected from a game returns to the same variant",
+    "Rules are separate illustrated paragraph clouds, including the official central-pawn exception",
+    "The variant cloud passes automated accessibility checks",
+    "Home fits narrow phones, tablets and desktop"
+  ],
+  "violations": [],
+  "errors": [],
+  "qaUsers": [
+    20,
+    21
+  ]
+}

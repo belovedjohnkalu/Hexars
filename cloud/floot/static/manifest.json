@@ -12,14 +12,8 @@
   "prefer_related_applications": false,
   "icons": [
     {
-      "src": "/_cdn/static/f72178ec-847d-48d7-ada5-e64a1ed04bd4-hexars-dark-192.png",
-      "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "any"
-    },
-    {
-      "src": "/_cdn/static/9522e791-e7fa-41d6-867c-2d4013eb3982-hexars-dark-512.png",
-      "sizes": "512x512",
+      "src": "/_cdn/static/cb4a5e12-7591-4fef-b1ae-691f46ff6dbc.png",
+      "sizes": "1024x1024",
       "type": "image/png",
       "purpose": "any maskable"
     }

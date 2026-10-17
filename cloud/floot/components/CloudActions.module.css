@@ -9,3 +9,5 @@
 .destinations { display:flex; flex-direction:column; gap:4px; max-height:32dvh; overflow:auto; margin-top:16px; }
 .destinations button { display:block; text-align:left; min-height:44px; white-space:normal; flex-shrink:0; overflow-wrap:anywhere; }
 .destinations span { display:block; max-width:100%; }
+.scopes { display:flex; gap:8px; margin:12px 0 16px; }
+.scopes button { flex:1; min-height:44px; }

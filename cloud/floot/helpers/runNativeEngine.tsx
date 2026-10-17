@@ -1,3 +1,4 @@
+import { tacticalLevels } from "./tacticalLevels";
 import { spawn } from "node:child_process";
 import { readFile, writeFile, chmod, rename, rm } from "node:fs/promises";
 import { createHash, randomUUID } from "node:crypto";
@@ -13,6 +14,7 @@ type Options = {
   action: "new" | "inspect" | "move" | "search";
   origin: string;
   variant?: VariantId;
+  difficulty?:number;
   state?: Json;
   move?: ChessMove;
   signal?: AbortSignal;
@@ -146,7 +148,7 @@ export async function runNativeEngine(options: Options): Promise<NativeResult> {
             send({
               type: "go",
               stateId: previousGame.stateId,
-              limits: { timeMs: 750, depth: 3, nodeLimit: 30000 },
+              limits: (tacticalLevels.find(l=>l.level===options.difficulty)||tacticalLevels[2]).limits,
             });
           }
         } else if (stage === "search") {

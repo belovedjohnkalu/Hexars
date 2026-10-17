@@ -1,6 +1,4 @@
 import { useEffect, useRef, useState, type ReactNode, type PointerEvent } from "react";
-import { Minus, Plus } from "lucide-react";
-import { Button } from "./Button";
 import styles from "./SpatialViewport.module.css";
 type View={zoom:number;x:number;y:number};
 const views=new Map<string,View>();
@@ -33,10 +31,6 @@ export function SpatialViewport({children,width,height,viewKey,label="Word space
   <div ref={viewport} className={styles.viewport} role="region" aria-label={label} tabIndex={0} onPointerDown={down} onPointerMove={move} onPointerUp={up} onPointerCancel={up} onClickCapture={e=>{if(moved.current){e.preventDefault();e.stopPropagation();moved.current=false;}}} onKeyDown={e=>{if(e.target!==e.currentTarget)return;if(e.key==='+'||e.key==='='){e.preventDefault();setScale(zoomRef.current+.15);}if(e.key==='-'){e.preventDefault();setScale(zoomRef.current-.15);}if(e.key==='0'){e.preventDefault();setScale(1);}}}>
    <div className={styles.extent} style={{width:Math.max(width*zoom,1),height:Math.max(height*zoom,1)}}><div className={styles.world} style={{width,height,transform:`scale(${zoom})`}}>{children}</div></div>
   </div>
-  <div className={styles.zoom} data-no-pan aria-label="Zoom controls">
-   <Button variant="ghost" size="icon" aria-label="Zoom out" disabled={zoom<=.4} onClick={()=>setScale(zoomRef.current-.15)}><Minus size={16}/></Button>
-   <Button variant="ghost" className={styles.percent} aria-label="Reset zoom" title="Reset zoom" onClick={()=>setScale(1)}>{Math.round(zoom*100)}%</Button>
-   <Button variant="ghost" size="icon" aria-label="Zoom in" disabled={zoom>=2.5} onClick={()=>setScale(zoomRef.current+.15)}><Plus size={16}/></Button>
-  </div>
+
  </div>;
 }

@@ -28,6 +28,7 @@ export type UserRole = "admin" | "user";
 export interface HexchessGames {
   accessTokenHash: string;
   createdAt: Generated<Timestamp>;
+  difficulty: Generated<number>;
   humanPlayer: number;
   id: string;
   lastSearch: Json | null;
@@ -41,6 +42,34 @@ export interface HexchessGames {
 
 export interface IonCloudAccounts {
   userId: number;
+  workspaceId: string;
+}
+
+export interface IonCloudTransfers {
+  createdAt: Generated<Timestamp>;
+  kind: string;
+  operationId: string;
+  sourceNode: string;
+  sourceWorkspace: string;
+  targetParent: string;
+  targetWorkspace: string;
+  userId: number;
+}
+
+export interface IonDeviceAccounts {
+  deviceHash: string;
+  sessionId: string;
+  userId: number;
+}
+
+export interface IonRememberedDevices {
+  expiresAt: Timestamp;
+  tokenHash: string;
+}
+
+export interface IonSharedSpaces {
+  kind: string;
+  ownerUserId: number;
   workspaceId: string;
 }
 
@@ -99,6 +128,10 @@ export interface Users {
 export interface DB {
   hexchessGames: HexchessGames;
   ionCloudAccounts: IonCloudAccounts;
+  ionCloudTransfers: IonCloudTransfers;
+  ionDeviceAccounts: IonDeviceAccounts;
+  ionRememberedDevices: IonRememberedDevices;
+  ionSharedSpaces: IonSharedSpaces;
   ionWorkspaces: IonWorkspaces;
   loginAttempts: LoginAttempts;
   passwordResetCodes: PasswordResetCodes;

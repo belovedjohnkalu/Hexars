@@ -12,6 +12,7 @@ export async function handle(request: Request) {
     // Get the current session
     const session = await getServerSessionOrThrow(request);
 
+    await db.deleteFrom("ionDeviceAccounts").where("sessionId","=",session.id).execute();
     // Delete the session from the database
     await db.deleteFrom("sessions").where("id", "=", session.id).execute();
 

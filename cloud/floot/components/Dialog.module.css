@@ -2,7 +2,7 @@
   .overlay {
     position: fixed;
     inset: 0;
-    background: #02050c99;
+    background: #000000aa;
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
     z-index: var(--z-overlay) !important;
@@ -22,7 +22,7 @@
     max-width: 90vw;
     max-height: min(85dvh, 760px);
     overflow: auto;
-    background: linear-gradient(140deg, #243b5ddd, #0b1428ee 65%);
+    background: #111113;
     border: 1px solid var(--glass-border);
     backdrop-filter: blur(32px) saturate(140%);
     -webkit-backdrop-filter: blur(32px) saturate(140%);

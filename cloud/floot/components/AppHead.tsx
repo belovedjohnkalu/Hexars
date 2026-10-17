@@ -11,7 +11,7 @@ export function AppHead({ title = "ION" }: { title?: string }) {
     <meta name="apple-mobile-web-app-title" content="ION" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black" />
     <link rel="manifest" href="/manifest.json" />
-    <link rel="apple-touch-icon" href="/_cdn/static/bbff6547-57ce-49ce-8f0a-92ee7a03d999-hexars-dark-180.png" />
-    <link rel="icon" href="/_cdn/static/f72178ec-847d-48d7-ada5-e64a1ed04bd4-hexars-dark-192.png" />
+    <link rel="apple-touch-icon" href="/_cdn/static/cb4a5e12-7591-4fef-b1ae-691f46ff6dbc.png" />
+    <link rel="icon" type="image/svg+xml" href="/_api/icon" />
   </Helmet>;
 }

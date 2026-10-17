@@ -10,7 +10,7 @@ import {
 import { gameSessions } from "./gameSessions";
 type Credentials = { gameId: string; accessToken: string };
 
-export function useCloudGame(variant: VariantId, defaultMode: "engine" | "two_players" = "engine") {
+export function useCloudGame(variant: VariantId, defaultMode: "engine" | "two_players" = "engine", difficulty=3) {
   const [data, setData] = useState<OutputType | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -44,10 +44,10 @@ export function useCloudGame(variant: VariantId, defaultMode: "engine" | "two_pl
       try {
         let result = await postGame(body, { signal: abort.signal });
         if (sequence !== requestSequence.current) return false;
-        if (initialVariant && result.game.variant !== initialVariant) {
+        if (initialVariant && (result.game.variant !== initialVariant||(defaultMode==="engine"&&result.difficulty!==difficulty))) {
           // Keep the old variant's game before opening the requested variant.
           gameSessions.save(result);
-          result = await postGame({ action: "new", mode: defaultMode, humanPlayer: 0, variant: initialVariant }, { signal: abort.signal });
+          result = await postGame({ action: "new", mode: defaultMode, difficulty,humanPlayer: 0, variant: initialVariant }, { signal: abort.signal });
           if (sequence !== requestSequence.current) return false;
         }
         accept(result);
@@ -85,7 +85,7 @@ export function useCloudGame(variant: VariantId, defaultMode: "engine" | "two_pl
         if (sequence === requestSequence.current) setBusy(false);
       }
     },
-    [accept, defaultMode],
+    [accept, defaultMode,difficulty],
   );
 
   useEffect(() => {
@@ -95,7 +95,7 @@ export function useCloudGame(variant: VariantId, defaultMode: "engine" | "two_pl
       engineKey.current = "";
       credentials.current = saved;
       void perform(
-        saved ? { action: "get", ...saved } : { action: "new", mode: defaultMode, humanPlayer: 0, variant },
+        saved ? { action: "get", ...saved } : { action: "new", mode: defaultMode, difficulty,humanPlayer: 0, variant },
         linked ? undefined : variant,
       );
     }, 0);
@@ -168,7 +168,7 @@ export function useCloudGame(variant: VariantId, defaultMode: "engine" | "two_pl
     error,
     newGame: (mode: "engine" | "two_players", humanPlayer: 0 | 1, variant: VariantId) => {
       engineKey.current = "";
-      return perform({ action: "new", mode, humanPlayer, variant });
+      return perform({ action: "new", mode, humanPlayer, variant,difficulty });
     },
     openGame: (link: string) => {
       try {
@@ -189,7 +189,7 @@ export function useCloudGame(variant: VariantId, defaultMode: "engine" | "two_pl
       return perform(
         credentials.current
           ? { action: "get", ...credentials.current }
-          : { action: "new", mode: defaultMode, humanPlayer: 0, variant },
+          : { action: "new", mode: defaultMode, difficulty,humanPlayer: 0, variant },
       );
     },
   };

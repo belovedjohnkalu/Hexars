@@ -1,17 +1,23 @@
 # ION
 
-ION is live on **Floot** at https://hexars.floot.app. Its main navigation is a
+ION is live on **Floot** at https://ion.floot.app. Its main navigation is a
 pannable, zoomable cloud of words and pictures. Open **Hexagonal Chess**, then
 **Boards** to choose Gliński or McCooey, **Engines** to select Tactical, or **Rules**
-for complete rules.
+for separate illustrated rule paragraphs.
 
-Every confirmed word and picture is stored on the server. Sign in with the same
-account on another device to see the same private space; open devices update via
-Floot realtime. Existing browser words join the account at sign-in. Anonymous
-spaces still use a browser capability; clearing that browser’s data loses anonymous
-access. There is no application item-count cap. React/TypeScript renders the
-interface; authoritative chess rules and Tactical search run in C++ on the cloud
-server. No local engine installation is required to play.
+Home contains **Hexagonal Chess**, **Public**, and **Private**. Public is readable
+across accounts and devices, with live updates; sign in to contribute. Private is
+visible only to its signed-in account. Hold a word to edit or transfer its entire
+branch between Public and Private, with confirmation before publishing. Only the
+configured owner can edit the shared Hexagonal Chess content. Existing personal
+content stays private; it is not published automatically.
+
+Every confirmed word and picture is stored on the server. Remember accounts on a
+trusted device to switch without re-entering passwords; forgetting removes that
+shortcut. No passwords are stored in browser storage. There is no application
+item-count cap. React/TypeScript renders the interface; authoritative rules and
+Tactical search run in C++ on the cloud server. No local engine installation is
+required. A domain change requires signing in again; account content persists.
 
 The standalone development source also implements Shafran. The Cloudflare,
 Supabase and Vercel migration is paused at the user's request. The live Floot
@@ -38,9 +44,8 @@ Games are saved in the cloud. **Share game** lets you resume on another device; 
 ## Design
 
 ION uses pure black, neutral glass, self-hosted Inter, and smaller words. Drag to
-pan, scroll in either direction, pinch or Ctrl/Command-scroll to zoom, or use the
-visible zoom controls. Hold/right-click a word for Edit, Move, Copy or Delete.
-Default entries support sparse personal overrides; branch deletion is reversible.
+pan, scroll in either direction, pinch or Ctrl/Command-scroll to zoom, or keyboard zoom. Hold/right-click a word for Edit, Move, Copy or Delete.
+Home roots are fixed; only the owner may change shared Chess entries. Deletion within a space is reversible.
 The compact insert bar and parent Back sit at the bottom.
 
 Boards opens starting-position pictures for the two published variants. Each
@@ -58,7 +63,7 @@ motion. The Pro hosting badge setting is disabled.
 - Checkmate, Gliński fractional stalemate (¾–¼), McCooey equal stalemate (½–½), automatic threefold repetition, the fifty-move rule, and automatic material draws. ION ends in a ½–½ draw when each side has only its king plus at most one bishop, knight, or rook. Pawns, queens, or two pieces on either side prevent this house-rule draw; an already-delivered checkmate wins. Gliński and McCooey have no castling; Shafran supports short and long castling on both flanks.
 - Human versus Tactical as White or Black, or a shared two-player board.
 - Separate saved games per variant, shared links, undo, automatic pass-and-play orientation, promotion and keyboard/touch controls.
-- Tactical: material and positional evaluation, iterative-deepening alpha-beta, capture ordering, bounded quiescence, and time/node limits. Current hosted budget: 750 ms, maximum depth 3 and 30,000 nodes.
+- Tactical: material and positional evaluation, iterative-deepening alpha-beta, capture ordering, bounded quiescence, and time/node limits. Five levels before board selection: Beginner (80 ms/depth 1), Easy (200 ms/depth 2), Medium (750 ms/depth 3), Hard (1.5 s/depth 4), Expert (3 s/depth 5), each with its own node limit. These are not Elo ratings.
 
 Engines 2–6, Brusky, De Vasa and Wellisch remain planned. Each future engine will be an independent executable with its own search/evaluation design. Engine identities are provisional; strength has not been rated.
 

@@ -4,7 +4,3 @@
 .viewport:focus-visible { outline: 2px solid var(--primary); }
 .extent { position: relative; min-width: 100%; min-height: 100%; }
 .world { position: relative; transform-origin: 0 0; }
-.zoom { position: absolute; right: 14px; bottom: 8px; display: flex; align-items: center; border: 1px solid var(--glass-border); border-radius: var(--radius-full); background: var(--glass-solid); backdrop-filter: blur(24px); padding: 2px; }
-.zoom button { width: 36px; height: 36px; min-height: 36px; padding: 0; border-radius: var(--radius-full); color: var(--muted-foreground); }
-.zoom .percent { width: 46px; font-size: 11px; font-variant-numeric: tabular-nums; }
-@media (pointer:coarse) { .zoom button { width: 40px; height: 40px; } }

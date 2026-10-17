@@ -1,10 +1,11 @@
 {
-  "date": "2026-10-17T06:16:03.451Z",
+  "date": "2026-10-17T21:11:51.025Z",
+  "origin": "https://ion.floot.app",
   "checks": [
-    "Holding a word opens Edit, Move, Copy and Delete",
-    "Control-scroll zooms around the pointer",
-    "Dragging pans without opening a word",
-    "Two-finger pinch enlarges the cloud",
-    "Account and recovery forms use app-owned validation"
+    "Keyboard zoom and two-axis scrolling remain available without zoom buttons",
+    "Modified wheel zoom remains available",
+    "The new domain serves ION favicon and black install metadata",
+    "Owner-added chess cloud links retain shared scope and stay read-only for visitors",
+    "Reduced motion removes cloud transitions"
   ]
 }

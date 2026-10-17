@@ -22,6 +22,7 @@ export const schema = z.discriminatedUnion("action", [
       action: z.literal("new"),
       mode: z.enum(["engine", "two_players"]),
       variant: variantSchema.default("glinski"),
+      difficulty:z.number().int().min(1).max(5).optional(),
       humanPlayer: z.union([z.literal(0), z.literal(1)]),
     })
     .strict(),
@@ -80,6 +81,7 @@ export type OutputType = {
   accessToken: string;
   version: number;
   mode: string;
+  difficulty?:number;
   humanPlayer: number;
   engine: string;
   execution: "cloud";

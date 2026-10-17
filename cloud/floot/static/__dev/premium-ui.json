@@ -19,7 +19,7 @@
     "CRUD": "CloudActions"
   },
   "evidence": {
-    "crudFullFlow": "../../../../tests/e2e/spatial-cloud.live.cjs",
-    "failurePaths": "../../../../tests/e2e/spatial-cloud.live.cjs"
+    "crudFullFlow": "../../../../tests/e2e/scoped-spaces.live.cjs",
+    "failurePaths": "../../../../tests/cloud/scopes.api.mjs"
   }
 }

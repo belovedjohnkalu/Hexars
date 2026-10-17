@@ -1,5 +1,8 @@
 import { publish } from "@floot/realtime";
-import { cloudWorkspace } from "../helpers/cloudWorkspace";
+import { cloudContext } from "../helpers/cloudContext";
+import { cloudPolicy } from "../helpers/cloudPolicy";
+import { cloudTransfer } from "../helpers/cloudTransfer";
+import { channels } from "../helpers/realtimeChannels";
 import { upload, getUrl, getInfo } from "@floot/storage";
 import { db } from "../helpers/db";
 import { cloudTree } from "../helpers/cloudTree";
@@ -16,17 +19,32 @@ export async function handle(request: Request) {
     const body = await request.text();
     if (body.length > 4096) throw new CloudError("Request too large.", 413);
     const input = schema.parse(JSON.parse(body));
-    const row = await cloudWorkspace(request,input);
+    let context=await cloudContext(request,input);
+    if(input.scope==='home'){
+      const shared=await db.selectFrom('ionSharedSpaces').innerJoin('ionWorkspaces','ionSharedSpaces.workspaceId','ionWorkspaces.id').select(['kind','nodes']).execute();
+      const privateRow=context.userId?await db.selectFrom('ionCloudAccounts').innerJoin('ionWorkspaces','ionCloudAccounts.workspaceId','ionWorkspaces.id').select('nodes').where('userId','=',context.userId).executeTakeFirst():undefined;
+      const count=(value:unknown)=>Array.isArray(value)?(value as CloudNode[]).filter(n=>!n.removedBy).length:0;
+      return new Response(JSON.stringify({nodes:cloudTree.roots.map(n=>({...n,sizeCount:n.id==='private'?count(privateRow?.nodes):n.id==='public'?count(shared.find(s=>s.kind==='public')?.nodes):cloudTree.forScope('chess').length-1+count(shared.find(s=>s.kind==='chess')?.nodes)})),version:0,scope:'home',canAdd:false,owner:context.owner,userId:context.userId||undefined} satisfies OutputType),{headers});
+    }
+    if(input.action==='transfer'){
+      const transfer=await cloudTransfer(request,input);
+      if(transfer){await Promise.allSettled([publish(channels.cloud(input.scope,transfer.userId),{changed:true}),publish(channels.cloud(input.targetScope,transfer.userId),{changed:true})]);}
+      context=await cloudContext(request,{...input,action:'load'});
+    }
+    const row=context.row!;
     let nodes = (Array.isArray(row.nodes) ? row.nodes : []) as unknown as CloudNode[];
     let version = row.version;
-    const all = cloudTree.resolve(nodes).filter(n=>!n.removedBy);
+    const all = [...new Map([...context.seeds,...nodes].map(n=>[n.id,n])).values()].filter(n=>!n.removedBy);
     if (input.action === "upload") {
-      const filename = "ion/" + row.id + "/" + input.id + "." + extensions[input.contentType];
+      if(!cloudPolicy.writable(input.scope,context.userId,context.owner))cloudPolicy.fail("Sign in to add a picture.",401);
+      const filename = "ion/" + row.id + "/" + context.userId + "/" + input.id + "." + extensions[input.contentType];
       const result = await upload({ visibility: "private", filename, contentType: input.contentType, sizeBytes: input.sizeBytes });
       if (!result.ok) throw new CloudError("Couldn’t prepare the picture. Try again.", 400);
       return new Response(JSON.stringify({ nodes: [], version, upload: { url: result.presignedUrl, headers: result.headers } } satisfies OutputType), { headers });
     }
     if (input.action === "add") {
+      if(!cloudPolicy.writable(input.scope,context.userId,context.owner))cloudPolicy.fail("You cannot add here.");
+      if(!input.parentId)cloudPolicy.fail("Choose a cloud inside this space.",400);
       // A retry of the same creation is safe even after another tab changes the version.
       const existing = nodes.find(n => n.id === input.id);
       if(existing?.removedBy)throw new CloudError("This item was removed. Edit its name to add it again.",409);
@@ -34,9 +52,9 @@ export async function handle(request: Request) {
         if (input.version !== row.version) throw new CloudError("Your space changed in another tab. Try again.", 409);
           if (input.parentId !== null && !all.some(n => n.id === input.parentId && !n.destination))
           throw new CloudError("Choose an existing cloud.", 400);
-        const node: CloudNode = { id: input.id, parentId: input.parentId, name: input.name };
+        const node: CloudNode = { id: input.id, parentId: input.parentId, name: input.name,createdBy:context.userId! };
         if (input.imageType) {
-          const filename = "ion/" + row.id + "/" + input.id + "." + extensions[input.imageType];
+          const filename = "ion/" + row.id + "/" + context.userId + "/" + input.id + "." + extensions[input.imageType];
           const info = await getInfo({ visibility: "private", filename });
           if (!info.ok || !info.exists || info.sizeBytes > 3 * 1024 * 1024)
             throw new CloudError("Upload the picture again.", 400);
@@ -50,23 +68,28 @@ export async function handle(request: Request) {
       }
     }
     if(input.action==="rename"||input.action==="remove"||input.action==="restore"||input.action==="move"||input.action==="copy"){
-      const next=cloudChanges.apply(nodes,input,row.version,cloudTree.seed);
+      if(input.action==='restore'){
+        if(!cloudPolicy.writable(input.scope,context.userId,context.owner)||nodes.filter(n=>n.removedBy===input.operationId).some(n=>!cloudPolicy.edit(input.scope,{...n,removedBy:undefined},context.userId,context.owner)))cloudPolicy.fail('You cannot restore this branch.');
+      }else if(input.action!=='copy')cloudPolicy.assert(input.scope,all,input.id,context.userId,context.owner,input.action==='remove'||input.action==='move');
+      else if(!cloudPolicy.writable(input.scope,context.userId,context.owner))cloudPolicy.fail('You cannot copy here.');
+      if((input.action==='move'||input.action==='copy')&&!input.parentId)cloudPolicy.fail('Choose a cloud inside this space.',400);
+      let next=cloudChanges.apply(nodes,input,row.version,context.seeds);
+      if(input.action==='copy')next=next.map(n=>n.copyOperation===input.operationId?{...n,createdBy:context.userId!}:n);
       if(next!==nodes){
         const updated=await db.updateTable("ionWorkspaces").set({nodes:next as unknown as Json,version:row.version+1,updatedAt:new Date()}).where("id","=",row.id).where("version","=",row.version).returning("version").executeTakeFirst();
         if(!updated)throw new CloudError("Your space changed. Try again.",409);
         nodes=next;version=updated.version;
       }
     }
-    if(version!==row.version&&row.ownerId){
-      try{await publish("cloud-user:"+row.ownerId,{version,workspaceId:row.id});}catch{console.error("Cloud refresh signal delayed");}
-    }
+    if(version!==row.version){try{await publish(channels.cloud(input.scope,context.userId||0),{version,workspaceId:row.id});}catch{console.error('Cloud refresh delayed');}}
     // Signed picture URLs are refreshed on every read, and never stored as authority.
-    const visible = await Promise.all(cloudTree.resolve(nodes).filter(n=>!n.removedBy).map(async node => {
-      if (!node.imageKey) return node;
+    const visible = await Promise.all([...new Map([...context.seeds,...nodes].map(n=>[n.id,n])).values()].filter(n=>!n.removedBy).map(async node => {
+      const visibleNode={...node,createdBy:undefined,canEdit:cloudPolicy.edit(input.scope,node,context.userId,context.owner),canCopy:!!context.userId&&!cloudTree.roots.some(r=>r.id===node.id)&&(input.scope!=="chess"||context.owner)};
+      if (!node.imageKey) return visibleNode;
       const result = await getUrl({ visibility: "private", filename: node.imageKey, expiresInSeconds: 3600 });
-      return { ...node, isImage: true, imageKey: undefined, imageUrl: result.ok ? result.url : undefined };
+      return { ...visibleNode, isImage: true, imageKey: undefined, imageUrl: result.ok ? result.url : undefined };
     }));
-    return new Response(JSON.stringify({ nodes: visible, version, workspaceId:row.id, account:!!row.ownerId, undo: cloudChanges.undo(nodes) } satisfies OutputType), { headers });
+    return new Response(JSON.stringify({ nodes: visible, version, workspaceId:row.id, account:input.scope==='private', scope:input.scope, canAdd:cloudPolicy.writable(input.scope,context.userId,context.owner), owner:context.owner,userId:context.userId||undefined, undo: cloudChanges.undo(nodes.filter(n=>cloudPolicy.edit(input.scope,n,context.userId,context.owner))) } satisfies OutputType), { headers });
   } catch (error) {
     const status = error instanceof Error && "status" in error && typeof error.status === "number" ? error.status : error instanceof SyntaxError || (error && typeof error === "object" && "issues" in error) ? 400 : 503;
     if (status === 503) console.error("ION space request failed", error instanceof Error ? error.message : "Unknown error");

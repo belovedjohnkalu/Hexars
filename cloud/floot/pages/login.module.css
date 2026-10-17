@@ -8,3 +8,9 @@
 .content form button { min-height:44px; }
 .content .error { color:var(--error); }
 .back { margin-top:28px; }
+.accounts { display:flex; flex-direction:column; gap:4px; margin:20px 0; }
+.saved { display:flex; align-items:center; gap:4px; border-bottom:1px solid var(--border); }
+.saved > button:first-child { flex:1; min-width:0; text-align:left; display:flex; justify-content:space-between; padding:12px 4px; height:auto; min-height:48px; }
+.saved span { overflow:hidden; text-overflow:ellipsis; }
+.saved small { font-size:11px; color:var(--muted-foreground); padding-left:8px; }
+.content .hint { font-size:12px; line-height:1.5; margin:-8px 0 0; }

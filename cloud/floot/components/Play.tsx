@@ -19,7 +19,8 @@ const key=(h:Hex)=>h.q+','+h.r;
 export function Play({variant}:{variant:VariantId}){
  useInstallApp();const location=useLocation(),navigate=useNavigate();
  const mode=new URLSearchParams(location.search).get('mode')==='friend'?'two_players':'engine';
- const cloud=useCloudGame(variant,mode),data=cloud.data,game=data?.game;
+ const rawLevel=new URLSearchParams(location.search).get('level');let difficulty=Math.max(1,Math.min(5,Math.round(Number(rawLevel))||3));
+ const cloud=useCloudGame(variant,mode,difficulty),data=cloud.data,game=data?.game;
  const [selected,setSelected]=useState<Hex|null>(null),[promotions,setPromotions]=useState<ChessMove[]>([]),[reset,setReset]=useState(false),[resultOpen,setResultOpen]=useState(false);
  const [review,setReview]=useState<{ply:number;game:GameView}|null>(null),[reviewBusy,setReviewBusy]=useState(false),[reviewError,setReviewError]=useState('');
  const [size,setSize]=useState({width:390,height:650}),area=useRef<HTMLDivElement>(null),heading=useRef<HTMLHeadingElement>(null),keep=useRef<HTMLButtonElement>(null),endKey=useRef('');

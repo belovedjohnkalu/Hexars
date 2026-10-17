@@ -2,28 +2,27 @@
   "provider": "Floot",
   "project_id": "9d7c0966-4648-49f3-845c-b4a9296d0358",
   "execution": "native-cpp-linux-x64-on-cloud-server",
-  "engine_asset": "/_cdn/static/38e1b6ba-5580-44df-a511-13ecea7e79fe-tactical-0.7-linux-x64.bin",
-  "engine_sha256": "dca41e6c28a444256116a8945867c1c5fb01a214bc2334e484aadda635813010",
-  "published_url": "https://hexars.floot.app",
+  "engine_asset": "/_cdn/static/2269ba52-c5cc-4f50-86e9-df446d6e403d-tactical-0.6-linux-x64.bin",
+  "engine_sha256": "ec6edf98d810c963fd6dc421fbf133bcbce334b258a5c724185fdda7a99c9b6d",
+  "published_url": "https://ion.floot.app",
   "installable_web_app": true,
   "native_app_store_package": false,
-  "previous_url": "https://hexchess-lab-9d7c.floot.app",
-  "app_name": "HEXARS",
+  "previous_url": "https://hexars.floot.app",
+  "app_name": "ION",
   "engine_name": "Tactical",
   "supported_variants": [
     "glinski",
-    "mccooey",
-    "shafran"
+    "mccooey"
   ],
-  "ui_version": "0.9.0",
+  "ui_version": "0.11.0",
   "routes": [
     "/",
+    "/login",
     "/glinski",
-    "/mccooey",
-    "/shafran"
+    "/mccooey"
   ],
   "font_asset": "/_cdn/static/6e6c9250-599e-4bf4-a9ae-66ff948afb59-InterVariable.woff2",
-  "published_ui_version": "0.8.1",
-  "release_status": "awaiting_floot_daily_limit_reset",
-  "resume_after": "2026-10-14T05:00:00Z"
+  "published_ui_version": "0.11.0",
+  "release_status": "published",
+  "favicon": "/_api/icon"
 }

@@ -1,6 +1,18 @@
 # Development progress · cloud edition 0.5
 
-Published: **https://hexars.floot.app**
+Published: **https://ion.floot.app**
+
+## 2026-10-17 — Public and Private on ION
+
+Published at https://ion.floot.app. Home has exactly Chess, Public and Private.
+Public updates live for all devices; Private requires its owning account; only the
+configured owner edits shared Chess. Atomic branch transfers, remembered account
+switching, keyboard anchoring, a new favicon, black sheets, blue boards, illustrated
+rule paragraphs and five Tactical levels are complete. The old address was released.
+Verification: 38 API assertions, 9 spec files plus the cloud hook, 14 new-domain
+browser flows, 5 gesture/metadata checks, native checkmate and zero axe violations.
+See [release details](shared-spaces-release.md) for evidence and device-test limits.
+
 
 ## Completed
 

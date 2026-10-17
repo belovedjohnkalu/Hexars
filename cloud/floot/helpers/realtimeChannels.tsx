@@ -7,6 +7,7 @@
 // every room. Keep each channel aligned with its React Query key, e.g.
 //   channels.room(id)   <->   queryKey ["room", id]
 export const channels = {
+  cloud:(scope:string,userId:number)=>scope==="private"?"cloud-user:"+userId:scope==="chess"?"cloud:chess":"cloud:public",
   room: (id: string | number) => "room:" + id,
   user: (userId: string) => "user:" + userId,
   // Presence channel — subscribers get a live roster (who's online). The reserved

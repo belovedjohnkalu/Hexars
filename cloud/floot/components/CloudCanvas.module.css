@@ -19,5 +19,3 @@
 .danger { color:var(--error); }
 @keyframes arrive { from { opacity:0; } to { opacity:1; } }
 @media(prefers-reduced-motion:reduce) { .canvas,.node { transition:none; animation:none; } }
-
-.node[data-node-id="hexagonal-chess"] img { filter:grayscale(1); }
