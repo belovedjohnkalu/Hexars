@@ -100,9 +100,19 @@ Json describeGame(const GameState& state) {
         const auto to=variantDefinition(state.variant).index(move.to);
         encoded["capture"]=!state.occupants[to].empty() || isEnPassantCapture(state,move);
         // These moves already passed shared legal-move validation. The fast
-        // internal application is used only to describe checking destinations.
+        // internal application describes checking destinations and visual changes.
         const auto next=applyCandidateMove(state,move,false);
         encoded["givesCheck"]=isInCheck(next,next.activePlayer);
+        Json changes=Json::array();
+        const auto& board=variantDefinition(state.variant).cells();
+        for (std::size_t index=0;index<board.size();++index) {
+            const auto before=state.occupants[index], after=next.occupants[index];
+            if (before.type==after.type && (after.empty() || before.player==after.player)) continue;
+            Json piece=nullptr;
+            if (!after.empty()) piece={{"type",names[static_cast<int>(after.type)]},{"player",after.player}};
+            changes.push_back({{"q",board[index].q},{"r",board[index].r},{"piece",piece}});
+        }
+        encoded["changes"]=std::move(changes);
         moves.push_back(std::move(encoded));
     }
     std::string status="ongoing",reason="";
@@ -124,7 +134,7 @@ Json processRequest(const Json& request, std::optional<GameState>& state) {
     if(!request.is_object()||request.value("protocolVersion",0)!=1||!request.contains("type")||!request.at("type").is_string()) throw std::invalid_argument("Invalid protocol request");
     const auto type=request.at("type").get<std::string>();
     Json response{{"protocolVersion",1},{"requestId",request.value("requestId",std::string{})}};
-    if(type=="hello") { response.update({{"type","hello"},{"engine","Tactical 0.7"},{"capabilities",Json::array({"glinski","mccooey","shafran","legal_moves","search"})}});return response; }
+    if(type=="hello") { response.update({{"type","hello"},{"engine","Tactical 0.7.1"},{"capabilities",Json::array({"glinski","mccooey","shafran","legal_moves","search"})}});return response; }
     if(type=="supported_variants") {response.update({{"type","supported_variants"},{"variants",Json::array({"glinski","mccooey","shafran"})}});return response;}
     if(type=="new_game") {
         state=createGame(request.value("variant",std::string{"glinski"}));

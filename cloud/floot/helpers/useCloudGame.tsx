@@ -13,6 +13,7 @@ type Credentials = { gameId: string; accessToken: string };
 export function useCloudGame(variant: VariantId, defaultMode: "engine" | "two_players" = "engine", difficulty=3) {
   const [data, setData] = useState<OutputType | null>(null);
   const [busy, setBusy] = useState(false);
+  const [pendingMove, setPendingMove] = useState<ChessMove | null>(null);
   const [error, setError] = useState<string | null>(null);
   const credentials = useRef<Credentials | null>(null);
   const current = useRef<OutputType | null>(null);
@@ -21,6 +22,7 @@ export function useCloudGame(variant: VariantId, defaultMode: "engine" | "two_pl
   const engineKey = useRef("");
 
   const accept = useCallback((result: OutputType) => {
+    setPendingMove(null);
     current.current = result;
     credentials.current = { gameId: result.gameId, accessToken: result.accessToken };
     setData(result);
@@ -39,6 +41,7 @@ export function useCloudGame(variant: VariantId, defaultMode: "engine" | "two_pl
       controller.current?.abort();
       const abort = new AbortController();
       controller.current = abort;
+      if (body.action !== "move") setPendingMove(null);
       setBusy(true);
       setError(null);
       try {
@@ -82,7 +85,7 @@ export function useCloudGame(variant: VariantId, defaultMode: "engine" | "two_pl
         );
         return false;
       } finally {
-        if (sequence === requestSequence.current) setBusy(false);
+        if (sequence === requestSequence.current) { setBusy(false); setPendingMove(null); }
       }
     },
     [accept, defaultMode,difficulty],
@@ -105,6 +108,22 @@ export function useCloudGame(variant: VariantId, defaultMode: "engine" | "two_pl
       ++requestSequence.current;
     };
   }, [perform, variant, defaultMode]);
+
+  useEffect(() => {
+    const openLinkedGame = () => {
+      const linked = gameSessions.fromHash();
+      if (!linked || linked.gameId === credentials.current?.gameId && linked.accessToken === credentials.current.accessToken) return;
+      engineKey.current = "";
+      credentials.current = linked;
+      void perform({ action: "get", ...linked });
+    };
+    window.addEventListener("hashchange", openLinkedGame);
+    window.addEventListener("popstate", openLinkedGame);
+    return () => {
+      window.removeEventListener("hashchange", openLinkedGame);
+      window.removeEventListener("popstate", openLinkedGame);
+    };
+  }, [perform]);
 
   useEffect(() => {
     if (
@@ -159,12 +178,17 @@ export function useCloudGame(variant: VariantId, defaultMode: "engine" | "two_pl
       accessToken: session.accessToken,
       version: session.version,
     };
+    if (action === "move" && move) {
+      const legal = session.game.legalMoves.find(candidate => candidate.from.q === move.from.q && candidate.from.r === move.from.r && candidate.to.q === move.to.q && candidate.to.r === move.to.r && candidate.promotion === move.promotion);
+      setPendingMove(legal?.changes?.length ? legal : null);
+    }
     return action === "move" && move
       ? perform({ action: "move", ...common, move })
       : perform({ action: "undo", ...common });
   };
   return {
     data,
+    pendingMove,
     busy,
     error,
     newGame: (mode: "engine" | "two_players", humanPlayer: 0 | 1, variant: VariantId) => {

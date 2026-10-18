@@ -1,4 +1,6 @@
 import { useEffect, useRef, useState } from "react";
+import { cloudNames } from "../helpers/cloudNames";
+import type { CloudScope } from "../endpoints/cloud_POST.schema";
 import { z } from "zod";
 import { ArrowUp, ImagePlus, X } from "lucide-react";
 import { CloudColorWheel } from "./CloudColorWheel";
@@ -9,8 +11,8 @@ import { Form, FormItem, FormLabel, FormControl, FormMessage, useForm } from "./
 import styles from "./CloudComposer.module.css";
 type Draft={name:string;file?:File;color?:CloudColor};
 type Submission=Draft&{id:string;parentId:string|null;uploaded?:boolean};
-export function CloudComposer({parentId,busy,disabled,onAdd,draft,onDraft,uploading=false,onCancelUpload,colors=false}:{parentId:string|null;busy:boolean;disabled:boolean;draft:Draft;onDraft:(draft:Draft)=>void;onAdd:(value:Submission)=>Promise<boolean>;uploading?:boolean;onCancelUpload?:()=>void;colors?:boolean}){
-  const form=useForm({defaultValues:{name:draft.name},schema:z.object({name:z.string().max(80,"Use up to 80 characters.")})});
+export function CloudComposer({parentId,busy,disabled,onAdd,draft,onDraft,uploading=false,onCancelUpload,colors=false,scope="private"}:{parentId:string|null;busy:boolean;disabled:boolean;draft:Draft;onDraft:(draft:Draft)=>void;onAdd:(value:Submission)=>Promise<boolean>;uploading?:boolean;onCancelUpload?:()=>void;colors?:boolean;scope?:CloudScope}){
+  const form=useForm({defaultValues:{name:draft.name},schema:z.object({name:cloudNames.schema(scope,true)})});
   const [color,setColor]=useState<CloudColor>(draft.color||'white');
   const [file,setFile]=useState<File|undefined>(draft.file),[fileError,setFileError]=useState(""),[preview,setPreview]=useState("");
   const fileInput=useRef<HTMLInputElement>(null),wordInput=useRef<HTMLInputElement>(null),pending=useRef<Submission|null>(null),composing=useRef(false),mounted=useRef(true),submitting=useRef(false);
@@ -26,7 +28,8 @@ export function CloudComposer({parentId,busy,disabled,onAdd,draft,onDraft,upload
   }
   const submit=form.handleSubmit(async values=>{
     if(busy||disabled||submitting.current||composing.current)return;
-    const name=values.name.trim()||(file?.name.replace(/\.[^.]+$/,"").trim().slice(0,80)||"");
+    const fileName=file?.name.replace(/\.[^.]+$/,"").trim()||"";
+    const name=values.name.trim()||(scope==='private'?fileName:fileName.slice(0,80));
     if(!name){form.setFieldError("name","Add a word or choose a picture.");wordInput.current?.focus();return;}
     const item=pending.current??{id:crypto.randomUUID(),parentId,name,file,...(colors?{color}:{})};pending.current=item;
     const shouldFocus=!!wordInput.current&&document.activeElement?.closest("#cloud-composer-form")!==null;
@@ -47,13 +50,13 @@ export function CloudComposer({parentId,busy,disabled,onAdd,draft,onDraft,upload
         <Input type="file" ref={fileInput} accept="image/*" className={styles.hidden} aria-label="Picture file" aria-invalid={!!fileError} aria-describedby={fileError?"cloud-picture-error":undefined} tabIndex={-1} onChange={e=>{choose(e.target.files?.[0]);e.target.value="";}} disabled={busy}/>
         <FormItem name="name" className={styles.field}>
           <FormLabel className={styles.hidden}>Add a word or a picture name</FormLabel>
-          <FormControl><Input ref={wordInput} className={styles.input} style={{color:colorValue(colors?color:undefined)}} placeholder={file?"Name this picture…":"Add…"} autoComplete="off" enterKeyHint="done" maxLength={80} value={form.values.name} onChange={e=>form.setValues({name:e.target.value})} onCompositionStart={()=>{composing.current=true;}} onCompositionEnd={()=>{composing.current=false;}} onKeyDown={e=>{if(e.key==="Enter"&&(e.nativeEvent.isComposing||composing.current))e.preventDefault();}} readOnly={busy} aria-busy={busy}/></FormControl>
+          <FormControl><Input ref={wordInput} className={styles.input} style={{color:colorValue(colors?color:undefined)}} placeholder={file?"Name this picture…":"Add…"} autoComplete="off" enterKeyHint="done" maxLength={scope==='private'?undefined:80} value={form.values.name} onChange={e=>form.setValues({name:e.target.value})} onCompositionStart={()=>{composing.current=true;}} onCompositionEnd={()=>{composing.current=false;}} onKeyDown={e=>{if(e.key==="Enter"&&(e.nativeEvent.isComposing||composing.current))e.preventDefault();}} readOnly={busy} aria-busy={busy}/></FormControl>
           <FormMessage className={styles.fieldError}/>
         </FormItem>
         <Button type="submit" size="icon" className={styles.add} aria-label={busy?"Saving":"Add"} title={disabled?"Opening your space":busy?"Saving":"Add"} disabled={busy||disabled||(!form.values.name.trim()&&!file)} aria-busy={busy}>{busy?<span className={styles.saving}/>:<ArrowUp size={24} strokeWidth={2}/>}</Button>
       </div>
       {fileError&&<p id="cloud-picture-error" className={styles.error} role="alert">{fileError}</p>}
-      {form.values.name.length>=70&&<span className={styles.counter} aria-label={form.values.name.length+" of 80 characters"}>{form.values.name.length}/80</span>}
+      {scope!=='private'&&form.values.name.length>=70&&<span className={styles.counter} aria-label={form.values.name.length+" of 80 characters"}>{form.values.name.length}/80</span>}
     </form></Form>
   </div>;
 }

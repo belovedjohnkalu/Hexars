@@ -18,7 +18,7 @@ class CloudError extends Error {
 export async function handle(request: Request) {
   try {
     const body = await request.text();
-    if (body.length > 4096) throw new CloudError("Request too large.", 413);
+    if (body.length > 1024 * 1024) throw new CloudError("Request too large.", 413);
     const input = schema.parse(JSON.parse(body));
     let context=await cloudContext(request,input);
     if(input.scope==='home'){
@@ -53,7 +53,7 @@ export async function handle(request: Request) {
         if (input.version !== row.version) throw new CloudError("Your space changed in another tab. Try again.", 409);
           if (input.parentId !== null && !all.some(n => n.id === input.parentId && !n.destination))
           throw new CloudError("Choose an existing cloud.", 400);
-        const node: CloudNode = { id: input.id, parentId: input.parentId, name: input.name,createdBy:context.userId!,...(input.scope==='private'&&input.color?{color:input.color}:{}) };
+        const node: CloudNode = { id: input.id, parentId: input.parentId, name: input.name,createdBy:context.userId!,...((input.scope==='private'||input.scope==='public')&&input.color?{color:input.color}:{}) };
         if (input.imageType) {
           const filename = "ion/" + row.id + "/" + context.userId + "/" + input.id + "." + extensions[input.imageType];
           const info = await getInfo({ visibility: "private", filename });

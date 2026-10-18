@@ -14,6 +14,9 @@ import { gameOutcome } from "../helpers/gameOutcome";
 import { useBoardFacing } from "../helpers/useBoardFacing";
 import { useInstallApp } from "../helpers/useInstallApp";
 import { postGame, type VariantId, type Hex, type ChessMove, type GameView } from "../endpoints/game_POST.schema";
+import { previewMove } from "../helpers/previewMove";
+import { boardLayout } from "../helpers/boardLayout";
+import { chessVariants } from "../helpers/chessVariants";
 import styles from "./Play.module.css";
 const moveInput=(m:ChessMove)=>({from:m.from,to:m.to,...(m.promotion?{promotion:m.promotion}:{})});
 const key=(h:Hex)=>h.q+','+h.r;
@@ -26,17 +29,17 @@ export function Play({variant}:{variant:VariantId}){
  const [review,setReview]=useState<{ply:number;game:GameView}|null>(null),[reviewBusy,setReviewBusy]=useState(false),[reviewError,setReviewError]=useState('');
  const [size,setSize]=useState({width:390,height:650}),area=useRef<HTMLDivElement>(null),heading=useRef<HTMLHeadingElement>(null),keep=useRef<HTMLButtonElement>(null),endKey=useRef('');
  const desired=useRef<number|null>(null),sequence=useRef(0),reviewAbort=useRef<AbortController|null>(null),swipe=useRef<{x:number;y:number;dragged:boolean}|null>(null),suppressClick=useRef(false);
- const shown=review?.game||game,ended=!!game&&game.result.status!=='ongoing',thinking=!!data&&data.mode==='engine'&&game?.activePlayer!==data.humanPlayer&&!ended;
+ const shown=review?.game||(game?previewMove(game,cloud.pendingMove):undefined),ended=!!game&&game.result.status!=='ongoing',thinking=!!data&&data.mode==='engine'&&game?.activePlayer!==data.humanPlayer&&!ended;
  const facing=useBoardFacing(data?.gameId,game?.ply,data?.mode==='two_players'?game?.activePlayer===1:data?.humanPlayer===1);
  const selectedGame=!!gameSessions.fromHash()||!!data&&data.mode===mode&&(mode==='two_players'||data.difficulty===difficulty);
  const canPlay=selectedGame&&!!game&&!ended&&!cloud.busy&&!cloud.error&&!thinking&&!facing.turning&&!review&&!reviewBusy;
  const candidates=game?.legalMoves.filter(m=>selected&&key(m.from)===key(selected))||[];
  const canUndo=selectedGame&&!!data?.moves.length&&!cloud.busy&&!facing.turning&&!review&&(data.mode==='two_players'||data.moves.some(m=>m.player===data.humanPlayer));
- const name=variant==='glinski'?'Gliński’s Variant':'McCooey’s Variant';
+ const name=chessVariants.name(variant)+'’s Variant';
  useEffect(()=>{const el=area.current;if(!el)return;const observer=new ResizeObserver(()=>setSize({width:el.clientWidth,height:Math.max(420,el.clientHeight)}));observer.observe(el);return()=>observer.disconnect();},[]);
  useEffect(()=>{heading.current?.focus({preventScroll:true});},[variant]);
  useEffect(()=>{setSelected(null);setPromotions([]);},[game?.stateId]);
- useEffect(()=>{setReview(null);desired.current=null;reviewAbort.current?.abort();setReviewBusy(false);setReviewError('');},[data?.gameId]);
+ useEffect(()=>{setSelected(null);setPromotions([]);setReset(false);setResultOpen(false);endKey.current='';setReview(null);desired.current=null;reviewAbort.current?.abort();setReviewBusy(false);setReviewError('');},[data?.gameId]);
  useEffect(()=>{if(!ended||!data||!game)return;const id=data.gameId+':'+game.stateId;if(endKey.current!==id){endKey.current=id;setResultOpen(true);}},[ended,data?.gameId,game?.stateId]);
  useEffect(()=>()=>reviewAbort.current?.abort(),[]);
  function choose(hex:Hex){if(!canPlay||!game)return;const moves=candidates.filter(m=>key(m.to)===key(hex));if(moves.length>1){setPromotions(moves);return;}if(moves.length===1){setSelected(null);void cloud.play(moveInput(moves[0]));}else setSelected(selected&&key(selected)===key(hex)?null:game.board.cells.find(c=>key(c)===key(hex))?.piece?.player===game.activePlayer?hex:null);}
@@ -52,8 +55,9 @@ export function Play({variant}:{variant:VariantId}){
  function move(e:PointerEvent<HTMLDivElement>){const start=swipe.current;if(start&&Math.abs(e.clientX-start.x)>40&&Math.abs(e.clientY-start.y)<Math.abs(e.clientX-start.x)*.6){start.dragged=true;suppressClick.current=true;e.currentTarget.setPointerCapture(e.pointerId);}}
  function up(e:PointerEvent<HTMLDivElement>){const start=swipe.current;swipe.current=null;if(start?.dragged){void history((desired.current??game?.ply??0)+(e.clientX>start.x?-1:1));}if(e.currentTarget.hasPointerCapture(e.pointerId))e.currentTarget.releasePointerCapture(e.pointerId);}
  async function restart(){if(await cloud.newGame(data?.mode==='two_players'?'two_players':'engine',(data?.humanPlayer===1?1:0),variant)){setReset(false);setResultOpen(false);setReview(null);}}
- const boardWidth=Math.min(size.width-24,540),boardHeight=boardWidth*548/484,worldWidth=Math.max(size.width,boardWidth+24),worldHeight=Math.max(size.height,boardHeight+160),boardY=(worldHeight-boardHeight)/2;
- const status=review?`Move ${review.ply} of ${game?.ply}`:!game?'Opening…':ended?'Game over':thinking?'Thinking…':game.check?'Check':data?.mode==='two_players'?game.activePlayer===0?'White’s turn':'Black’s turn':'Your turn';
+ const layout=boardLayout(shown?.board.cells??[]);
+ const boardWidth=Math.min(size.width-24,540),boardHeight=boardWidth*layout.height/layout.width,worldWidth=Math.max(size.width,boardWidth+24),worldHeight=Math.max(size.height,boardHeight+160),boardY=(worldHeight-boardHeight)/2;
+ const status=review?`Move ${review.ply} of ${game?.ply}`:!game?'Opening…':ended?'Game over':cloud.pendingMove?'Moving…':thinking?'Thinking…':game.check?'Check':data?.mode==='two_players'?game.activePlayer===0?'White’s turn':'Black’s turn':'Your turn';
  const outcome=game?gameOutcome(game.result,data?.mode||'two_players',data?.humanPlayer??0):{title:'Draw',score:'½ – ½',detail:''};
  return <div className={styles.app}><AppHead title={name+' · Hexagonal Chess'}/>
  <header className={styles.header}><h1 ref={heading} tabIndex={-1}>{name}</h1><div className={styles.status} role="status" aria-live="polite">{status}{thinking&&<Spinner size="sm" aria-label="Tactical is thinking"/>}</div></header>
@@ -66,8 +70,8 @@ export function Play({variant}:{variant:VariantId}){
  <Button variant="ghost" className={styles.word+' '+styles.secondaryWord} style={{left:'20%',top:boardY+boardHeight+76}} disabled={cloud.busy} onClick={()=>game?.ply?setReset(true):void restart()}>Board Reset</Button>
  <Button variant="ghost" className={styles.word+' '+styles.secondaryWord} style={{left:'78%',top:boardY+boardHeight+76}} disabled={!canUndo} onClick={()=>void cloud.undo()}>Undo</Button>
  </nav>
- <div data-no-pan className={styles.board} style={{width:boardWidth,left:(worldWidth-boardWidth)/2,top:boardY}} onPointerDown={down} onPointerMove={move} onPointerUp={up} onPointerCancel={()=>{swipe.current=null;}} onClickCapture={e=>{if(suppressClick.current){e.preventDefault();e.stopPropagation();suppressClick.current=false;}}}>
- {shown?<CloudBoard key={data?.gameId} game={shown} selected={review?null:selected} onCell={choose} flipped={facing.flipped} coordinates={false} theme="neutral" lastMove={data?.moves[(review?.ply??game?.ply??0)-1]} disabled={!canPlay}/>:<div className={styles.loading}><Spinner aria-label="Opening board"/></div>}
+ <div data-no-pan className={styles.board} data-pending-move={!!cloud.pendingMove} style={{width:boardWidth,left:(worldWidth-boardWidth)/2,top:boardY}} onPointerDown={down} onPointerMove={move} onPointerUp={up} onPointerCancel={()=>{swipe.current=null;}} onClickCapture={e=>{if(suppressClick.current){e.preventDefault();e.stopPropagation();suppressClick.current=false;}}}>
+ {shown?<CloudBoard key={data?.gameId} game={shown} selected={review?null:selected} onCell={choose} flipped={facing.flipped} coordinates={false} theme="neutral" lastMove={cloud.pendingMove??data?.moves[(review?.ply??game?.ply??0)-1]} disabled={!canPlay}/>:<div className={styles.loading}><Spinner aria-label="Opening board"/></div>}
  </div>
  </SpatialViewport></main>
  {(review||reviewBusy)&&<div className={styles.history} role="group" aria-label="Move history"><Button variant="ghost" size="icon" aria-label="Previous move" disabled={(desired.current??review?.ply??0)<=0} onClick={()=>void history((desired.current??review?.ply??0)-1)}><ChevronLeft size={18}/></Button><Button variant="ghost" disabled={reviewBusy} onClick={()=>void history(game?.ply??0)}>{reviewBusy?'Opening…':'Present'}</Button><Button variant="ghost" size="icon" aria-label="Next move" onClick={()=>void history((desired.current??review?.ply??0)+1)}><ChevronRight size={18}/></Button></div>}

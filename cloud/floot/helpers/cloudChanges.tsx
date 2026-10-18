@@ -20,7 +20,7 @@ function applyAll(nodes:CloudNode[],input:Change,currentVersion:number,seeds:Clo
   if(input.action==="move"&&node.parentId===input.parentId)return nodes;
   if(input.action==="copy"&&nodes.some(n=>n.id===input.operationId))return fail("Choose a new copy operation.",409);
   if(input.version!==currentVersion)return fail("Your space changed. Try again.",409);
-  if(input.action==="rename")return nodes.map(n=>n.id===input.id?{...n,name:input.name,...(input.scope==='private'&&input.color?{color:input.color}:{})}:n);
+  if(input.action==="rename")return nodes.map(n=>n.id===input.id?{...n,name:input.name,...((input.scope==='private'||input.scope==='public')&&input.color?{color:input.color}:{})}:n);
   const ids=new Set([input.id]);
   let grew=true;
   while(grew){grew=false;for(const n of nodes)if(!n.removedBy&&n.parentId&&ids.has(n.parentId)&&!ids.has(n.id)){ids.add(n.id);grew=true;}}

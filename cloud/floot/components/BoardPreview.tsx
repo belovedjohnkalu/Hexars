@@ -1,9 +1,10 @@
+import type { VariantId } from "../endpoints/game_POST.schema";
 import { useQuery } from "@tanstack/react-query";
 import { getVariants } from "../endpoints/variants_GET.schema";
 import { CloudBoard } from "./CloudBoard";
 import { Spinner } from "./Spinner";
 import type { GameView } from "../endpoints/game_POST.schema";
-export function BoardPreview({variant}:{variant:"glinski"|"mccooey"}){
+export function BoardPreview({variant}:{variant:VariantId}){
  const result=useQuery({queryKey:["starting-boards"],queryFn:()=>getVariants(),staleTime:300000});
  const board=result.data?.variants.find(v=>v.id===variant)?.board;
  if(!board)return <span style={{display:"grid",placeItems:"center",height:"100%"}}>{result.isError?<span>Board unavailable</span>:<Spinner size="sm" aria-label="Loading board"/>}</span>;

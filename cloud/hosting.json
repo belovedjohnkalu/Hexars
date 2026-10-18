@@ -2,8 +2,8 @@
   "provider": "Floot",
   "project_id": "9d7c0966-4648-49f3-845c-b4a9296d0358",
   "execution": "native-cpp-linux-x64-on-cloud-server",
-  "engine_asset": "/_cdn/static/2269ba52-c5cc-4f50-86e9-df446d6e403d-tactical-0.6-linux-x64.bin",
-  "engine_sha256": "ec6edf98d810c963fd6dc421fbf133bcbce334b258a5c724185fdda7a99c9b6d",
+  "engine_asset": "/_cdn/static/eacabb97-9c33-4516-a7c2-150b6601f6fa-tactical-0.7.1-linux-x64.bin",
+  "engine_sha256": "d914d8c30dd0e13b8280a12ae035c929d514626a70f69a0cb744ca0fdb41794a",
   "published_url": "https://ion.floot.app",
   "installable_web_app": true,
   "native_app_store_package": false,
@@ -12,17 +12,19 @@
   "engine_name": "Tactical",
   "supported_variants": [
     "glinski",
-    "mccooey"
+    "mccooey",
+    "shafran"
   ],
-  "ui_version": "0.12.0",
+  "ui_version": "0.13.0",
   "routes": [
     "/",
     "/login",
     "/glinski",
-    "/mccooey"
+    "/mccooey",
+    "/shafran"
   ],
   "font_asset": "/_cdn/static/6e6c9250-599e-4bf4-a9ae-66ff948afb59-InterVariable.woff2",
-  "published_ui_version": "0.12.0",
+  "published_ui_version": "0.13.0",
   "release_status": "published",
   "favicon": "/_api/icon?v=2",
   "tactical_levels": [

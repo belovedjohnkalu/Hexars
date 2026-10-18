@@ -1,0 +1,16 @@
+{
+  "date": "2026-10-18T04:15:26.512Z",
+  "checks": [
+    "The Public color wheel saves a colored word visible from a signed-out device",
+    "Permitted Public color edits update another device in real time",
+    "Home first returns to the owning space, then a second press opens ION",
+    "A legal piece moves immediately while its slow cloud save is still pending",
+    "Confirmed pass-and-play turns unlock after the shorter smooth rotation",
+    "A failed save rolls back the preview, preserves the real position and recovers with Retry",
+    "Immediate movement still respects reduced motion"
+  ],
+  "timings": {
+    "clickToPreviewMs": 59,
+    "confirmedToReadyMs": 787
+  }
+}

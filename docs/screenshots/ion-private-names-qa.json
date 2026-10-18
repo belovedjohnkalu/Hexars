@@ -1,0 +1,12 @@
+{
+  "date": "2026-10-18T04:13:39.478Z",
+  "checks": [
+    "Private accepts more than 80 words and restores the complete draft after reload",
+    "The full private name is saved in the cloud and available in another device context",
+    "Editing saves a 6,000-character name; fitted pages expose every character without scrolling",
+    "Long private names preserve accessibility and the no-scroll layout",
+    "Long-name confirmation stays compact and keeps all actions visible",
+    "Removing the name restriction does not change Private authorization"
+  ],
+  "violations": []
+}

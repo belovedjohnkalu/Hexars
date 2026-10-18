@@ -27,3 +27,7 @@
 @media(min-width:700px) { .header { padding-inline:28px; } .footer { padding-bottom:20px; } }
 
 .header > span { height:44px; width:44px; display:grid; place-items:center; }
+
+.cloudBody { display:flex; flex-direction:column; height:100%; min-height:0; }
+.longName { flex:0 0 34%; min-height:56px; max-height:240px; width:min(650px,100%); margin:auto; padding:8px 24px; }
+.childCloud { flex:1; min-height:0; }

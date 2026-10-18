@@ -38,6 +38,7 @@ export type ChessMove = {
   promotion?: "queen" | "rook" | "bishop" | "knight";
   capture?: boolean;
   givesCheck?: boolean;
+  changes?: Array<Hex & { piece: { type: PieceName; player: number } | null }>;
   fromNotation?: string;
   toNotation?: string;
 };

@@ -2,7 +2,7 @@ import type { CloudColor } from "./cloudColors";
 type Draft={name:string;file?:File;color?:CloudColor};
 const cache=new Map<string,Draft>();
 const storageKey="ion.word-drafts.v1";
-function read():Record<string,string>{try{const value=JSON.parse(sessionStorage.getItem(storageKey)||"{}");if(!value||typeof value!=="object"||Array.isArray(value))return {};return Object.fromEntries(Object.entries(value).filter(([,name])=>typeof name==="string"&&name.length<=80)) as Record<string,string>;}catch{return {};}}
+function read():Record<string,string>{try{const value=JSON.parse(sessionStorage.getItem(storageKey)||"{}");if(!value||typeof value!=="object"||Array.isArray(value))return {};return Object.fromEntries(Object.entries(value).filter(([,name])=>typeof name==="string")) as Record<string,string>;}catch{return {};}}
 export const cloudDrafts={
   get(id:string|null):Draft {const key=id||"root";return cache.get(key)||{name:read()[key]||""};},
   set(id:string|null,draft:Draft) {

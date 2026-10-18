@@ -2,10 +2,10 @@
 
 ION is live on **Floot** at https://ion.floot.app. Its main navigation is a
 pannable, zoomable cloud of words and pictures. Open **Hexagonal Chess**, then
-**Boards** to choose Gliński or McCooey, **Engines** to select Tactical, or **Rules**
+**Boards** to choose Gliński, McCooey or Shafran, **Engines** to select Tactical, or **Rules**
 for separate rule paragraphs. Rule lists are words; illustrations appear inside each paragraph, and long text uses fitted pages without scrolling.
 
-Home contains **Hexagonal Chess**, **Public**, and **Private**. Public is readable
+Home contains **Hexagonal Chess**, **Public**, and **Private**. Public has the same saved-color wheel as Private and is readable
 across accounts and devices, with live updates; sign in to contribute. Private is
 visible only to its signed-in account. Hold a word to edit or transfer its entire
 branch between Public and Private, with confirmation before publishing. Only the
@@ -18,7 +18,14 @@ shortcut. No passwords are stored in browser storage. Each cloud accepts 1,024 i
 Tactical search run in C++ on the cloud server. No local engine installation is
 required. A domain change requires signing in again; account content persists.
 
-The standalone development source also implements Shafran. The Cloudflare,
+Shafran is available on the live ION app, with 70 cells, triple pawn advances,
+both crossed en passant cells, four castling choices per side and an equal stalemate.
+Private cloud names have no 80-character restriction; compact previews preserve the
+full saved name, readable through fitted pages. Home at a space root opens ION.
+Moves now animate immediately from native visual deltas while the cloud confirms
+them; failures restore the saved board.
+
+The Cloudflare,
 Supabase and Vercel migration is paused at the user's request. The live Floot
 source is mirrored under `cloud/floot`; `web` is the separate migration source.
 
@@ -124,4 +131,4 @@ Published-site browser checks verified real C++ replies, both human sides, a com
 
 Browser install offers are retained in an app-level FIFO queue across page changes and menu closure. Only an explicit attempt that obtains the browser choice consumes an offer. Failed attempts stay available for retry. This concerns the website’s browser events; the app cannot alter ChatGPT’s message queue.
 
-Development 0.9.0: tap a selected piece again to deselect. Moves glide for 480ms before the pass-and-play board rotates for 560ms; reduced motion skips the delay. The homepage places the geometric logo beside the wordmark. Shafran includes its 70-cell board, 36-piece setup, oblique a–i notation, pawn initial advances up to three hexagons, both crossed en-passant cells, four castling choices per side, promotion, legal search and drawn stalemate. No suggested extra features were added. See [Shafran](docs/variants/shafran.md) and [pending release](docs/release-0.9.md).
+Development 0.9.0: tap a selected piece again to deselect. Moves glide for 480ms before the pass-and-play board rotates for 560ms; reduced motion skips the delay. The homepage places the geometric logo beside the wordmark. Shafran includes its 70-cell board, 36-piece setup, oblique a–i notation, pawn initial advances up to three hexagons, both crossed en-passant cells, four castling choices per side, promotion, legal search and drawn stalemate. No suggested extra features were added. See [Shafran](docs/variants/shafran.md) and [original implementation](docs/release-0.9.md) and [ION release](docs/ion-shafran-release.md).

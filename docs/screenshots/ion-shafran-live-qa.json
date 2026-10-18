@@ -1,0 +1,21 @@
+{
+  "date": "2026-10-18T04:16:12.135Z",
+  "checks": [
+    "All three variant previews use the authoritative native board and setup",
+    "Shafran opens from Boards; selecting a pawn shows three advances and a second tap deselects",
+    "The three-cell pawn advance saves, then Pass and Play rotates the centered 70-cell board",
+    "Swipe review returns to the starting position without changing the game; Undo restores the turn",
+    "Twenty-two rule clouds hide pictures until opened and preserve variant/mode through nested Back",
+    "Cloud save/apply/undo correctly handles all four White castling choices",
+    "Long castling moves both visible pieces and rotates the board without clipping",
+    "Both empty crossed cells show capture outlines; en passant removes the right pawn",
+    "Edge promotion offers the four legal pieces and saves the chosen queen",
+    "Shafran checkmate and equal-scoring stalemate open the correct result sheets",
+    "Choosing Pre-Beginner returns to Shafran and Tactical replies with a native-validated move",
+    "Pass and Play clears the engine and restores its separate Shafran game",
+    "Board, surrounding actions and no-scroll layout fit phone, landscape and desktop",
+    "Shafran passes automated accessibility checks with no browser runtime errors"
+  ],
+  "violations": [],
+  "errors": []
+}

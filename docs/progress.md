@@ -2,6 +2,18 @@
 
 Published: **https://ion.floot.app**
 
+## 2026-10-18 — Shafran, Public colors and responsive moves
+
+Shafran joins Boards, Rules and Tactical on ION: 70 authoritative cells, 36 starting pieces,
+triple pawn advances, both en passant targets, promotion and short/long castling
+on both flanks. Pass and Play, saved games, undo and history use the shared flows.
+Private names no longer have an 80-character cap; long labels use compact previews
+and full fitted reading pages. The separate 1,024-immediate-droplet capacity remains.
+Public now shares the color wheel and live color updates. Home at a space root opens ION.
+Native visual deltas make moves animate immediately while saving; failures roll back.
+Fourteen Shafran, six Private-name and seven Public/latency browser flows pass;
+helper/type checks and 23 native protocol checks pass. See [release details](ion-shafran-release.md).
+
 ## 2026-10-17 — Colors, fitted pages and a stable Home
 
 Published on https://ion.floot.app. Private has a saved-color wheel; default clouds
@@ -46,11 +58,11 @@ See [release details](shared-spaces-release.md) for evidence and device-test lim
 - [ ] Physical iPhone/Android installation verification and Windows compiler/runtime verification.
 - [ ] Engines 2–6 with independently designed strategies.
 - [ ] Arena/tournament controller and rated engine-strength measurements.
-- [ ] The other four historical variants, including three-player Wellisch search/results.
+- [ ] The other three historical variants, including three-player Wellisch search/results.
 - [ ] Stronger evaluation, transposition tables and native asynchronous search cancellation.
 - [ ] Account game library, side-specific multiplayer access and broader production load testing.
 - [ ] Offline features or native App Store/Play Store packaging if later requested.
-- [ ] GitHub remote publication; no remote repository is configured.
+- [x] GitHub source backup: belovedjohnkalu/Hexars (main).
 
 ## Verification record
 

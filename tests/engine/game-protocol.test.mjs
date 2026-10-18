@@ -30,7 +30,7 @@ function engine(t) {
 test("Versioned protocol identifies the engine and exposes authoritative starting pieces", async (t) => {
   const request = engine(t);
   const hello = await request({ type: "hello" });
-  assert.equal(hello.engine, "Tactical 0.7");
+  assert.equal(hello.engine, "Tactical 0.7.1");
   const start = await request({ type: "new_game", variant: "glinski" });
   assert.equal(start.game.board.cells.length, 91);
   assert.equal(start.game.board.cells.filter((cell) => cell.piece).length, 36);
@@ -338,6 +338,8 @@ test("Shafran serializes both en-passant captures after a triple advance", async
     const move = before.game.legalMoves.find(m => m.toNotation === to && m.capture);
     const result = await request({ type: "play_move", stateId: before.game.stateId, move });
     assert.equal(result.game.board.cells.find(c => c.notation === "d5").piece, null);
+    assert.equal(move.changes.length, 3);
+    for(const change of move.changes)assert.deepEqual(change.piece,result.game.board.cells.find(c=>c.q===change.q&&c.r===change.r).piece);
   }
 });
 
@@ -355,6 +357,8 @@ test("Shafran castling applies and preserves both king and rook movement rights"
     const result = await request({ type: "play_move", stateId: loaded.game.stateId, move });
     assert.equal(result.game.board.cells.find(c => c.notation === to).piece.type, "king");
     assert.equal(result.game.board.cells.find(c => c.notation === rook).piece.type, "rook");
+    assert.equal(move.changes.length, 4);
+    for(const change of move.changes)assert.deepEqual(change.piece,result.game.board.cells.find(c=>c.q===change.q&&c.r===change.r).piece);
     assert.equal((await request({ type: "position", state: result.state })).game.stateId, result.game.stateId);
   }
 });
@@ -364,4 +368,21 @@ test("Tactical returns a legal Shafran move under its time budget", async t => {
   const result = await request({ type: "go", stateId: initial.game.stateId, limits: { timeMs: 100, depth: 2, nodeLimit: 2000 } });
   assert.ok(initial.game.legalMoves.some(m => m.fromNotation === result.move.fromNotation && m.toNotation === result.move.toNotation));
   assert.ok(result.diagnostics.timeMs < 1000);
+});
+
+test("Native legal moves include exact visual deltas for immediate rendering",async t=>{
+  const request=engine(t);
+  for(const variant of ['glinski','mccooey','shafran']){
+    const initial=await request({type:'new_game',variant});
+    for(const move of initial.game.legalMoves){
+      assert.ok(move.changes.length>=2);
+      await request({type:'position',state:initial.state});
+      const applied=await request({type:'play_move',stateId:initial.game.stateId,move});
+      const projected=initial.game.board.cells.map(cell=>{
+        const change=move.changes.find(c=>c.q===cell.q&&c.r===cell.r);
+        return change?{...cell,piece:change.piece}:cell;
+      });
+      assert.deepEqual(projected,applied.game.board.cells);
+    }
+  }
 });

@@ -1,9 +1,11 @@
+import { cloudNames } from "../helpers/cloudNames";
+import type { VariantId } from "./game_POST.schema";
 import { z } from "zod";
 import { cloudColors,type CloudColor } from "../helpers/cloudColors";
 export type CloudScope="home"|"public"|"private"|"chess";
 const credentials = { scope: z.enum(["home","public","private","chess"]).default("private"), account: z.boolean().optional(), workspaceId: z.string().uuid(), accessToken: z.string().regex(/^[a-f0-9]{64}$/) };
 const parentId = z.string().max(80).nullable();
-const name = z.string().trim().min(1, "Give this cloud a name.").max(80, "Use up to 80 characters.");
+const name = z.string().trim().min(1, "Give this cloud a name.");
 const version = z.number().int().nonnegative();
 export const schema = z.discriminatedUnion("action", [
   z.object({ action: z.literal("load"), connect: z.boolean().optional(), ...credentials }),
@@ -15,10 +17,14 @@ export const schema = z.discriminatedUnion("action", [
   z.object({ action: z.literal("copy"), ...credentials, id: z.string().min(1).max(80), parentId, operationId: z.string().uuid(), version }),
   z.object({ action: z.literal("transfer"), ...credentials, id:z.string().uuid(), targetScope:z.enum(["public","private"]), targetParent:z.string().min(1).max(80), targetVersion:version, operationId:z.string().uuid(), mode:z.enum(["move","copy"]), version }),
   z.object({ action: z.literal("restore"), ...credentials, operationId: z.string().uuid(), version }),
-]);
+]).superRefine((input, context) => {
+  if (!("name" in input)) return;
+  const result = cloudNames.schema(input.scope).safeParse(input.name);
+  if (!result.success) for (const issue of result.error.issues) context.addIssue({ ...issue, path: ["name", ...issue.path] });
+});
 export type CloudNode = {
   id: string; parentId: string | null; name: string; color?:CloudColor;
-  imageKey?: string; imageUrl?: string; isImage?: boolean; destination?: "board" | "glinski" | "mccooey" | "tactical" | "level"; note?: string; illustration?:string; variant?:"glinski"|"mccooey"; level?:number; createdBy?:number; canEdit?:boolean; canCopy?:boolean; sizeCount?:number;
+  imageKey?: string; imageUrl?: string; isImage?: boolean; destination?: "board" | VariantId | "tactical" | "level"; note?: string; illustration?:string; variant?:VariantId; level?:number; createdBy?:number; canEdit?:boolean; canCopy?:boolean; sizeCount?:number;
   copyOperation?: string; removedBy?: string; removedAt?: string;
 };
 export type InputType = z.input<typeof schema>;
