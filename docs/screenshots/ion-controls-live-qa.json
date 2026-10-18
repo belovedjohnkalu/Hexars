@@ -1,0 +1,20 @@
+{
+  "date": "2026-10-18T15:03:21.887Z",
+  "origin": "https://ion.floot.app",
+  "checks": [
+    "Published Home has five stable clouds, system photos and no badge or guest composer",
+    "Published Home passes automated WCAG checks",
+    "Add account remembers both accounts; ordinary Accounts functions remain noneditable and have no ILs",
+    "Holding ordinary system commands is read-only; remembered account switching restores dev identity",
+    "Forgetting remembered accounts confirms, cancels safely, then removes only quick access",
+    "Private collage survives live deployment and loads both full-screen photos",
+    "Live native board still deselects, plays, animates and undoes a legal move",
+    "An expired explicit game link offers and starts a new game",
+    "Responsive and reduced-motion navigation work without app scrolling"
+  ],
+  "errors": [],
+  "violations": [],
+  "qaGameIds": [
+    "d50f2484-bc6f-4677-b864-05ff4f87430b"
+  ]
+}

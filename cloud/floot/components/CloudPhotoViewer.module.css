@@ -11,3 +11,5 @@
 @media(prefers-reduced-motion:reduce){.viewer.viewer{animation:none;}}
 
 .viewer > button { min-width:44px; min-height:44px; }
+.image { position:relative; }
+.loading { position:absolute; inset:0; display:grid; place-items:center; pointer-events:none; }

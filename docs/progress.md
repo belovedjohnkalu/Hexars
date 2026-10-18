@@ -237,3 +237,14 @@ Moves preserve identities across scopes; copies receive new labels.
 Native regression, full games, protocol rights/serialization and UI tests pass;
 live release evidence is recorded in docs/ion-five-variants-release.md. Wellisch
 and Engines 2–6 remain planned.
+
+## Controls and three-player foundation — October 18
+
+Implemented 300 ms hold-to-Controls navigation, dev-only Copy IL, stable camera
+restoration, cloud-based Accounts, dev-editable ION/system clouds, original system
+photos, multiple-picture collages and full-screen viewing. Explicit dev membership
+supports multiple accounts while preserving Private isolation. Saved chess games
+expire after 30 days since the last saved game change, with daily physical cleanup.
+Wellisch now has tested three-player setup/geometry/reserve metadata, but remains
+disabled for play until historical multiplayer rules and search are complete.
+See ion-controls-retention-release.md for verification and deployment evidence.

@@ -28,7 +28,7 @@
     "/devasa"
   ],
   "font_asset": "/_cdn/static/6e6c9250-599e-4bf4-a9ae-66ff948afb59-InterVariable.woff2",
-  "published_ui_version": "0.16.0",
+  "published_ui_version": "0.17.0",
   "release_status": "published",
   "favicon": "/_api/icon?v=2",
   "tactical_levels": [
@@ -42,5 +42,10 @@
   "in_development_variants": {
     "wellisch": "tested three-player setup and geometric movement; legal play disabled"
   },
-  "saved_game_retention_days": 30
+  "saved_game_retention_days": 30,
+  "saved_game_cleanup": {
+    "schedule": "10 0 * * *",
+    "timezone": "Etc/UTC",
+    "next_verified_run": "2026-10-19T00:10:00Z"
+  }
 }

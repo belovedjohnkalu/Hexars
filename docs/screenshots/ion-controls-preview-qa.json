@@ -1,0 +1,14 @@
+{
+  "date": "2026-10-18T14:59:52.215Z",
+  "checks": [
+    "Guest ION has pictured Controls and Accounts with no composer or context popup",
+    "Sign-in works even with restricted browser storage and dev ION has a composer",
+    "300ms hold opens Controls without native popup or ghost action",
+    "Editing restores the precise camera and neighboring word position",
+    "Copy IL has a clipboard fallback; deletion and Undo retain the viewport",
+    "Multi-file UI uploads a collage and full-screen viewing reaches every photo",
+    "Photo/color tray and composer remain above the simulated keyboard",
+    "No app document scrolling at phone, tablet or desktop sizes"
+  ],
+  "errors": []
+}
