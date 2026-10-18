@@ -110,3 +110,5 @@ Public and Private creation use CloudColorWheel, an authored horizontal RadioGro
 The shared board renderer fits native coordinates around their geometric center, including Shafran’s between-cell center. Rotation, piece transitions, blue cell tokens and inset outlines keep their existing owners. Shafran adds no extra game controls. Private names have no 80-character restriction: compact word-cloud previews preserve the full accessible name; entering a long label opens fitted reading pages above its droplets. Full text is stored unchanged. No new color or motion tokens.
 
 Public creation and permitted edits use the existing eight-color wheel and shared word tokens. At a space root the Home control opens ION; from a deeper droplet it first opens that space root. Human piece previews animate immediately from native move deltas while saving; failed writes restore the authoritative board. Piece movement is 220ms and rotation is 320ms, respecting reduced motion.
+
+Back navigation uses a 32px arrow in a 56×56px tap target on cloud and game pages, anchored in the existing bottom-left thumb zone. Header account/Home controls retain their own sizing.

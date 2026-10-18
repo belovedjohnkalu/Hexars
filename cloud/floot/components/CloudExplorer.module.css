@@ -12,7 +12,8 @@
 .status button { font-size:12px; min-height:32px; }
 .error { display:flex; align-items:center; justify-content:center; gap:8px; color:var(--error); font-size:13px; }
 .bottom { display:flex; align-items:center; gap:8px; width:min(620px,100%); min-height:44px; margin:auto; }
-.back { flex-shrink:0; align-self:flex-end; }
+.back.back { flex-shrink:0; align-self:flex-end; width:56px; height:56px; min-width:56px; padding:0; }
+.back svg { width:32px; height:32px; stroke-width:2.2; }
 .loading { position:absolute; top:10px; left:50%; pointer-events:none; }
 .article { height:100%; min-height:0; overflow:clip; max-width:650px; margin:auto; padding:8px 24px 0; display:flex; flex-direction:column; }
 .ruleText { flex:1; min-height:44px; }
