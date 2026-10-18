@@ -1,0 +1,13 @@
+{
+  "date": "2026-10-18T04:59:07.031Z",
+  "checks": [
+    "Compact gradient has keyboard selection and no preset swatches",
+    "Private gradient color is saved and restored on another signed-in device",
+    "Two concurrent choices of one color become distinct after safe retry",
+    "Public gradient edits appear on another device in real time",
+    "Real server denies Chess color writes by non-owners and hides their picker",
+    "Owner UI fixture includes gradient creation and Chess color editing",
+    "Gradient fits narrow and desktop screens without page scrolling"
+  ],
+  "ownerTest": "UI response fixture; real non-owner denial and pure owner policy tested separately"
+}

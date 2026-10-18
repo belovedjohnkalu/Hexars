@@ -7,6 +7,7 @@ import { channels } from "../helpers/realtimeChannels";
 import { upload, getUrl, getInfo } from "@floot/storage";
 import { db } from "../helpers/db";
 import { cloudTree } from "../helpers/cloudTree";
+import { unusedColor } from "../helpers/cloudColors";
 import { cloudChanges } from "../helpers/cloudChanges";
 import { schema, type CloudNode, type OutputType } from "./cloud_POST.schema";
 import type { Json } from "../helpers/schema";
@@ -53,7 +54,7 @@ export async function handle(request: Request) {
         if (input.version !== row.version) throw new CloudError("Your space changed in another tab. Try again.", 409);
           if (input.parentId !== null && !all.some(n => n.id === input.parentId && !n.destination))
           throw new CloudError("Choose an existing cloud.", 400);
-        const node: CloudNode = { id: input.id, parentId: input.parentId, name: input.name,createdBy:context.userId!,...((input.scope==='private'||input.scope==='public')&&input.color?{color:input.color}:{}) };
+        const node: CloudNode = { id: input.id, parentId: input.parentId, name: input.name,createdBy:context.userId!,color:unusedColor(input.color||'white',all.filter(n=>n.parentId===input.parentId).map(n=>n.color)) };
         if (input.imageType) {
           const filename = "ion/" + row.id + "/" + context.userId + "/" + input.id + "." + extensions[input.imageType];
           const info = await getInfo({ visibility: "private", filename });

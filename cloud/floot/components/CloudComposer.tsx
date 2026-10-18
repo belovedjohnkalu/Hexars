@@ -4,16 +4,16 @@ import type { CloudScope } from "../endpoints/cloud_POST.schema";
 import { z } from "zod";
 import { ArrowUp, ImagePlus, X } from "lucide-react";
 import { CloudColorWheel } from "./CloudColorWheel";
-import { colorValue,type CloudColor } from "../helpers/cloudColors";
+import { colorValue,unusedColor,type CloudColor } from "../helpers/cloudColors";
 import { Button } from "./Button";
 import { Input } from "./Input";
 import { Form, FormItem, FormLabel, FormControl, FormMessage, useForm } from "./Form";
 import styles from "./CloudComposer.module.css";
 type Draft={name:string;file?:File;color?:CloudColor};
 type Submission=Draft&{id:string;parentId:string|null;uploaded?:boolean};
-export function CloudComposer({parentId,busy,disabled,onAdd,draft,onDraft,uploading=false,onCancelUpload,colors=false,scope="private"}:{parentId:string|null;busy:boolean;disabled:boolean;draft:Draft;onDraft:(draft:Draft)=>void;onAdd:(value:Submission)=>Promise<boolean>;uploading?:boolean;onCancelUpload?:()=>void;colors?:boolean;scope?:CloudScope}){
+export function CloudComposer({parentId,busy,disabled,onAdd,draft,onDraft,uploading=false,onCancelUpload,colors=false,scope="private",usedColors=[]}:{parentId:string|null;busy:boolean;disabled:boolean;draft:Draft;onDraft:(draft:Draft)=>void;onAdd:(value:Submission)=>Promise<boolean>;uploading?:boolean;onCancelUpload?:()=>void;colors?:boolean;scope?:CloudScope;usedColors?:(CloudColor|undefined)[]}){
   const form=useForm({defaultValues:{name:draft.name},schema:z.object({name:cloudNames.schema(scope,true)})});
-  const [color,setColor]=useState<CloudColor>(draft.color||'white');
+  const [color,setColor]=useState<CloudColor>(()=>unusedColor(draft.color||'white',usedColors));
   const [file,setFile]=useState<File|undefined>(draft.file),[fileError,setFileError]=useState(""),[preview,setPreview]=useState("");
   const fileInput=useRef<HTMLInputElement>(null),wordInput=useRef<HTMLInputElement>(null),pending=useRef<Submission|null>(null),composing=useRef(false),mounted=useRef(true),submitting=useRef(false);
   useEffect(()=>{mounted.current=true;return()=>{mounted.current=false;};},[]);
@@ -31,19 +31,20 @@ export function CloudComposer({parentId,busy,disabled,onAdd,draft,onDraft,upload
     const fileName=file?.name.replace(/\.[^.]+$/,"").trim()||"";
     const name=values.name.trim()||(scope==='private'?fileName:fileName.slice(0,80));
     if(!name){form.setFieldError("name","Add a word or choose a picture.");wordInput.current?.focus();return;}
-    const item=pending.current??{id:crypto.randomUUID(),parentId,name,file,...(colors?{color}:{})};pending.current=item;
+    const item=pending.current??{id:crypto.randomUUID(),parentId,name,file,...(colors?{color:unusedColor(color,usedColors)}:{})};pending.current=item;
     const shouldFocus=!!wordInput.current&&document.activeElement?.closest("#cloud-composer-form")!==null;
     submitting.current=true;
     try{
       if(await onAdd(item)){
-        pending.current=null;onDraft({name:"",...(colors?{color}:{})});
-        if(mounted.current){form.setValues({name:""});setFile(undefined);setFileError("");if(shouldFocus)wordInput.current?.focus({preventScroll:true});}
+        const nextColor=colors?unusedColor(color,[...usedColors,item.color]):color;
+        pending.current=null;onDraft({name:"",...(colors?{color:nextColor}:{})});
+        if(mounted.current){form.setValues({name:""});setColor(nextColor);setFile(undefined);setFileError("");if(shouldFocus)wordInput.current?.focus({preventScroll:true});}
       }
     }finally{submitting.current=false;}
   });
   return <div className={styles.wrap}>
     <Form {...form}><form id="cloud-composer-form" noValidate onSubmit={submit} className={styles.form} aria-label="Add to this cloud">
-      {colors&&<CloudColorWheel value={color} onChange={setColor} disabled={busy}/>}
+      {colors&&<CloudColorWheel value={color} onChange={setColor} disabled={busy} usedColors={usedColors}/>}
       {file&&<div className={styles.attachment}><img src={preview} width={40} height={40} alt=""/><span title={file.name}>{file.name}</span><Button variant="ghost" size="icon" aria-label="Remove picture" disabled={busy} onClick={()=>{setFile(undefined);setFileError("");wordInput.current?.focus({preventScroll:true});}}><X size={18}/></Button></div>}
       <div className={styles.bar}>
         <Button variant="ghost" size="icon" className={styles.photo} aria-label={uploading?"Stop upload":"Choose a picture"} title={uploading?"Stop upload":"Choose a picture"} disabled={busy&&!uploading} onClick={()=>uploading?onCancelUpload?.():fileInput.current?.click()}>{uploading?<X size={24}/>:<ImagePlus size={24} strokeWidth={1.6}/>}</Button>
