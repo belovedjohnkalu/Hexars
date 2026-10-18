@@ -1,0 +1,20 @@
+{
+  "date": "2026-10-18T18:13:56.889Z",
+  "results": [
+    {
+      "label": "Sign in",
+      "lines": 1,
+      "whiteSpace": "nowrap"
+    },
+    {
+      "label": "Create account",
+      "lines": 1,
+      "whiteSpace": "nowrap"
+    },
+    {
+      "label": "Recover password",
+      "lines": 1,
+      "whiteSpace": "nowrap"
+    }
+  ]
+}
