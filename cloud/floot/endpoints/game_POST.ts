@@ -97,6 +97,11 @@ export async function handle(request: Request) {
     let lastSearch = row.lastSearch as unknown as SearchDiagnostics | null;
     let nextState = row.state;
     let version = row.version;
+    let humanPlayer=row.humanPlayer;
+    if(input.action==='switch_side'){
+      if(row.mode!=='engine')throw new GameError('Side switching requires an engine game.',400);
+      humanPlayer=input.humanPlayer;
+    }
 
     if (
       input.action === "move" &&
@@ -186,7 +191,8 @@ export async function handle(request: Request) {
           moves: moves as unknown as Json,
           lastSearch: lastSearch as unknown as Json,
           version: row.version + 1,
-          updatedAt: new Date(),
+          updatedAt: input.action==='switch_side'?row.updatedAt:new Date(),
+          humanPlayer,
         })
         .where("id", "=", row.id)
         .where("version", "=", row.version)
@@ -203,7 +209,7 @@ export async function handle(request: Request) {
       version,
       mode: row.mode,
       difficulty:row.difficulty,
-      humanPlayer: row.humanPlayer,
+      humanPlayer,
       engine: native.engine,
       execution: "cloud",
       game: native.game,

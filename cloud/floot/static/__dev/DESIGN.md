@@ -126,3 +126,6 @@ CloudCanvas and cloudLayout reserve the full measured label on one line, includi
 
 ## Wellisch
 All six variants use the shared flat blue board, word-cloud navigation and existing result/promotion sheets. Wellisch adds a third army in the existing word-amber color, with a dark outline matching White's outline; Black retains a light outline. No new visual tokens. Three-player turns rotate by 120 degrees after the movement completes, keeping pieces upright. A small high-contrast pawn direction mark and accessible original-army label remain meaningful after army takeover. Rules retain separate paragraph clouds and opened diagrams. The shared spatial viewport never paints a full-screen focus rectangle; individual actionable controls retain focus feedback.
+
+## Board gestures and Boards
+Boards (IL01) places its six native position pictures and whole captions in a square spatial arrangement, using the existing Rules layout owner. Vertical board swipes change perspective or saved engine-side assignment; horizontal swipes retain history. The existing board/piece rotation timing, blue palette, black surfaces, focus feedback and reduced-motion behavior remain the owners. No new visible buttons, scroll containers or visual tokens.

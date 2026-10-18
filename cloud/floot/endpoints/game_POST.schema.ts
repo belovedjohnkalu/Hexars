@@ -32,6 +32,7 @@ export const schema = z.discriminatedUnion("action", [
   z.object({ action: z.literal("move"), ...mutation, move }).strict(),
   z.object({ action: z.literal("engine"), ...mutation }).strict(),
   z.object({ action: z.literal("undo"), ...mutation }).strict(),
+  z.object({ action: z.literal("switch_side"), ...mutation, humanPlayer:z.union([z.literal(0),z.literal(1)]) }).strict(),
 ]);
 export type InputType = z.infer<typeof schema>;
 export type Hex = { q: number; r: number };

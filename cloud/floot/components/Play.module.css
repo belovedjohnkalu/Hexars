@@ -8,7 +8,7 @@
 .words { position:absolute; inset:0; pointer-events:none; }
 .word.word { position:absolute; transform:translate(-50%,-50%); pointer-events:auto; font-size:clamp(18px,2.4vw,24px); font-weight:450; padding:8px; min-height:44px; height:auto; background:transparent; box-shadow:none; letter-spacing:-.035em; }
 .word.secondaryWord { font-size:15px; color:var(--muted-foreground); white-space:nowrap; }
-.board { position:absolute; touch-action:pan-y; }
+.board { position:absolute; touch-action:none; }
 .loading { width:100%; aspect-ratio:484/548; display:grid; place-items:center; }
 .footer { flex-shrink:0; height:calc(90px + env(safe-area-inset-bottom)); padding:4px 16px; }
 .footer button,.footer a { color:var(--muted-foreground); border-radius:var(--radius-full); width:56px; height:56px; min-width:56px; padding:0; }

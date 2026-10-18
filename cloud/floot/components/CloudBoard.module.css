@@ -1,4 +1,4 @@
-.board { display: block; width: 100%; margin: auto; overflow: visible; touch-action: manipulation; }
+.board { display: block; width: 100%; margin: auto; overflow: visible; touch-action: none; }
 .board, .board * { -webkit-tap-highlight-color: transparent; -webkit-user-select: none; user-select: none; }
 .canvas { transform-origin: 300px 300px; transition: transform 320ms cubic-bezier(.22,1,.36,1); }
 .cell, .cell:focus, .cell:focus-visible { outline: none !important; box-shadow: none !important; }

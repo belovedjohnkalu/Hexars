@@ -1,0 +1,18 @@
+{
+  "date": "2026-10-18T21:36:10.825Z",
+  "square": {
+    "count": 6,
+    "width": 503.57456970214844,
+    "height": 555.1320419311523
+  },
+  "checks": [
+    "IL01 Boards uses a square six-preview arrangement",
+    "Both vertical directions flip Pass and Play without moving a piece or resetting the game",
+    "Horizontal swipes retain read-only move-history navigation",
+    "Repeated vertical swipes persist side changes and Tactical alternates White/Black on the same game",
+    "A second swipe during Tactical search queues safely and restores the requested side",
+    "F provides a keyboard alternative to the vertical gesture",
+    "A stale side-switch request cannot overwrite the saved game"
+  ],
+  "appErrors": []
+}

@@ -21,6 +21,8 @@ export function useCloudGame(variant: VariantId, defaultMode: "engine" | "two_pl
   const requestSequence = useRef(0);
   const controller = useRef<AbortController | null>(null);
   const engineKey = useRef("");
+  const [sideTarget,setSideTarget]=useState<0|1|null>(null);
+  const sideGoal=useRef<0|1|null>(null);
 
   const accept = useCallback((result: OutputType) => {
     setPendingMove(null);
@@ -98,6 +100,7 @@ export function useCloudGame(variant: VariantId, defaultMode: "engine" | "two_pl
   );
 
   useEffect(() => {
+    sideGoal.current=null;setSideTarget(null);
     const timer = setTimeout(() => {
       const linked = gameSessions.fromHash();
       const saved = linked || gameSessions.stored(variant, defaultMode);
@@ -121,6 +124,7 @@ export function useCloudGame(variant: VariantId, defaultMode: "engine" | "two_pl
       if (!linked || linked.gameId === credentials.current?.gameId && linked.accessToken === credentials.current.accessToken) return;
       engineKey.current = "";
       credentials.current = linked;
+      sideGoal.current=null;setSideTarget(null);
       void perform({ action: "get", ...linked });
     };
     window.addEventListener("hashchange", openLinkedGame);
@@ -131,12 +135,20 @@ export function useCloudGame(variant: VariantId, defaultMode: "engine" | "two_pl
     };
   }, [perform]);
 
+  useEffect(()=>{
+    if(!data||busy||error||sideTarget===null)return;
+    if(data.mode!=='engine'||data.humanPlayer===sideTarget){sideGoal.current=null;setSideTarget(null);return;}
+    engineKey.current='';
+    void perform({action:'switch_side',gameId:data.gameId,accessToken:data.accessToken,version:data.version,humanPlayer:sideTarget});
+  },[data,busy,error,sideTarget,perform]);
+
   useEffect(() => {
     if (
       !data ||
       data.game.variant !== variant ||
       busy ||
       error ||
+      sideGoal.current!==null ||
       data.mode !== "engine" ||
       (!gameSessions.fromHash()&&(defaultMode!=="engine" || data.difficulty!==difficulty)) ||
       data.game.result.status !== "ongoing" ||
@@ -198,7 +210,10 @@ export function useCloudGame(variant: VariantId, defaultMode: "engine" | "two_pl
     busy,
     error,
     missing,
+    switchingSide:sideTarget!==null,
+    switchSide:()=>{const session=current.current;if(!session||session.mode!=='engine')return;const target=(sideGoal.current??session.humanPlayer)===0?1:0;sideGoal.current=target;setSideTarget(target);},
     newGame: (mode: "engine" | "two_players", humanPlayer: 0 | 1, variant: VariantId) => {
+      sideGoal.current=null;setSideTarget(null);
       engineKey.current = "";
       return perform({ action: "new", mode, humanPlayer, variant,difficulty });
     },

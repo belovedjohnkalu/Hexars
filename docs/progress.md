@@ -277,3 +277,10 @@ Pass and Play, both Tactical replies, full-round Undo and 22 Rules clouds.
 Native, protocol, saved-state compatibility and browser checks passed. Published
 as UI 0.18.0 / Tactical 0.9.0. See ion-wellisch-release.md for evidence and rule
 source limits. Engines 2–6 remain future independent executables.
+
+## Board swipes and square Boards — October 18
+
+Vertical swipes flip Pass and Play or switch Tactical sides on the same saved
+game. Busy side changes queue; horizontal history remains available. IL01 Boards
+now uses a square arrangement. Focused tests, hosted typecheck and browser
+verification passed. Published at ion.floot.app; see ion-board-swipes-release.md.
