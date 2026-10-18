@@ -1,0 +1,13 @@
+{
+  "date": "2026-10-18T05:49:13.999Z",
+  "checks": [
+    "private gradient appears only during entry, retains drafts/color and never shifts the composer",
+    "public gradient appears only during entry, retains drafts/color and never shifts the composer",
+    "Composer stays directly above a simulated mobile keyboard",
+    "Owner fixture shows labels beside words and picture captions",
+    "Losing owner status hides labels even if a stale payload contains them"
+  ],
+  "errors": [],
+  "ownerFixture": true,
+  "physicalKeyboardTest": false
+}

@@ -28,8 +28,8 @@
     "/devasa"
   ],
   "font_asset": "/_cdn/static/6e6c9250-599e-4bf4-a9ae-66ff948afb59-InterVariable.woff2",
-  "published_ui_version": "0.15.0",
-  "release_status": "verification",
+  "published_ui_version": "0.16.0",
+  "release_status": "published",
   "favicon": "/_api/icon?v=2",
   "tactical_levels": [
     "Pre-Beginner",

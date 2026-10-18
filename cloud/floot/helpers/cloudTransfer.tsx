@@ -1,4 +1,5 @@
 import { assertCloudCapacity } from "./cloudCapacity";
+import { cloudIdentifierStore } from "./cloudIdentifierStore";
 import { transferNodeIds } from "./cloudIdentifiers";
 import { randomUUID } from "node:crypto";
 import { db } from "./db";
@@ -12,6 +13,7 @@ export async function cloudTransfer(request:Request,raw:Extract<InputType,{actio
  if(!['public','private'].includes(input.scope)||input.scope===input.targetScope)cloudPolicy.fail('Choose the other space.',400);
  const source=await cloudContext(request,input),target=await cloudContext(request,{...input,scope:input.targetScope,action:'load'});
  if(!source.userId||!source.row||!target.row)cloudPolicy.fail('Sign in to transfer a cloud.',401);
+ if(source.owner||input.scope==='public')await cloudIdentifierStore([...cloudTree.forScope(input.scope),...(source.row!.nodes as unknown as CloudNode[])]);
  const uid=source.userId!,sourceId=source.row!.id,targetId=target.row!.id;
  await db.transaction().execute(async tx=>{
   await tx.selectFrom('users').select('id').where('id','=',uid).forUpdate().executeTakeFirstOrThrow();
@@ -33,5 +35,6 @@ export async function cloudTransfer(request:Request,raw:Extract<InputType,{actio
   if(input.mode==='move')await tx.updateTable('ionWorkspaces').set({nodes:stored.filter(n=>!ids.has(n.id)) as unknown as Json,version:a.version+1,updatedAt:new Date()}).where('id','=',a.id).execute();
   await tx.insertInto('ionCloudTransfers').values({operationId:input.operationId,userId:uid,sourceWorkspace:sourceId,targetWorkspace:targetId,sourceNode:input.id,targetParent:input.targetParent,kind:input.mode}).execute();
  });
+ if(target.owner||input.targetScope==='public'){const latest=await db.selectFrom('ionWorkspaces').select('nodes').where('id','=',targetId).executeTakeFirstOrThrow();await cloudIdentifierStore([...cloudTree.forScope(input.targetScope),...(latest.nodes as unknown as CloudNode[])]);}
  return {sourceId,targetId,userId:uid};
 }

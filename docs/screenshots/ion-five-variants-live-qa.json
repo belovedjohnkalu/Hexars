@@ -1,0 +1,31 @@
+{
+  "date": "2026-10-18T05:49:06.138Z",
+  "checks": [
+    "Five native-authoritative starting boards and piece counts",
+    "Brusky preview fits above its caption",
+    "Brusky first moves, deselection, bright history endpoints and pass-and-play rotation",
+    "Brusky swipe review and undo preserve the live game",
+    "Brusky has 23 separate Rules clouds with pictures only inside paragraphs",
+    "Brusky cloud castling applies both pieces and undo restores rights",
+    "Brusky empty en-passant destination is a capture and removes the correct pawn",
+    "Brusky promotion saves the chosen piece",
+    "Brusky mate and equal-score stalemate open the correct result sheets",
+    "Brusky difficulty selection returns to the variant and Tactical replies legally",
+    "Brusky separate Pass and Play slot and confirmed reset",
+    "Brusky fits narrow phone, landscape and desktop without scrolling",
+    "De Vasa preview fits above its caption",
+    "De Vasa first moves, deselection, bright history endpoints and pass-and-play rotation",
+    "De Vasa swipe review and undo preserve the live game",
+    "De Vasa has 23 separate Rules clouds with pictures only inside paragraphs",
+    "De Vasa cloud castling applies both pieces and undo restores rights",
+    "De Vasa empty en-passant destination is a capture and removes the correct pawn",
+    "De Vasa promotion saves the chosen piece",
+    "De Vasa mate and equal-score stalemate open the correct result sheets",
+    "De Vasa difficulty selection returns to the variant and Tactical replies legally",
+    "De Vasa separate Pass and Play slot and confirmed reset",
+    "De Vasa fits narrow phone, landscape and desktop without scrolling",
+    "New game surface passes automated accessibility and has no runtime errors"
+  ],
+  "violations": [],
+  "errors": []
+}

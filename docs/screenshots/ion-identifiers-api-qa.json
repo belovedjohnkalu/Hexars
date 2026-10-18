@@ -1,0 +1,16 @@
+{
+  "date": "2026-10-18",
+  "passed": true,
+  "checks": [
+    "persistent creation label",
+    "soft deletion retains registry",
+    "new arrival does not reuse deleted number",
+    "nonowner signed-in responses omit identifier fields",
+    "signed-out responses omit identifier fields",
+    "cross-space move keeps ID and label",
+    "moved public label hidden in nonowner Private",
+    "copy receives fresh ID and immediate IL",
+    "copy preserves Private source"
+  ],
+  "cleanup": "Temporary QA account, nodes and counters removed; real identifiers preserved"
+}

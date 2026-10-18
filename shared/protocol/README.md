@@ -45,3 +45,13 @@ At `?foundation`, the loopback WebSocket manager accepts versioned JSON frames c
 It serializes requests, preserves per-client response correlation, caps payloads/queues, accepts only localhost/127.0.0.1 Vite origins, and reports native exit/timeout. It must remain on loopback. Its protocol and tests are retained to support future local diagnostics without changing cloud gameplay.
 
 McCooey pawn `hasMoved` fields are required on loaded positions; effective first-move rights and the variant domain affect repetition keys. Existing Gliński hashes retain compatibility with earlier saved histories.
+
+
+Tactical 0.8.0 supports `glinski`, `mccooey`, `shafran`, `brusky` and `devasa`.
+Native board responses include `orientation`: `flat` for the first three,
+`pointy` for Brusky/De Vasa. Renderers use this alongside native coordinates;
+it does not grant frontend rule authority. King/rook/pawn `hasMoved` is required
+when loading Shafran, Brusky or De Vasa positions. Initial pawn capture and
+castling rights participate in repetition keys. Version 1 and legacy saved-state
+hashes remain compatible. `changes` also describes both pieces during castling
+and the removed en-passant victim in either new pawn direction.

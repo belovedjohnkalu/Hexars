@@ -1,0 +1,7 @@
+import { gameCloudLayout } from './gameCloudLayout';
+describe('Responsive game cloud',()=>{
+ it('keeps short landscape boards and action targets within the visible world',()=>{
+  for(const [width,height] of [[852,235],[568,162],[1280,380]])for(const aspect of [1.735,1.49,.884]){const r=gameCloudLayout(width,height,aspect);expect(r.worldHeight).toBe(height);expect(r.boardY).toBeGreaterThanOrEqual(0);expect(r.boardY+r.boardHeight).toBeLessThanOrEqual(height);for(const a of Object.values(r.actions)){expect(a.top-22).toBeGreaterThanOrEqual(0);expect(a.top+22).toBeLessThanOrEqual(height);expect(a.left).toBeGreaterThan(70);expect(a.left).toBeLessThan(width-70);}}
+ });
+ it('retains the large portrait board and surrounding words',()=>{const r=gameCloudLayout(393,620,1.735);expect(r.boardWidth).toBe(369);expect(r.actions.variants.top).toBeLessThan(r.boardY);expect(r.actions.reset.top).toBeGreaterThan(r.boardY+r.boardHeight);});
+});

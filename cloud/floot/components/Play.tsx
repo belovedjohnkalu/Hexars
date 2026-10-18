@@ -15,6 +15,7 @@ import { useBoardFacing } from "../helpers/useBoardFacing";
 import { useInstallApp } from "../helpers/useInstallApp";
 import { postGame, type VariantId, type Hex, type ChessMove, type GameView } from "../endpoints/game_POST.schema";
 import { previewMove } from "../helpers/previewMove";
+import { gameCloudLayout } from "../helpers/gameCloudLayout";
 import { boardLayout } from "../helpers/boardLayout";
 import { chessVariants } from "../helpers/chessVariants";
 import styles from "./Play.module.css";
@@ -27,7 +28,7 @@ export function Play({variant}:{variant:VariantId}){
  const cloud=useCloudGame(variant,mode,difficulty),data=cloud.data,game=data?.game;
  const [selected,setSelected]=useState<Hex|null>(null),[promotions,setPromotions]=useState<ChessMove[]>([]),[reset,setReset]=useState(false),[resultOpen,setResultOpen]=useState(false);
  const [review,setReview]=useState<{ply:number;game:GameView}|null>(null),[reviewBusy,setReviewBusy]=useState(false),[reviewError,setReviewError]=useState('');
- const [size,setSize]=useState({width:390,height:650}),area=useRef<HTMLDivElement>(null),heading=useRef<HTMLHeadingElement>(null),keep=useRef<HTMLButtonElement>(null),endKey=useRef('');
+ const [size,setSize]=useState({width:390,height:650}),[measured,setMeasured]=useState(false),area=useRef<HTMLDivElement>(null),heading=useRef<HTMLHeadingElement>(null),keep=useRef<HTMLButtonElement>(null),endKey=useRef('');
  const desired=useRef<number|null>(null),sequence=useRef(0),reviewAbort=useRef<AbortController|null>(null),swipe=useRef<{x:number;y:number;dragged:boolean}|null>(null),suppressClick=useRef(false);
  const shown=review?.game||(game?previewMove(game,cloud.pendingMove):undefined),ended=!!game&&game.result.status!=='ongoing',thinking=!!data&&data.mode==='engine'&&game?.activePlayer!==data.humanPlayer&&!ended;
  const facing=useBoardFacing(data?.gameId,game?.ply,data?.mode==='two_players'?game?.activePlayer===1:data?.humanPlayer===1);
@@ -36,7 +37,7 @@ export function Play({variant}:{variant:VariantId}){
  const candidates=game?.legalMoves.filter(m=>selected&&key(m.from)===key(selected))||[];
  const canUndo=selectedGame&&!!data?.moves.length&&!cloud.busy&&!facing.turning&&!review&&(data.mode==='two_players'||data.moves.some(m=>m.player===data.humanPlayer));
  const name=chessVariants.name(variant)+'’s Variant';
- useEffect(()=>{const el=area.current;if(!el)return;const observer=new ResizeObserver(()=>setSize({width:el.clientWidth,height:Math.max(420,el.clientHeight)}));observer.observe(el);return()=>observer.disconnect();},[]);
+ useEffect(()=>{const el=area.current;if(!el)return;const observer=new ResizeObserver(()=>{setSize({width:el.clientWidth,height:Math.max(1,el.clientHeight)});setMeasured(true);});observer.observe(el);return()=>observer.disconnect();},[]);
  useEffect(()=>{heading.current?.focus({preventScroll:true});},[variant]);
  useEffect(()=>{setSelected(null);setPromotions([]);},[game?.stateId]);
  useEffect(()=>{setSelected(null);setPromotions([]);setReset(false);setResultOpen(false);endKey.current='';setReview(null);desired.current=null;reviewAbort.current?.abort();setReviewBusy(false);setReviewError('');},[data?.gameId]);
@@ -56,19 +57,19 @@ export function Play({variant}:{variant:VariantId}){
  function up(e:PointerEvent<HTMLDivElement>){const start=swipe.current;swipe.current=null;if(start?.dragged){void history((desired.current??game?.ply??0)+(e.clientX>start.x?-1:1));}if(e.currentTarget.hasPointerCapture(e.pointerId))e.currentTarget.releasePointerCapture(e.pointerId);}
  async function restart(){if(await cloud.newGame(data?.mode==='two_players'?'two_players':'engine',(data?.humanPlayer===1?1:0),variant)){setReset(false);setResultOpen(false);setReview(null);}}
  const layout=boardLayout(shown?.board.cells??[],shown?.board.orientation);
- const boardWidth=Math.min(size.width-24,540),boardHeight=boardWidth*layout.height/layout.width,worldWidth=Math.max(size.width,boardWidth+24),worldHeight=Math.max(size.height,boardHeight+160),boardY=(worldHeight-boardHeight)/2;
+ const {boardWidth,worldWidth,worldHeight,boardY,actions}=gameCloudLayout(size.width,size.height,layout.width/layout.height);
  const status=review?`Move ${review.ply} of ${game?.ply}`:!game?'Opening…':ended?'Game over':cloud.pendingMove?'Moving…':thinking?'Thinking…':game.check?'Check':data?.mode==='two_players'?game.activePlayer===0?'White’s turn':'Black’s turn':'Your turn';
  const outcome=game?gameOutcome(game.result,data?.mode||'two_players',data?.humanPlayer??0):{title:'Draw',score:'½ – ½',detail:''};
  return <div className={styles.app}><AppHead title={name+' · Hexagonal Chess'}/>
  <header className={styles.header}><h1 ref={heading} tabIndex={-1}>{name}</h1><div className={styles.status} role="status" aria-live="polite">{status}{thinking&&<Spinner size="sm" aria-label="Tactical is thinking"/>}</div></header>
- <main ref={area} className={styles.space} aria-label={name+' game'}><SpatialViewport width={worldWidth} height={worldHeight} viewKey={'game-'+variant} label="Board space">
+ <main ref={area} className={styles.space} aria-label={name+' game'}><SpatialViewport width={worldWidth} height={worldHeight} viewKey={'game-'+variant} label="Board space" ready={measured&&!!shown} refitKey={size.width+":"+size.height}>
  <nav className={styles.words} aria-label="Game actions" style={{width:worldWidth,height:worldHeight}}>
- <Button asChild variant="ghost" className={styles.word} style={{left:'20%',top:boardY-42,color:'var(--word-cyan)'}}><Link to="/?cloud=boards">Variants</Link></Button>
- <Button asChild variant="ghost" className={styles.word} style={{left:'72%',top:boardY-42,color:'var(--word-amber)'}}><Link to={'/?cloud=rules&return='+variant+'&mode='+(data?.mode==='two_players'?'friend':'engine')+'&level='+(data?.difficulty??difficulty)}>Rules</Link></Button>
- <Button asChild variant="ghost" className={styles.word} style={{left:'28%',top:boardY+boardHeight+34,color:'var(--word-coral)'}}><Link to={'/?cloud=engines&return='+variant+'&mode='+(data?.mode==='two_players'?'friend':'engine')+'&level='+(data?.difficulty??difficulty)}>Engines</Link></Button>
- <Button asChild variant="ghost" className={styles.word} style={{left:'72%',top:boardY+boardHeight+34,color:'var(--word-mint)'}}><Link to={'/'+variant+'?mode=friend'} aria-current={data?.mode==='two_players'?'page':undefined} onClick={()=>{try{localStorage.removeItem('ion.engine');}catch{}}}>Pass and Play</Link></Button>
- <Button variant="ghost" className={styles.word+' '+styles.secondaryWord} style={{left:'20%',top:boardY+boardHeight+76}} disabled={cloud.busy} onClick={()=>game?.ply?setReset(true):void restart()}>Board Reset</Button>
- <Button variant="ghost" className={styles.word+' '+styles.secondaryWord} style={{left:'78%',top:boardY+boardHeight+76}} disabled={!canUndo} onClick={()=>void cloud.undo()}>Undo</Button>
+ <Button asChild variant="ghost" className={styles.word} style={{...actions.variants,color:'var(--word-cyan)'}}><Link to="/?cloud=boards">Variants</Link></Button>
+ <Button asChild variant="ghost" className={styles.word} style={{...actions.rules,color:'var(--word-amber)'}}><Link to={'/?cloud=rules&return='+variant+'&mode='+(data?.mode==='two_players'?'friend':'engine')+'&level='+(data?.difficulty??difficulty)}>Rules</Link></Button>
+ <Button asChild variant="ghost" className={styles.word} style={{...actions.engines,color:'var(--word-coral)'}}><Link to={'/?cloud=engines&return='+variant+'&mode='+(data?.mode==='two_players'?'friend':'engine')+'&level='+(data?.difficulty??difficulty)}>Engines</Link></Button>
+ <Button asChild variant="ghost" className={styles.word} style={{...actions.friend,color:'var(--word-mint)'}}><Link to={'/'+variant+'?mode=friend'} aria-current={data?.mode==='two_players'?'page':undefined} onClick={()=>{try{localStorage.removeItem('ion.engine');}catch{}}}>Pass and Play</Link></Button>
+ <Button variant="ghost" className={styles.word+' '+styles.secondaryWord} style={{...actions.reset}} disabled={cloud.busy} onClick={()=>game?.ply?setReset(true):void restart()}>Board Reset</Button>
+ <Button variant="ghost" className={styles.word+' '+styles.secondaryWord} style={{...actions.undo}} disabled={!canUndo} onClick={()=>void cloud.undo()}>Undo</Button>
  </nav>
  <div data-no-pan className={styles.board} data-pending-move={!!cloud.pendingMove} style={{width:boardWidth,left:(worldWidth-boardWidth)/2,top:boardY}} onPointerDown={down} onPointerMove={move} onPointerUp={up} onPointerCancel={()=>{swipe.current=null;}} onClickCapture={e=>{if(suppressClick.current){e.preventDefault();e.stopPropagation();suppressClick.current=false;}}}>
  {shown?<CloudBoard key={data?.gameId} game={shown} selected={review?null:selected} onCell={choose} flipped={facing.flipped} coordinates={false} theme="neutral" lastMove={cloud.pendingMove??data?.moves[(review?.ply??game?.ply??0)-1]} disabled={!canPlay}/>:<div className={styles.loading}><Spinner aria-label="Opening board"/></div>}
