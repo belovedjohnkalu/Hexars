@@ -8,9 +8,10 @@ const DialogOverlay=React.forwardRef<React.ElementRef<typeof DialogPrimitive.Ove
 DialogOverlay.displayName="DialogOverlay";
 interface DialogContentProps extends React.ComponentPropsWithoutRef<typeof DialogPrimitive.Content>{
   closeDisabled?:boolean;
+  fullScreen?:boolean;
   container?:React.ComponentPropsWithoutRef<typeof DialogPrimitive.Portal>["container"];
 }
-const DialogContent=React.forwardRef<React.ElementRef<typeof DialogPrimitive.Content>,DialogContentProps>(({className,children,container,closeDisabled=false,style,...props},ref)=>{
+const DialogContent=React.forwardRef<React.ElementRef<typeof DialogPrimitive.Content>,DialogContentProps>(({className,children,container,closeDisabled=false,fullScreen=false,style,...props},ref)=>{
   const [viewport,setViewport]=React.useState<{height:number;center:number}|null>(null);
   React.useEffect(()=>{
     if(container)return;
@@ -18,7 +19,7 @@ const DialogContent=React.forwardRef<React.ElementRef<typeof DialogPrimitive.Con
     update();visual?.addEventListener("resize",update);visual?.addEventListener("scroll",update);window.addEventListener("resize",update);
     return()=>{visual?.removeEventListener("resize",update);visual?.removeEventListener("scroll",update);window.removeEventListener("resize",update);};
   },[container]);
-  return <DialogPortal container={container}><DialogOverlay/><DialogPrimitive.Content ref={ref} className={styles.content+" "+(className||"")} style={{...(viewport&&!container?{maxHeight:Math.max(160,viewport.height-32)+"px",top:viewport.center+"px"}:{}),...style}} {...props}>
+  return <DialogPortal container={container}><DialogOverlay/><DialogPrimitive.Content ref={ref} className={styles.content+" "+(className||"")} style={{...(viewport&&!container?(fullScreen?{top:viewport.center-viewport.height/2+"px",height:viewport.height+"px",maxHeight:viewport.height+"px",transform:"none"}:{maxHeight:Math.max(160,viewport.height-32)+"px",top:viewport.center+"px"}):{}),...style}} {...props}>
     {children}<DialogPrimitive.Close disabled={closeDisabled} className={styles.close}><X className={styles.closeIcon}/><span className={styles.screenReaderText}>Close</span></DialogPrimitive.Close>
   </DialogPrimitive.Content></DialogPortal>;
 });

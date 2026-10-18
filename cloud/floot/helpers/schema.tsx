@@ -42,6 +42,11 @@ export interface HexchessGames {
   version: Generated<number>;
 }
 
+export interface IonAccountSpaces {
+  userId: number;
+  workspaceId: string;
+}
+
 export interface IonCloudAccounts {
   userId: number;
   workspaceId: string;
@@ -68,6 +73,11 @@ export interface IonCloudTransfers {
   sourceWorkspace: string;
   targetParent: string;
   targetWorkspace: string;
+  userId: number;
+}
+
+export interface IonDevAccounts {
+  grantedAt: Generated<Timestamp>;
   userId: number;
 }
 
@@ -142,10 +152,12 @@ export interface Users {
 
 export interface DB {
   hexchessGames: HexchessGames;
+  ionAccountSpaces: IonAccountSpaces;
   ionCloudAccounts: IonCloudAccounts;
   ionCloudIdentifierCounters: IonCloudIdentifierCounters;
   ionCloudIdentifiers: IonCloudIdentifiers;
   ionCloudTransfers: IonCloudTransfers;
+  ionDevAccounts: IonDevAccounts;
   ionDeviceAccounts: IonDeviceAccounts;
   ionRememberedDevices: IonRememberedDevices;
   ionSharedSpaces: IonSharedSpaces;

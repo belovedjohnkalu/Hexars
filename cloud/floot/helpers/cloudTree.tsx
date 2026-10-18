@@ -1,6 +1,10 @@
+import { systemClouds } from "./systemClouds";
 import { horizontalRuleClouds } from "./horizontalRules";
 import type { CloudNode,CloudScope } from "../endpoints/cloud_POST.schema";
 const roots:CloudNode[]=[{"id": "hexagonal-chess", "parentId": null, "name": "Hexagonal Chess", "imageUrl": "/_cdn/static/9522e791-e7fa-41d6-867c-2d4013eb3982-hexars-dark-512.png", "color": "blue"}, {"id": "public", "parentId": null, "name": "Public", "color": "mint"}, {"id": "private", "parentId": null, "name": "Private", "color": "lavender"}];
+roots.forEach((n,i)=>{n.parentId='ion';n.destination='space';n.space=(['chess','public','private'] as const)[i];});
+roots.push(...systemClouds.filter(n=>n.parentId==='ion'));
+const homeSeed=[systemClouds[0],...roots,...systemClouds.filter(n=>n.parentId==='controls')];
 const seed:CloudNode[]=[
 {"id": "hexagonal-chess", "parentId": null, "name": "Hexagonal Chess", "imageUrl": "/_cdn/static/9522e791-e7fa-41d6-867c-2d4013eb3982-hexars-dark-512.png", "color": "blue"},
 {"id": "engines", "parentId": "hexagonal-chess", "name": "Engines", "color": "coral"},
@@ -91,4 +95,4 @@ function sizes(nodes:CloudNode[],parentId:string|null){
  const siblings=nodes.filter(n=>n.parentId===parentId),values=siblings.map(n=>n.sizeCount??counts.get(n.id)??0),min=Math.min(...values),max=Math.max(...values);
  return siblings.map((node,i)=>({...node,count:values[i],percent:max===min?50:(values[i]-min)/(max-min)*100}));
 }
-export const cloudTree={roots,seed,forScope(scope:CloudScope):CloudNode[]{return scope==='chess'?seed:scope==='public'?[roots[1]]:scope==='private'?[roots[2]]:roots;},resolve(nodes:CloudNode[]){return [...new Map([...seed,...nodes].map(n=>[n.id,n])).values()];},descendants,sizes,path(nodes:CloudNode[],id:string|null){const byId=new Map(nodes.map(n=>[n.id,n])),result:CloudNode[]=[],seen=new Set<string>();let current=id?byId.get(id):undefined;while(current&&!seen.has(current.id)){seen.add(current.id);result.unshift(current);current=current.parentId?byId.get(current.parentId):undefined;}return result;}};
+export const cloudTree={roots,seed,forScope(scope:CloudScope):CloudNode[]{return scope==='chess'?seed:scope==='public'?[{...roots[1],parentId:null,destination:undefined}]:scope==='private'?[{...roots[2],parentId:null,destination:undefined}]:scope==='accounts'?[{...roots[4],parentId:null,destination:undefined}]:homeSeed;},resolve(nodes:CloudNode[]){return [...new Map([...seed,...nodes].map(n=>[n.id,n])).values()];},descendants,sizes,path(nodes:CloudNode[],id:string|null){const byId=new Map(nodes.map(n=>[n.id,n])),result:CloudNode[]=[],seen=new Set<string>();let current=id?byId.get(id):undefined;while(current&&!seen.has(current.id)){seen.add(current.id);result.unshift(current);current=current.parentId?byId.get(current.parentId):undefined;}return result;}};

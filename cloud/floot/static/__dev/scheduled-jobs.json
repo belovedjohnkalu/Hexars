@@ -1,0 +1,3 @@
+{
+ "expireSavedGames":{"schedule":"10 0 * * *","enabled":true,"timezone":"Etc/UTC"}
+}

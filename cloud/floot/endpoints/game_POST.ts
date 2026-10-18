@@ -1,5 +1,6 @@
 import { createHash, randomBytes, randomUUID } from "node:crypto";
 import superjson from "superjson";
+import { savedGameCutoff } from "../helpers/gameRetention";
 import { db } from "../helpers/db";
 import { runNativeEngine } from "../helpers/runNativeEngine";
 import type { Json } from "../helpers/schema";
@@ -83,9 +84,12 @@ export async function handle(request: Request) {
       .selectAll()
       .where("id", "=", input.gameId)
       .where("accessTokenHash", "=", tokenHash(input.accessToken))
+      .where("updatedAt", ">", savedGameCutoff())
       .executeTakeFirst();
-    if (!row)
-      throw new GameError("Game not found. Start a new game or use its saved game link.", 404);
+    if (!row){
+      await db.deleteFrom('hexchessGames').where('id','=',input.gameId).where('accessTokenHash','=',tokenHash(input.accessToken)).where('updatedAt','<=',savedGameCutoff()).execute();
+      throw new GameError("This saved game is no longer available. Start a new game.",404);
+    }
     if (input.action !== "get" && input.action !== "review" && input.version !== row.version)
       throw new GameError("This game changed on another device. Refresh to continue.", 409);
     let moves = (Array.isArray(row.moves) ? row.moves : []) as unknown as MoveRecord[];

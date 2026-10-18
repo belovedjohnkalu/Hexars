@@ -23,3 +23,6 @@
 @media(prefers-reduced-motion:reduce) { .canvas,.node { transition:none; animation:none; } }
 
 .canvas[data-home=true] .node { transition:color 180ms ease,opacity 180ms ease; }
+.node.node { background:transparent; border:0; box-shadow:none; white-space:normal; height:auto; }
+.node[data-holding=true] { opacity:.72; text-decoration:underline; text-underline-offset:6px; }
+.node::selection,.node *::selection { background:transparent; }

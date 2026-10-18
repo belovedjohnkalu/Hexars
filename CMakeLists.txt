@@ -53,3 +53,12 @@ if(BUILD_TESTING)
   target_link_libraries(horizontal-rules-tests PRIVATE hexchess_rules)
   add_test(NAME horizontal-rules COMMAND horizontal-rules-tests)
 endif()
+
+# Experimental three-player foundation stays separate from the live engine.
+add_library(hexchess_wellisch_foundation shared/variants/wellisch.cpp)
+target_link_libraries(hexchess_wellisch_foundation PUBLIC hexchess_rules)
+if(BUILD_TESTING)
+  add_executable(wellisch-foundation-tests tests/rules/wellisch.cpp)
+  target_link_libraries(wellisch-foundation-tests PRIVATE hexchess_wellisch_foundation)
+  add_test(NAME wellisch-foundation COMMAND wellisch-foundation-tests)
+endif()

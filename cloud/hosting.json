@@ -17,7 +17,7 @@
     "brusky",
     "devasa"
   ],
-  "ui_version": "0.16.0",
+  "ui_version": "0.17.0",
   "routes": [
     "/",
     "/login",
@@ -39,5 +39,8 @@
     "Hard",
     "Expert"
   ],
-  "in_development_variants": {}
+  "in_development_variants": {
+    "wellisch": "tested three-player setup and geometric movement; legal play disabled"
+  },
+  "saved_game_retention_days": 30
 }

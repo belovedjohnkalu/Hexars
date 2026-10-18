@@ -5,16 +5,16 @@ pannable, zoomable cloud of words and pictures. Open **Hexagonal Chess**, then
 **Boards** to choose Gliński, McCooey, Shafran, Brusky or De Vasa, **Engines** to select Tactical, or **Rules**
 for separate rule paragraphs. Rule lists are words; illustrations appear inside each paragraph, and long text uses fitted pages without scrolling.
 
-Home contains **Hexagonal Chess**, **Public**, and **Private**. Public has the same saved continuous-gradient color wheel as Private and is readable
+Home starts with **Hexagonal Chess**, **Public**, **Private**, **Controls** and **Accounts**. Dev accounts may add more. Public has the same saved continuous-gradient color wheel as Private and is readable
 across accounts and devices, with live updates; sign in to contribute. Private is
-visible only to its signed-in account. Hold a word to edit or transfer its entire
-branch between Public and Private, with confirmation before publishing. Only the
-configured owner can edit the shared Hexagonal Chess content. Existing personal
+visible only to its signed-in account. Hold a word for 300 ms to open Controls and edit or transfer its entire
+branch between Public and Private, with confirmation before publishing. Only explicit
+dev accounts can edit the shared Hexagonal Chess content. Existing personal
 content stays private; it is not published automatically.
 
-The configured owner sees permanent IL labels beside clouds. Each actual hierarchy level adds a zero-based arrival segment without placeholder zeros: IL1 → IL10 → IL100. Segments run 0–9, A0–Z9, AA0–ZZ9, then AAA0 onward. Deletion never releases a number; moves retain labels and copies receive new ones. Other accounts never receive these labels. Existing content is initialized in its saved order.
+Dev accounts see permanent IL labels beside accessible clouds and can copy them from Controls. Each actual hierarchy level adds a zero-based arrival segment without placeholder zeros: IL1 → IL10 → IL100. Segments run 0–9, A0–Z9, AA0–ZZ9, then AAA0 onward. Deletion never releases a number; moves retain labels and copies receive new ones. Ordinary accounts never receive these labels. Existing content is initialized in its saved order.
 
-Every confirmed word and picture is stored on the server. Remember accounts on a
+Every confirmed word and picture is stored on the server. Select multiple photos for a collage; hold it and choose View photos to inspect each image full screen with pan/zoom. Accounts and Controls use the same cloud navigation. Remember accounts on a
 trusted device to switch without re-entering passwords; forgetting removes that
 shortcut. No passwords are stored in browser storage. Each cloud accepts 1,024 immediate droplets; total workspace size and nesting are independent. React/TypeScript renders the interface; authoritative rules and
 Tactical search run in C++ on the cloud server. No local engine installation is
@@ -47,13 +47,13 @@ configuration. Package workspaces now use `@ion/` names.
 
 The **Install** action appears only when the browser supplies an installation prompt or when manual installation is supported in top-level iPhone/iPad Safari. It is hidden in incompatible browsers, embedded frames and an already installed app. The home-screen app uses a standalone window. This is an installable web app, not an App Store or Play Store binary. Internet access is required for cloud play.
 
-Games are saved in the cloud. **Share game** lets you resume on another device; opening a copied game link restores it after installation if browser and app storage are separate. Anyone with that link can control the shared game. Word spaces now have user accounts. Chess sessions still use separate capability links; side-specific multiplayer credentials and an account game library are not included. The current minimal game surface does not expose a Share button; historical copied links still open.
+Games are saved in the cloud for 30 days after the last saved move or undo; opening a game does not extend this period. A daily cleanup physically removes expired records. **Share game** lets you resume on another device; opening a copied game link restores it after installation if browser and app storage are separate. Anyone with that link can control the shared game. Word spaces now have user accounts. Chess sessions still use separate capability links; side-specific multiplayer credentials and an account game library are not included. The current minimal game surface does not expose a Share button; historical copied links still open.
 
 ## Design
 
 ION uses pure black, neutral glass, self-hosted Inter, and smaller words. Drag to
 pan, pinch or Ctrl/Command-wheel to zoom, or use keyboard zoom. App pages do not scroll. Hold/right-click a word for Edit, Move, Copy or Delete.
-Home roots are fixed; only the owner may change shared Chess entries. Deletion within a space is reversible.
+ION, Accounts and Controls are read-only for ordinary accounts; dev accounts can customize them. Only dev accounts may change shared Chess entries. Deletion within a space is reversible.
 The compact insert bar and parent Back sit at the bottom. Public, Private and the owner’s Hexagonal Chess editor have a compact continuous gradient wheel, visible only while entering a word. New selections avoid exact duplicate colors among siblings, including server-side allocation. Existing saved colors and branch copies are preserved. Home uses fixed positions. Deletion Undo expires after ten seconds.
 
 Boards opens native starting-position pictures for all five published variants. Each
@@ -73,7 +73,7 @@ motion. The Pro hosting badge setting is disabled.
 - Separate saved games per variant, shared links, undo, automatic pass-and-play orientation, promotion and keyboard/touch controls.
 - Tactical: material and positional evaluation, iterative-deepening alpha-beta, capture ordering, bounded quiescence, and time/node limits. Six levels before board selection: Pre-Beginner (40 ms/depth 1/125 nodes, with a 50% random legal choice), Beginner (80 ms/depth 1), Easy (200 ms/depth 2), Medium (750 ms/depth 3), Hard (1.5 s/depth 4), Expert (3 s/depth 5), each with its own node limit. These are not Elo ratings.
 
-[Brusky](docs/variants/brusky.md) and [De Vasa](docs/variants/devasa.md) are playable with their own pawn rules, en passant, promotion, castling, results and Tactical search. Their 84-cell and 81-cell boards use native pointy geometry. Engines 2–6 and Wellisch remain planned. Each future engine will be an independent executable with its own search/evaluation design. Engine identities are provisional; strength has not been rated.
+[Brusky](docs/variants/brusky.md) and [De Vasa](docs/variants/devasa.md) are playable with their own pawn rules, en passant, promotion, castling, results and Tactical search. Their 84-cell and 81-cell boards use native pointy geometry. Engines 2–6 remain planned. [Wellisch](docs/variants/wellisch.md) now has a tested three-player starting-position and movement-geometry foundation; it remains unavailable for play until its complete multiplayer rules and search are verified. Each future engine will be an independent executable with its own search/evaluation design. Engine identities are provisional; strength has not been rated.
 
 ## Work on the source
 
@@ -115,7 +115,7 @@ engines/engine-1/            C++ protocol, search, evaluation
 engines/engine-2/ … engine-6/ Reserved independent engines
 shared/include/hexchess/     Geometry, pieces, moves, game state, rules
 shared/src/                 Geometry and shared authoritative variant rules
-shared/variants/            Gliński, McCooey and Shafran setups and rule descriptors
+shared/variants/            Five playable setups and experimental Wellisch foundation
 shared/protocol/            Versioned native and cloud contracts
 tests/                      Native rules, games, protocol, manager, frontend checks
 docs/                       Architecture, rules references, progress, browser evidence

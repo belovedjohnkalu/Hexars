@@ -15,6 +15,7 @@ export function useCloudGame(variant: VariantId, defaultMode: "engine" | "two_pl
   const [busy, setBusy] = useState(false);
   const [pendingMove, setPendingMove] = useState<ChessMove | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [missing,setMissing]=useState(false);
   const credentials = useRef<Credentials | null>(null);
   const current = useRef<OutputType | null>(null);
   const requestSequence = useRef(0);
@@ -43,7 +44,7 @@ export function useCloudGame(variant: VariantId, defaultMode: "engine" | "two_pl
       controller.current = abort;
       if (body.action !== "move") setPendingMove(null);
       setBusy(true);
-      setError(null);
+      setError(null);setMissing(false);
       try {
         let result = await postGame(body, { signal: abort.signal });
         if (sequence !== requestSequence.current) return false;
@@ -78,9 +79,14 @@ export function useCloudGame(variant: VariantId, defaultMode: "engine" | "two_pl
             /* Show the original conflict with a refresh control. */
           }
         }
+        const notFound=!!failure&&typeof failure==='object'&&'status' in failure&&failure.status===404;
+        if(notFound&&initialVariant&&!gameSessions.fromHash()){
+          try{const fresh=await postGame({action:'new',variant:initialVariant,mode:defaultMode,difficulty,humanPlayer:0},{signal:abort.signal});if(sequence!==requestSequence.current)return false;accept(fresh);return true;}catch{/* Keep the recoverable new-game action below. */}
+        }
+        setMissing(notFound);
         setError(
           failure && typeof failure === "object" && "status" in failure && failure.status === 404
-            ? "We couldn’t find that game. Check the link, or start a new game."
+            ? "This saved game is no longer available. Start a new game."
             : "We couldn’t finish that request. Check your connection and try again.",
         );
         return false;
@@ -191,6 +197,7 @@ export function useCloudGame(variant: VariantId, defaultMode: "engine" | "two_pl
     pendingMove,
     busy,
     error,
+    missing,
     newGame: (mode: "engine" | "two_players", humanPlayer: 0 | 1, variant: VariantId) => {
       engineKey.current = "";
       return perform({ action: "new", mode, humanPlayer, variant,difficulty });

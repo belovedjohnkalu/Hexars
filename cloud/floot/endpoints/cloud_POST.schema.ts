@@ -2,15 +2,15 @@ import { cloudNames } from "../helpers/cloudNames";
 import type { VariantId } from "./game_POST.schema";
 import { z } from "zod";
 import { isCloudColor,type CloudColor } from "../helpers/cloudColors";
-export type CloudScope="home"|"public"|"private"|"chess";
-const credentials = { scope: z.enum(["home","public","private","chess"]).default("private"), account: z.boolean().optional(), workspaceId: z.string().uuid(), accessToken: z.string().regex(/^[a-f0-9]{64}$/) };
+export type CloudScope="home"|"public"|"private"|"chess"|"accounts";
+const credentials = { scope: z.enum(["home","public","private","chess","accounts"]).default("private"), account: z.boolean().optional(), workspaceId: z.string().uuid(), accessToken: z.string().regex(/^[a-f0-9]{64}$/) };
 const parentId = z.string().max(80).nullable();
 const name = z.string().trim().min(1, "Give this cloud a name.");
 const version = z.number().int().nonnegative();
 export const schema = z.discriminatedUnion("action", [
   z.object({ action: z.literal("load"), connect: z.boolean().optional(), ...credentials }),
-  z.object({ action: z.literal("add"), ...credentials, id: z.string().uuid(), parentId, name, version, color:z.custom<CloudColor>(isCloudColor,"Choose a color from the wheel.").optional(), imageType: z.enum(["image/png", "image/jpeg", "image/webp", "image/gif"]).optional() }),
-  z.object({ action: z.literal("upload"), ...credentials, id: z.string().uuid(), contentType: z.enum(["image/png", "image/jpeg", "image/webp", "image/gif"]), sizeBytes: z.number().int().positive().max(3 * 1024 * 1024) }),
+  z.object({ action: z.literal("add"), ...credentials, id: z.string().uuid(), parentId, name, version, color:z.custom<CloudColor>(isCloudColor,"Choose a color from the wheel.").optional(), imageType: z.enum(["image/png", "image/jpeg", "image/webp", "image/gif"]).optional(), images:z.array(z.object({id:z.string().uuid(),contentType:z.enum(["image/png","image/jpeg","image/webp","image/gif"])})).optional() }),
+  z.object({ action: z.literal("upload"), ...credentials, id: z.string().uuid(), fileId:z.string().uuid().optional(), contentType: z.enum(["image/png", "image/jpeg", "image/webp", "image/gif"]), sizeBytes: z.number().int().positive().max(3 * 1024 * 1024) }),
   z.object({ action: z.literal("rename"), ...credentials, id: z.string().min(1).max(80), name, color:z.custom<CloudColor>(isCloudColor,"Choose a color from the wheel.").optional(), version }),
   z.object({ action: z.literal("remove"), ...credentials, id: z.string().min(1).max(80), operationId: z.string().uuid(), expectedCount: z.number().int().nonnegative(), version }),
   z.object({ action: z.literal("move"), ...credentials, id: z.string().min(1).max(80), parentId, version }),
@@ -24,12 +24,12 @@ export const schema = z.discriminatedUnion("action", [
 });
 export type CloudNode = {
   id: string; parentId: string | null; name: string; color?:CloudColor; identifier?:string;
-  imageKey?: string; imageUrl?: string; isImage?: boolean; destination?: "board" | VariantId | "tactical" | "level"; note?: string; illustration?:string; variant?:VariantId; level?:number; createdBy?:number; canEdit?:boolean; canCopy?:boolean; sizeCount?:number;
+  imageKey?: string; imageUrl?: string; imageKeys?:string[]; imageUrls?:string[]; isImage?: boolean; destination?: "board" | VariantId | "tactical" | "level" | "control" | "account" | "accounts" | "space"; space?:CloudScope; control?:"rename"|"move"|"copy"|"remove"|"copy-il"|"view-photos"; accountAction?:string; system?:boolean; note?: string; illustration?:string; variant?:VariantId; level?:number; createdBy?:number; canEdit?:boolean; canCopy?:boolean; sizeCount?:number;
   copyOperation?: string; removedBy?: string; removedAt?: string;
 };
 export type InputType = z.input<typeof schema>;
 export type OutputType = {
-  nodes: CloudNode[]; version: number; workspaceId?: string; account?: boolean; scope?:CloudScope; canAdd?:boolean; canManage?:boolean; owner?:boolean; userId?:number;
+  nodes: CloudNode[]; version: number; workspaceId?: string; account?: boolean; scope?:CloudScope; canAdd?:boolean; canManage?:boolean; dev?:boolean; owner?:boolean; userId?:number;
   undo?: { operationId: string; name: string; parentId: string | null; count: number; expiresAt?:number };
   upload?: { url: string; headers: Record<string, string> };
 };

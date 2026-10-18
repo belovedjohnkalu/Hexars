@@ -81,8 +81,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const logout = useCallback(async () => {
     await postLogout();
-    localStorage.removeItem("ion.private-space.v1");
-    sessionStorage.removeItem("ion.word-drafts.v1");
+    try{localStorage.removeItem("ion.private-space.v1");}catch{}
+    try{sessionStorage.removeItem("ion.word-drafts.v1");}catch{}
     window.location.assign("/");
     // Invalidate all queries after login so previous user's state don't corrupt new user state.
     queryClient.resetQueries();

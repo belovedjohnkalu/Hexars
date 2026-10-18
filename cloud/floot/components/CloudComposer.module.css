@@ -27,3 +27,6 @@
 .colors { position:absolute; left:0; right:0; bottom:calc(100% + 4px); z-index:2; border-radius:var(--radius-full); background:var(--background); animation:colorEntry 140ms var(--ease) both; }
 @keyframes colorEntry { from { opacity:0; transform:translateY(3px); } to { opacity:1; transform:translateY(0); } }
 @media(prefers-reduced-motion:reduce) { .colors { animation:none; } }
+.extras { position:absolute; left:0; right:0; bottom:calc(100% + 4px); z-index:2; border-radius:var(--radius); background:var(--background); animation:colorEntry 140ms var(--ease) both; }
+.extras .attachment { margin:0; padding:4px 8px; }
+@media(prefers-reduced-motion:reduce){.extras{animation:none;}}

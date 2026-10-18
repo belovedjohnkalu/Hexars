@@ -1,6 +1,6 @@
 import type { CloudNode } from '../endpoints/cloud_POST.schema';
 export type IdentifierRecord={nodeId:string;parentId:string|null;label:string;arrivalOrdinal:string};
-export const rootIdentifiers:Record<string,string>={'hexagonal-chess':'IL0',public:'IL1',private:'IL2'};
+export const rootIdentifiers:Record<string,string>={'hexagonal-chess':'IL0',public:'IL1',private:'IL2',controls:'IL3',accounts:'IL4'};
 // Zero-based segments: 0..9, A0..Z9, AA0..ZZ9, AAA0..ZZZ9. A digit closes each
 // segment, so nested paths remain distinct without placeholder zeros.
 export function identifierSegment(ordinal:number):string{
