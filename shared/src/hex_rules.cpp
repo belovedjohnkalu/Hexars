@@ -1,4 +1,5 @@
 #include "hexchess/rules.hpp"
+#include "hexchess/wellisch.hpp"
 #include <algorithm>
 #include <array>
 #include <cmath>
@@ -117,6 +118,7 @@ static void rays(const GameState& state, std::vector<Move>& moves, Hex from, con
 }
 
 std::vector<Move> generateCandidateMoves(const GameState& state) {
+    if(state.variant=="wellisch")return wellisch::candidateMoves(state);
     std::vector<Move> moves;
     moves.reserve(150);
     const auto& cells = variantDefinition(state.variant).cells();
@@ -173,6 +175,7 @@ static bool attacksAlong(const GameState& state, Hex from, Hex target, const std
 }
 
 bool isAttacked(const GameState& state, Hex position, PlayerId attacker) {
+    if(state.variant=="wellisch")return wellisch::attacked(state,position,attacker);
     const auto& cells = variantDefinition(state.variant).cells();
     static const auto knights = knightDirections();
     for (std::size_t index = 0; index < state.occupants.size(); ++index) {
@@ -196,6 +199,7 @@ bool isAttacked(const GameState& state, Hex position, PlayerId attacker) {
 }
 
 bool isInCheck(const GameState& state, PlayerId player) {
+    if(state.variant=="wellisch")return wellisch::inCheck(state,player);
     const auto& cells = variantDefinition(state.variant).cells();
     for (std::size_t index = 0; index < state.occupants.size(); ++index) {
         const auto piece = state.occupants[index];
@@ -208,6 +212,7 @@ bool isInCheck(const GameState& state, PlayerId player) {
 }
 
 GameState applyCandidateMove(const GameState& state, const Move& move, bool recordHistory) {
+    if(state.variant=="wellisch")return wellisch::apply(state,move,recordHistory);
     GameState next = state;
     const int from = variantDefinition(state.variant).index(move.from), to = variantDefinition(state.variant).index(move.to);
     const auto piece = state.occupants[from];
@@ -249,6 +254,7 @@ GameState applyCandidateMove(const GameState& state, const Move& move, bool reco
 }
 
 std::vector<Move> generateLegalMoves(const GameState& state) {
+    if(state.variant=="wellisch")return wellisch::legalMoves(state);
     std::vector<Move> legal;
     for (const auto& move : generateCandidateMoves(state)) {
         const auto next = applyCandidateMove(state, move, false);
@@ -258,6 +264,7 @@ std::vector<Move> generateLegalMoves(const GameState& state) {
 }
 
 std::uint64_t positionKey(const GameState& state) {
+    if(state.variant=="wellisch")return wellisch::key(state);
     std::uint64_t hash = 1469598103934665603ULL;
     const auto mix = [&](std::uint64_t value) { hash ^= value; hash *= 1099511628211ULL; };
     // Preserve existing Gliński hashes so saved games remain loadable.
@@ -302,6 +309,7 @@ std::uint64_t positionKey(const GameState& state) {
 }
 
 void validatePosition(const GameState& state) {
+    if(state.variant=="wellisch"){wellisch::validate(state);return;}
     const auto& variant = variantDefinition(state.variant);
     if (state.occupants.size() != variant.cells().size() ||
         state.turnOrder != std::vector<PlayerId>{0,1} || state.activePlayer > 1 ||
@@ -342,6 +350,7 @@ void validatePosition(const GameState& state) {
 }
 
 GameResult getGameResult(const GameState& state, const std::vector<Move>& legalMoves) {
+    if(state.variant=="wellisch")return wellisch::result(state,legalMoves);
     // A checkmate already delivered by the final move takes precedence.
     if (legalMoves.empty() && isInCheck(state, state.activePlayer)) {
         GameResult result;

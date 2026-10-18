@@ -3,8 +3,7 @@
 #include <array>
 #include <string_view>
 
-// Experimental three-player foundation. Geometry below is not legal move
-// generation; check, takeover, promotion timing and results are not enabled yet.
+// Original army-takeover rules; see docs/variants/wellisch.md for sources.
 namespace hexchess::wellisch {
 inline constexpr PlayerId noPlayer=255;
 struct Position {
@@ -28,4 +27,13 @@ std::vector<Hex> geometricDestinations(PieceType type,PlayerId player,Hex from);
 std::vector<PieceType> promotionChoices(const Position& position,PlayerId player);
 struct CastleSwap {Hex king;Hex rook;};
 std::array<CastleSwap,2> castleSwaps(PlayerId player);
+GameState createGame();
+std::vector<Move> candidateMoves(const GameState& state);
+std::vector<Move> legalMoves(const GameState& state);
+bool attacked(const GameState& state,Hex target,PlayerId attacker);
+bool inCheck(const GameState& state,PlayerId player);
+GameState apply(const GameState& state,const Move& move,bool recordHistory);
+std::uint64_t key(const GameState& state);
+void validate(const GameState& state);
+GameResult result(const GameState& state,const std::vector<Move>& moves);
 }

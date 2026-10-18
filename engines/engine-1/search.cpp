@@ -1,4 +1,5 @@
 #include "search.hpp"
+#include "hexchess/wellisch.hpp"
 #include <algorithm>
 #include <chrono>
 #include <cmath>
@@ -39,10 +40,12 @@ struct Search {
     }
 
     int ordering(const GameState& state, const Move& move) {
+        if(move.pass)return -1000000;
         const auto source = state.occupants[variantDefinition(state.variant).index(move.from)];
         const auto target = state.occupants[variantDefinition(state.variant).index(move.to)];
         const bool enPassant = isEnPassantCapture(state,move);
-        return (target.empty() ? (enPassant ? 1000 : 0) : values[static_cast<int>(target.type)] * 10 - values[static_cast<int>(source.type)]) +
+        if(state.variant=="wellisch"&&!target.empty()&&target.player==source.player)return move.promotion==PieceType::None?100:10000;
+        return (target.empty() ? (enPassant ? 1000 : 0) : (target.type==PieceType::King?1000000:values[static_cast<int>(target.type)] * 10) - values[static_cast<int>(source.type)]) +
                (move.promotion == PieceType::None ? 0 : values[static_cast<int>(move.promotion)] * 10);
     }
 
@@ -97,6 +100,24 @@ struct Search {
         }
         return alpha;
     }
+
+    using Utilities=std::array<int,3>;
+    Utilities multiplayerEvaluation(const GameState& state){
+        Utilities material{},utility{};
+        for(std::size_t i=0;i<state.occupants.size();++i){const auto p=state.occupants[i];if(p.empty())continue;int value=p.type==PieceType::Knight?220:values[static_cast<int>(p.type)];const auto h=wellisch::rotate(wellisch::cells()[i],3-state.wellisch->origins[i]);if(p.type==PieceType::Pawn)value+=(5-h.r)*4;material[p.player]+=value;}
+        const int total=material[0]+material[1]+material[2];
+        for(PlayerId p=0;p<3;++p)utility[p]=state.wellisch->controllers[p]!=p?-1000000:material[p]*3-total-(isInCheck(state,p)?50:0);
+        return utility;
+    }
+    Utilities maxn(const GameState& state,int depth,int ply){
+        ++nodes;if(expired())return multiplayerEvaluation(state);
+        auto moves=generateLegalMoves(state);const auto result=getGameResult(state,moves);
+        if(result.type!=ResultType::Ongoing){Utilities value{};for(PlayerId p=0;p<3;++p)value[p]=result.winner>=0?(result.winner==p?1000000-ply:-1000000+ply):state.wellisch->controllers[p]!=p?-1000000:0;return value;}
+        if(depth<=0)return multiplayerEvaluation(state);
+        order(state,moves);Utilities best{};best.fill(-2000000);const auto player=state.activePlayer;
+        for(const auto& move:moves){const auto value=maxn(applyCandidateMove(state,move),depth-1,ply+1);if(stopped)break;if(value[player]>best[player])best=value;}
+        return best;
+    }
 };
 
 SearchResult search(const GameState& state, SearchLimits limits) {
@@ -111,6 +132,11 @@ SearchResult search(const GameState& state, SearchLimits limits) {
     if (getGameResult(state,moves).type != ResultType::Ongoing) return result;
     context.order(state,moves);
     result.move = moves.front();
+    if(state.variant=="wellisch"){
+        result.score=context.multiplayerEvaluation(state)[state.activePlayer];
+        for(int depth=1;depth<=limits.depth;++depth){if(context.expired())break;int bestScore=-2000000;auto best=moves.front();for(const auto& move:moves){const auto values=context.maxn(applyCandidateMove(state,move),depth-1,1);if(context.stopped)break;if(values[state.activePlayer]>bestScore){bestScore=values[state.activePlayer];best=move;}}if(context.stopped)break;result.move=best;result.score=bestScore;result.depth=depth;const auto found=std::find(moves.begin(),moves.end(),best);std::rotate(moves.begin(),found,found+1);}
+        result.nodes=context.nodes;result.timeMs=static_cast<int>(std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now()-start).count());return result;
+    }
     result.score = evaluate(state);
     for (int depth = 1; depth <= limits.depth; ++depth) {
         if (context.expired()) break;

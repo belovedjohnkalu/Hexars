@@ -2,7 +2,7 @@
 
 ION is live on **Floot** at https://ion.floot.app. Its main navigation is a
 pannable, zoomable cloud of words and pictures. Open **Hexagonal Chess**, then
-**Boards** to choose Gliński, McCooey, Shafran, Brusky or De Vasa, **Engines** to select Tactical, or **Rules**
+**Boards** to choose Gliński, McCooey, Shafran, Brusky, De Vasa or Wellisch, **Engines** to select Tactical, or **Rules**
 for separate rule paragraphs. Rule lists are words; illustrations appear inside each paragraph, and long text uses fitted pages without scrolling.
 
 Home starts with **Hexagonal Chess**, **Public**, **Private**, **Controls** and **Accounts**. Dev accounts may add more. Public has the same saved continuous-gradient color wheel as Private and is readable
@@ -22,8 +22,8 @@ required. A domain change requires signing in again; account content persists.
 
 Shafran is available on the live ION app, with 70 cells, triple pawn advances,
 both crossed en passant cells, four castling choices per side and an equal stalemate.
-Private cloud names have no 80-character restriction; compact previews preserve the
-full saved name, readable through fitted pages. Home at a space root opens ION.
+Private cloud names have no 80-character restriction; full labels stay on one line
+in an expanding spatial canvas, with pan and zoom. Home at a space root opens ION.
 Moves now animate immediately from native visual deltas while the cloud confirms
 them; failures restore the saved board.
 
@@ -56,7 +56,7 @@ pan, pinch or Ctrl/Command-wheel to zoom, or use keyboard zoom. App pages do not
 ION, Accounts and Controls are read-only for ordinary accounts; dev accounts can customize them. Only dev accounts may change shared Chess entries. Deletion within a space is reversible.
 The compact insert bar and parent Back sit at the bottom. Public, Private and the owner’s Hexagonal Chess editor have a compact continuous gradient wheel, visible only while entering a word. New selections avoid exact duplicate colors among siblings, including server-side allocation. Existing saved colors and branch copies are preserved. Home uses fixed positions. Deletion Undo expires after ten seconds.
 
-Boards opens native starting-position pictures for all five published variants. Each
+Boards opens native starting-position pictures for all six published variants. Each
 game places its interactive board among Variants, Rules, Engines, Board Reset
 and Undo, plus Pass and Play to deselect Tactical. Swipe right for an earlier move, left for a newer one; Present returns
 to live play. A bold result sheet identifies checkmate, stalemate and draws.
@@ -73,7 +73,7 @@ motion. The Pro hosting badge setting is disabled.
 - Separate saved games per variant, shared links, undo, automatic pass-and-play orientation, promotion and keyboard/touch controls.
 - Tactical: material and positional evaluation, iterative-deepening alpha-beta, capture ordering, bounded quiescence, and time/node limits. Six levels before board selection: Pre-Beginner (40 ms/depth 1/125 nodes, with a 50% random legal choice), Beginner (80 ms/depth 1), Easy (200 ms/depth 2), Medium (750 ms/depth 3), Hard (1.5 s/depth 4), Expert (3 s/depth 5), each with its own node limit. These are not Elo ratings.
 
-[Brusky](docs/variants/brusky.md) and [De Vasa](docs/variants/devasa.md) are playable with their own pawn rules, en passant, promotion, castling, results and Tactical search. Their 84-cell and 81-cell boards use native pointy geometry. Engines 2–6 remain planned. [Wellisch](docs/variants/wellisch.md) now has a tested three-player starting-position and movement-geometry foundation; it remains unavailable for play until its complete multiplayer rules and search are verified. Each future engine will be an independent executable with its own search/evaluation design. Engine identities are provisional; strength has not been rated.
+[Brusky](docs/variants/brusky.md) and [De Vasa](docs/variants/devasa.md) are playable with their own pawn rules, en passant, promotion, castling, results and Tactical search. Their 84-cell and 81-cell boards use native pointy geometry. [Wellisch](docs/variants/wellisch.md) adds three-player pass-and-play and human-versus-two-Tactical games: first king capture transfers the army, pawns keep their direction, and the remaining game ends by normal mate/stalemate. Captured-piece promotion reserves, delayed promotion and king–rook swaps are saved natively. Tactical 0.9.0 uses MaxN for this variant. Engines 2–6 remain planned independent executables. Strength has not been rated.
 
 ## Work on the source
 

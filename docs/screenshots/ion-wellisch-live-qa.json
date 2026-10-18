@@ -1,0 +1,13 @@
+{
+  "date": "2026-10-18T20:50:10.026Z",
+  "checks": [
+    "Published native Tactical 0.9.0 creates the three-army board and accepts a legal first move with 120-degree rotation",
+    "A reload and independent API read restore the full saved position",
+    "Live 320px phone, 844px landscape and desktop boards fit without document scrolling",
+    "Keyboard pan/zoom works without a rectangular viewport outline",
+    "Published starting-board catalog exposes all six native variants",
+    "Published game has no automated WCAG A/AA violations"
+  ],
+  "errors": [],
+  "a11y": []
+}

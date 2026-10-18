@@ -7,6 +7,7 @@ struct Move {
     Hex from;
     Hex to;
     PieceType promotion{PieceType::None};
+    bool pass{false};
     auto operator<=>(const Move&) const = default;
 };
 }

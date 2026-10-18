@@ -22,6 +22,18 @@ export function ruleIllustration(board: GameView["board"], kind: string, variant
   };
   const put = (notation: string, type: PieceName, player: number) => pieces.push({...cell(notation),type,player});
   const mark = (notation: string) => { const h = cell(notation); add(h.q,h.r); };
+  if(variant==='wellisch'){
+    if(kind==='rook'||kind==='queen')for(const [q,r] of edges)for(let n=1;n<=10;n++){if(!valid.has(key({q:q*n,r:r*n})))break;add(q*n,r*n);}
+    if(kind==='knight'||kind==='queen')for(const [q,r]of corners)add(q,r);
+    if(kind==='king')for(const [q,r]of edges)add(q,r);
+    if(['rook','queen','knight','king'].includes(kind)){pieces.push({...origin,type,player:0});caption=kind==='queen'?'Rook rays and six short knight jumps.':kind==='knight'?'Six short jumps, all on the same cell color.':kind==='king'?'Six edge steps; no vertex steps.':'Six edge rays; pieces block the path.';}
+    else if(kind==='advance'||kind==='capture'){pieces.push({...origin,type:'pawn',player:0});add(0,-1);add(1,-1);if(kind==='capture')pieces.push({q:1,r:-1,type:'knight',player:2});caption='Either forward edge cell permits a step or an enemy capture. Never two cells.';}
+    else if(kind==='promotion'){put('f10','pawn',0);mark('f11');caption='Reach the opposite edge; choose only a captured piece of this pawn’s original army.';}
+    else if(kind==='castle'){put('d1','king',0);put('b1','rook',0);put('e1','rook',0);mark('b1');mark('e1');caption='King d1 swaps with b1 or e1. Rights, empty paths and king safety apply.';}
+    else if(kind==='takeover'){put('d1','king',0);put('f6','rook',0);put('f8','king',1);put('g6','pawn',1);put('k9','king',2);mark('f8');caption='The first king capture transfers the defeated army; its pawns keep their direction.';}
+    else {put('d1','king',0);put('c8','king',1);put('k9','king',2);if(kind==='check'){put('f1','rook',2);mark('d1');caption='Gold’s rook checks White’s king.';}else caption='Three kings remain until the first takeover. Read the rule for the complete policy.';}
+    return {targets,pieces,caption};
+  }
   if (["rook","bishop","queen"].includes(kind)) {
     const directions = kind === "rook" ? edges : kind === "bishop" ? corners : [...edges,...corners];
     for (const [q,r] of directions) for (let n=1;n<=10;n++) { if (!valid.has(key({q:q*n,r:r*n}))) break; add(q*n,r*n); }

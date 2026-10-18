@@ -1,11 +1,11 @@
 import type { PieceName } from "../endpoints/game_POST.schema";
 
 // Original, flat Staunton silhouettes: the same drawing for each side.
-export function ChessPiece({ type, player, onBoard = false, className }: {
-  type: PieceName; player: number; onBoard?: boolean; className?: string; theme?: string;
+export function ChessPiece({ type, player, onBoard = false, className, direction }: {
+  type: PieceName; player: number; onBoard?: boolean; className?: string; theme?: string; direction?:number;
 }) {
-  const fill = player === 0 ? "#f5f5f7" : "#090909";
-  const edge = player === 0 ? "#090909" : "#f5f5f7";
+  const fill = player === 0 ? "#f5f5f7" : player === 2 ? "var(--word-amber)" : "#090909";
+  const edge = player === 1 ? "#f5f5f7" : "#090909";
   return (
     <svg viewBox="-24 -27 48 54" x={onBoard ? -24 : undefined} y={onBoard ? -27 : undefined}
       width={onBoard ? 48 : undefined} height={onBoard ? 54 : undefined} className={className}
@@ -33,6 +33,7 @@ export function ChessPiece({ type, player, onBoard = false, className }: {
           <path d="M0-9 C-7-13-13-8-11-2 L-7 5 H7 L11-2 C13-8 7-13 0-9 Z M-6 6 H6 L9 12 H12 L14 19 H-14 L-12 12 H-9 Z" />
         </>}
       </g>
+      {type==='pawn'&&direction!==undefined&&<g transform={`translate(0 23) rotate(${direction})`} fill="none" strokeLinejoin="round" strokeLinecap="round"><path d="M-3 1 0-2 3 1" stroke="#090909" strokeWidth={4}/><path d="M-3 1 0-2 3 1" stroke="#f5f5f7" strokeWidth={1.5}/></g>}
     </svg>
   );
 }

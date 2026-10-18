@@ -7,6 +7,7 @@ const variants = [
   { id: "shafran", name: "Shafran", cells: 70 },
   { id: "brusky", name: "Brusky", cells: 84 },
   { id: "devasa", name: "De Vasa", cells: 81 },
+  { id: "wellisch", name: "Wellisch", cells: 91 },
 ] as const;
 export const chessVariants = {
   all: variants,

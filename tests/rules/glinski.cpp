@@ -43,7 +43,7 @@ int main() {
     }
     require(!isInCheck(initial,0)&&!isInCheck(initial,1),"Initial king in check");
     require(!has(initial,move("f5","f7")),"Blocked central pawn double step accepted");
-    rejects([&]{createGame("wellisch");},"Unimplemented variant accepted");
+    rejects([&]{createGame("unknown");},"Unimplemented variant accepted");
     for(const auto& pair:{std::pair{PieceType::Rook,30},std::pair{PieceType::Bishop,12},std::pair{PieceType::Queen,42},std::pair{PieceType::Knight,12}}) {
         auto state=fixture();put(state,"f6",pair.first,0);require(fromCount(state,"f6")==pair.second,"Centre movement count failed");
         if(pair.first==PieceType::Bishop)for(const auto& value:generateCandidateMoves(state))if(value.from==glinskiFromNotation("f6"))require(cellColour(value.from)==cellColour(value.to),"Bishop changed colour");

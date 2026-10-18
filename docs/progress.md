@@ -266,3 +266,14 @@ This prevents the occasional white rectangle after focus restoration while
 retaining visible focus feedback on individual clouds, buttons and inputs.
 The Floot typecheck is clean, the production CSS was inspected, and the fix is
 live at ion.floot.app.
+
+## Wellisch three-player completion — October 18
+
+The sixth variant now supports legal native three-player games, original army
+takeover, preserved pawn directions/reserves, king–rook swaps, immediate and
+delayed captured-piece promotion, forced passes, final mate/stalemate and complete
+saved timelines. Tactical uses MaxN; the UI supports three armies, 120-degree
+Pass and Play, both Tactical replies, full-round Undo and 22 Rules clouds.
+Native, protocol, saved-state compatibility and browser checks passed. Published
+as UI 0.18.0 / Tactical 0.9.0. See ion-wellisch-release.md for evidence and rule
+source limits. Engines 2–6 remain future independent executables.

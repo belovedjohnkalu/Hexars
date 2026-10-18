@@ -1,0 +1,16 @@
+{
+  "date": "2026-10-18T20:48:25.574Z",
+  "checks": [
+    "Sixth variant is reachable in Boards with separate caption and native preview",
+    "91 cells, 45 pieces, three visible colors, second-tap deselection and 120-degree pass-and-play turns",
+    "Swipe history is read-only and Undo restores the complete earlier three-player position",
+    "22 Rules paragraph clouds and the distinct Wellisch knight illustration",
+    "Human White receives both Tactical replies; Undo removes the complete three-player round",
+    "Phone, landscape and desktop retain the board, reachable actions and no document scrolling",
+    "Keyboard spatial access and reduced motion preserve the outline-free viewport"
+  ],
+  "appErrors": [],
+  "previewEditorErrors": [
+    "n"
+  ]
+}

@@ -59,6 +59,8 @@ try {
   const ruleSources = [
     "shared/src/geometry.cpp",
     "shared/src/hex_rules.cpp",
+    "shared/src/wellisch_rules.cpp",
+    "shared/variants/wellisch.cpp",
     "shared/variants/glinski.cpp",
     "shared/variants/mccooey.cpp",
     "shared/variants/shafran.cpp",
@@ -129,7 +131,7 @@ try {
   }
   if (process.argv.includes("--test")) {
     const output = path.join(root, "build", windows ? "wellisch-foundation-tests.exe" : "wellisch-foundation-tests");
-    await run(compiler, [...flags, path.join(root,"tests/rules/wellisch.cpp"), path.join(root,"shared/variants/wellisch.cpp"), ...ruleSources, "-o",output]);
+    await run(compiler, [...flags, path.join(root,"tests/rules/wellisch.cpp"), path.join(root,"engines/engine-1/search.cpp"), ...ruleSources, "-o",output]);
     process.stdout.write(await run(output, []));
   }
   if (process.argv.includes("--cloud")) {

@@ -30,7 +30,7 @@ function engine(t) {
 test("Versioned protocol identifies the engine and exposes authoritative starting pieces", async (t) => {
   const request = engine(t);
   const hello = await request({ type: "hello" });
-  assert.equal(hello.engine, "Tactical 0.8.0");
+  assert.equal(hello.engine, "Tactical 0.9.0");
   const start = await request({ type: "new_game", variant: "glinski" });
   assert.equal(start.game.board.cells.length, 91);
   assert.equal(start.game.board.cells.filter((cell) => cell.piece).length, 36);
@@ -79,7 +79,7 @@ test("Fully defined positions round-trip and malformed positions are rejected", 
     piece?.type === "king" && piece.player === 0 ? null : piece,
   );
   assert.equal((await request({ type: "position", state: missingKing })).type, "error");
-  assert.equal((await request({ type: "new_game", variant: "wellisch" })).type, "error");
+  assert.equal((await request({ type: "new_game", variant: "unknown" })).type, "error");
 });
 
 test("Search returns a legal correlated move within a bounded budget", async (t) => {
@@ -245,7 +245,7 @@ test("Automatic material draws hide moves, score half each and stop search", asy
 
 test("McCooey identifies its variant, setup and first-move pawn rights", async (t) => {
   const request = engine(t);
-  assert.deepEqual((await request({ type: "supported_variants" })).variants, ["glinski", "mccooey", "shafran", "brusky", "devasa"]);
+  assert.deepEqual((await request({ type: "supported_variants" })).variants, ["glinski", "mccooey", "shafran", "brusky", "devasa", "wellisch"]);
   const initial = await request({ type: "new_game", variant: "mccooey" });
   assert.equal(initial.game.variant, "mccooey");
   assert.equal(initial.game.board.variant, "mccooey");

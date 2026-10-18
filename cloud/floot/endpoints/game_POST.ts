@@ -25,7 +25,7 @@ function activePlayer(state: Json) {
     !state ||
     typeof state !== "object" ||
     Array.isArray(state) ||
-    (state.activePlayer !== 0 && state.activePlayer !== 1)
+    (state.activePlayer !== 0 && state.activePlayer !== 1 && !(state.variant === 'wellisch' && state.activePlayer === 2))
   )
     throw new Error("Saved game state is invalid");
   return state.activePlayer;
@@ -116,12 +116,12 @@ export async function handle(request: Request) {
     if (input.action === "undo") {
       if (!timeline.length) throw new GameError("There are no moves to undo.", 400);
       let count = 1;
-      if (
-        row.mode === "engine" &&
-        activePlayer(row.state) === row.humanPlayer &&
-        timeline.length >= 2
-      )
-        count = 2;
+      // Return to before the latest human action, including both opponents'
+      // replies and any same-turn delayed promotions. Pass-and-play undoes one.
+      if(row.mode==='engine'){
+        let lastHuman=-1;for(let i=moves.length-1;i>=0;--i)if(!moves[i].engine&&moves[i].player===row.humanPlayer){lastHuman=i;break;}
+        if(lastHuman>=0)count=timeline.length-lastHuman;
+      }
       nextState = timeline[timeline.length - count];
       timeline = timeline.slice(0, -count);
       moves = moves.slice(0, -count);
@@ -160,7 +160,7 @@ export async function handle(request: Request) {
         player: before.activePlayer,
         from: selected.from,
         to: selected.to,
-        notation:
+        notation: selected.pass ? "Pass" :
           from +
           (capture ? "×" : "–") +
           to +

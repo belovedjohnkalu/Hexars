@@ -1,7 +1,7 @@
 import { z } from "zod";
 import superjson from "superjson";
 
-export const variantSchema = z.enum(["glinski", "mccooey", "shafran", "brusky", "devasa"]);
+export const variantSchema = z.enum(["glinski", "mccooey", "shafran", "brusky", "devasa", "wellisch"]);
 export type VariantId = z.infer<typeof variantSchema>;
 
 const hex = z
@@ -12,6 +12,7 @@ const move = z
     from: hex,
     to: hex,
     promotion: z.enum(["queen", "rook", "bishop", "knight"]).optional(),
+    pass: z.literal(true).optional(),
   })
   .strict();
 const session = { gameId: z.string().uuid(), accessToken: z.string().regex(/^[a-f0-9]{64}$/) };
@@ -39,9 +40,10 @@ export type ChessMove = {
   from: Hex;
   to: Hex;
   promotion?: "queen" | "rook" | "bishop" | "knight";
+  pass?: true;
   capture?: boolean;
   givesCheck?: boolean;
-  changes?: Array<Hex & { piece: { type: PieceName; player: number } | null }>;
+  changes?: Array<Hex & { piece: { type: PieceName; player: number; armyOrigin?: number } | null }>;
   fromNotation?: string;
   toNotation?: string;
 };
@@ -51,13 +53,16 @@ export type GameView = {
   activePlayer: number;
   ply: number;
   check: boolean;
+  activePlayers?: number[];
+  checkedPlayers?: number[];
+  armyControllers?: number[];
   board: {
     variant: VariantId;
     stage: string;
     orientation?: "flat"|"pointy";
     players: number[];
     cells: Array<
-      Hex & { colour: number; notation: string; piece: { type: PieceName; player: number } | null }
+      Hex & { colour: number; notation: string; piece: { type: PieceName; player: number; armyOrigin?: number } | null }
     >;
   };
   legalMoves: ChessMove[];

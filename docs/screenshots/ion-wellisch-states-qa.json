@@ -1,0 +1,18 @@
+{
+  "date": "2026-10-18T20:47:26.114Z",
+  "browserTransportFixtures": true,
+  "nativeRules": true,
+  "databaseWrites": false,
+  "checks": [
+    "Castling swaps both pieces; a failed save rolls back and Retry restores interaction",
+    "Multiple waiting pawns use paged promotion choices and retain the same normal turn",
+    "First king capture transfers the army, preserves pawn origin and fully reverses with Undo",
+    "A trapped third king receives an explicit forced Pass instead of a premature game over",
+    "Final mate names Gold and preserves White–Black–Gold scoring",
+    "Two-survivor stalemate and three-player draw have complete, correct score sheets"
+  ],
+  "appErrors": [],
+  "previewEditorErrors": [
+    "n"
+  ]
+}

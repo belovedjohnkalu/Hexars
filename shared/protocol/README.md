@@ -1,4 +1,4 @@
-# HexChess protocol · version 1 / Tactical 0.6
+# HexChess protocol · version 1 / Tactical 0.9.0
 
 ## Cloud browser API
 
@@ -55,3 +55,30 @@ when loading Shafran, Brusky or De Vasa positions. Initial pawn capture and
 castling rights participate in repetition keys. Version 1 and legacy saved-state
 hashes remain compatible. `changes` also describes both pieces during castling
 and the removed en-passant victim in either new pawn direction.
+
+## Wellisch extension — Tactical 0.9.0
+
+`supported_variants` and `hello` now include `wellisch`; capabilities also include
+`maxn`. The existing native protocol version and five older saved-state formats
+remain compatible. The active Floot API accepts all six variant IDs; the paused
+Vercel/Supabase migration is a separate source and is not the production API.
+
+Wellisch has `turnOrder: [0,1,2]`. Its mandatory `wellisch` state contains the
+91-entry `origins` vector (0/1/2 for each piece's original army, 255 for empty),
+three `controllers`, three captured-piece `reserves` of piece names, and
+`consecutivePasses`. Native validation rejects missing, inconsistent or malformed
+rights. The browser still cannot load arbitrary positions through the public API.
+
+A forced pass is `{from:{q:0,r:0},to:{q:0,r:0},pass:true}`. It is legal only when
+three kings remain and no ordinary move is possible. Delayed promotion uses
+`from==to` plus a reserve-backed `promotion`; it keeps the same active player for
+the following normal move. Every action increments ply and has a complete saved
+timeline entry. Castling targets the friendly original rook cell and is not
+reported as a capture. First king capture transfers ownership and may emit many
+visual changes in one legal move.
+
+Game views add `activePlayers`, `checkedPlayers`, `armyControllers` and each
+piece's `armyOrigin`; result scores retain three entries in White–Black–Gold
+order, even after elimination. Tactical uses iterative-deepening MaxN and the
+existing time/node limits. The cloud bridge validates its proposed action with
+the same shared `play_move` path before saving.

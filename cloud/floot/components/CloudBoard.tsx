@@ -6,12 +6,13 @@ import { chessVariants } from "../helpers/chessVariants";
 import styles from "./CloudBoard.module.css";
 
 const key = (hex: Hex) => `${hex.q},${hex.r}`;
-type VisualPiece = Hex & { id: number; type: PieceName; player: number };
+type VisualPiece = Hex & { id: number; type: PieceName; player: number; armyOrigin?:number };
 export function CloudBoard({
   game,
   selected,
   onCell,
   flipped,
+  rotation,
   coordinates,
   theme,
   lastMove,
@@ -23,6 +24,7 @@ export function CloudBoard({
   selected: Hex | null;
   onCell: (hex: Hex) => void;
   flipped: boolean;
+  rotation?: number;
   coordinates: boolean;
   theme: string;
   lastMove?: ChessMove;
@@ -40,8 +42,8 @@ export function CloudBoard({
     const occupied = game.board.cells.filter((cell) => cell.piece);
     for (const cell of occupied) {
       const old = previous.current.get(key(cell));
-      if (old && old.player === cell.piece!.player && old.type === cell.piece!.type) {
-        next.set(key(cell), { ...old, q: cell.q, r: cell.r });
+      if (old && (old.player === cell.piece!.player || old.armyOrigin!==undefined&&old.armyOrigin===cell.piece!.armyOrigin) && old.type === cell.piece!.type) {
+        next.set(key(cell), { ...old, q: cell.q, r: cell.r,player:cell.piece!.player,armyOrigin:cell.piece!.armyOrigin });
         used.add(old.id);
       }
     }
@@ -66,6 +68,7 @@ export function CloudBoard({
         r: cell.r,
         type: cell.piece!.type,
         player: cell.piece!.player,
+        armyOrigin: cell.piece!.armyOrigin,
         id: old?.id ?? ++sequence.current,
       };
       next.set(key(cell), piece);
@@ -85,6 +88,7 @@ export function CloudBoard({
       .map((move) => key(move.to)),
   );
   const sign = flipped ? -1 : 1;
+  const angle=rotation??(flipped?180:0);
   return (
     <svg
       viewBox={layout.viewBox}
@@ -96,7 +100,7 @@ export function CloudBoard({
       <title>Your hexagonal chessboard. Select a piece to see where it can move.</title>
       <g
         className={styles.canvas}
-        style={{ transform: flipped ? "rotate(180deg)" : "rotate(0deg)" }}
+        style={{ transform: `rotate(${angle}deg)` }}
       >
         {game.board.cells.map((cell) => {
           const { x, y } = layout.position(cell);
@@ -110,9 +114,9 @@ export function CloudBoard({
           const active = selected && key(cell) === key(selected),
             target = destinations.has(key(cell));
           const last =
-            lastMove && (key(cell) === key(lastMove.from) || key(cell) === key(lastMove.to));
+            lastMove && !lastMove.pass && (key(cell) === key(lastMove.from) || key(cell) === key(lastMove.to));
           const checked =
-            cell.piece?.type === "king" && cell.piece.player === game.activePlayer && game.check;
+            cell.piece?.type === "king" && (game.checkedPlayers?.includes(cell.piece.player) ?? (cell.piece.player === game.activePlayer && game.check));
           const targetMoves = game.legalMoves.filter(
             (move) => selected && key(move.from) === key(selected) && key(move.to) === key(cell),
           );
@@ -140,7 +144,7 @@ export function CloudBoard({
                   ? "last-move"
                   : null;
           const name = cell.piece
-            ? `${cell.piece.player === 0 ? "White" : "Black"} ${cell.piece.type}`
+            ? `${cell.piece.player === 0 ? "White" : cell.piece.player === 2 ? "Gold" : "Black"} ${cell.piece.type}${cell.piece.type==='pawn'&&cell.piece.armyOrigin!==undefined?`, originally ${['White','Black','Gold'][cell.piece.armyOrigin]}`:''}`
             : "Empty cell";
           return (
             <g
@@ -171,11 +175,16 @@ export function CloudBoard({
                 }[event.key];
                 if (direction) {
                   event.preventDefault();
-                  const neighbour = game.board.cells.find(
+                  let neighbour = game.board.cells.find(
                     (next) =>
                       next.q === cell.q + direction[0] * sign &&
                       next.r === cell.r + direction[1] * sign,
                   );
+                  if(rotation!==undefined){
+                    const wanted={ArrowUp:[0,-1],ArrowDown:[0,1],ArrowLeft:[-1,0],ArrowRight:[1,0]}[event.key]!;
+                    const here=layout.position(cell),radians=angle*Math.PI/180;
+                    const scored=game.board.cells.filter(next=>Math.max(Math.abs(next.q-cell.q),Math.abs(next.r-cell.r),Math.abs(next.q+next.r-cell.q-cell.r))===1).map(next=>{const p=layout.position(next),dx=p.x-here.x,dy=p.y-here.y,x=dx*Math.cos(radians)-dy*Math.sin(radians),y=dx*Math.sin(radians)+dy*Math.cos(radians);return {next,score:(x*wanted[0]+y*wanted[1])/Math.hypot(x,y)};}).filter(item=>item.score>.4).sort((a,b)=>b.score-a.score);neighbour=scored[0]?.next;
+                  }
                   const node =
                     neighbour &&
                     event.currentTarget.parentElement?.querySelector<SVGGElement>(
@@ -228,7 +237,7 @@ export function CloudBoard({
                   y={y + 21}
                   textAnchor="middle"
                   className={styles.coordinate}
-                  transform={flipped ? `rotate(-180 ${x} ${y})` : undefined}
+                  transform={angle ? `rotate(${-angle} ${x} ${y})` : undefined}
                   pointerEvents="none"
                 >
                   {cell.notation}
@@ -249,11 +258,12 @@ export function CloudBoard({
           >
             <g
               className={styles.pieceFacing}
-              style={{ transform: flipped ? "rotate(-180deg)" : "rotate(0deg)" }}
+              style={{ transform: `rotate(${-angle}deg)` }}
             >
               <ChessPiece
                 type={piece.type}
                 player={piece.player}
+                direction={piece.armyOrigin!==undefined?piece.armyOrigin*120+angle:undefined}
                 theme={theme}
                 onBoard
                 className={styles.piece}
@@ -275,11 +285,12 @@ export function CloudBoard({
           >
             <g
               className={styles.pieceFacing}
-              style={{ transform: flipped ? "rotate(-180deg)" : "rotate(0deg)" }}
+              style={{ transform: `rotate(${-angle}deg)` }}
             >
               <ChessPiece
                 type={piece.type}
                 player={piece.player}
+                direction={piece.armyOrigin!==undefined?piece.armyOrigin*120+angle:undefined}
                 theme={theme}
                 onBoard
                 className={styles.piece}

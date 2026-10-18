@@ -9,8 +9,8 @@ import { createInterface } from "node:readline";
 import type { Json } from "./schema";
 import type { ChessMove, GameView, SearchDiagnostics, VariantId } from "../endpoints/game_POST.schema";
 
-const asset = "/_cdn/static/fc4bd2d7-7f24-4a2b-add1-686dd2305796-tactical-0.8.0-linux-x64.bin";
-const checksum = "87d367b4d7b340f3fbf6b4d208dcb3ff7d2015ce4a406d82f2461140ec385693";
+const asset = "/_cdn/static/9f65e48d-88fe-4aeb-b6dd-467b03953d57-tactical-0.9.0-linux-x64.bin";
+const checksum = "33a4d360905b37806e16fe9709ec323b0e48fdd5ebd240adf7af9a76ebc71b93";
 type Options = {
   action: "new" | "inspect" | "move" | "search";
   origin: string;
@@ -45,7 +45,7 @@ async function executable(origin: string) {
   const response = await fetch(new URL(asset, origin), { signal: AbortSignal.timeout(15000) });
   if (!response.ok) throw new Error("The cloud engine could not be loaded");
   binary = Buffer.from(await response.arrayBuffer());
-  if (binary.length !== 2177112 || createHash("sha256").update(binary).digest("hex") !== checksum)
+  if (binary.length !== 2222328 || createHash("sha256").update(binary).digest("hex") !== checksum)
     throw new Error("Cloud engine checksum mismatch");
   const staging = filename + "-" + randomUUID();
   try {
@@ -160,7 +160,7 @@ export async function runNativeEngine(options: Options): Promise<NativeResult> {
           if (!packet.move) throw new Error("Game has ended");
           const randomMove=options.difficulty===0&&randomInt(2)===0?previousGame!.legalMoves[randomInt(previousGame!.legalMoves.length)]:null;
           const chosen=randomMove||packet.move as ChessMove;
-          appliedMove={from:chosen.from,to:chosen.to,...(chosen.promotion?{promotion:chosen.promotion}:{})};
+          appliedMove={from:chosen.from,to:chosen.to,...(chosen.promotion?{promotion:chosen.promotion}:{}),...(chosen.pass?{pass:true}:{})};
           const measured = packet.diagnostics as Omit<SearchDiagnostics, "score">;
           const evaluation = packet.evaluation as { score: number };
           diagnostics = { ...measured, score: evaluation.score,...(randomMove?{randomized:true}:{}) };

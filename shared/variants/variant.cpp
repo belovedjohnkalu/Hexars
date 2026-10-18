@@ -3,6 +3,7 @@
 #include <stdexcept>
 #include "hexchess/brusky.hpp"
 #include "hexchess/devasa.hpp"
+#include "hexchess/wellisch.hpp"
 
 namespace hexchess {
 const VariantDefinition& variantDefinition(const VariantId& id) {
@@ -30,6 +31,10 @@ const VariantDefinition& variantDefinition(const VariantId& id) {
         [](PlayerId p){std::vector<CastlingPlan> out;for(const auto c:devasa::castlePlans(p))out.push_back({c.kingFrom,c.kingTo,c.rookFrom,c.rookTo});return out;},false,false,true};
     if(id=="brusky")return bruskyRules;
     if(id=="devasa")return devasaRules;
+    static const VariantDefinition wellischRules{
+        "wellisch",wellisch::cells,wellisch::index,wellisch::notation,
+        [](Hex,PlayerId){return false;},true,{},false,nullptr,false,nullptr,nullptr,nullptr,false,false,true};
+    if(id=="wellisch")return wellischRules;
     throw std::invalid_argument("Variant not implemented");
 }
 GameState createGame(const VariantId& variant) {
@@ -38,6 +43,7 @@ GameState createGame(const VariantId& variant) {
     if (variant == "shafran") return createShafranStartingPosition();
     if (variant == "brusky") return brusky::startingPosition();
     if (variant == "devasa") return devasa::startingPosition();
+    if (variant == "wellisch") return wellisch::createGame();
     throw std::invalid_argument("Variant not implemented");
 }
 }
