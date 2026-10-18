@@ -15,7 +15,7 @@
     "mccooey",
     "shafran"
   ],
-  "ui_version": "0.14.0",
+  "ui_version": "0.15.0",
   "routes": [
     "/",
     "/login",
@@ -24,7 +24,7 @@
     "/shafran"
   ],
   "font_asset": "/_cdn/static/6e6c9250-599e-4bf4-a9ae-66ff948afb59-InterVariable.woff2",
-  "published_ui_version": "0.14.0",
+  "published_ui_version": "0.15.0",
   "release_status": "published",
   "favicon": "/_api/icon?v=2",
   "tactical_levels": [
@@ -36,6 +36,7 @@
     "Expert"
   ],
   "in_development_variants": {
-    "brusky": "native geometry, notation and setup; gameplay disabled"
+    "brusky": "native geometry, notation and setup; gameplay disabled",
+    "devasa": "native geometry, notation and setup; gameplay disabled"
   }
 }

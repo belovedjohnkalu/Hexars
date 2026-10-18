@@ -1,0 +1,12 @@
+{
+  "date": "2026-10-18T05:15:22.559Z",
+  "checks": [
+    "All three Rules clouds open readable in square worlds with off-screen content reachable by panning",
+    "Shafran preview stays inside its frame above the caption in normal and Tactical board selection",
+    "Rules variant choices remain words; diagrams appear inside their paragraphs",
+    "Deleting a cloud preserves its camera, zoom and every surviving word’s screen position",
+    "Undo restores the deleted cloud without refitting the camera",
+    "Failed deletion keeps the word, camera and recovery sheet intact",
+    "Changed cloud flow passes automated accessibility and reduced-motion checks"
+  ]
+}

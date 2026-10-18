@@ -1,13 +1,19 @@
 import { useLayoutEffect,useRef,useState,type ReactNode,type PointerEvent } from 'react';
 import styles from './SpatialViewport.module.css';
 type View={zoom:number;x:number;y:number};const views=new Map<string,View>();
-export function SpatialViewport({children,width,height,viewKey,label='Word space'}:{children:ReactNode;width:number;height:number;viewKey:string;label?:string}){
- const fitKey=useRef(''),hasFit=useRef(false);
+export function SpatialViewport({children,width,height,viewKey,label='Word space',ready=true,initialZoom,refitKey}:{children:ReactNode;width:number;height:number;viewKey:string;label?:string;ready?:boolean;initialZoom?:number;refitKey?:string}){
+ const fitKey=useRef(''),hasFit=useRef(false),lastRefit=useRef(refitKey);
  const viewport=useRef<HTMLDivElement>(null),world=useRef<HTMLDivElement>(null),[view,setView]=useState<View>({zoom:1,x:0,y:0}),current=useRef(view),fit=useRef(view),points=useRef(new Map<number,{x:number;y:number}>()),last=useRef<{x:number;y:number;distance?:number}|null>(null),origin=useRef<{x:number;y:number}|null>(null),moved=useRef(false),touched=useRef(false);
  const apply=(v:View)=>{current.current=v;setView(v);};
  const scale=(next:number,cx?:number,cy?:number)=>{const el=viewport.current;if(!el)return;const b=el.getBoundingClientRect(),old=current.current,z=Math.max(Math.min(.025,fit.current.zoom/2),Math.min(3,next)),x=(cx??b.left+el.clientWidth/2)-b.left,y=(cy??b.top+el.clientHeight/2)-b.top;apply({zoom:z,x:x-(x-old.x)*z/old.zoom,y:y-(y-old.y)*z/old.zoom});touched.current=true;};
- useLayoutEffect(()=>{const el=viewport.current;if(!el)return;const update=()=>{if(fitKey.current!==viewKey){fitKey.current=viewKey;hasFit.current=false;}if(hasFit.current&&el.closest('[data-keyboard="true"]'))return;hasFit.current=true;const z=Math.min(1,el.clientWidth/Math.max(width,1),el.clientHeight/Math.max(height,1)),v={zoom:z,x:(el.clientWidth-width*z)/2,y:(el.clientHeight-height*z)/2};fit.current=v;if(!touched.current)apply(views.get(viewKey)||v);};const ro=new ResizeObserver(update);ro.observe(el);update();return()=>{ro.disconnect();};},[viewKey,width,height]);
- useLayoutEffect(()=>{touched.current=false;const saved=views.get(viewKey);if(saved){apply(saved);touched.current=true;}else apply(fit.current);return()=>{if(touched.current)views.set(viewKey,current.current);};},[viewKey]);
+ useLayoutEffect(()=>{const el=viewport.current;if(!el)return;const update=()=>{
+  if(fitKey.current!==viewKey){fitKey.current=viewKey;hasFit.current=false;touched.current=false;}
+  if(!ready)return;
+  const z=Math.min(1,el.clientWidth/Math.max(width,1),el.clientHeight/Math.max(height,1)),fitView={zoom:z,x:(el.clientWidth-width*z)/2,y:(el.clientHeight-height*z)/2};fit.current=fitView;
+  // Content changes must never refit a camera that has already opened.
+  if(!hasFit.current||lastRefit.current!==refitKey){const zoom=initialZoom??z;apply((!hasFit.current?views.get(viewKey):undefined)||{zoom,x:(el.clientWidth-width*zoom)/2,y:(el.clientHeight-height*zoom)/2});hasFit.current=true;lastRefit.current=refitKey;}
+ };const ro=new ResizeObserver(update);ro.observe(el);update();return()=>ro.disconnect();},[viewKey,width,height,ready,initialZoom,refitKey]);
+ useLayoutEffect(()=>()=>{if(hasFit.current)views.set(viewKey,current.current);},[viewKey]);
  useLayoutEffect(()=>{const el=viewport.current;if(!el)return;const wheel=(e:WheelEvent)=>{e.preventDefault();if(e.ctrlKey||e.metaKey||e.altKey)scale(current.current.zoom*Math.exp(-e.deltaY*.006),e.clientX,e.clientY);};el.addEventListener('wheel',wheel,{passive:false});return()=>el.removeEventListener('wheel',wheel);},[]);
  const sample=():{x:number;y:number;distance?:number}|null=>{const p=[...points.current.values()];if(!p.length)return null;return p.length===1?p[0]:{x:(p[0].x+p[1].x)/2,y:(p[0].y+p[1].y)/2,distance:Math.hypot(p[0].x-p[1].x,p[0].y-p[1].y)};};
  function down(e:PointerEvent<HTMLDivElement>){if(e.button!==0||(e.target as HTMLElement).closest('[data-no-pan],button,input,[role=menu]'))return;points.current.set(e.pointerId,{x:e.clientX,y:e.clientY});if(points.current.size===1){moved.current=false;origin.current={x:e.clientX,y:e.clientY};}last.current=sample();}

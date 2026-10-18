@@ -8,11 +8,11 @@
 .node:focus-visible { outline:2px solid var(--primary); outline-offset:3px; }
 .node.fading { opacity:.1; }
 .picture { flex-direction:column; gap:12px; }
-.pictureFrame { display:block; flex-shrink:0; }
+.pictureFrame { display:block; flex-shrink:0; overflow:clip; }
 .pictureFallback { display:grid; place-items:center; height:100%; width:100%; border:1px solid var(--border); border-radius:24%; background:var(--surface); }
 .justAdded { text-decoration:underline; text-underline-offset:6px; }
 .picture img { display:block; width:100%; height:100%; border-radius:24%; object-fit:cover; border:1px solid var(--border); }
-.caption { color:inherit; font-size:16px; line-height:1.3; }
+.caption { color:inherit; font-size:16px; line-height:1.3; flex-shrink:0; }
 .empty { position:absolute; inset:0; display:grid; place-items:center; margin:0; color:var(--muted-foreground); font-size:19px; pointer-events:none; }
 .context { min-width:190px; border-radius:20px; padding:6px; background:var(--glass-solid); backdrop-filter:blur(28px); }
 .context [role=menuitem] { min-height:44px; font-size:17px; padding:10px 16px; cursor:pointer; }

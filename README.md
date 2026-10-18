@@ -71,7 +71,7 @@ motion. The Pro hosting badge setting is disabled.
 - Separate saved games per variant, shared links, undo, automatic pass-and-play orientation, promotion and keyboard/touch controls.
 - Tactical: material and positional evaluation, iterative-deepening alpha-beta, capture ordering, bounded quiescence, and time/node limits. Six levels before board selection: Pre-Beginner (40 ms/depth 1/125 nodes, with a 50% random legal choice), Beginner (80 ms/depth 1), Easy (200 ms/depth 2), Medium (750 ms/depth 3), Hard (1.5 s/depth 4), Expert (3 s/depth 5), each with its own node limit. These are not Elo ratings.
 
-Brusky’s native 84-cell board, conventional notation and 38-piece setup are implemented and tested; legal rules and live selection remain disabled until complete. See [Brusky progress](docs/variants/brusky.md). Engines 2–6, De Vasa and Wellisch remain planned. Each future engine will be an independent executable with its own search/evaluation design. Engine identities are provisional; strength has not been rated.
+Brusky’s native 84-cell board, conventional notation and 38-piece setup are implemented and tested; legal rules and live selection remain disabled until complete. See [Brusky progress](docs/variants/brusky.md). De Vasa’s [81-cell board, notation and 36-piece setup](docs/variants/devasa.md) are now implemented and tested as an experimental foundation; gameplay remains disabled. Engines 2–6 and Wellisch remain planned. Each future engine will be an independent executable with its own search/evaluation design. Engine identities are provisional; strength has not been rated.
 
 ## Work on the source
 

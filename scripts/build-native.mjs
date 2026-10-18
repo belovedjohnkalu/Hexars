@@ -63,6 +63,7 @@ try {
     "shared/variants/mccooey.cpp",
     "shared/variants/shafran.cpp",
     "shared/variants/brusky.cpp",
+    "shared/variants/devasa.cpp",
     "shared/variants/variant.cpp",
   ].map((source) => path.join(root, source));
   const engineSources = [
@@ -114,6 +115,11 @@ try {
   if (process.argv.includes("--test")) {
     const output = path.join(root, "build", windows ? "brusky-foundation-tests.exe" : "brusky-foundation-tests");
     await run(compiler, [...flags, path.join(root,"tests/rules/brusky.cpp"), ...ruleSources, "-o",output]);
+    process.stdout.write(await run(output, []));
+  }
+  if (process.argv.includes("--test")) {
+    const output = path.join(root, "build", windows ? "devasa-foundation-tests.exe" : "devasa-foundation-tests");
+    await run(compiler, [...flags, path.join(root,"tests/rules/devasa.cpp"), ...ruleSources, "-o",output]);
     process.stdout.write(await run(output, []));
   }
   if (process.argv.includes("--cloud")) {
