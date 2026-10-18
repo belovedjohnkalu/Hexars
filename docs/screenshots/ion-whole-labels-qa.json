@@ -1,0 +1,11 @@
+{
+  "date": "2026-10-18T18:12:12.374Z",
+  "fixturesOnly": true,
+  "checks": [
+    "Whole labels, reserved IL space and no overlaps at 320px",
+    "Whole labels, reserved IL space and no overlaps at 393px",
+    "Whole labels, reserved IL space and no overlaps at 768px",
+    "Whole labels, reserved IL space and no overlaps at 1280px",
+    "Keyboard pan and zoom preserve full labels without document scrolling"
+  ]
+}

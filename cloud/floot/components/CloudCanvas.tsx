@@ -1,6 +1,5 @@
 import { useLayoutEffect,useMemo,useRef,useState,type CSSProperties,type MouseEvent } from 'react';
 import { Link,useLocation } from 'react-router-dom';
-import { cloudNames } from '../helpers/cloudNames';
 import { chessVariants } from '../helpers/chessVariants';
 import { cloudTree } from '../helpers/cloudTree';
 import { colorValue } from '../helpers/cloudColors';
@@ -27,7 +26,7 @@ export function CloudCanvas({nodes,parentId,onOpen,opening,loading,addedId,onPic
   const saved=lastLayout.current?.key===layoutKey?lastLayout.current:layoutCache.get(layoutKey),old=saved?.viewportWidth===size.width?saved.layout:undefined;
   const previous=old||(scope==='home'&&parentId==='ion'?cloudHomeLayout(size.width,size.height):undefined);
   const width=Math.max(previous?.width||0,size.width,square?Math.max(760,Math.ceil(Math.sqrt(siblings.length))*165):Math.min(2400,Math.sqrt(siblings.length)*100));
-  return cloudLayout(siblings.map(n=>({...n,identifier:showIdentifiers?n.identifier:undefined,name:cloudNames.preview(n.name)})),width,size.height,(text,font)=>{if(!context)return text.length*font*.54;context.font='500 '+font+'px Inter, sans-serif';return context.measureText(text).width;},{square,compact:size.width<600,previous});
+  return cloudLayout(siblings.map(n=>({...n,identifier:showIdentifiers?n.identifier:undefined,name:n.name})),width,size.height,(text,font)=>{if(!context)return text.length*font*.54;context.font='500 '+font+'px Inter, sans-serif';return context.measureText(text).width;},{square,compact:size.width<600,previous});
  },[siblings,size,fontReady,scope,square,layoutKey,showIdentifiers,parentId]);
  useLayoutEffect(()=>{if(!fontReady||loading)return;const old=lastLayout.current?.key===layoutKey?lastLayout.current:layoutCache.get(layoutKey),retain=old?.key===layoutKey&&old.viewportWidth===size.width&&old.layout.width===layout.width;const items=retain?[...new Map([...old.layout.items,...layout.items].map(n=>[n.id,n])).values()]:layout.items;lastLayout.current={key:layoutKey,viewportWidth:size.width,layout:{...layout,items}};layoutCache.set(layoutKey,lastLayout.current);},[layout,size.width,fontReady,loading,layoutKey]);
  const rectangles=new Map(layout.items.map(n=>[n.id,n]));
@@ -41,11 +40,11 @@ export function CloudCanvas({nodes,parentId,onOpen,opening,loading,addedId,onPic
   if(chessVariants.isId(node.destination)){let mode='friend',level='3';try{if(localStorage.getItem('ion.engine')==='tactical'){mode='engine';level=localStorage.getItem('ion.difficulty')||'3';}}catch{}return '/'+node.destination+'?mode='+mode+(mode==='engine'?'&level='+level:'');}
   return cloudURL(node.id,scope)+context;
  }
- return <div ref={area} className={styles.viewport+' '+className}><SpatialViewport width={layout.width} height={layout.height} viewKey={layoutKey} ready={!!fontReady&&!loading} refitKey={size.width+':'+size.height} initialZoom={square?1:undefined}>
+ return <div ref={area} className={styles.viewport+' '+className}><SpatialViewport width={layout.width} height={layout.height} viewKey={layoutKey} ready={!!fontReady&&!loading} refitKey={size.width+':'+size.height} initialZoom={square?1:layout.width>size.width?Math.max(.7,Math.min(1,size.width/layout.width,size.height/layout.height)):undefined}>
  <div className={styles.canvas+(opening?' '+styles.leaving:'')} data-home={scope==='home'&&parentId==='ion'} role="group" aria-label={parentId?'Droplets':'Clouds'} aria-busy={loading} style={{width:layout.width,height:layout.height,visibility:fontReady&&!loading?'visible':'hidden'}}>
  {siblings.map(node=>{const rect=rectangles.get(node.id);if(!rect)return null;const picture=node.isImage||cloudPhotoUrls(node).length>0,identifier=showIdentifiers?node.identifier:undefined;
   const label=identifier?<span className={styles.identifier} data-identifier={identifier} style={{width:identifierFootprint(identifier).width-6}}>{identifier}</span>:null;
-  const content=picture?<><CloudPhoto node={node} size={rect.width-24} onError={onPictureError}/><span className={styles.caption}><span>{cloudNames.preview(node.name)}</span>{label}</span></>:<><span>{cloudNames.preview(node.name)}</span>{label}</>;
+  const content=picture?<><CloudPhoto node={node} size={rect.pictureSize??rect.width-24} onError={onPictureError}/><span className={styles.caption}><span className={styles.text}>{node.name}</span>{label}</span></>:<><span className={styles.text}>{node.name}</span>{label}</>;
   const props={...hold.handlers(node),className:[styles.node,picture?styles.picture:'',opening&&opening!==node.id?styles.fading:'',node.id===addedId?styles.justAdded:''].join(' '),'data-node-id':node.id,'data-percent':node.percent,'data-descendants':node.count,'data-holding':hold.holding===node.id,'aria-label':node.name,'aria-description':(identifier?identifier+'. ':'')+(node.destination?'Open '+node.name:node.count+' droplets inside. Hold for Controls.'),style:{color:colorValue(node.color||cloudTree.seed.find(n=>n.id===node.id)?.color),'--node-x':rect.x+'px','--node-y':rect.y+'px',width:rect.width,minHeight:rect.height,fontSize:rect.fontSize} as CSSProperties};
   return node.destination==='control'||node.destination==='account'?<Button key={node.id} variant="ghost" {...props} onClick={()=>onCommand?.(node)}>{content}</Button>:<Link key={node.id} {...props} to={destination(node)} onClick={e=>{if(node.destination==='level')try{localStorage.setItem('ion.engine','tactical');localStorage.setItem('ion.difficulty',String(node.level??3));}catch{}onOpen(e,node.id,destination(node));}}>{content}</Link>;
  })}

@@ -248,3 +248,13 @@ expire after 30 days since the last saved game change, with daily physical clean
 Wellisch now has tested three-player setup/geometry/reserve metadata, but remains
 disabled for play until historical multiplayer rules and search are complete.
 See ion-controls-retention-release.md for verification and deployment evidence.
+
+## Whole cloud labels — October 18
+
+Cloud labels, account emails, sentences and photo captions now remain on one
+line, with full text rather than abbreviated previews. The spatial world grows
+to the measured label plus its IL; image dimensions remain independent. Existing
+pan/zoom and no-scroll behavior are preserved. Layout and related regressions
+pass; browser fixtures verify 320/393/768/1280 px, complete labels, no overlaps,
+and keyboard pan/zoom. Static audit retains the 20 previously reviewed JSX
+false positives; no new unresolved ownership or blocking findings.

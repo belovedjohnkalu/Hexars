@@ -1,31 +1,20 @@
 import { identifierFootprint } from "./cloudIdentifiers";
 type Item={id:string;name:string;identifier?:string;imageUrl?:string;isImage?:boolean;percent:number};
 export type Rect={x:number;y:number;width:number;height:number};
-export type CloudLayout={width:number;height:number;items:Array<Rect&{id:string;fontSize:number}>};
-function lines(text:string,size:number,width:number,measure:(text:string,size:number)=>number){
-  let count=1,line="",longest=0;
-  for(const word of text.split(/\s+/)){
-    if(line&&measure(line+" "+word,size)<=width){line+=" "+word;continue;}
-    if(line){longest=Math.max(longest,measure(line,size));count++;line="";}
-    for(const char of word){
-      if(line&&measure(line+char,size)>width){longest=Math.max(longest,measure(line,size));count++;line=char;}
-      else line+=char;
-    }
-  }
-  return {count,longest:Math.max(longest,measure(line,size))};
-}
+export type CloudLayout={width:number;height:number;items:Array<Rect&{id:string;fontSize:number;pictureSize?:number}>};
 export function cloudLayout(items:Item[],width:number,height:number,measure:(text:string,size:number)=>number,options:{square?:boolean;compact?:boolean;previous?:CloudLayout}={}){
   const previous=options.previous,narrow=options.compact??width<600,gap=narrow?16:24,cells=new Map<string,Rect[]>(),result:CloudLayout['items']=[];
-  const maxWidth=Math.max(120,Math.min(width-40,narrow?280:440));
   function keys(rect:Rect){const list:string[]=[];for(let x=Math.floor(rect.x/128);x<=Math.floor((rect.x+rect.width)/128);x++)for(let y=Math.floor(rect.y/128);y<=Math.floor((rect.y+rect.height)/128);y++)list.push(x+","+y);return list;}
   const overlaps=(rect:Rect)=>keys(rect).some(k=>(cells.get(k)||[]).some(r=>rect.x<r.x+r.width&&rect.x+rect.width>r.x&&rect.y<r.y+r.height&&rect.y+rect.height>r.y));
   const reserve=(rect:Rect)=>{for(const k of keys(rect))cells.set(k,[...(cells.get(k)||[]),rect]);};
   const measured=[...items].sort((a,b)=>b.percent-a.percent||items.indexOf(a)-items.indexOf(b)).map(item=>{
-    const identifier=identifierFootprint(item.identifier),fontSize=(narrow?17:20)+item.percent/100*(narrow?13:18),text=lines(item.name,fontSize,Math.max(40,maxWidth-24-identifier.width),measure);
-    const picture=(narrow?105:135)+item.percent*.25,isPicture=item.isImage||item.imageUrl;
-    const width=isPicture?picture+24:Math.max(64,text.longest+24+identifier.width),caption=lines(item.name,16,Math.max(32,width-24-identifier.width),measure);
-    return {id:item.id,fontSize,width,height:isPicture?picture+Math.max(caption.count*20.8,identifier.height)+32:Math.max(text.count*fontSize*1.18,identifier.height)+20};
+    const identifier=identifierFootprint(item.identifier),fontSize=(narrow?17:20)+item.percent/100*(narrow?13:18);
+    const name=item.name.replace(/\s+/g,' '),picture=(narrow?105:135)+item.percent*.25,isPicture=item.isImage||item.imageUrl;
+    const labelWidth=measure(name,isPicture?16:fontSize)+24+identifier.width;
+    return {id:item.id,fontSize,width:Math.max(64,labelWidth,isPicture?picture+24:0),height:isPicture?picture+Math.max(20.8,identifier.height)+32:Math.max(fontSize*1.18,identifier.height)+20,...(isPicture?{pictureSize:picture}:{})};
   });
+  // The spatial world grows to fit whole labels; labels never split or shrink.
+  width=Math.max(width,previous?.width||0,...measured.map(item=>item.width+32));
   const pending:typeof measured=[];
   // Keep retained words anchored before placing additions. Never normalize the
   // whole cloud again after deletion, restore, realtime refresh or an edit.

@@ -120,3 +120,6 @@ Only the configured owner sees permanent IL labels adjacent to words and picture
 
 ## Controls and photos — 0.17
 CloudControls is the canonical action-navigation owner. No context popup or native black selection flash. Round trips preserve account-scoped camera and retained word centers. Home has five fixed default footprints with photos for Controls and Accounts; dev additions are placed around them. Accounts functions use the same word-cloud canvas. Only explicit dev membership permits system edits; ordinary accounts see read-only commands. Multiple photos form a reserved square collage through CloudPhoto. CloudPhotoViewer uses the canonical Dialog fullScreen variant with SpatialViewport and shared Button navigation. The composer’s color/photo tray overlays above the compact bar; it never resizes the canvas or moves beyond the visual keyboard edge. No new visual tokens or app scroll containers.
+
+## Whole cloud labels
+CloudCanvas and cloudLayout reserve the full measured label on one line, including email addresses, sentences, picture captions and adjacent dev ILs. Labels are neither shortened nor split into letters. Photo dimensions remain independent of caption width. The spatial world expands for long labels, with a readable initial camera scale and existing pan/zoom access; document scrolling stays disabled.

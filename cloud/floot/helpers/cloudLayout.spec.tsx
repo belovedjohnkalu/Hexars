@@ -6,7 +6,7 @@ describe("Cloud layout", () => {
     const result = cloudLayout(nodes,width,480,measure);
     for (const item of result.items) {
       expect(item.x).toBeGreaterThanOrEqual(0);
-      expect(item.x+item.width).toBeLessThanOrEqual(width);
+      expect(item.x+item.width).toBeLessThanOrEqual(result.width);
       expect(item.fontSize).toBeGreaterThanOrEqual(17);
       expect(item.y).toBeGreaterThanOrEqual(0);
       for (const other of result.items.filter(n=>n.id!==item.id)) {
@@ -53,6 +53,19 @@ describe('Square Rules and anchored cloud updates',()=>{
 describe('Owner identifiers in spatial layout',()=>{
  it('reserves separate space for labels without overlaps, including alphabetic overflow',()=>{
   const nodes=Array.from({length:32},(_,i)=>({id:String(i),name:'Cloud '+i,percent:50,identifier:'IL1'+'A'.repeat(i===31?102:Math.floor(i/10))+i%10,...(i===4?{isImage:true}:{})}));
-  for(const width of [280,393,1024]){const result=cloudLayout(nodes,width,600,(text,size)=>text.length*size*.54);for(const a of result.items){expect(a.x).toBeGreaterThanOrEqual(0);expect(a.x+a.width).toBeLessThanOrEqual(width);for(const b of result.items.filter(n=>n.id!==a.id))expect(a.x<b.x+b.width&&a.x+a.width>b.x&&a.y<b.y+b.height&&a.y+a.height>b.y).toBeFalse();}}
+  for(const width of [280,393,1024]){const result=cloudLayout(nodes,width,600,(text,size)=>text.length*size*.54);for(const a of result.items){expect(a.x).toBeGreaterThanOrEqual(0);expect(a.x+a.width).toBeLessThanOrEqual(result.width);for(const b of result.items.filter(n=>n.id!==a.id))expect(a.x<b.x+b.width&&a.x+a.width>b.x&&a.y<b.y+b.height&&a.y+a.height>b.y).toBeFalse();}}
+ });
+});
+
+
+describe('Whole cloud labels',()=>{
+ const measure=(text:string,size:number)=>text.length*size*.54;
+ it('reserves one uninterrupted line for words, sentences, email addresses and photo captions',()=>{
+  const names=['Remember','Sign out','Add account','someone.with.a.long.address@example.com','A complete sentence stays together.','A long caption stays together too.'];
+  for(const width of [280,393,820]){
+   const nodes=names.map((name,i)=>({id:String(i),name,percent:i%2*100,identifier:'IL4'+i,...(i===5?{isImage:true}:{})})),result=cloudLayout(nodes,width,600,measure);
+   for(const rect of result.items){const node=nodes.find(n=>n.id===rect.id)!;expect(rect.width).toBeGreaterThanOrEqual(measure(node.name,node.isImage?16:rect.fontSize)+24);expect(rect.height).toBeLessThan(250);}
+   const photo=result.items.find(n=>n.id==='5')!;expect(photo.pictureSize).toBeLessThan(photo.width-24);
+  }
  });
 });

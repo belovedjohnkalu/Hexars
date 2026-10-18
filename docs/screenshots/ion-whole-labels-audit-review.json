@@ -1,0 +1,6 @@
+{
+  "rawAuditPassed": false,
+  "findingCount": 20,
+  "newBlockingFindings": 0,
+  "review": "Existing JSX scanner false positives: shared Button asChild links and Radix triggers own their actions; Form is a React provider around separately noValidate literal forms. No changed workflow adds an actionless control or unowned form. See prior ion-premium-adjudication.json and browser evidence."
+}
