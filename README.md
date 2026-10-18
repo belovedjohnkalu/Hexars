@@ -2,7 +2,7 @@
 
 ION is live on **Floot** at https://ion.floot.app. Its main navigation is a
 pannable, zoomable cloud of words and pictures. Open **Hexagonal Chess**, then
-**Boards** to choose Gliński, McCooey or Shafran, **Engines** to select Tactical, or **Rules**
+**Boards** to choose Gliński, McCooey, Shafran, Brusky or De Vasa, **Engines** to select Tactical, or **Rules**
 for separate rule paragraphs. Rule lists are words; illustrations appear inside each paragraph, and long text uses fitted pages without scrolling.
 
 Home contains **Hexagonal Chess**, **Public**, and **Private**. Public has the same saved continuous-gradient color wheel as Private and is readable
@@ -11,6 +11,8 @@ visible only to its signed-in account. Hold a word to edit or transfer its entir
 branch between Public and Private, with confirmation before publishing. Only the
 configured owner can edit the shared Hexagonal Chess content. Existing personal
 content stays private; it is not published automatically.
+
+The configured owner sees permanent IL labels beside clouds. Each actual hierarchy level adds a zero-based arrival segment without placeholder zeros: IL1 → IL10 → IL100. Segments run 0–9, A0–Z9, AA0–ZZ9, then AAA0 onward. Deletion never releases a number; moves retain labels and copies receive new ones. Other accounts never receive these labels. Existing content is initialized in its saved order.
 
 Every confirmed word and picture is stored on the server. Remember accounts on a
 trusted device to switch without re-entering passwords; forgetting removes that
@@ -52,9 +54,9 @@ Games are saved in the cloud. **Share game** lets you resume on another device; 
 ION uses pure black, neutral glass, self-hosted Inter, and smaller words. Drag to
 pan, pinch or Ctrl/Command-wheel to zoom, or use keyboard zoom. App pages do not scroll. Hold/right-click a word for Edit, Move, Copy or Delete.
 Home roots are fixed; only the owner may change shared Chess entries. Deletion within a space is reversible.
-The compact insert bar and parent Back sit at the bottom. Public, Private and the owner’s Hexagonal Chess editor have a compact continuous gradient wheel. New selections avoid exact duplicate colors among siblings, including server-side allocation. Existing saved colors and branch copies are preserved. Home uses fixed positions. Deletion Undo expires after ten seconds.
+The compact insert bar and parent Back sit at the bottom. Public, Private and the owner’s Hexagonal Chess editor have a compact continuous gradient wheel, visible only while entering a word. New selections avoid exact duplicate colors among siblings, including server-side allocation. Existing saved colors and branch copies are preserved. Home uses fixed positions. Deletion Undo expires after ten seconds.
 
-Boards opens starting-position pictures for the two published variants. Each
+Boards opens native starting-position pictures for all five published variants. Each
 game places its interactive board among Variants, Rules, Engines, Board Reset
 and Undo, plus Pass and Play to deselect Tactical. Swipe right for an earlier move, left for a newer one; Present returns
 to live play. A bold result sheet identifies checkmate, stalemate and draws.
@@ -71,7 +73,7 @@ motion. The Pro hosting badge setting is disabled.
 - Separate saved games per variant, shared links, undo, automatic pass-and-play orientation, promotion and keyboard/touch controls.
 - Tactical: material and positional evaluation, iterative-deepening alpha-beta, capture ordering, bounded quiescence, and time/node limits. Six levels before board selection: Pre-Beginner (40 ms/depth 1/125 nodes, with a 50% random legal choice), Beginner (80 ms/depth 1), Easy (200 ms/depth 2), Medium (750 ms/depth 3), Hard (1.5 s/depth 4), Expert (3 s/depth 5), each with its own node limit. These are not Elo ratings.
 
-Brusky’s native 84-cell board, conventional notation and 38-piece setup are implemented and tested; legal rules and live selection remain disabled until complete. See [Brusky progress](docs/variants/brusky.md). De Vasa’s [81-cell board, notation and 36-piece setup](docs/variants/devasa.md) are now implemented and tested as an experimental foundation; gameplay remains disabled. Engines 2–6 and Wellisch remain planned. Each future engine will be an independent executable with its own search/evaluation design. Engine identities are provisional; strength has not been rated.
+[Brusky](docs/variants/brusky.md) and [De Vasa](docs/variants/devasa.md) are playable with their own pawn rules, en passant, promotion, castling, results and Tactical search. Their 84-cell and 81-cell boards use native pointy geometry. Engines 2–6 and Wellisch remain planned. Each future engine will be an independent executable with its own search/evaluation design. Engine identities are provisional; strength has not been rated.
 
 ## Work on the source
 

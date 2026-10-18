@@ -106,7 +106,7 @@ test("Vercel browser paths pass through the binding to real native boards, game 
     globalThis.fetch = async (input, init) => api(new Request(String(input), init));
     const previews = await proxyApi(new Request("https://hexars.test/api/variants"));
     assert.equal(previews.status, 200);
-    assert.deepEqual((await previews.json()).variants.map((v: { board: { cells: unknown[] } }) => v.board.cells.length), [91, 91, 70]);
+    assert.deepEqual((await previews.json()).variants.map((v: { board: { cells: unknown[] } }) => v.board.cells.length), [91, 91, 70, 84, 81]);
     assert.equal(rows.size, 0);
     const create = { action: "new", variant: "mccooey", mode: "engine", humanPlayer: 0 } as const;
     const unauthenticated = await proxyApi(new Request("https://hexars.test/api/game", {

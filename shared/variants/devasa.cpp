@@ -1,4 +1,5 @@
 #include "hexchess/devasa.hpp"
+#include "hexchess/rules.hpp"
 #include <stdexcept>
 
 namespace hexchess::devasa {
@@ -38,7 +39,8 @@ GameState startingPosition() {
     const std::array<PieceType,9> row{PieceType::Rook,PieceType::Knight,PieceType::Bishop,
         PieceType::Queen,PieceType::Bishop,PieceType::King,PieceType::Bishop,PieceType::Knight,PieceType::Rook};
     for(int file=0;file<9;++file){both({file-4,4},row[file]);both({file-4,2},PieceType::Pawn);}
-    // Movement rights and repetition keys belong to the forthcoming rules module.
+    state.positionHistory.push_back(positionKey(state));
+    validatePosition(state);
     return state;
 }
 std::array<Hex,2> pawnForwardDirections(PlayerId player) {

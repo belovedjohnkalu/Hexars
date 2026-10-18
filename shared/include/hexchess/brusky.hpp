@@ -3,9 +3,7 @@
 #include <array>
 #include <string_view>
 
-// Work in progress: board/setup only. Not registered with createGame or Tactical.
-// Calling the shared move generator on this setup deliberately rejects the
-// unsupported variant rather than applying another variant's pawn rules.
+// Variant-specific board, setup and special-move geometry.
 namespace hexchess::brusky {
 const std::vector<Hex>& cells();
 int index(Hex position);

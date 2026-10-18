@@ -35,7 +35,7 @@ int main(){try{
     for(PlayerId side=0;side<=1;++side){const auto plans=brusky::castlePlans(side);for(int flank=0;flank<2;++flank){require(brusky::notation(plans[flank].kingTo)==targets[side][flank*2],"Castling king destination wrong");require(brusky::notation(plans[flank].rookTo)==targets[side][flank*2+1],"Castling rook destination wrong");}}
     rejects([&]{brusky::pawnForwardDirections(2);},"Third player accepted");
     // Partial work must never be advertised as a legal playable variant.
-    rejects([&]{createGame("brusky");},"Unfinished Brusky exposed as playable");
-    rejects([&]{generateLegalMoves(initial);},"Unfinished Brusky inherited another variant's rules");
-    std::cout<<"Brusky foundation: "<<assertions<<" board/setup assertions; gameplay remains intentionally disabled\n";
+    validatePosition(createGame("brusky"));
+    require(!generateLegalMoves(createGame("brusky")).empty(),"Starting position has no moves");
+    std::cout<<"Brusky foundation: "<<assertions<<" board/setup assertions; playable setup verified\n";
 }catch(const std::exception& e){std::cerr<<"Brusky foundation failure: "<<e.what()<<'\n';return 1;}}

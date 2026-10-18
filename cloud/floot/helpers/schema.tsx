@@ -9,6 +9,8 @@ export type Generated<T> = T extends ColumnType<infer S, infer I, infer U>
   ? ColumnType<S, I | undefined, U>
   : ColumnType<T, T | undefined, T>;
 
+export type Int8 = ColumnType<string, bigint | number | string, bigint | number | string>;
+
 export type Json = JsonValue;
 
 export type JsonArray = JsonValue[];
@@ -43,6 +45,19 @@ export interface HexchessGames {
 export interface IonCloudAccounts {
   userId: number;
   workspaceId: string;
+}
+
+export interface IonCloudIdentifierCounters {
+  nextOrdinal: Int8;
+  parentId: string;
+}
+
+export interface IonCloudIdentifiers {
+  arrivalOrdinal: Int8;
+  assignedAt: Generated<Timestamp>;
+  label: string;
+  nodeId: string;
+  parentId: string | null;
 }
 
 export interface IonCloudTransfers {
@@ -128,6 +143,8 @@ export interface Users {
 export interface DB {
   hexchessGames: HexchessGames;
   ionCloudAccounts: IonCloudAccounts;
+  ionCloudIdentifierCounters: IonCloudIdentifierCounters;
+  ionCloudIdentifiers: IonCloudIdentifiers;
   ionCloudTransfers: IonCloudTransfers;
   ionDeviceAccounts: IonDeviceAccounts;
   ionRememberedDevices: IonRememberedDevices;

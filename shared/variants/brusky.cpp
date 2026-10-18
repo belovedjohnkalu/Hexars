@@ -1,4 +1,5 @@
 #include "hexchess/brusky.hpp"
+#include "hexchess/rules.hpp"
 #include <algorithm>
 #include <stdexcept>
 
@@ -48,7 +49,8 @@ GameState startingPosition() {
         PieceType::Queen,PieceType::Bishop,PieceType::King,PieceType::Bishop,PieceType::Knight,PieceType::Rook};
     for(int file=0;file<9;++file)both(std::string(1,static_cast<char>('a'+file))+"1",back[file]);
     for(int file=0;file<10;++file)both(std::string(1,static_cast<char>('a'+file))+"2",PieceType::Pawn);
-    // No repetition hash until the full variant descriptor and legal rules exist.
+    state.positionHistory.push_back(positionKey(state));
+    validatePosition(state);
     return state;
 }
 std::array<Hex,2> pawnForwardDirections(PlayerId player) {

@@ -9,8 +9,8 @@ import { createInterface } from "node:readline";
 import type { Json } from "./schema";
 import type { ChessMove, GameView, SearchDiagnostics, VariantId } from "../endpoints/game_POST.schema";
 
-const asset = "/_cdn/static/eacabb97-9c33-4516-a7c2-150b6601f6fa-tactical-0.7.1-linux-x64.bin";
-const checksum = "d914d8c30dd0e13b8280a12ae035c929d514626a70f69a0cb744ca0fdb41794a";
+const asset = "/_cdn/static/fc4bd2d7-7f24-4a2b-add1-686dd2305796-tactical-0.8.0-linux-x64.bin";
+const checksum = "87d367b4d7b340f3fbf6b4d208dcb3ff7d2015ce4a406d82f2461140ec385693";
 type Options = {
   action: "new" | "inspect" | "move" | "search";
   origin: string;
@@ -45,7 +45,7 @@ async function executable(origin: string) {
   const response = await fetch(new URL(asset, origin), { signal: AbortSignal.timeout(15000) });
   if (!response.ok) throw new Error("The cloud engine could not be loaded");
   binary = Buffer.from(await response.arrayBuffer());
-  if (binary.length !== 2160312 || createHash("sha256").update(binary).digest("hex") !== checksum)
+  if (binary.length !== 2177112 || createHash("sha256").update(binary).digest("hex") !== checksum)
     throw new Error("Cloud engine checksum mismatch");
   const staging = filename + "-" + randomUUID();
   try {

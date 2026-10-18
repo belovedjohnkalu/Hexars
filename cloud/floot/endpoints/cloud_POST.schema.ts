@@ -23,7 +23,7 @@ export const schema = z.discriminatedUnion("action", [
   if (!result.success) for (const issue of result.error.issues) context.addIssue({ ...issue, path: ["name", ...issue.path] });
 });
 export type CloudNode = {
-  id: string; parentId: string | null; name: string; color?:CloudColor;
+  id: string; parentId: string | null; name: string; color?:CloudColor; identifier?:string;
   imageKey?: string; imageUrl?: string; isImage?: boolean; destination?: "board" | VariantId | "tactical" | "level"; note?: string; illustration?:string; variant?:VariantId; level?:number; createdBy?:number; canEdit?:boolean; canCopy?:boolean; sizeCount?:number;
   copyOperation?: string; removedBy?: string; removedAt?: string;
 };

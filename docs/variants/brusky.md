@@ -1,10 +1,7 @@
-# Brusky — implementation started
+# Brusky — playable
 
-Status: native board, conventional notation, starting position and special-rule
-geometry are implemented and tested. Brusky is **not yet playable**, registered
-in `createGame`, advertised by Tactical, or offered in the live board chooser.
-This prevents the common generator from silently applying another variant’s
-pawn rules to an unfinished variant.
+Playable in ION with native-authoritative rules, Tactical, pass-and-play,
+cloud save/resume, undo/review and illustrated paragraph clouds.
 
 ## References checked on 2026-10-18
 
@@ -33,14 +30,14 @@ R N B Q B K B N R; pawns occupy a2–j2. Black’s d8–l8 row is
 R N B K B Q B N R; pawns occupy c7–l7. Tests check these rows independently
 rather than simply mirroring the implementation.
 
-The experimental `hexchess::brusky` namespace supplies this ordered cell list,
+The `hexchess::brusky` namespace supplies this ordered cell list,
 notation/index conversions, a `GameState` setup, the two forward pawn axes,
 starting/promotion cells, and the two castling destination plans per player.
-The setup deliberately has no repetition key until Brusky’s rights are implemented.
+The setup validates and records its own repetition key, including movement rights.
 
-## Next implementation gate
+## Implemented rules and verification
 
-Before enabling the variant, implement and independently test:
+Native fixtures independently cover:
 
 - Two noncapturing forward directions, with an unmoved starting pawn allowed
   two steps along either individual direction. All traversed cells must be empty.
@@ -59,5 +56,4 @@ Before enabling the variant, implement and independently test:
 - Native protocol and Tactical support; pointy board rendering/previews/rule
   diagrams; pass-and-play, undo/review, saved games and engine games.
 
-No frontend authority, database rows, engine asset, or saved game hash was changed
-for this foundation. `npm run test:native` and CMake/CTest both include its tests.
+The shared protocol exposes pointy orientation, full movement history and native legal-move deltas. Original three-variant hashes and saved states remain compatible. `npm run test:native`, protocol tests and CMake/CTest cover the module; the shared horizontal suite covers full random and Tactical games.

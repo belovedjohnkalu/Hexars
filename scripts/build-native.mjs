@@ -122,6 +122,11 @@ try {
     await run(compiler, [...flags, path.join(root,"tests/rules/devasa.cpp"), ...ruleSources, "-o",output]);
     process.stdout.write(await run(output, []));
   }
+  if (process.argv.includes("--test")) {
+    const output = path.join(root, "build", windows ? "horizontal-rules-tests.exe" : "horizontal-rules-tests");
+    await run(compiler, [...flags, path.join(root,"tests/rules/horizontal.cpp"), path.join(root,"engines/engine-1/search.cpp"), ...ruleSources, "-o",output]);
+    process.stdout.write(await run(output, []));
+  }
   if (process.argv.includes("--cloud")) {
     if (process.platform !== "linux" || process.arch !== "x64")
       throw new Error("Cloud executable must be built on Linux x64");

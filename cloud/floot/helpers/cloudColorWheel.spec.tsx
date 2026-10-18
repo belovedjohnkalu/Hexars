@@ -21,3 +21,17 @@ describe('Gradient color control',()=>{
   expect(colorHex(add.calls.mostRecent().args[0].color)).not.toBe(colorHex(first.color));
  });
 });
+
+describe('Color wheel entry visibility',()=>{
+ let originalEvent:typeof Event;
+ beforeEach(()=>{originalEvent=globalThis.Event;globalThis.Event=window.Event;});
+ afterEach(()=>{cleanup();globalThis.Event=originalEvent;});
+ it('is hidden until word entry starts and stays available when focus moves into the picker',()=>{
+  const view=render(<CloudComposer colors parentId="private" busy={false} disabled={false} draft={{name:''}} onDraft={()=>{}} onAdd={async()=>true}/>),input=view.getByLabelText('Add a word or a picture name');
+  expect(view.queryByRole('slider')).toBeNull();fireEvent.focus(input);const slider=view.getByRole('slider',{name:'Word color'});expect(slider).toBeTruthy();fireEvent.blur(input,{relatedTarget:slider});expect(view.queryByRole('slider')).toBeTruthy();fireEvent.blur(slider,{relatedTarget:document.body});expect(view.queryByRole('slider')).toBeNull();
+ });
+ it('keeps the draft and chosen color when entry is dismissed',()=>{
+  const view=render(<CloudComposer colors parentId="public" scope="public" busy={false} disabled={false} draft={{name:'Keep me',color:'blue'}} onDraft={()=>{}} onAdd={async()=>false}/>),input=view.getByLabelText('Add a word or a picture name') as HTMLInputElement;
+  fireEvent.focus(input);const original=view.getByRole('slider').getAttribute('aria-valuetext');fireEvent.keyDown(view.getByRole('slider'),{key:'ArrowRight'});const chosen=view.getByRole('slider').getAttribute('aria-valuetext');expect(chosen).not.toBe(original);fireEvent.blur(input,{relatedTarget:document.body});expect(view.queryByRole('slider')).toBeNull();expect(input.value).toBe('Keep me');fireEvent.focus(input);expect(view.getByRole('slider').getAttribute('aria-valuetext')).toBe(chosen);
+ });
+});

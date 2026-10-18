@@ -8,7 +8,7 @@ import { CloudBoard } from "../components/CloudBoard";
 import { InstallControl } from "../components/InstallControl";
 import { HexLoading } from "../components/HexLoading";
 import styles from "./home.module.css";
-const names = { glinski: "Gliński", mccooey: "McCooey", shafran: "Shafran" };
+const names = { glinski: "Gliński", mccooey: "McCooey", shafran: "Shafran", brusky:"Brusky",devasa:"De Vasa" };
 export default function Home() {
   const navigate = useNavigate();
   const [previews, setPreviews] = useState<OutputType["variants"]>([]);
@@ -36,7 +36,7 @@ export default function Home() {
     <header className={styles.header}><div className={styles.brand}><img src="/icons/icon-192.png" width={48} height={48} alt="" aria-hidden="true" /><h1>ION</h1></div><InstallControl /></header>
     {loadingLink ? <main className={styles.opening} role="status"><HexLoading /><div>Opening…</div></main> : <main className={styles.choices}>
       {error && <p className={styles.notice} role="alert">{gameSessions.fromHash() ? "Link unavailable" : "Boards unavailable"}</p>}
-      {(["glinski", "mccooey", "shafran"] as const).map(id => {
+      {(["glinski", "mccooey", "shafran", "brusky", "devasa"] as const).map(id => {
         const preview = previews.find(value => value.id === id);
         const game: GameView | null = preview ? {
           variant: id, stateId: `preview-${id}`, board: preview.board,

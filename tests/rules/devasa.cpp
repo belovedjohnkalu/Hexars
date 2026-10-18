@@ -26,6 +26,6 @@ int main(){try{
     for(PlayerId side=0;side<2;++side)for(const auto direction:devasa::pawnCaptureDirections(side))require(cellColour(direction)==cellColour({0,0}),"Pawn capture changes cell color");
     const char* targets[2][4]{{"h1","g1","c1","d1"},{"b9","c9","g9","f9"}};
     for(PlayerId side=0;side<2;++side){const auto plans=devasa::castlePlans(side);for(int flank=0;flank<2;++flank){require(devasa::notation(plans[flank].kingTo)==targets[side][flank*2],"King castle destination wrong");require(devasa::notation(plans[flank].rookTo)==targets[side][flank*2+1],"Rook castle destination wrong");}}
-    rejects([&]{devasa::pawnForwardDirections(2);},"Third player accepted");rejects([&]{createGame("devasa");},"Unfinished rules advertised playable");rejects([&]{generateLegalMoves(state);},"Unfinished setup inherited another variant's rules");
-    std::cout<<"De Vasa foundation: "<<assertions<<" geometry/setup assertions; gameplay remains disabled\n";
+    rejects([&]{devasa::pawnForwardDirections(2);},"Third player accepted");validatePosition(createGame("devasa"));require(!generateLegalMoves(createGame("devasa")).empty(),"Starting position has no moves");
+    std::cout<<"De Vasa foundation: "<<assertions<<" geometry/setup assertions; playable setup verified\n";
 }catch(const std::exception& e){std::cerr<<"De Vasa foundation failure: "<<e.what()<<'\n';return 1;}}

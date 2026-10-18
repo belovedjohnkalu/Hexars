@@ -23,3 +23,7 @@
 .saving { width: 20px; height: 20px; border: 2px solid currentColor; border-top-color: transparent; border-radius: var(--radius-full); animation: turn 800ms linear infinite; }
 @keyframes turn { to { transform: rotate(360deg); } }
 @media (prefers-reduced-motion: reduce) { .saving { animation: none; border-top-color: currentColor; opacity: .7; } }
+
+.colors { position:absolute; left:0; right:0; bottom:calc(100% + 4px); z-index:2; border-radius:var(--radius-full); background:var(--background); animation:colorEntry 140ms var(--ease) both; }
+@keyframes colorEntry { from { opacity:0; transform:translateY(3px); } to { opacity:1; transform:translateY(0); } }
+@media(prefers-reduced-motion:reduce) { .colors { animation:none; } }

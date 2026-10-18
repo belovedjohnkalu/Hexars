@@ -70,7 +70,7 @@ async function execute(options: EngineOptions): Promise<NativeResult> {
       const game = packet.game as GameView;
       if (
         !Array.isArray(game.board?.cells) ||
-        game.board.cells.length !== ({ glinski: 91, mccooey: 91, shafran: 70 } as const)[game.variant] ||
+        game.board.cells.length !== ({ glinski: 91, mccooey: 91, shafran: 70, brusky:84, devasa:81 } as const)[game.variant] ||
         !Array.isArray(game.legalMoves)
       )
         throw new Error("Invalid cloud game response");

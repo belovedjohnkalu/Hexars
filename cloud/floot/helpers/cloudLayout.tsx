@@ -1,4 +1,5 @@
-type Item={id:string;name:string;imageUrl?:string;isImage?:boolean;percent:number};
+import { identifierFootprint } from "./cloudIdentifiers";
+type Item={id:string;name:string;identifier?:string;imageUrl?:string;isImage?:boolean;percent:number};
 export type Rect={x:number;y:number;width:number;height:number};
 export type CloudLayout={width:number;height:number;items:Array<Rect&{id:string;fontSize:number}>};
 function lines(text:string,size:number,width:number,measure:(text:string,size:number)=>number){
@@ -20,10 +21,10 @@ export function cloudLayout(items:Item[],width:number,height:number,measure:(tex
   const overlaps=(rect:Rect)=>keys(rect).some(k=>(cells.get(k)||[]).some(r=>rect.x<r.x+r.width&&rect.x+rect.width>r.x&&rect.y<r.y+r.height&&rect.y+rect.height>r.y));
   const reserve=(rect:Rect)=>{for(const k of keys(rect))cells.set(k,[...(cells.get(k)||[]),rect]);};
   const measured=[...items].sort((a,b)=>b.percent-a.percent||items.indexOf(a)-items.indexOf(b)).map(item=>{
-    const fontSize=(narrow?17:20)+item.percent/100*(narrow?13:18),text=lines(item.name,fontSize,maxWidth-24,measure);
+    const identifier=identifierFootprint(item.identifier),fontSize=(narrow?17:20)+item.percent/100*(narrow?13:18),text=lines(item.name,fontSize,Math.max(40,maxWidth-24-identifier.width),measure);
     const picture=(narrow?105:135)+item.percent*.25,isPicture=item.isImage||item.imageUrl;
-    const width=isPicture?picture+24:Math.max(64,text.longest+24),caption=lines(item.name,16,width-24,measure);
-    return {id:item.id,fontSize,width,height:isPicture?picture+caption.count*20.8+32:text.count*fontSize*1.18+20};
+    const width=isPicture?picture+24:Math.max(64,text.longest+24+identifier.width),caption=lines(item.name,16,Math.max(32,width-24-identifier.width),measure);
+    return {id:item.id,fontSize,width,height:isPicture?picture+Math.max(caption.count*20.8,identifier.height)+32:Math.max(text.count*fontSize*1.18,identifier.height)+20};
   });
   const pending:typeof measured=[];
   // Keep retained words anchored before placing additions. Never normalize the

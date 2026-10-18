@@ -1,11 +1,11 @@
 import { z } from "zod";
 import superjson from "superjson";
 
-export const variantSchema = z.enum(["glinski", "mccooey", "shafran"]);
+export const variantSchema = z.enum(["glinski", "mccooey", "shafran", "brusky", "devasa"]);
 export type VariantId = z.infer<typeof variantSchema>;
 
 const hex = z
-  .object({ q: z.number().int().min(-5).max(5), r: z.number().int().min(-5).max(5) })
+  .object({ q: z.number().int().min(-5).max(6), r: z.number().int().min(-5).max(5) })
   .strict();
 const move = z
   .object({
@@ -54,6 +54,7 @@ export type GameView = {
   board: {
     variant: VariantId;
     stage: string;
+    orientation?: "flat"|"pointy";
     players: number[];
     cells: Array<
       Hex & { colour: number; notation: string; piece: { type: PieceName; player: number } | null }

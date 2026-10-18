@@ -6,6 +6,7 @@
 namespace hexchess {
 // A variant owns its board, pawn rules and result policy. The common generator
 // shares the six orthodox hexagonal piece movements used by these variants.
+struct CastlingPlan { Hex kingFrom,kingTo,rookFrom,rookTo; };
 struct VariantDefinition {
     VariantId id;
     const std::vector<Hex>& (*cells)();
@@ -17,6 +18,12 @@ struct VariantDefinition {
     bool fractionalStalemate;
     int (*pawnInitialAdvance)(Hex, PlayerId){nullptr};
     bool castling{false};
+    std::vector<Hex> (*pawnForwards)(PlayerId){nullptr};
+    bool (*promotionCell)(Hex,PlayerId){nullptr};
+    std::vector<CastlingPlan> (*castlePlans)(PlayerId){nullptr};
+    bool pawnInitialExtraCapture{false};
+    bool enemyBlocksBothPawnAdvances{false};
+    bool pointyBoard{false};
 };
 const VariantDefinition& variantDefinition(const VariantId& id);
 GameState createMcCooeyStartingPosition();

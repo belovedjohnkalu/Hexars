@@ -56,8 +56,8 @@ GameState decodeState(const Json& value) {
             const auto type = pieceType(piece.at("type").get<std::string>());
             if (state.variant == "mccooey" && type == PieceType::Pawn && !piece.contains("hasMoved"))
                 throw std::invalid_argument("Missing McCooey pawn movement rights");
-            if (state.variant == "shafran" && (type == PieceType::Pawn || type == PieceType::King || type == PieceType::Rook) && !piece.contains("hasMoved"))
-                throw std::invalid_argument("Missing Shafran movement rights");
+            if ((state.variant == "shafran" || state.variant == "brusky" || state.variant == "devasa") && (type == PieceType::Pawn || type == PieceType::King || type == PieceType::Rook) && !piece.contains("hasMoved"))
+                throw std::invalid_argument("Missing variant movement rights");
             state.occupants.push_back({type,static_cast<PlayerId>(player),piece.value("hasMoved",false)});
         }
     }
@@ -126,7 +126,7 @@ Json describeGame(const GameState& state) {
         default: break;
     }
     return {{"stateId",stateId(state)},{"variant",state.variant},{"activePlayer",state.activePlayer},{"ply",state.ply},
-            {"check",isInCheck(state,state.activePlayer)},{"board",{{"variant",state.variant},{"stage","game"},{"players",state.turnOrder},{"cells",cells}}},
+            {"check",isInCheck(state,state.activePlayer)},{"board",{{"variant",state.variant},{"stage","game"},{"orientation",variantDefinition(state.variant).pointyBoard?"pointy":"flat"},{"players",state.turnOrder},{"cells",cells}}},
             {"legalMoves",moves},{"result",{{"status",status},{"reason",reason},{"winner",result.winner},{"scores",Json::array({result.scores[0],result.scores[1]})}}}};
 }
 
@@ -134,8 +134,8 @@ Json processRequest(const Json& request, std::optional<GameState>& state) {
     if(!request.is_object()||request.value("protocolVersion",0)!=1||!request.contains("type")||!request.at("type").is_string()) throw std::invalid_argument("Invalid protocol request");
     const auto type=request.at("type").get<std::string>();
     Json response{{"protocolVersion",1},{"requestId",request.value("requestId",std::string{})}};
-    if(type=="hello") { response.update({{"type","hello"},{"engine","Tactical 0.7.1"},{"capabilities",Json::array({"glinski","mccooey","shafran","legal_moves","search"})}});return response; }
-    if(type=="supported_variants") {response.update({{"type","supported_variants"},{"variants",Json::array({"glinski","mccooey","shafran"})}});return response;}
+    if(type=="hello") { response.update({{"type","hello"},{"engine","Tactical 0.8.0"},{"capabilities",Json::array({"glinski","mccooey","shafran","brusky","devasa","legal_moves","search"})}});return response; }
+    if(type=="supported_variants") {response.update({{"type","supported_variants"},{"variants",Json::array({"glinski","mccooey","shafran","brusky","devasa"})}});return response;}
     if(type=="new_game") {
         state=createGame(request.value("variant",std::string{"glinski"}));
     } else if(type=="position") {

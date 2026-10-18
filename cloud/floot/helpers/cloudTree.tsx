@@ -1,3 +1,4 @@
+import { horizontalRuleClouds } from "./horizontalRules";
 import type { CloudNode,CloudScope } from "../endpoints/cloud_POST.schema";
 const roots:CloudNode[]=[{"id": "hexagonal-chess", "parentId": null, "name": "Hexagonal Chess", "imageUrl": "/_cdn/static/9522e791-e7fa-41d6-867c-2d4013eb3982-hexars-dark-512.png", "color": "blue"}, {"id": "public", "parentId": null, "name": "Public", "color": "mint"}, {"id": "private", "parentId": null, "name": "Private", "color": "lavender"}];
 const seed:CloudNode[]=[
@@ -79,6 +80,7 @@ const seed:CloudNode[]=[
 {"id": "shafran-rule-material-20", "parentId": "shafran-rules", "name": "Material house rule", "note": "Bare kings draw. The selected app house rule also draws when each side has only its king plus at most one bishop, knight or rook, with no pawns or queens. An existing checkmate takes precedence. This is a house rule: historical hexagonal chess can allow a lone minor to mate in unusual positions.", "illustration": "material", "variant": "shafran", "isImage": false, "color": "white"},
 {"id": "shafran-rule-setup-21", "parentId": "shafran-rules", "name": "Reference", "note": "This implementation follows Green Chess’s Shafran rules and its four castling diagrams: greenchess.net/en/rules.php?v=shafran. The setup and en passant examples were checked against the Shafran section of Wikipedia’s Hexagonal chess article. The original manuscript was not located; the material draw above is an app house rule.", "illustration": "setup", "variant": "shafran", "isImage": false, "color": "blue"}
 ];
+seed.push(...horizontalRuleClouds());
 function descendants(nodes:CloudNode[],id:string){
  const children=new Map<string,CloudNode[]>();for(const n of nodes)if(n.parentId)children.set(n.parentId,[...(children.get(n.parentId)||[]),n]);
  const seen=new Set([id]),queue=[id];for(let i=0;i<queue.length;i++)for(const n of children.get(queue[i])||[])if(!seen.has(n.id)){seen.add(n.id);queue.push(n.id);}return seen.size-1;

@@ -27,6 +27,36 @@ export function ruleIllustration(board: GameView["board"], kind: string, variant
     for (const [q,r] of directions) for (let n=1;n<=10;n++) { if (!valid.has(key({q:q*n,r:r*n}))) break; add(q*n,r*n); }
   } else if (kind === "king") for (const [q,r] of [...edges,...corners]) add(q,r);
   else if (kind === "knight") for (const [q,r] of jumps) add(q,r);
+  else if (board.orientation === "pointy") {
+    const showPawn=(at:string)=>{origin=cell(at);pieces.push({...origin,type:"pawn",player:0});};
+    if(kind==="advance"||kind==="double"){
+      showPawn(kind==="double"?(variant==="brusky"?"c2":"c3"):"e4");
+      for(const [q,r] of [[0,-1],[1,-1]])for(let n=1;n<=(kind==="double"?2:1);n++)add(origin.q+q*n,origin.r+r*n);
+      caption=kind==="double"?"On its first move, a pawn may take one or two empty cells along either single forward axis.":"Two forward choices; occupied paths are blocked.";
+    }else if(kind==="capture"||kind==="initial-capture"){
+      showPawn(kind==="initial-capture"?(variant==="brusky"?"c2":"c3"):"g5");
+      const directions=[[-1,-1],[2,-1],...(kind==="initial-capture"&&variant==="brusky"?[[1,-2]]:[])];
+      for(const [q,r]of directions){add(origin.q+q,origin.r+r);if(valid.has(key({q:origin.q+q,r:origin.r+r})))pieces.push({q:origin.q+q,r:origin.r+r,type:"knight",player:1});}
+      caption=kind==="initial-capture"&&variant==="brusky"?"An unmoved starting pawn has a third straight-forward capture.":"Side captures land on enemies, on the pawn’s cell color.";
+    }else if(kind==="blocked"){
+      put("g5","pawn",0);put("h6","pawn",1);if(variant==="devasa")mark("g6");
+      caption=variant==="brusky"?"The enemy on h6 blocks both forward advances of g5.":"The enemy on h6 leaves g5–g6 available.";
+    }else if(kind==="en-passant"){
+      put("g5","pawn",0);put("f5","pawn",1);mark("f6");caption="After Black f7–f5, White g5×f6 removes the pawn on f5.";
+    }else if(kind==="promotion"){
+      showPawn(variant==="brusky"?"g7":"g8");for(const [q,r]of [[0,-1],[1,-1]])add(origin.q+q,origin.r+r);caption="Either highlighted back-rank destination requires promotion.";
+    }else if(kind.startsWith("castle-")){
+      const short=kind==="castle-short";put("f1","king",0);put(short?"i1":"a1","rook",0);mark(short?"h1":"c1");mark(short?"g1":"d1");caption=short?"King h1; rook g1. The empty path and every king transit cell must be safe.":"King c1; rook d1. Movement history, empty paths and king safety still apply.";
+    }else{
+      const fixture:Array<[string,PieceName,number]>=kind==="mate"?(variant==="brusky"?[["a5","king",0],["j4","queen",0],["l4","king",1]]:[["a9","king",0],["g1","queen",0],["i1","king",1]])
+        :kind==="stalemate"?(variant==="brusky"?[["h2","king",0],["k6","queen",0],["l4","king",1]]:[["a9","king",0],["g2","queen",0],["i1","king",1]])
+        :kind==="check"?[["a1","king",0],["f5","rook",0],[variant==="brusky"?"f8":"f9","king",1]]
+        :[["a1","king",0],[variant==="brusky"?"l8":"i9","king",1]];
+      for(const [at,type,player]of fixture)put(at,type,player);
+      if(["mate","stalemate","check"].includes(kind)){const king=pieces.find(p=>p.player===1)!;targets.add(key(king));caption=kind==="mate"?"Black is checkmated.":kind==="stalemate"?"Black is not in check and has no legal move: ½–½.":"Black’s king is in check.";}else caption="Read the rule text for this draw policy.";
+    }
+    return {targets,pieces,caption};
+  }
   else if (kind === "capture") for (const [q,r] of variant === "glinski" ? [[1,0],[-1,1]] : [[1,1],[-1,2]]) { add(q,r); pieces.push({q,r,type:"pawn",player:1}); }
   else if (kind === "triple") { origin=cell("e2"); for(let step=1;step<=3;step++) add(origin.q,origin.r+step); caption="White’s e-pawn can advance up to three empty cells on its first move."; }
   else if (kind === "double") { origin=variant === "mccooey" ? {q:-1,r:-2} : {q:0,r:-1}; add(origin.q,origin.r+1); add(origin.q,origin.r+2); }

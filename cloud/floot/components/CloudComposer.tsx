@@ -13,6 +13,7 @@ type Draft={name:string;file?:File;color?:CloudColor};
 type Submission=Draft&{id:string;parentId:string|null;uploaded?:boolean};
 export function CloudComposer({parentId,busy,disabled,onAdd,draft,onDraft,uploading=false,onCancelUpload,colors=false,scope="private",usedColors=[]}:{parentId:string|null;busy:boolean;disabled:boolean;draft:Draft;onDraft:(draft:Draft)=>void;onAdd:(value:Submission)=>Promise<boolean>;uploading?:boolean;onCancelUpload?:()=>void;colors?:boolean;scope?:CloudScope;usedColors?:(CloudColor|undefined)[]}){
   const form=useForm({defaultValues:{name:draft.name},schema:z.object({name:cloudNames.schema(scope,true)})});
+  const [editing,setEditing]=useState(false);
   const [color,setColor]=useState<CloudColor>(()=>unusedColor(draft.color||'white',usedColors));
   const [file,setFile]=useState<File|undefined>(draft.file),[fileError,setFileError]=useState(""),[preview,setPreview]=useState("");
   const fileInput=useRef<HTMLInputElement>(null),wordInput=useRef<HTMLInputElement>(null),pending=useRef<Submission|null>(null),composing=useRef(false),mounted=useRef(true),submitting=useRef(false);
@@ -43,15 +44,15 @@ export function CloudComposer({parentId,busy,disabled,onAdd,draft,onDraft,upload
     }finally{submitting.current=false;}
   });
   return <div className={styles.wrap}>
-    <Form {...form}><form id="cloud-composer-form" noValidate onSubmit={submit} className={styles.form} aria-label="Add to this cloud">
-      {colors&&<CloudColorWheel value={color} onChange={setColor} disabled={busy} usedColors={usedColors}/>}
+    <Form {...form}><form id="cloud-composer-form" noValidate onSubmit={submit} className={styles.form} onBlur={e=>{if(!e.currentTarget.contains(e.relatedTarget as Node|null))setEditing(false);}} aria-label="Add to this cloud">
+      {colors&&editing&&<div className={styles.colors}><CloudColorWheel value={color} onChange={setColor} disabled={busy} usedColors={usedColors}/></div>}
       {file&&<div className={styles.attachment}><img src={preview} width={40} height={40} alt=""/><span title={file.name}>{file.name}</span><Button variant="ghost" size="icon" aria-label="Remove picture" disabled={busy} onClick={()=>{setFile(undefined);setFileError("");wordInput.current?.focus({preventScroll:true});}}><X size={18}/></Button></div>}
       <div className={styles.bar}>
         <Button variant="ghost" size="icon" className={styles.photo} aria-label={uploading?"Stop upload":"Choose a picture"} title={uploading?"Stop upload":"Choose a picture"} disabled={busy&&!uploading} onClick={()=>uploading?onCancelUpload?.():fileInput.current?.click()}>{uploading?<X size={24}/>:<ImagePlus size={24} strokeWidth={1.6}/>}</Button>
         <Input type="file" ref={fileInput} accept="image/*" className={styles.hidden} aria-label="Picture file" aria-invalid={!!fileError} aria-describedby={fileError?"cloud-picture-error":undefined} tabIndex={-1} onChange={e=>{choose(e.target.files?.[0]);e.target.value="";}} disabled={busy}/>
         <FormItem name="name" className={styles.field}>
           <FormLabel className={styles.hidden}>Add a word or a picture name</FormLabel>
-          <FormControl><Input ref={wordInput} className={styles.input} style={{color:colorValue(colors?color:undefined)}} placeholder={file?"Name this picture…":"Add…"} autoComplete="off" enterKeyHint="done" maxLength={scope==='private'?undefined:80} value={form.values.name} onChange={e=>form.setValues({name:e.target.value})} onCompositionStart={()=>{composing.current=true;}} onCompositionEnd={()=>{composing.current=false;}} onKeyDown={e=>{if(e.key==="Enter"&&(e.nativeEvent.isComposing||composing.current))e.preventDefault();}} readOnly={busy} aria-busy={busy}/></FormControl>
+          <FormControl><Input ref={wordInput} onFocus={()=>setEditing(true)} className={styles.input} style={{color:colorValue(colors?color:undefined)}} placeholder={file?"Name this picture…":"Add…"} autoComplete="off" enterKeyHint="done" maxLength={scope==='private'?undefined:80} value={form.values.name} onChange={e=>form.setValues({name:e.target.value})} onCompositionStart={()=>{composing.current=true;}} onCompositionEnd={()=>{composing.current=false;}} onKeyDown={e=>{if(e.key==="Enter"&&(e.nativeEvent.isComposing||composing.current))e.preventDefault();}} readOnly={busy} aria-busy={busy}/></FormControl>
           <FormMessage className={styles.fieldError}/>
         </FormItem>
         <Button type="submit" size="icon" className={styles.add} aria-label={busy?"Saving":"Add"} title={disabled?"Opening your space":busy?"Saving":"Add"} disabled={busy||disabled||(!form.values.name.trim()&&!file)} aria-busy={busy}>{busy?<span className={styles.saving}/>:<ArrowUp size={24} strokeWidth={2}/>}</Button>

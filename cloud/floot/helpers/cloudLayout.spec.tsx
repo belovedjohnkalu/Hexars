@@ -48,3 +48,11 @@ describe('Square Rules and anchored cloud updates',()=>{
  });
 
 });
+
+
+describe('Owner identifiers in spatial layout',()=>{
+ it('reserves separate space for labels without overlaps, including alphabetic overflow',()=>{
+  const nodes=Array.from({length:32},(_,i)=>({id:String(i),name:'Cloud '+i,percent:50,identifier:'IL1'+'A'.repeat(i===31?102:Math.floor(i/10))+i%10,...(i===4?{isImage:true}:{})}));
+  for(const width of [280,393,1024]){const result=cloudLayout(nodes,width,600,(text,size)=>text.length*size*.54);for(const a of result.items){expect(a.x).toBeGreaterThanOrEqual(0);expect(a.x+a.width).toBeLessThanOrEqual(width);for(const b of result.items.filter(n=>n.id!==a.id))expect(a.x<b.x+b.width&&a.x+a.width>b.x&&a.y<b.y+b.height&&a.y+a.height>b.y).toBeFalse();}}
+ });
+});

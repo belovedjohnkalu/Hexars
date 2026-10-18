@@ -15,7 +15,12 @@ int evaluate(const GameState& state) {
         const int distance = std::max({std::abs(cell.q),std::abs(cell.r),std::abs(cell.q + cell.r)});
         int value = values[static_cast<int>(piece.type)];
         if (piece.type == PieceType::Knight || piece.type == PieceType::Bishop) value += (5 - distance) * 7;
-        if (piece.type == PieceType::Pawn) value += (piece.player == 0 ? cell.r + 5 : 5 - cell.r) * 4;
+        if(piece.type==PieceType::Pawn){
+            const auto& rules=variantDefinition(state.variant);
+            const double centerR=state.variant=="brusky"?-.5:0;
+            const double progress=rules.pointyBoard?-(cell.r-centerR):cell.r;
+            value+=static_cast<int>((piece.player==0?progress+5:5-progress)*4);
+        }
         if (piece.type == PieceType::Queen) value += (5 - distance) * 2;
         score += piece.player == state.activePlayer ? value : -value;
     }

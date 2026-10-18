@@ -14,11 +14,13 @@ import { Dialog, DialogContent, DialogTitle, DialogDescription } from "./Dialog"
 import { HexLoading } from "./HexLoading";
 import { useBoardFacing } from "../helpers/useBoardFacing";
 import styles from "./Play.module.css";
+import {boardLayout} from "../helpers/boardLayout";
+import {chessVariants} from "../helpers/chessVariants";
 const key = (hex: Hex) => `${hex.q},${hex.r}`;
 export function Play({ variant }: { variant: VariantId }) {
   useInstallApp(); // Capture browser offers even while the menu is closed.
   const cloud = useCloudGame(variant), data = cloud.data, game = data?.game;
-  const name = { glinski: "Gliński", mccooey: "McCooey", shafran: "Shafran" }[variant];
+  const name=chessVariants.name(variant),layout=boardLayout(game?.board.cells??[],game?.board.orientation);
   const [selected, setSelected] = useState<Hex | null>(null);
   const [menu, setMenu] = useState(false);
   const [mode, setMode] = useState<"engine" | "two_players">("engine");
@@ -77,7 +79,7 @@ export function Play({ variant }: { variant: VariantId }) {
     </header>
     <main className={styles.main}>
       <div className={styles.status} role="status" aria-live="polite"><span key={status}>{status}</span>{thinking && <span className={styles.pulse} aria-hidden="true" />}</div>
-      <div className={styles.board} style={{ "--board-ratio": variant === "shafran" ? .8 : 484/548, aspectRatio: variant === "shafran" ? "400 / 500" : "484 / 548" } as CSSProperties}>
+      <div className={styles.board} style={{ "--board-ratio": layout.width/layout.height, aspectRatio: `${layout.width} / ${layout.height}` } as CSSProperties}>
         {game ? <CloudBoard key={data?.gameId} game={game} selected={selected} onCell={chooseCell} flipped={flipped} coordinates={false} theme="grove" lastMove={lastMove} disabled={!canPlay} /> : <div className={styles.loading}><HexLoading /></div>}
       </div>
       {ended && <p className={styles.result}>{game?.result.status === "checkmate" ? "Checkmate" : game?.result.status === "stalemate" && variant === "glinski" ? "¾–¼" : "½–½"}</p>}
@@ -109,8 +111,8 @@ export function Play({ variant }: { variant: VariantId }) {
         <details className={styles.rules}>
           <summary>Rules</summary>
           <p>Tap a piece, then a marked hexagon.</p>
-          <p>{variant === "shafran" ? "Pawns capture through corners. On their first move, pawns can advance to the middle of their file." : variant === "mccooey" ? "Pawns capture through corners. Only unmoved pawns can advance twice; the center pawn cannot." : "Pawns capture to either forward side. A starting pawn cell allows a two-step advance."}</p>
-          <p>{variant === "shafran" ? "Short or long castling on either side." : "No castling."} Promote at the far edge. En passant lasts one turn.</p>
+          <p>{variant === "brusky" || variant === "devasa" ? "Pawns advance along two forward axes; capture through side corners. Only unmoved starting pawns may advance twice. Brusky also has a third initial capture and enemy blocking of both forward paths." : variant === "shafran" ? "Pawns capture through corners. On their first move, pawns can advance to the middle of their file." : variant === "mccooey" ? "Pawns capture through corners. Only unmoved pawns can advance twice; the center pawn cannot." : "Pawns capture to either forward side. A starting pawn cell allows a two-step advance."}</p>
+          <p>{variant === "brusky" || variant === "devasa" ? "Short kingside or long queenside castling when original pieces are unmoved, the path is empty and the king stays safe." : variant === "shafran" ? "Short or long castling on either side." : "No castling."} Promote at the far edge. En passant lasts one turn.</p>
           <p>{variant === "glinski" ? "Stalemate: ¾–¼." : "Stalemate: ½–½."} Bare kings, or a king with at most one bishop, knight or rook per side: ½–½. Pawns, queens or extra pieces keep play going.</p>
         </details>
       </DialogContent>

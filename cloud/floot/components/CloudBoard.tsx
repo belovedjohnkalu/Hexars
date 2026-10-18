@@ -31,7 +31,7 @@ export function CloudBoard({
   preview?: boolean;
 }) {
   const [focused, setFocused] = useState(() => game.board.cells.find(cell => cell.q === 0 && cell.r === 0)?.notation ?? game.board.cells[0]?.notation);
-  const layout = useMemo(() => boardLayout(game.board.cells), [game.board.cells]);
+  const layout = useMemo(() => boardLayout(game.board.cells,game.board.orientation), [game.board.cells,game.board.orientation]);
   const previous = useRef(new Map<string, VisualPiece>());
   const sequence = useRef(0);
   const visuals = useMemo(() => {
@@ -102,7 +102,7 @@ export function CloudBoard({
           const { x, y } = layout.position(cell);
           const hexPoints = (radius: number) =>
             Array.from({ length: 6 }, (_, index) => {
-              const angle = (index * Math.PI) / 3;
+              const angle = (index * Math.PI) / 3+layout.vertexAngle;
               return `${x + radius * Math.cos(angle)},${y + radius * Math.sin(angle)}`;
             }).join(" ");
           const points = hexPoints(27.55);
@@ -164,8 +164,8 @@ export function CloudBoard({
                   if (!disabled) onCell(cell);
                 }
                 const direction = {
-                  ArrowUp: [0, 1],
-                  ArrowDown: [0, -1],
+                  ArrowUp: [0, game.board.orientation==="pointy"?-1:1],
+                  ArrowDown: [0, game.board.orientation==="pointy"?1:-1],
                   ArrowLeft: [-1, 0],
                   ArrowRight: [1, 0],
                 }[event.key];

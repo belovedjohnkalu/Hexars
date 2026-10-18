@@ -55,7 +55,7 @@ export function Play({variant}:{variant:VariantId}){
  function move(e:PointerEvent<HTMLDivElement>){const start=swipe.current;if(start&&Math.abs(e.clientX-start.x)>40&&Math.abs(e.clientY-start.y)<Math.abs(e.clientX-start.x)*.6){start.dragged=true;suppressClick.current=true;e.currentTarget.setPointerCapture(e.pointerId);}}
  function up(e:PointerEvent<HTMLDivElement>){const start=swipe.current;swipe.current=null;if(start?.dragged){void history((desired.current??game?.ply??0)+(e.clientX>start.x?-1:1));}if(e.currentTarget.hasPointerCapture(e.pointerId))e.currentTarget.releasePointerCapture(e.pointerId);}
  async function restart(){if(await cloud.newGame(data?.mode==='two_players'?'two_players':'engine',(data?.humanPlayer===1?1:0),variant)){setReset(false);setResultOpen(false);setReview(null);}}
- const layout=boardLayout(shown?.board.cells??[]);
+ const layout=boardLayout(shown?.board.cells??[],shown?.board.orientation);
  const boardWidth=Math.min(size.width-24,540),boardHeight=boardWidth*layout.height/layout.width,worldWidth=Math.max(size.width,boardWidth+24),worldHeight=Math.max(size.height,boardHeight+160),boardY=(worldHeight-boardHeight)/2;
  const status=review?`Move ${review.ply} of ${game?.ply}`:!game?'Opening…':ended?'Game over':cloud.pendingMove?'Moving…':thinking?'Thinking…':game.check?'Check':data?.mode==='two_players'?game.activePlayer===0?'White’s turn':'Black’s turn':'Your turn';
  const outcome=game?gameOutcome(game.result,data?.mode||'two_players',data?.humanPlayer??0):{title:'Draw',score:'½ – ½',detail:''};

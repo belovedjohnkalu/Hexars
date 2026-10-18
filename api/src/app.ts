@@ -29,7 +29,7 @@ export function createApp(options: Options) {
       try {
         // Native boards are immutable for this release and independent of user games.
         if (!boards && !loadingBoards) {
-          loadingBoards = Promise.all((["glinski", "mccooey", "shafran"] as const).map(async id => {
+          loadingBoards = Promise.all((["glinski", "mccooey", "shafran", "brusky", "devasa"] as const).map(async id => {
             const result = await runNativeEngine({ action: "new", variant: id });
             return { id, board: result.game.board };
           })).then(variants => boards = JSON.stringify({ variants })).finally(() => { loadingBoards = null; });

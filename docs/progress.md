@@ -223,3 +223,17 @@ complete variant text; Tactical routes back to the incoming game. Added read-onl
 swipe history and bold result sheets. Ten spec files and real browser sync,
 gesture, cloud-to-game and native checkmate checks pass. See ion-cloud-navigation.md
 for exact evidence and limitations. GitHub remote is configured and is the backup.
+
+
+## Five variants and owner identifiers — October 18
+
+Brusky and De Vasa now have complete native rule integration, Tactical support,
+pointy web rendering and 23 Rules paragraph clouds each. The focused gradient
+picker overlays the composer only during entry. Permanent owner-only IL labels
+are stored separately from deletable nodes, with never-reused arrival counters.
+The corrected alphabetic segments are 0–9, A0–Z9, AA0–ZZ9, then AAA0 onward.
+Moves preserve identities across scopes; copies receive new labels.
+
+Native regression, full games, protocol rights/serialization and UI tests pass;
+live release evidence is recorded in docs/ion-five-variants-release.md. Wellisch
+and Engines 2–6 remain planned.

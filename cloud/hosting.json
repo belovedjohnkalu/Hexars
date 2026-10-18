@@ -2,8 +2,8 @@
   "provider": "Floot",
   "project_id": "9d7c0966-4648-49f3-845c-b4a9296d0358",
   "execution": "native-cpp-linux-x64-on-cloud-server",
-  "engine_asset": "/_cdn/static/eacabb97-9c33-4516-a7c2-150b6601f6fa-tactical-0.7.1-linux-x64.bin",
-  "engine_sha256": "d914d8c30dd0e13b8280a12ae035c929d514626a70f69a0cb744ca0fdb41794a",
+  "engine_asset": "/_cdn/static/fc4bd2d7-7f24-4a2b-add1-686dd2305796-tactical-0.8.0-linux-x64.bin",
+  "engine_sha256": "87d367b4d7b340f3fbf6b4d208dcb3ff7d2015ce4a406d82f2461140ec385693",
   "published_url": "https://ion.floot.app",
   "installable_web_app": true,
   "native_app_store_package": false,
@@ -13,19 +13,23 @@
   "supported_variants": [
     "glinski",
     "mccooey",
-    "shafran"
+    "shafran",
+    "brusky",
+    "devasa"
   ],
-  "ui_version": "0.15.0",
+  "ui_version": "0.16.0",
   "routes": [
     "/",
     "/login",
     "/glinski",
     "/mccooey",
-    "/shafran"
+    "/shafran",
+    "/brusky",
+    "/devasa"
   ],
   "font_asset": "/_cdn/static/6e6c9250-599e-4bf4-a9ae-66ff948afb59-InterVariable.woff2",
   "published_ui_version": "0.15.0",
-  "release_status": "published",
+  "release_status": "verification",
   "favicon": "/_api/icon?v=2",
   "tactical_levels": [
     "Pre-Beginner",
@@ -35,8 +39,5 @@
     "Hard",
     "Expert"
   ],
-  "in_development_variants": {
-    "brusky": "native geometry, notation and setup; gameplay disabled",
-    "devasa": "native geometry, notation and setup; gameplay disabled"
-  }
+  "in_development_variants": {}
 }

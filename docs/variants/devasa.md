@@ -1,9 +1,7 @@
-# De Vasa — implementation started
+# De Vasa — playable
 
-The experimental native foundation implements the revised **81-cell rhombus**,
-notation a–i / 1–9, the 36-piece starting arrangement and special-move geometry.
-It is intentionally absent from `createGame`, Tactical capabilities and the live
-chooser. Legal moves, game results, protocol and web gameplay are not implemented.
+Playable in ION with native-authoritative rules, Tactical, pass-and-play,
+cloud save/resume, undo/review and illustrated paragraph clouds.
 
 ## References checked on 2026-10-18
 
@@ -32,22 +30,24 @@ a9–i9 row is R N B K B Q B N R, with pawns on a7–i7. The second ranks are
 empty. Both sides have one king, one queen, two rooks, two knights, three
 bishops and nine pawns.
 
-The foundation records both forward pawn axes and same-color side-capture
+The module implements both forward pawn axes and same-color side-capture
 axes, starting cells, opposite horizontal promotion ranks, and castle plans:
 White Kf1→h1 / Ri1→g1 or Kf1→c1 / Ra1→d1; Black Kd9→b9 / Ra9→c9 or
-Kd9→g9 / Ri9→f9. These are geometric destinations, **not permission to castle**.
+Kd9→g9 / Ri9→f9. Permission depends on unmoved king/rook, vacant paths and safe king transit.
 
-## Next gate before enabling play
+## Implemented rules and verification
 
-Implement unmoved-pawn double moves along either individual forward axis,
-blockers, both side captures, immediate en passant with king-safety filtering,
-promotion choices, and castling with movement rights, empty paths and safe
-king transit. Independently verify mate/stalemate and historical draw policy;
-keep the app’s low-material house draw explicitly labeled. Do not inherit
-Brusky’s extra initial capture or enemy blocking of both forward paths.
+Unmoved starting pawns may double along either individual forward axis. Pieces
+block only their own path; there is no Brusky initial third capture or enemy
+blocking of both paths. Immediate en passant validates the crossed cell, victim,
+movement history, expiry and king safety on both axes for both colors. Promotion
+is on the opposite horizontal rank, with all four choices. Castling validates
+king/rook rights, empty paths and every king transit cell.
 
-Then add protocol validation, native move-change previews, Tactical search,
-pointy-board rendering, rule illustrations, pass-and-play, undo/review, saved
-games and complete-game tests. The experimental setup has no repetition hash
-until its own movement rights and descriptor exist. Tests require unsupported
-play to reject explicitly rather than applying another variant’s rules.
+Checkmate, equal-score stalemate, repetition and automatic draw policy are
+implemented. The app’s low-material house draw is explicitly labeled. The native
+protocol round-trips complete rights, rejects malformed positions, and supplies
+visual deltas for immediate previews, including castling and en passant. Tactical
+uses these same rules. Full random games and engine self-play complete legally.
+The shared horizontal suite contains 5,071 assertions across both variants,
+besides each module’s independent geometry/setup and protocol tests.

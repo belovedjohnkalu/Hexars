@@ -30,7 +30,7 @@ function engine(t) {
 test("Versioned protocol identifies the engine and exposes authoritative starting pieces", async (t) => {
   const request = engine(t);
   const hello = await request({ type: "hello" });
-  assert.equal(hello.engine, "Tactical 0.7.1");
+  assert.equal(hello.engine, "Tactical 0.8.0");
   const start = await request({ type: "new_game", variant: "glinski" });
   assert.equal(start.game.board.cells.length, 91);
   assert.equal(start.game.board.cells.filter((cell) => cell.piece).length, 36);
@@ -245,7 +245,7 @@ test("Automatic material draws hide moves, score half each and stop search", asy
 
 test("McCooey identifies its variant, setup and first-move pawn rights", async (t) => {
   const request = engine(t);
-  assert.deepEqual((await request({ type: "supported_variants" })).variants, ["glinski", "mccooey", "shafran"]);
+  assert.deepEqual((await request({ type: "supported_variants" })).variants, ["glinski", "mccooey", "shafran", "brusky", "devasa"]);
   const initial = await request({ type: "new_game", variant: "mccooey" });
   assert.equal(initial.game.variant, "mccooey");
   assert.equal(initial.game.board.variant, "mccooey");
@@ -372,7 +372,7 @@ test("Tactical returns a legal Shafran move under its time budget", async t => {
 
 test("Native legal moves include exact visual deltas for immediate rendering",async t=>{
   const request=engine(t);
-  for(const variant of ['glinski','mccooey','shafran']){
+  for(const variant of ['glinski','mccooey','shafran','brusky','devasa']){
     const initial=await request({type:'new_game',variant});
     for(const move of initial.game.legalMoves){
       assert.ok(move.changes.length>=2);
@@ -385,4 +385,20 @@ test("Native legal moves include exact visual deltas for immediate rendering",as
       assert.deepEqual(projected,applied.game.board.cells);
     }
   }
+});
+
+for(const variant of ['brusky','devasa'])test(`${variant} protocol validates rights, castling, en passant, promotion and terminal results`,async t=>{
+ const request=engine(t),initial=await request({type:'new_game',variant}),cells=initial.game.board.cells;
+ assert.equal(initial.game.board.orientation,'pointy');assert.equal(cells.length,variant==='brusky'?84:81);
+ assert.equal((await request({type:'position',state:initial.state})).game.stateId,initial.game.stateId);
+ const missing=structuredClone(initial.state);delete missing.occupants.find(p=>p?.type==='pawn').hasMoved;
+ assert.equal((await request({type:'position',state:missing})).type,'error');
+ const fixture=(pieces,activePlayer=0)=>{const state={...initial.state,occupants:cells.map(()=>null),activePlayer,positionHistory:[]};for(const [notation,type,player,moved=true] of pieces){const i=cells.findIndex(c=>c.notation===notation);assert.ok(i>=0);state.occupants[i]={type,player,hasMoved:moved};}return state;};
+ const apply=async(response,from,to,promotion)=>{const move=response.game.legalMoves.find(m=>m.fromNotation===from&&m.toNotation===to&&m.promotion===promotion);assert.ok(move,`${variant} ${from}-${to}`);const after=await request({type:'play_move',stateId:response.game.stateId,move});assert.notEqual(after.type,'error');return {after,move};};
+ const castleState=fixture([['f1','king',0,false],[variant==='brusky'?'g8':'d9','king',1,false],['a1','rook',0,false],['i1','rook',0,false]]);
+ for(const [to,rook] of [['h1','g1'],['c1','d1']]){const before=await request({type:'position',state:castleState}),{after,move}=await apply(before,'f1',to);assert.equal(move.changes.length,4);assert.equal(after.game.board.cells.find(c=>c.notation===rook).piece.type,'rook');assert.equal((await request({type:'position',state:after.state})).game.stateId,after.game.stateId);}
+ for(const [to,cross,from] of [['f5','f6','g5'],['d5','e6','f5']]){let before=await request({type:'position',state:fixture([['a1','king',0],[variant==='brusky'?'l8':'i9','king',1],['f7','pawn',1,false],[from,'pawn',0]],1)});before=(await apply(before,'f7',to)).after;assert.equal((await request({type:'position',state:before.state})).game.stateId,before.game.stateId);const {after,move}=await apply(before,from,cross);assert.equal(move.capture,true);assert.equal(move.changes.length,3);assert.equal(after.game.board.cells.find(c=>c.notation===to).piece,null);const bad=structuredClone(before.state);bad.occupants[bad.enPassantPawn].hasMoved=false;assert.equal((await request({type:'position',state:bad})).type,'error');}
+ let before=await request({type:'position',state:fixture([['a1','king',0],['a5','king',1],[variant==='brusky'?'g7':'g8','pawn',0]])});
+ const promotion=before.game.legalMoves.find(m=>m.promotion==='queen');assert.ok(promotion);const promoted=await request({type:'play_move',stateId:before.game.stateId,move:promotion});assert.equal(promoted.game.board.cells.find(c=>c.notation===promotion.toNotation).piece.type,'queen');
+ for(const [status,king,queen] of variant==='brusky'?[['checkmate','a5','j4'],['stalemate','h2','k6']]:[['checkmate','a9','g1'],['stalemate','a9','g2']]){before=await request({type:'position',state:fixture([[king,'king',0],[variant==='brusky'?'l4':'i1','king',1],[queen,'queen',0]],1)});assert.equal(before.game.result.status,status);assert.deepEqual(before.game.legalMoves,[]);if(status==='stalemate')assert.deepEqual(before.game.result.scores,[.5,.5]);const result=await request({type:'go',stateId:before.game.stateId,limits:{timeMs:20,depth:1,nodeLimit:100}});assert.equal(result.move,null);}
 });

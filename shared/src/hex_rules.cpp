@@ -29,43 +29,59 @@ static int pawnAdvance(const VariantDefinition& variant, Hex from, PlayerId play
     return variant.pawnInitialAdvance ? variant.pawnInitialAdvance(from,player) :
         variant.pawnDoubleCell(from,player) ? 2 : 1;
 }
-struct Castle { Hex rookFrom; Hex rookTo; };
-static std::optional<Castle> castleDetails(const GameState& state, const Move& move) {
-    if (!variantDefinition(state.variant).castling || occupant(state,move.from).type != PieceType::King) return {};
-    const auto player = occupant(state,move.from).player;
-    const Hex home{0,player == 0 ? -5 : 4};
-    if (move.from != home) return {};
-    const int sign = player == 0 ? 1 : -1;
-    for (const Hex direction : {Hex{-sign,sign},Hex{sign,0}})
-        for (const int distance : {2,3})
-            if (move.to == add(home,direction,distance))
-                return Castle{add(home,direction,4),add(home,direction,distance-1)};
+static std::vector<Hex> pawnForwards(const VariantDefinition& variant,PlayerId player) {
+    return variant.pawnForwards?variant.pawnForwards(player):std::vector<Hex>{{0,player==0?1:-1}};
+}
+static std::vector<Hex> pawnCaptures(const GameState& state,Hex from,Piece pawn) {
+    const auto& variant=variantDefinition(state.variant);
+    const auto base=variant.pawnCaptures[pawn.player];
+    std::vector<Hex> directions(base.begin(),base.end());
+    if(variant.pawnInitialExtraCapture&&!pawn.hasMoved&&variant.pawnDoubleCell(from,pawn.player)) {
+        const auto forward=pawnForwards(variant,pawn.player);
+        directions.push_back(add(forward[0],forward[1]));
+    }
+    return directions;
+}
+static bool promotes(const VariantDefinition& variant,Hex to,PlayerId player) {
+    return variant.promotionCell?variant.promotionCell(to,player):variant.index({to.q,to.r+(player==0?1:-1)})<0;
+}
+static int distance(Hex from,Hex to) {return std::max({std::abs(to.q-from.q),std::abs(to.r-from.r),std::abs(to.q+to.r-from.q-from.r)});}
+static std::vector<CastlingPlan> castlePlans(const VariantDefinition& variant,PlayerId player) {
+    if(!variant.castling)return {};
+    if(variant.castlePlans)return variant.castlePlans(player);
+    const Hex home{0,player==0?-5:4};const int sign=player==0?1:-1;
+    std::vector<CastlingPlan> plans;
+    for(const Hex direction:{Hex{-sign,sign},Hex{sign,0}})for(const int length:{2,3})
+        plans.push_back({home,add(home,direction,length),add(home,direction,4),add(home,direction,length-1)});
+    return plans;
+}
+static std::optional<CastlingPlan> castleDetails(const GameState& state,const Move& move) {
+    const auto piece=occupant(state,move.from);
+    if(piece.type!=PieceType::King)return {};
+    for(const auto plan:castlePlans(variantDefinition(state.variant),piece.player))
+        if(move.from==plan.kingFrom&&move.to==plan.kingTo)return plan;
     return {};
 }
-static void addCastles(const GameState& state, std::vector<Move>& moves, Hex from) {
-    if (!variantDefinition(state.variant).castling || occupant(state,from).hasMoved || isInCheck(state,state.activePlayer)) return;
-    const int sign = state.activePlayer == 0 ? 1 : -1;
-    for (const Hex direction : {Hex{-sign,sign},Hex{sign,0}}) {
-        const Hex rook = add(from,direction,4);
-        const auto piece = occupant(state,rook);
-        if (piece.type != PieceType::Rook || piece.player != state.activePlayer || piece.hasMoved) continue;
-        bool clear = true;
-        for (int step = 1; step <= 3; ++step) clear = clear && occupant(state,add(from,direction,step)).empty();
-        if (!clear) continue;
-        for (const int distance : {2,3}) {
-            const Move move{from,add(from,direction,distance)};
-            if (!castleDetails(state,move)) continue;
-            bool safe = true;
-            for (int step = 1; step <= distance; ++step) {
-                GameState probe = state;
-                const auto to = variantDefinition(state.variant).index(add(from,direction,step));
-                if (to < 0) { safe = false; break; }
-                probe.occupants[variantDefinition(state.variant).index(from)] = {};
-                probe.occupants[to] = occupant(state,from);
-                if (isInCheck(probe,state.activePlayer)) { safe = false; break; }
-            }
-            if (safe) moves.push_back(move);
+static void addCastles(const GameState& state,std::vector<Move>& moves,Hex from) {
+    const auto& variant=variantDefinition(state.variant);
+    if(!variant.castling||occupant(state,from).hasMoved||isInCheck(state,state.activePlayer))return;
+    for(const auto plan:castlePlans(variant,state.activePlayer)) {
+        if(from!=plan.kingFrom)continue;
+        const auto rook=occupant(state,plan.rookFrom);
+        if(rook.type!=PieceType::Rook||rook.player!=state.activePlayer||rook.hasMoved)continue;
+        const int rookDistance=distance(from,plan.rookFrom),kingDistance=distance(from,plan.kingTo);
+        const Hex direction{(plan.rookFrom.q-from.q)/rookDistance,(plan.rookFrom.r-from.r)/rookDistance};
+        bool clear=true;
+        for(int step=1;step<rookDistance;++step){const auto cell=add(from,direction,step);if(variant.index(cell)<0||!occupant(state,cell).empty()){clear=false;break;}}
+        if(!clear)continue;
+        bool safe=true;
+        for(int step=1;step<=kingDistance;++step){
+            GameState probe=state;const int to=variant.index(add(from,direction,step));
+            if(to<0){safe=false;break;}
+            probe.occupants[variant.index(from)]={};probe.occupants[to]=occupant(state,from);
+            if(isInCheck(probe,state.activePlayer)){safe=false;break;}
         }
+        if(safe)moves.push_back({from,plan.kingTo});
     }
 }
 
@@ -83,7 +99,7 @@ static void addMove(const GameState& state, std::vector<Move>& moves, Hex from, 
     const auto& target = occupant(state, to);
     if (!target.empty() && (target.player == state.activePlayer || target.type == PieceType::King)) return;
     const auto& source = occupant(state, from);
-    if (source.type == PieceType::Pawn && variantDefinition(state.variant).index({to.q, to.r + (source.player == 0 ? 1 : -1)}) < 0) {
+    if (source.type == PieceType::Pawn && promotes(variantDefinition(state.variant),to,source.player)) {
         for (const auto promotion : {PieceType::Queen, PieceType::Rook, PieceType::Bishop, PieceType::Knight}) moves.push_back({from, to, promotion});
     } else moves.push_back({from, to});
 }
@@ -116,15 +132,16 @@ std::vector<Move> generateCandidateMoves(const GameState& state) {
             case PieceType::King: rays(state, moves, from, edge, 1); rays(state, moves, from, vertex, 1); addCastles(state,moves,from); break;
             case PieceType::Knight: for (const auto direction : knights) addMove(state, moves, from, add(from, direction)); break;
             case PieceType::Pawn: {
-                const int forward = piece.player == 0 ? 1 : -1;
                 const auto& variant = variantDefinition(state.variant);
                 const int distance = variant.pawnDoubleRequiresUnmoved && piece.hasMoved ? 1 : pawnAdvance(variant,from,piece.player);
-                for (int step = 1; step <= distance; ++step) {
-                    const Hex to{from.q,from.r+step*forward};
-                    if (variant.index(to) < 0 || !occupant(state,to).empty()) break;
+                const auto forwards=pawnForwards(variant,piece.player);
+                const bool blocked=variant.enemyBlocksBothPawnAdvances&&std::any_of(forwards.begin(),forwards.end(),[&](Hex dir){const auto p=occupant(state,add(from,dir));return !p.empty()&&p.player!=piece.player;});
+                if(!blocked)for(const auto direction:forwards)for(int step=1;step<=distance;++step){
+                    const auto to=add(from,direction,step);
+                    if(variant.index(to)<0||!occupant(state,to).empty())break;
                     addMove(state,moves,from,to);
                 }
-                const auto& captures = variantDefinition(state.variant).pawnCaptures[piece.player];
+                const auto captures=pawnCaptures(state,from,piece);
                 for (const auto direction : captures) {
                     const Hex to = add(from, direction);
                     const int toIndex = variantDefinition(state.variant).index(to);
@@ -169,7 +186,7 @@ bool isAttacked(const GameState& state, Hex position, PlayerId attacker) {
             case PieceType::King: if (attacksAlong(state, from, position, edge, 1) || attacksAlong(state, from, position, vertex, 1)) return true; break;
             case PieceType::Knight: for (const auto direction : knights) if (add(from, direction) == position) return true; break;
             case PieceType::Pawn:
-                for (const auto direction : variantDefinition(state.variant).pawnCaptures[piece.player])
+                for (const auto direction : pawnCaptures(state,from,piece))
                     if (add(from, direction) == position) return true;
                 break;
             default: break;
@@ -212,12 +229,12 @@ GameState applyCandidateMove(const GameState& state, const Move& move, bool reco
     if (move.promotion != PieceType::None) next.occupants[to].type = move.promotion;
     next.enPassantTarget = next.enPassantPawn = -1;
     next.additionalEnPassantTargets.clear();
-    if (piece.type == PieceType::Pawn && std::abs(move.to.r - move.from.r) >= 2 && move.to.q == move.from.q) {
-        const int direction = piece.player == 0 ? 1 : -1;
-        next.enPassantTarget = variantDefinition(state.variant).index({move.from.q,move.from.r+direction});
-        for (int step = 2; step < std::abs(move.to.r-move.from.r); ++step)
-            next.additionalEnPassantTargets.push_back(variantDefinition(state.variant).index({move.from.q,move.from.r+step*direction}));
-        next.enPassantPawn = to;
+    if(piece.type==PieceType::Pawn)for(const auto direction:pawnForwards(variantDefinition(state.variant),piece.player)) {
+        const int steps=distance(move.from,move.to);
+        if(steps<2||move.to!=add(move.from,direction,steps))continue;
+        next.enPassantTarget=variantDefinition(state.variant).index(add(move.from,direction));
+        for(int step=2;step<steps;++step)next.additionalEnPassantTargets.push_back(variantDefinition(state.variant).index(add(move.from,direction,step)));
+        next.enPassantPawn=to;break;
     }
     next.halfmoveClock = capture || piece.type == PieceType::Pawn ? 0 : state.halfmoveClock + 1;
     next.ply = state.ply + 1;
@@ -256,16 +273,14 @@ std::uint64_t positionKey(const GameState& state) {
     mix(state.activePlayer);
     if (variant.castling) {
         unsigned rights = 0;
-        for (PlayerId player = 0; player <= 1; ++player) {
-            const Hex home{0,player == 0 ? -5 : 4};
-            const auto king = occupant(state,home);
-            if (king.type != PieceType::King || king.player != player || king.hasMoved) continue;
-            const int sign = player == 0 ? 1 : -1;
-            int flank = 0;
-            for (const Hex direction : {Hex{-sign,sign},Hex{sign,0}}) {
-                const auto rook = occupant(state,add(home,direction,4));
-                if (rook.type == PieceType::Rook && rook.player == player && !rook.hasMoved) rights |= 1U << (player*2+flank);
-                ++flank;
+        for(PlayerId player=0;player<=1;++player){
+            std::vector<Hex> rooks;
+            for(const auto plan:castlePlans(variant,player)){
+                if(std::find(rooks.begin(),rooks.end(),plan.rookFrom)!=rooks.end())continue;
+                const int flank=static_cast<int>(rooks.size());rooks.push_back(plan.rookFrom);
+                const auto king=occupant(state,plan.kingFrom),rook=occupant(state,plan.rookFrom);
+                if(king.type==PieceType::King&&king.player==player&&!king.hasMoved&&rook.type==PieceType::Rook&&rook.player==player&&!rook.hasMoved)
+                    rights|=1U<<(player*2+flank);
             }
         }
         mix(rights);
@@ -297,7 +312,7 @@ void validatePosition(const GameState& state) {
         const auto piece = state.occupants[index];
         if (static_cast<int>(piece.type) > 6 || (!piece.empty() && piece.player > 1)) throw std::invalid_argument("Invalid piece");
         if (piece.type == PieceType::King) ++kings[piece.player];
-        if (piece.type == PieceType::Pawn && variant.index({variant.cells()[index].q, variant.cells()[index].r + (piece.player == 0 ? 1 : -1)}) < 0) throw std::invalid_argument("Unpromoted pawn on last cell");
+        if (piece.type == PieceType::Pawn && promotes(variant,variant.cells()[index],piece.player)) throw std::invalid_argument("Unpromoted pawn on last cell");
     }
     if (kings[0] != 1 || kings[1] != 1) throw std::invalid_argument("Each player must have exactly one king");
     if (isInCheck(state, static_cast<PlayerId>(1 - state.activePlayer))) throw std::invalid_argument("Previous player left its king in check");
@@ -310,15 +325,15 @@ void validatePosition(const GameState& state) {
         const auto pawn = state.occupants[state.enPassantPawn];
         const auto target = variantDefinition(state.variant).cells()[state.enPassantTarget];
         const auto end = variantDefinition(state.variant).cells()[state.enPassantPawn];
-        const int direction = pawn.player == 0 ? 1 : -1;
-        const int steps = (end.r-target.r)*direction+1;
-        const Hex start{end.q,end.r-steps*direction};
-        const std::vector<int> expectedExtra = steps == 3 ? std::vector<int>{variant.index({target.q,target.r+direction})} : std::vector<int>{};
-        if (pawn.type != PieceType::Pawn || pawn.player == state.activePlayer || !state.occupants[state.enPassantTarget].empty() ||
-            end.q != target.q || steps < 2 || steps > 3 || steps > pawnAdvance(variant,start,pawn.player) ||
-            variant.index(start) < 0 || !occupant(state,start).empty() ||
-            state.additionalEnPassantTargets != expectedExtra || (variant.pawnDoubleRequiresUnmoved && !pawn.hasMoved))
-            throw std::invalid_argument("Inconsistent en-passant rights");
+        bool consistent=false;
+        if(pawn.type==PieceType::Pawn&&pawn.player!=state.activePlayer&&state.occupants[state.enPassantTarget].empty()&&(!variant.pawnDoubleRequiresUnmoved||pawn.hasMoved))
+        for(const auto direction:pawnForwards(variant,pawn.player))for(int steps=2;steps<=3;++steps){
+            const Hex start=add(end,direction,-steps);
+            if(add(start,direction)!=target||variant.index(start)<0||!occupant(state,start).empty()||steps>pawnAdvance(variant,start,pawn.player))continue;
+            const std::vector<int> expectedExtra=steps==3?std::vector<int>{variant.index(add(target,direction))}:std::vector<int>{};
+            if(state.additionalEnPassantTargets==expectedExtra)consistent=true;
+        }
+        if(!consistent)throw std::invalid_argument("Inconsistent en-passant rights");
         for (const int extra : state.additionalEnPassantTargets)
             if (extra < 0 || extra >= static_cast<int>(variant.cells().size()) || !state.occupants[extra].empty())
                 throw std::invalid_argument("Inconsistent additional en-passant rights");

@@ -1,6 +1,8 @@
 import { useMemo, useRef, useState } from "react";
 import type { GameView, Hex, ChessMove, PieceName } from "../api/game";
 import { ChessPiece } from "./ChessPiece";
+import { boardLayout } from "../helpers/boardLayout";
+import { chessVariants } from "../helpers/chessVariants";
 import styles from "./CloudBoard.module.css";
 
 const key = (hex: Hex) => `${hex.q},${hex.r}`;
@@ -28,7 +30,8 @@ export function CloudBoard({
   className?: string;
   preview?: boolean;
 }) {
-  const [focused, setFocused] = useState("f6");
+  const [focused, setFocused] = useState(() => game.board.cells.find(cell => cell.q === 0 && cell.r === 0)?.notation ?? game.board.cells[0]?.notation);
+  const layout = useMemo(() => boardLayout(game.board.cells,game.board.orientation), [game.board.cells,game.board.orientation]);
   const previous = useRef(new Map<string, VisualPiece>());
   const sequence = useRef(0);
   const visuals = useMemo(() => {
@@ -82,26 +85,24 @@ export function CloudBoard({
       .map((move) => key(move.to)),
   );
   const sign = flipped ? -1 : 1;
-  const centerY = game.variant === "shafran" ? 300+14*Math.sqrt(3) : 300;
   return (
     <svg
-      viewBox={game.variant === "shafran" ? `100 ${centerY-250} 400 500` : "58 26 484 548"}
+      viewBox={layout.viewBox}
       className={`${styles.board} ${className || ""}`}
       role={preview ? "img" : "group"}
       aria-hidden={preview || undefined}
-      aria-label={`${({ glinski: "Gliński", mccooey: "McCooey", shafran: "Shafran" })[game.variant]} hexagonal chessboard`}
+      aria-label={`${chessVariants.name(game.variant)} hexagonal chessboard`}
     >
       <title>Your hexagonal chessboard. Select a piece to see where it can move.</title>
       <g
         className={styles.canvas}
-        style={{ transformOrigin: `300px ${centerY}px`, transform: flipped ? "rotate(180deg)" : "rotate(0deg)" }}
+        style={{ transform: flipped ? "rotate(180deg)" : "rotate(0deg)" }}
       >
         {game.board.cells.map((cell) => {
-          const x = 300 + 42 * cell.q,
-            y = 300 - 28 * Math.sqrt(3) * (cell.r + cell.q / 2);
+          const { x, y } = layout.position(cell);
           const hexPoints = (radius: number) =>
             Array.from({ length: 6 }, (_, index) => {
-              const angle = (index * Math.PI) / 3;
+              const angle = (index * Math.PI) / 3+layout.vertexAngle;
               return `${x + radius * Math.cos(angle)},${y + radius * Math.sin(angle)}`;
             }).join(" ");
           const points = hexPoints(27.55);
@@ -163,8 +164,8 @@ export function CloudBoard({
                   if (!disabled) onCell(cell);
                 }
                 const direction = {
-                  ArrowUp: [0, 1],
-                  ArrowDown: [0, -1],
+                  ArrowUp: [0, game.board.orientation==="pointy"?-1:1],
+                  ArrowDown: [0, game.board.orientation==="pointy"?1:-1],
                   ArrowLeft: [-1, 0],
                   ArrowRight: [1, 0],
                 }[event.key];
@@ -196,30 +197,30 @@ export function CloudBoard({
                   <polygon
                     points={inset}
                     fill="none"
-                    stroke="#050b15"
-                    strokeWidth={6.5}
+                    stroke="#000000"
+                    strokeWidth={5}
                     opacity={1}
                   />
                   <polygon
                     className={styles.indicatorColour}
                     points={inset}
                     fill="none"
-                    strokeWidth={4}
+                    strokeWidth={3}
                   />
                   {indicator === "capture-check" && (
                     <polygon
                       points={inset}
                       fill="none"
                       stroke="#ffc566"
-                      strokeWidth={4}
+                      strokeWidth={3}
                       strokeDasharray="4 7"
                     />
                   )}
                 </g>
               )}
               <g className={styles.keyboardRing} pointerEvents="none">
-                <polygon points={inset} fill="none" stroke="#050b15" strokeWidth={6.5} />
-                <polygon points={inset} fill="none" stroke="#8acaff" strokeWidth={4} />
+                <polygon points={inset} fill="none" stroke="#000000" strokeWidth={5} />
+                <polygon points={inset} fill="none" stroke="var(--primary)" strokeWidth={3} />
               </g>
               {coordinates && (
                 <text
@@ -241,7 +242,7 @@ export function CloudBoard({
             key={`captured-${piece.id}`}
             className={styles.captured}
             style={{
-              transform: `translate(${300 + 42 * piece.q}px, ${300 - 28 * Math.sqrt(3) * (piece.r + piece.q / 2)}px)`,
+              transform: `translate(${layout.position(piece).x}px, ${layout.position(piece).y}px)`,
             }}
             pointerEvents="none"
             aria-hidden="true"
@@ -263,12 +264,11 @@ export function CloudBoard({
         {visuals.pieces.map((piece) => (
           <g
             key={piece.id}
-            data-piece-id={piece.id}
             data-piece={piece.type}
             data-player={piece.player}
             className={styles.piecePosition}
             style={{
-              transform: `translate(${300 + 42 * piece.q}px, ${300 - 28 * Math.sqrt(3) * (piece.r + piece.q / 2)}px)`,
+              transform: `translate(${layout.position(piece).x}px, ${layout.position(piece).y}px)`,
             }}
             pointerEvents="none"
             aria-hidden="true"

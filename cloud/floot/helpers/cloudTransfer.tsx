@@ -1,4 +1,5 @@
 import { assertCloudCapacity } from "./cloudCapacity";
+import { transferNodeIds } from "./cloudIdentifiers";
 import { randomUUID } from "node:crypto";
 import { db } from "./db";
 import { cloudContext } from "./cloudContext";
@@ -24,7 +25,8 @@ export async function cloudTransfer(request:Request,raw:Extract<InputType,{actio
   const group=cloudPolicy.branch(all,input.id);if(!group.length||['public','private','hexagonal-chess'].includes(input.id))cloudPolicy.fail('Choose a word inside the space.',400);
   if(input.mode==='move')cloudPolicy.assert(input.scope,all,input.id,uid,source.owner,true);
   if(existing.some(n=>n.id===input.operationId))cloudPolicy.fail('Choose a new transfer.',409);
-  const ids=new Map(group.map(n=>[n.id,n.id===input.id?input.operationId:randomUUID()]));
+  const ids=transferNodeIds(group,input.id,input.operationId,input.mode==='copy',randomUUID);
+  if(existing.some(n=>[...ids.values()].includes(n.id)))cloudPolicy.fail('This cloud is already in the destination.',409);
   const added=group.map(n=>({...n,id:ids.get(n.id)!,parentId:n.id===input.id?input.targetParent:ids.get(n.parentId!)!,createdBy:uid,canEdit:undefined,copyOperation:input.operationId}));
   assertCloudCapacity([...cloudTree.forScope(input.targetScope),...existing],[...cloudTree.forScope(input.targetScope),...existing,...added]);
   await tx.updateTable('ionWorkspaces').set({nodes:[...existing,...added] as unknown as Json,version:b.version+1,updatedAt:new Date()}).where('id','=',b.id).execute();

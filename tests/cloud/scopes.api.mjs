@@ -40,8 +40,8 @@ try{
  const moveOp=randomUUID(),privateTarget=(await cloud(a,'private')).data;
  r=await cloud(a,'public',{action:'transfer',id:op,targetScope:'private',targetParent:'private',targetVersion:privateTarget.version,operationId:moveOp,mode:'move',version:r.data.version});check(r.status===200,'Move public branch to private');
  check(!(await cloud(guest,'public')).data.nodes.some(n=>n.id===op),'Move removes public source');
- check((await cloud(a,'private')).data.nodes.filter(n=>n.id===moveOp||n.parentId===moveOp).length===2,'Move keeps subtree in private');
- check(!(await cloud(b,'private')).data.nodes.some(n=>n.id===moveOp),'Moved content is private');
+ check((await cloud(a,'private')).data.nodes.filter(n=>n.id===op||n.parentId===op).length===2,'Move keeps subtree and stable identities in private');
+ check(!(await cloud(b,'private')).data.nodes.some(n=>n.id===op),'Moved content is private');
  const remember=await request(a,'auth/accounts',{action:'remember'});check(remember.status===200&&remember.data.accounts.some(x=>x.id===a.id),'Remember signed-in account');
  const device=a.cookies.ion_device;check(!!device,'Trusted device cookie issued');
  b.cookies.ion_device=device;b.cookie=Object.values(b.cookies).join('; ');

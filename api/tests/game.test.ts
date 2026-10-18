@@ -37,12 +37,12 @@ async function success(handle: ReturnType<typeof gameService>, input: InputType)
   return body;
 }
 
-for (const variant of ["glinski", "mccooey", "shafran"] as const) {
+for (const variant of ["glinski", "mccooey", "shafran", "brusky", "devasa"] as const) {
   test(`${variant}: persist native moves, resume, undo, and preserve link credentials`, async () => {
     const store = new MemoryStore();
     const handle = gameService(store);
     const opened = await success(handle, { action: "new", variant, mode: "two_players", humanPlayer: 0 });
-    assert.equal(opened.game.board.cells.length, variant === "shafran" ? 70 : 91);
+    assert.equal(opened.game.board.cells.length, ({glinski:91,mccooey:91,shafran:70,brusky:84,devasa:81})[variant]);
     assert.equal(store.rows.get(opened.gameId)?.ownerId, "c5be7a75-1733-4074-92ba-b7ff5a612c1d");
     assert.notEqual(store.rows.get(opened.gameId)?.accessTokenHash, opened.accessToken);
     const moved = await success(handle, { action: "move", ...mutation(opened), move: plainMove(opened) });
@@ -134,7 +134,7 @@ test("homepage previews use native boards without creating accounts or games", a
   const response = await handle(new Request("https://hexars.test/api/variants", { headers: { "X-Hexars-Gateway": secret } }));
   const body = await response.json();
   assert.equal(response.status, 200);
-  assert.deepEqual(body.variants.map((variant: { board: { cells: unknown[] } }) => variant.board.cells.length), [91, 91, 70]);
+  assert.deepEqual(body.variants.map((variant: { board: { cells: unknown[] } }) => variant.board.cells.length), [91, 91, 70, 84, 81]);
   assert.equal(store.rows.size, 0);
 });
 test("cancelled native requests leave no game or running search", async () => {

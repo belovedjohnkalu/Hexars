@@ -1,3 +1,5 @@
+import { cloudIdentifierStore } from "../helpers/cloudIdentifierStore";
+import { rootIdentifiers } from "../helpers/cloudIdentifiers";
 import { publish } from "@floot/realtime";
 import { assertCloudCapacity } from "../helpers/cloudCapacity";
 import { cloudContext } from "../helpers/cloudContext";
@@ -26,7 +28,7 @@ export async function handle(request: Request) {
       const shared=await db.selectFrom('ionSharedSpaces').innerJoin('ionWorkspaces','ionSharedSpaces.workspaceId','ionWorkspaces.id').select(['kind','nodes']).execute();
       const privateRow=context.userId?await db.selectFrom('ionCloudAccounts').innerJoin('ionWorkspaces','ionCloudAccounts.workspaceId','ionWorkspaces.id').select('nodes').where('userId','=',context.userId).executeTakeFirst():undefined;
       const count=(value:unknown)=>Array.isArray(value)?(value as CloudNode[]).filter(n=>!n.removedBy).length:0;
-      return new Response(JSON.stringify({nodes:cloudTree.roots.map(n=>({...n,sizeCount:n.id==='private'?count(privateRow?.nodes):n.id==='public'?count(shared.find(s=>s.kind==='public')?.nodes):cloudTree.forScope('chess').length-1+count(shared.find(s=>s.kind==='chess')?.nodes)})),version:0,scope:'home',canAdd:false,owner:context.owner,userId:context.userId||undefined} satisfies OutputType),{headers});
+      return new Response(JSON.stringify({nodes:cloudTree.roots.map(n=>({...n,identifier:context.owner?rootIdentifiers[n.id]:undefined,sizeCount:n.id==='private'?count(privateRow?.nodes):n.id==='public'?count(shared.find(s=>s.kind==='public')?.nodes):cloudTree.forScope('chess').length-1+count(shared.find(s=>s.kind==='chess')?.nodes)})),version:0,scope:'home',canAdd:false,owner:context.owner,userId:context.userId||undefined} satisfies OutputType),{headers});
     }
     if(input.action==='transfer'){
       const transfer=await cloudTransfer(request,input);
@@ -86,9 +88,14 @@ export async function handle(request: Request) {
       }
     }
     if(version!==row.version){try{await publish(channels.cloud(input.scope,context.userId||0),{version,workspaceId:row.id});}catch{console.error('Cloud refresh delayed');}}
+    const merged=[...new Map([...context.seeds,...nodes].map(n=>[n.id,n])).values()];
+    // Keep removed rows in the registry. Allocation is serialized across devices;
+    // labels are never recycled or exposed in another account's Private space.
+    const identifiers=context.owner||(input.scope!=='private'&&input.action!=='load')
+      ?await cloudIdentifierStore(merged):undefined;
     // Signed picture URLs are refreshed on every read, and never stored as authority.
-    const visible = await Promise.all([...new Map([...context.seeds,...nodes].map(n=>[n.id,n])).values()].filter(n=>!n.removedBy).map(async node => {
-      const visibleNode={...node,createdBy:undefined,canEdit:cloudPolicy.edit(input.scope,node,context.userId,context.owner),canCopy:!!context.userId&&!cloudTree.roots.some(r=>r.id===node.id)&&(input.scope!=="chess"||context.owner)};
+    const visible = await Promise.all(merged.filter(n=>!n.removedBy).map(async node => {
+      const visibleNode={...node,identifier:context.owner?identifiers?.get(node.id)?.label:undefined,createdBy:undefined,canEdit:cloudPolicy.edit(input.scope,node,context.userId,context.owner),canCopy:!!context.userId&&!cloudTree.roots.some(r=>r.id===node.id)&&(input.scope!=="chess"||context.owner)};
       if (!node.imageKey) return visibleNode;
       const result = await getUrl({ visibility: "private", filename: node.imageKey, expiresInSeconds: 3600 });
       return { ...visibleNode, isImage: true, imageKey: undefined, imageUrl: result.ok ? result.url : undefined };

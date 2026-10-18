@@ -3,8 +3,7 @@
 #include <array>
 #include <string_view>
 
-// Experimental foundation only; intentionally absent from createGame/Tactical.
-// Legal move generation must reject this setup until its own rules are complete.
+// Variant-specific board, setup and special-move geometry.
 namespace hexchess::devasa {
 const std::vector<Hex>& cells();
 int index(Hex position);
