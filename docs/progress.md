@@ -258,3 +258,11 @@ pan/zoom and no-scroll behavior are preserved. Layout and related regressions
 pass; browser fixtures verify 320/393/768/1280 px, complete labels, no overlaps,
 and keyboard pan/zoom. Static audit retains the 20 previously reviewed JSX
 false positives; no new unresolved ownership or blocking findings.
+
+## Viewport edge outline — October 18
+
+Removed the full-screen focus outline from the spatial pan-and-zoom viewport.
+This prevents the occasional white rectangle after focus restoration while
+retaining visible focus feedback on individual clouds, buttons and inputs.
+The Floot typecheck is clean, the production CSS was inspected, and the fix is
+live at ion.floot.app.
