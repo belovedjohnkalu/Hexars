@@ -1,8 +1,8 @@
 import { identifierFootprint } from "./cloudIdentifiers";
 type Item={id:string;name:string;identifier?:string;imageUrl?:string;isImage?:boolean;percent:number};
 export type Rect={x:number;y:number;width:number;height:number};
-export type CloudLayout={width:number;height:number;items:Array<Rect&{id:string;fontSize:number;pictureSize?:number}>};
-export function cloudLayout(items:Item[],width:number,height:number,measure:(text:string,size:number)=>number,options:{square?:boolean;compact?:boolean;previous?:CloudLayout}={}){
+export type CloudLayout={width:number;height:number;items:Array<Rect&{id:string;fontSize:number;pictureSize?:number;gridSlot?:number}>};
+export function cloudLayout(items:Item[],width:number,height:number,measure:(text:string,size:number)=>number,options:{square?:boolean;boardGrid?:boolean;compact?:boolean;previous?:CloudLayout}={}){
   const previous=options.previous,narrow=options.compact??width<600,gap=narrow?16:24,cells=new Map<string,Rect[]>(),result:CloudLayout['items']=[];
   function keys(rect:Rect){const list:string[]=[];for(let x=Math.floor(rect.x/128);x<=Math.floor((rect.x+rect.width)/128);x++)for(let y=Math.floor(rect.y/128);y<=Math.floor((rect.y+rect.height)/128);y++)list.push(x+","+y);return list;}
   const overlaps=(rect:Rect)=>keys(rect).some(k=>(cells.get(k)||[]).some(r=>rect.x<r.x+r.width&&rect.x+rect.width>r.x&&rect.y<r.y+r.height&&rect.y+rect.height>r.y));
@@ -13,6 +13,17 @@ export function cloudLayout(items:Item[],width:number,height:number,measure:(tex
     const labelWidth=measure(name,isPicture?16:fontSize)+24+identifier.width;
     return {id:item.id,fontSize,width:Math.max(64,labelWidth,isPicture?picture+24:0),height:isPicture?picture+Math.max(20.8,identifier.height)+32:Math.max(fontSize*1.18,identifier.height)+20,...(isPicture?{pictureSize:picture}:{})};
   });
+  if(options.boardGrid){
+    // Boards is an aligned two-column collection, not a spiral whose outer
+    // previews disappear beyond a narrow camera. Retain slots after deletion.
+    const columns=2,cellWidth=Math.max(160,...measured.map(n=>n.width),...(previous?.items.map(n=>n.width)||[])),cellHeight=Math.max(160,...measured.map(n=>n.height),...(previous?.items.map(n=>n.height)||[]));
+    let nextSlot=Math.max(-1,...(previous?.items.map(n=>n.gridSlot??-1)||[]))+1;
+    const placed=measured.map(item=>({...item,gridSlot:previous?.items.find(n=>n.id===item.id)?.gridSlot??nextSlot++}));
+    const rows=Math.ceil((Math.max(-1,...placed.map(n=>n.gridSlot),...(previous?.items.map(n=>n.gridSlot??-1)||[]))+1)/columns);
+    const worldWidth=Math.max(width,columns*cellWidth+gap+32),worldHeight=Math.max(height,rows*(cellHeight+gap)-gap+32,previous?.height||0);
+    const left=(worldWidth-columns*cellWidth-gap)/2,top=16;
+    return {width:worldWidth,height:worldHeight,items:placed.map(item=>({...item,x:left+(item.gridSlot%columns)*(cellWidth+gap)+(cellWidth-item.width)/2,y:top+Math.floor(item.gridSlot/columns)*(cellHeight+gap)}))};
+  }
   // The spatial world grows to fit whole labels; labels never split or shrink.
   width=Math.max(width,previous?.width||0,...measured.map(item=>item.width+32));
   const pending:typeof measured=[];

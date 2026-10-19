@@ -284,3 +284,10 @@ Vertical swipes flip Pass and Play or switch Tactical sides on the same saved
 game. Busy side changes queue; horizontal history remains available. IL01 Boards
 now uses a square arrangement. Focused tests, hosted typecheck and browser
 verification passed. Published at ion.floot.app; see ion-board-swipes-release.md.
+
+## Boards column correction — October 19
+
+The clipped square spiral is replaced with two explicit columns and three rows.
+Both columns fit when Boards opens, including on 320px phones; the old camera
+cache is invalidated. Focused tests/typecheck and three-width browser checks pass.
+See ion-boards-grid-release.md and ion-boards-grid screenshots/QA JSONs.

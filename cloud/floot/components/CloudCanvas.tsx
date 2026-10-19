@@ -20,14 +20,14 @@ export function CloudCanvas({nodes,parentId,onOpen,opening,loading,addedId,onPic
  const area=useRef<HTMLDivElement>(null),[size,setSize]=useState({width:360,height:480}),[fontReady,setFontReady]=useState(0),location=useLocation(),hold=useCloudHold(onHighlight);
  useLayoutEffect(()=>{const el=area.current;if(!el)return;const measure=()=>setSize(old=>({width:Math.max(240,el.clientWidth),height:el.closest('[data-keyboard="true"]')?old.height:Math.max(160,el.clientHeight)}));measure();const observer=new ResizeObserver(measure);observer.observe(el);let alive=true;void document.fonts.ready.then(()=>{if(alive)setFontReady(1);});return()=>{alive=false;observer.disconnect();};},[]);
  const siblings=useMemo(()=>cloudTree.sizes(nodes,parentId).map(n=>n.note?{...n,isImage:false,imageUrl:undefined,imageUrls:undefined}:n),[nodes,parentId]);
- const square=scope==='chess'&&(parentId==='boards'||parentId==='rules'||!!parentId?.endsWith('-rules')),lastLayout=useRef<{key:string;viewportWidth:number;layout:CloudLayout}|null>(null),layoutKey=identity+':'+scope+':'+(parentId||'root');
+ const boardGrid=scope==='chess'&&parentId==='boards',square=scope==='chess'&&(parentId==='boards'||parentId==='rules'||!!parentId?.endsWith('-rules')),lastLayout=useRef<{key:string;viewportWidth:number;layout:CloudLayout}|null>(null),layoutKey=identity+':'+scope+':'+(parentId||'root')+(boardGrid?':grid-v2':'');
  const layout=useMemo(()=>{
   const context=document.createElement('canvas').getContext('2d');
   const saved=lastLayout.current?.key===layoutKey?lastLayout.current:layoutCache.get(layoutKey),old=saved?.viewportWidth===size.width?saved.layout:undefined;
   const previous=old||(scope==='home'&&parentId==='ion'?cloudHomeLayout(size.width,size.height):undefined);
-  const width=Math.max(previous?.width||0,size.width,square?Math.max(760,Math.ceil(Math.sqrt(siblings.length))*165):Math.min(2400,Math.sqrt(siblings.length)*100));
-  return cloudLayout(siblings.map(n=>({...n,identifier:showIdentifiers?n.identifier:undefined,name:n.name})),width,size.height,(text,font)=>{if(!context)return text.length*font*.54;context.font='500 '+font+'px Inter, sans-serif';return context.measureText(text).width;},{square,compact:size.width<600,previous});
- },[siblings,size,fontReady,scope,square,layoutKey,showIdentifiers,parentId]);
+  const width=Math.max(previous?.width||0,size.width,boardGrid?0:square?Math.max(760,Math.ceil(Math.sqrt(siblings.length))*165):Math.min(2400,Math.sqrt(siblings.length)*100));
+  return cloudLayout(siblings.map(n=>({...n,identifier:showIdentifiers?n.identifier:undefined,name:n.name})),width,size.height,(text,font)=>{if(!context)return text.length*font*.54;context.font='500 '+font+'px Inter, sans-serif';return context.measureText(text).width;},{square,boardGrid,compact:size.width<600,previous});
+ },[siblings,size,fontReady,scope,square,boardGrid,layoutKey,showIdentifiers,parentId]);
  useLayoutEffect(()=>{if(!fontReady||loading)return;const old=lastLayout.current?.key===layoutKey?lastLayout.current:layoutCache.get(layoutKey),retain=old?.key===layoutKey&&old.viewportWidth===size.width&&old.layout.width===layout.width;const items=retain?[...new Map([...old.layout.items,...layout.items].map(n=>[n.id,n])).values()]:layout.items;lastLayout.current={key:layoutKey,viewportWidth:size.width,layout:{...layout,items}};layoutCache.set(layoutKey,lastLayout.current);},[layout,size.width,fontReady,loading,layoutKey]);
  const rectangles=new Map(layout.items.map(n=>[n.id,n]));
  function destination(node:CloudNode){
@@ -40,7 +40,7 @@ export function CloudCanvas({nodes,parentId,onOpen,opening,loading,addedId,onPic
   if(chessVariants.isId(node.destination)){let mode='friend',level='3';try{if(localStorage.getItem('ion.engine')==='tactical'){mode='engine';level=localStorage.getItem('ion.difficulty')||'3';}}catch{}return '/'+node.destination+'?mode='+mode+(mode==='engine'?'&level='+level:'');}
   return cloudURL(node.id,scope)+context;
  }
- return <div ref={area} className={styles.viewport+' '+className}><SpatialViewport width={layout.width} height={layout.height} viewKey={layoutKey} ready={!!fontReady&&!loading} refitKey={size.width+':'+size.height} initialZoom={square?1:layout.width>size.width?Math.max(.7,Math.min(1,size.width/layout.width,size.height/layout.height)):undefined}>
+ return <div ref={area} className={styles.viewport+' '+className}><SpatialViewport width={layout.width} height={layout.height} viewKey={layoutKey} ready={!!fontReady&&!loading} refitKey={size.width+':'+size.height} initialZoom={boardGrid?Math.min(1,size.width/layout.width,size.height/layout.height):square?1:layout.width>size.width?Math.max(.7,Math.min(1,size.width/layout.width,size.height/layout.height)):undefined}>
  <div className={styles.canvas+(opening?' '+styles.leaving:'')} data-home={scope==='home'&&parentId==='ion'} role="group" aria-label={parentId?'Droplets':'Clouds'} aria-busy={loading} style={{width:layout.width,height:layout.height,visibility:fontReady&&!loading?'visible':'hidden'}}>
  {siblings.map(node=>{const rect=rectangles.get(node.id);if(!rect)return null;const picture=node.isImage||cloudPhotoUrls(node).length>0,identifier=showIdentifiers?node.identifier:undefined;
   const label=identifier?<span className={styles.identifier} data-identifier={identifier} style={{width:identifierFootprint(identifier).width-6}}>{identifier}</span>:null;

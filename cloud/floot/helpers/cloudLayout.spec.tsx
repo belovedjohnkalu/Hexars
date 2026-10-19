@@ -69,3 +69,22 @@ describe('Whole cloud labels',()=>{
   }
  });
 });
+
+describe('Boards aligned collection',()=>{
+ const measure=(text:string,size:number)=>text.length*size*.54;
+ const boards=['Gliński','McCooey','Shafran','Brusky','De Vasa','Wellisch'].map((name,i)=>({id:String(i),name:name+'’s Variant',isImage:true,percent:0}));
+ it('places six boards in two aligned columns and three rows at phone and desktop widths',()=>{
+  for(const width of [320,393,820]){
+   const result=cloudLayout(boards,width,600,measure,{boardGrid:true,compact:width<600});
+   const centers=result.items.map(n=>Math.round(n.x+n.width/2)),rows=result.items.map(n=>Math.round(n.y));
+   expect(new Set(centers).size).toBe(2);expect(new Set(rows).size).toBe(3);
+   expect(result.items.every(n=>n.x>=0&&n.x+n.width<=result.width)).toBeTrue();
+  }
+ });
+ it('retains grid slots and centers after deletion and appends new boards',()=>{
+  const first=cloudLayout(boards,393,600,measure,{boardGrid:true,compact:true});
+  const next=cloudLayout([...boards.slice(0,5),{id:'new',name:'New',isImage:true,percent:0}],393,600,measure,{boardGrid:true,compact:true,previous:first});
+  for(const n of next.items.filter(n=>n.id!=='new')){const old=first.items.find(o=>o.id===n.id)!;expect(n.x).toBeCloseTo(old.x,5);expect(n.y).toBeCloseTo(old.y,5);}
+  expect(next.items.find(n=>n.id==='new')?.gridSlot).toBe(6);
+ });
+});
