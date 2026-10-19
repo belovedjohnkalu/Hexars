@@ -1,9 +1,12 @@
 import { renderHook, act, waitFor, cleanup } from "@testing-library/react";
 import { useCloudSpace } from "./useCloudSpace";
+import { RealtimeClient } from "./RealtimeClient";
 import { cloudTree } from "./cloudTree";
 describe("Cloud refresh concurrency", () => {
   afterEach(cleanup);
+  it("does not fetch or reset authentication for a signed-out Private view",async()=>{const fetchSpy=spyOn(globalThis,"fetch");const hook=renderHook(()=>useCloudSpace(null,false,'private'));await waitFor(()=>expect(hook.result.current.ready).toBeTrue());expect(hook.result.current.error).toBe('');expect(hook.result.current.canAdd).toBeFalse();expect(fetchSpy).not.toHaveBeenCalled();});
   it("keeps a saved word when an older background read arrives late", async () => {
+    spyOn(RealtimeClient.prototype,"connect").and.resolveTo();
     localStorage.removeItem("ion.private-space.v1");
     let release: ((value: Response) => void) | undefined;
     let reads=0;
@@ -16,7 +19,7 @@ describe("Cloud refresh concurrency", () => {
       }
       return response(1,true);
     });
-    const hook=renderHook(()=>useCloudSpace());
+    const hook=renderHook(()=>useCloudSpace(42));
     await waitFor(()=>{if(hook.result.current.loading)throw new Error("Still opening");});
     act(()=>{window.dispatchEvent(new window.Event("focus"));});
     await waitFor(()=>{if(!release)throw new Error("Read not started");});

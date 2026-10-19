@@ -2,6 +2,15 @@
 
 Published: **https://ion.floot.app**
 
+## 2026-10-19 — Floating navigation and account refinement
+
+Shared glass Back bubbles free the composer footer. Title holds open Controls;
+signed-out Private stays stable. Signup has optional public nicknames, remembered
+accounts hide Remember, and text Copy is separate from Duplicate. ION is organically
+centered, deletion repacks survivors, and nested Back follows the immediate parent.
+Random code rooms are available under IL0510. The requested recoverable IL201 branch
+was restored. See [verification and release details](ion-navigation-account-refinement.md).
+
 ## 2026-10-19 — Organic clouds, redirects and Library
 
 Cloud collections now use close, collision-free organic packing with dramatic

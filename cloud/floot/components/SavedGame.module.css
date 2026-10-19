@@ -1,4 +1,4 @@
-.app { height:100dvh; display:flex; flex-direction:column; background:var(--background); color:var(--foreground); }
+.app { position:relative; height:100dvh; display:flex; flex-direction:column; background:var(--background); color:var(--foreground); }
 .header { flex-shrink:0; text-align:center; padding:calc(16px + env(safe-area-inset-top)) 20px 8px; }
 .header h1 { margin:0; font-size:20px; font-weight:500; letter-spacing:-.04em; outline:none; touch-action:none; user-select:none; }
 .main { flex:1; position:relative; min-height:0; }

@@ -99,7 +99,7 @@ export async function handle(request: Request) {
     const identifiers=context.owner||(['public','chess','home'].includes(input.scope)&&input.action!=='load')
       ?await cloudIdentifierStore(merged):undefined;
     // Signed picture URLs are refreshed on every read, and never stored as authority.
-    let visible = await Promise.all(merged.filter(n=>!n.removedBy).map(async node => {
+    let visible = await Promise.all(merged.filter(n=>!n.removedBy&&(context.scope!=='accounts'||n.id!=='account-remember'||context.seeds.some(seed=>seed.id==='account-remember'))).map(async node => {
       const visibleNode={...node,identifier:context.owner?identifiers?.get(node.id)?.label:undefined,createdBy:undefined,canEdit:cloudPolicy.edit(input.scope,node,context.userId,context.owner),canCopy:!!context.userId&&cloudPolicy.writable(input.scope,context.userId,context.owner)&&(context.owner||!cloudTree.roots.some(r=>r.id===node.id))};
       const keys=node.imageKeys?.length?node.imageKeys:node.imageKey?[node.imageKey]:[];
       if(!keys.length)return visibleNode;

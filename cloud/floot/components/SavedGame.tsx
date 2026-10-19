@@ -1,7 +1,7 @@
 import { useEffect,useMemo,useRef,useState } from 'react';
 import { Link,useLocation,useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { ArrowLeft } from 'lucide-react';
+import { FloatingBack } from './FloatingBack';
 import { AppHead } from './AppHead';
 import { Button } from './Button';
 import { Input } from './Input';
@@ -46,7 +46,7 @@ export function SavedGame({variant}:{variant:VariantId}){
  <CloudBoard game={game} selected={null} onCell={()=>{}} flipped={face%2===1} rotation={game.variant==='wellisch'?-120*(face%3):undefined} coordinates={false} theme="neutral" disabled lastMove={data.moves[(ply??data.moves.length)-1]}/>
  </div></SpatialViewport>}
  </>:null}
- </main><footer className={styles.footer}>{copy==='Copied'&&<span role="status">Copied</span>}<Button asChild variant="ghost" size="icon" className={styles.back}><Link to={back} state={{restoreCamera:true}} aria-label="Back"><ArrowLeft/></Link></Button></footer>
+ </main><footer className={styles.footer}>{copy==='Copied'&&<span role="status">Copied</span>}</footer><FloatingBack to={back}/>
  <Dialog open={!!copy&&copy!=='Copied'} onOpenChange={open=>{if(!open)setCopy('');}}><DialogContent><DialogTitle>{copy==='Copied'?'Copied':'Copy notations'}</DialogTitle><DialogDescription>{copy==='Copied'?'Ready to paste.':'Select the moves to copy them.'}</DialogDescription>{copy!=='Copied'&&<Input aria-label="Notations" readOnly value={copy.replace(/\n/g,' · ')} onFocus={e=>e.currentTarget.select()}/>}<Button variant="ghost" onClick={()=>setCopy('')}>Done</Button></DialogContent></Dialog>
  </div>;
 }

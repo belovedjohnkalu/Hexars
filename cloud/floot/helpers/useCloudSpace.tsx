@@ -23,6 +23,7 @@ export function useCloudSpace(accountId:number|null=null,authLoading=false,scope
  useEffect(()=>{const deadline=data.undo?.expiresAt;if(!deadline)return;setUndoClock(Date.now());const t=setTimeout(()=>setUndoClock(Date.now()),Math.max(0,deadline-Date.now())+10);return()=>clearTimeout(t);},[data.undo?.operationId,data.undo?.expiresAt]);
  const load=useCallback(async(signal?:AbortSignal)=>{
   try{const next=scope+':'+(accountId||'guest');if(scopeKey.current!==next){scopeKey.current=next;current.current=blank(scope);setData(current.current);setReady(false);setLoading(true);}identity.current=credentials();
+   if(scope==='private'&&!accountId){accept(blank(scope));setReady(true);setError('');return;}
    let connect=false;try{connect=scope==='private'&&!!accountId&&sessionStorage.getItem('ion.connect-space')==='yes';}catch{}
    const value=await postCloud({action:'load',scope,account:!!accountId,...identity.current,connect},{signal});
    if(mounted.current&&!signal?.aborted){accept(value);if(connect)sessionStorage.removeItem('ion.connect-space');setReady(true);setError('');}

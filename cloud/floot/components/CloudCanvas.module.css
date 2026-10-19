@@ -11,7 +11,7 @@
 .picture { flex-direction:column; gap:8px; }
 .pictureFrame { display:block; flex-shrink:0; overflow:clip; }
 .pictureFallback { display:grid; place-items:center; height:100%; width:100%; border:1px solid var(--border); border-radius:24%; background:var(--surface); }
-.justAdded { text-decoration:underline; text-underline-offset:6px; }
+.justAdded { filter:brightness(1.15); }
 .picture img { display:block; width:100%; height:100%; border-radius:24%; object-fit:cover; border:1px solid var(--border); }
 .caption { display:flex; align-items:center; justify-content:center; gap:6px; color:inherit; font-size:var(--caption-size,16px); line-height:1.3; flex-shrink:0; }
 .node > .identifier { margin-left:6px; }
@@ -23,12 +23,13 @@
 @keyframes arrive { from { opacity:0; } to { opacity:1; } }
 @media(prefers-reduced-motion:reduce) { .canvas,.node { transition:none; animation:none; } }
 
-.canvas[data-home=true] .node { transition:color 180ms ease,opacity 180ms ease; }
 .node.node { background:transparent; border:0; box-shadow:none; white-space:nowrap; height:auto; }
-.node[data-holding=true] { opacity:.72; text-decoration:underline; text-underline-offset:6px; }
+.node[data-holding=true] { opacity:.72; }
 .node::selection,.node *::selection { background:transparent; }
 
 .linkedLabel { white-space:nowrap; }
 .linkedLabel a { color:inherit; text-decoration:none; }
 .linkedLabel .linkedWord { text-decoration:underline; text-underline-offset:4px; }
 .linkedLabel a:focus-visible { outline:2px solid var(--primary); outline-offset:3px; }
+
+.node,.node * { -webkit-user-select:none; user-select:none; -webkit-touch-callout:none; -webkit-tap-highlight-color:transparent; }

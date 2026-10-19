@@ -44,7 +44,7 @@ export async function handle(request: Request) {
         .insertInto("users")
         .values({
           email,
-          displayName,
+          displayName:displayName||`Player ${randomBytes(3).toString('hex')}`,
           role: "user", // Default role
         })
         .returning(["id", "email", "displayName", "createdAt"])
