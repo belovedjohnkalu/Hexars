@@ -2,7 +2,7 @@ import { identifierFootprint } from "./cloudIdentifiers";
 type Item={id:string;name:string;identifier?:string;imageUrl?:string;isImage?:boolean;percent:number};
 export type Rect={x:number;y:number;width:number;height:number};
 export type CloudLayout={width:number;height:number;items:Array<Rect&{id:string;fontSize:number;pictureSize?:number;gridSlot?:number}>};
-export function cloudLayout(items:Item[],width:number,height:number,measure:(text:string,size:number)=>number,options:{square?:boolean;boardGrid?:boolean;compact?:boolean;previous?:CloudLayout}={}){
+export function cloudLayout(items:Item[],width:number,height:number,measure:(text:string,size:number)=>number,options:{square?:boolean;boardGrid?:boolean;columns?:number;compact?:boolean;previous?:CloudLayout}={}){
   const previous=options.previous,narrow=options.compact??width<600,gap=narrow?16:24,cells=new Map<string,Rect[]>(),result:CloudLayout['items']=[];
   function keys(rect:Rect){const list:string[]=[];for(let x=Math.floor(rect.x/128);x<=Math.floor((rect.x+rect.width)/128);x++)for(let y=Math.floor(rect.y/128);y<=Math.floor((rect.y+rect.height)/128);y++)list.push(x+","+y);return list;}
   const overlaps=(rect:Rect)=>keys(rect).some(k=>(cells.get(k)||[]).some(r=>rect.x<r.x+r.width&&rect.x+rect.width>r.x&&rect.y<r.y+r.height&&rect.y+rect.height>r.y));
@@ -16,7 +16,7 @@ export function cloudLayout(items:Item[],width:number,height:number,measure:(tex
   if(options.boardGrid){
     // Boards is an aligned two-column collection, not a spiral whose outer
     // previews disappear beyond a narrow camera. Retain slots after deletion.
-    const columns=2,cellWidth=Math.max(160,...measured.map(n=>n.width),...(previous?.items.map(n=>n.width)||[])),cellHeight=Math.max(160,...measured.map(n=>n.height),...(previous?.items.map(n=>n.height)||[]));
+    const columns=options.columns??2,cellWidth=Math.max(160,...measured.map(n=>n.width),...(previous?.items.map(n=>n.width)||[])),cellHeight=Math.max(160,...measured.map(n=>n.height),...(previous?.items.map(n=>n.height)||[]));
     let nextSlot=Math.max(-1,...(previous?.items.map(n=>n.gridSlot??-1)||[]))+1;
     const placed=measured.map(item=>({...item,gridSlot:previous?.items.find(n=>n.id===item.id)?.gridSlot??nextSlot++}));
     const rows=Math.ceil((Math.max(-1,...placed.map(n=>n.gridSlot),...(previous?.items.map(n=>n.gridSlot??-1)||[]))+1)/columns);

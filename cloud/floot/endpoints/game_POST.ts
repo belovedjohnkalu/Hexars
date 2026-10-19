@@ -1,6 +1,8 @@
 import { createHash, randomBytes, randomUUID } from "node:crypto";
 import superjson from "superjson";
-import { savedGameCutoff } from "../helpers/gameRetention";
+import { optionalGameUser } from '../helpers/gameAccess';
+import { publish } from '@floot/realtime';
+import { channels } from '../helpers/realtimeChannels';
 import { db } from "../helpers/db";
 import { runNativeEngine } from "../helpers/runNativeEngine";
 import type { Json } from "../helpers/schema";
@@ -37,10 +39,12 @@ export async function handle(request: Request) {
     const text = await request.text();
     if (text.length > 4096) throw new GameError("Request too large", 413);
     const input = schema.parse(superjson.parse(text));
+    const user=await optionalGameUser(request);
     if (input.action === "new") {
       const native = await runNativeEngine({
         action: "new",
         variant: input.variant,
+        engineId:input.engineId,
         origin: request.url,
         signal: request.signal,
       });
@@ -53,6 +57,7 @@ export async function handle(request: Request) {
           accessTokenHash: tokenHash(accessToken),
           mode: input.mode,
           difficulty:input.difficulty??3,
+          engineId:input.engineId??'tactical',
           humanPlayer: input.humanPlayer,
           state: native.state,
           timeline: [],
@@ -61,6 +66,7 @@ export async function handle(request: Request) {
           lastSearch: null,
         })
         .execute();
+      if(user)await db.insertInto('ionGameMembers').values({gameId,userId:user.id,seat:null}).onConflict(oc=>oc.columns(['gameId','userId']).doNothing()).execute();
       return new Response(
         superjson.stringify({
           gameId,
@@ -70,6 +76,7 @@ export async function handle(request: Request) {
           difficulty:input.difficulty??3,
           humanPlayer: input.humanPlayer,
           engine: native.engine,
+          engineId:input.engineId??'tactical',
           execution: "cloud",
           game: native.game,
           moves: [],
@@ -79,16 +86,14 @@ export async function handle(request: Request) {
       );
     }
 
-    const row = await db
-      .selectFrom("hexchessGames")
-      .selectAll()
-      .where("id", "=", input.gameId)
-      .where("accessTokenHash", "=", tokenHash(input.accessToken))
-      .where("updatedAt", ">", savedGameCutoff())
-      .executeTakeFirst();
-    if (!row){
-      await db.deleteFrom('hexchessGames').where('id','=',input.gameId).where('accessTokenHash','=',tokenHash(input.accessToken)).where('updatedAt','<=',savedGameCutoff()).execute();
-      throw new GameError("This saved game is no longer available. Start a new game.",404);
+    const row=await db.selectFrom('hexchessGames').selectAll().where('id','=',input.gameId).executeTakeFirst();
+    const member=user?await db.selectFrom('ionGameMembers').selectAll().where('gameId','=',input.gameId).where('userId','=',user.id).executeTakeFirst():null;
+    const capability=!!row&&row.accessTokenHash===tokenHash(input.accessToken);
+    if(!row||(!member&&!capability)||(row.mode==='online'&&!member))throw new GameError('This saved game is not available to this account.',404);
+    if(user&&capability&&row.mode!=='online'&&!member)await db.insertInto('ionGameMembers').values({gameId:row.id,userId:user.id,seat:null}).onConflict(oc=>oc.columns(['gameId','userId']).doNothing()).execute();
+    if(row.mode==='online'){
+      if(input.action==='engine'||input.action==='undo'||input.action==='switch_side')throw new GameError('This action is not available in an online match.',400);
+      if(input.action==='move'&&activePlayer(row.state)!==member?.seat)throw new GameError('Wait for your turn.',403);
     }
     if (input.action !== "get" && input.action !== "review" && input.version !== row.version)
       throw new GameError("This game changed on another device. Refresh to continue.", 409);
@@ -99,7 +104,7 @@ export async function handle(request: Request) {
     let version = row.version;
     let humanPlayer=row.humanPlayer;
     if(input.action==='switch_side'){
-      if(row.mode!=='engine')throw new GameError('Side switching requires an engine game.',400);
+      if(row.mode!=='engine'||(row.state&&typeof row.state==='object'&&!Array.isArray(row.state)&&Number(row.state.ply)>0)||moves.length>0)throw new GameError('Choose your engine side before the first move.',400);
       humanPlayer=input.humanPlayer;
     }
 
@@ -138,6 +143,7 @@ export async function handle(request: Request) {
       origin: request.url,
       state: nextState,
       difficulty:row.difficulty,
+      engineId:row.engineId==='positional'?'positional':'tactical',
       move: input.action === "move" ? input.move : undefined,
       signal: request.signal,
     });
@@ -203,13 +209,17 @@ export async function handle(request: Request) {
       version = updated.version;
     }
 
+    const players=row.mode==='online'?await db.selectFrom('ionGameMembers').innerJoin('users','users.id','ionGameMembers.userId').select(['ionGameMembers.seat','users.displayName as name']).where('gameId','=',row.id).orderBy('seat').execute():undefined;
+    if(input.action!=='get'&&input.action!=='review'){const members=await db.selectFrom('ionGameMembers').select('userId').where('gameId','=',row.id).execute();await Promise.all(members.map(m=>publish(channels.player(m.userId),{gameId:row.id,version})));}
     const output: OutputType = {
       gameId: row.id,
       accessToken: input.accessToken,
       version,
       mode: row.mode,
       difficulty:row.difficulty,
-      humanPlayer,
+      humanPlayer:row.mode==='online'?member!.seat!:humanPlayer,
+      engineId:row.engineId==='positional'?'positional':'tactical',
+      ...(players?{players:players.filter(p=>p.seat!==null).map(p=>({seat:p.seat!,name:p.name}))}:{}),
       engine: native.engine,
       execution: "cloud",
       game: native.game,
@@ -220,8 +230,8 @@ export async function handle(request: Request) {
   } catch (error) {
     const message = error instanceof Error ? error.message : "The game service is unavailable.";
     const status =
-      error instanceof GameError
-        ? error.status
+      error && typeof error==='object' && 'status' in error
+        ? Number(error.status)
         : message.includes("Illegal move") || message.includes("Game has ended")
           ? 400
           : typeof error === "object" && error && "issues" in error

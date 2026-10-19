@@ -2,7 +2,7 @@
 
 ION is live on **Floot** at https://ion.floot.app. Its main navigation is a
 pannable, zoomable cloud of words and pictures. Open **Hexagonal Chess**, then
-**Boards** to choose Gliński, McCooey, Shafran, Brusky, De Vasa or Wellisch, **Engines** to select Tactical, or **Rules**
+**Boards** to choose Gliński, McCooey, Shafran, Brusky, De Vasa or Wellisch, **Engines** to select Tactical or the first Positional implementation, or **Rules**
 for separate rule paragraphs. Rule lists are words; illustrations appear inside each paragraph, and long text uses fitted pages without scrolling.
 
 Home starts with **Hexagonal Chess**, **Public**, **Private**, **Controls** and **Accounts**. Dev accounts may add more. Public has the same saved continuous-gradient color wheel as Private and is readable
@@ -47,7 +47,12 @@ configuration. Package workspaces now use `@ion/` names.
 
 The **Install** action appears only when the browser supplies an installation prompt or when manual installation is supported in top-level iPhone/iPad Safari. It is hidden in incompatible browsers, embedded frames and an already installed app. The home-screen app uses a standalone window. This is an installable web app, not an App Store or Play Store binary. Internet access is required for cloud play.
 
-Games are saved in the cloud for 30 days after the last saved move or undo; opening a game does not extend this period. A daily cleanup physically removes expired records. **Share game** lets you resume on another device; opening a copied game link restores it after installation if browser and app storage are separate. Anyone with that link can control the shared game. Word spaces now have user accounts. Chess sessions still use separate capability links; side-specific multiplayer credentials and an account game library are not included. The current minimal game surface does not expose a Share button; historical copied links still open.
+Games are saved without automatic expiry. Signed-in games appear in private **History** under Hexagonal Chess, grouped by year, month and day, then by individual variant previews. Redundant single-child levels are skipped for ordinary accounts. Valid older local saved links can attach on opening; ownership of unrelated anonymous games is never guessed. Existing capability links still authorize local games, while online matches require account membership and the assigned seat.
+
+**Online** supports email-authenticated random matching by variant (or Random), and four-digit rooms for two players or three in Wellisch. Waiting rooms expire after 15 minutes; saved games do not. Moves are native-validated and delivered through private live update channels, without match polling. Downward title pulls refresh. Vertical board swipes switch the engine side only before the first move, then rotate the view. Each cell has a complete hexagonal hitbox, and dashed lavender last-move outlines differ from legal blue destinations.
+
+**Positional 0.1.0** is a separate executable with strategic beam/MaxN search. Its strength is still under development. Build it with `npm run build:positional`; add `-- --cloud` for a fully static Linux binary. See [the release notes](docs/ion-journeys-online-release.md).
+
 
 ## Design
 

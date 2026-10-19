@@ -19,6 +19,7 @@ export const gameSessions = {
   },
   stored(variant: VariantId, mode: "engine" | "two_players" = "engine") { return mode === "two_players" ? stored(`ion.game.friend.${variant}`) : stored(`hexars.game.${variant}`) || stored(legacyKey); },
   save(result: OutputType) {
+    if(result.mode==='online')return;
     const value = JSON.stringify({ gameId: result.gameId, accessToken: result.accessToken });
     try { if(result.mode === "two_players") localStorage.setItem(`ion.game.friend.${result.game.variant}`, value); else { localStorage.setItem(`hexars.game.${result.game.variant}`, value); localStorage.setItem(legacyKey, value); } localStorage.setItem("ion.board.variant", result.game.variant); }
     catch { /* The shared link remains available. */ }

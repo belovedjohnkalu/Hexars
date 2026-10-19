@@ -16,6 +16,7 @@ type Options = {
   origin: string;
   variant?: VariantId;
   difficulty?:number;
+  engineId?:'tactical'|'positional';
   state?: Json;
   move?: ChessMove;
   signal?: AbortSignal;
@@ -31,21 +32,22 @@ type NativeResult = {
 
 // Only immutable compiled code is cached in /tmp. Every game state lives in
 // Postgres; serverless process memory and temporary files are never game storage.
-async function executable(origin: string) {
+async function executable(origin: string,engineId='tactical') {
+  const positional=engineId==='positional',selectedAsset=positional?'/_cdn/static/4ba245d9-6ade-4313-8ee1-9a234e41517e-positional-0.1.0-static-linux-x64.bin':asset,selectedChecksum=positional?'71ddf694c874a26ee780e3aa85a8e57b4f3ca3b01babc3e3bec7e3f9125ee15b':checksum,selectedSize=positional?2797000:2222328;
   if (platform() !== "linux" || arch() !== "x64")
     throw new Error("Unsupported cloud engine platform");
-  const filename = path.join(tmpdir(), `hexchess-engine-${checksum}`);
+  const filename = path.join(tmpdir(), `hexchess-engine-${selectedChecksum}`);
   let binary: Buffer | null = null;
   try {
     binary = await readFile(filename);
   } catch {
     /* First request in a new runtime. */
   }
-  if (binary && createHash("sha256").update(binary).digest("hex") === checksum) return filename;
-  const response = await fetch(new URL(asset, origin), { signal: AbortSignal.timeout(15000) });
+  if (binary && createHash("sha256").update(binary).digest("hex") === selectedChecksum) return filename;
+  const response = await fetch(new URL(selectedAsset, origin), { signal: AbortSignal.timeout(15000) });
   if (!response.ok) throw new Error("The cloud engine could not be loaded");
   binary = Buffer.from(await response.arrayBuffer());
-  if (binary.length !== 2222328 || createHash("sha256").update(binary).digest("hex") !== checksum)
+  if (binary.length !== selectedSize || createHash("sha256").update(binary).digest("hex") !== selectedChecksum)
     throw new Error("Cloud engine checksum mismatch");
   const staging = filename + "-" + randomUUID();
   try {
@@ -59,7 +61,7 @@ async function executable(origin: string) {
 }
 
 export async function runNativeEngine(options: Options): Promise<NativeResult> {
-  const filename = await executable(options.origin);
+  const filename = await executable(options.origin,options.engineId);
   if (options.signal?.aborted) throw new Error("Game request cancelled");
   return await new Promise((resolve, reject) => {
     const child = spawn(filename, [], { shell: false, stdio: ["pipe", "pipe", "pipe"] });

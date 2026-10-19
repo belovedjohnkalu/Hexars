@@ -1,13 +1,14 @@
+import { chessJourney } from "./chessJourney";
 import { systemClouds } from "./systemClouds";
 import { horizontalRuleClouds } from "./horizontalRules";
 import { wellischRuleClouds } from "./wellischRules";
 import type { CloudNode,CloudScope } from "../endpoints/cloud_POST.schema";
-const roots:CloudNode[]=[{"id": "hexagonal-chess", "parentId": null, "name": "Hexagonal Chess", "imageUrl": "/_cdn/static/9522e791-e7fa-41d6-867c-2d4013eb3982-hexars-dark-512.png", "color": "blue"}, {"id": "public", "parentId": null, "name": "Public", "color": "mint"}, {"id": "private", "parentId": null, "name": "Private", "color": "lavender"}];
+const roots:CloudNode[]=[{"id": "hexagonal-chess", "parentId": null, "name": "Hexagonal Chess", "imageUrl": "/_cdn/static/5212c476-8b1a-456c-8c0f-0186a23e999a.png", "color": "blue"}, {"id": "public", "parentId": null, "name": "Public", "color": "mint"}, {"id": "private", "parentId": null, "name": "Private", "color": "lavender"}];
 roots.forEach((n,i)=>{n.parentId='ion';n.destination='space';n.space=(['chess','public','private'] as const)[i];});
 roots.push(...systemClouds.filter(n=>n.parentId==='ion'));
 const homeSeed=[systemClouds[0],...roots,...systemClouds.filter(n=>n.parentId==='controls')];
 const seed:CloudNode[]=[
-{"id": "hexagonal-chess", "parentId": null, "name": "Hexagonal Chess", "imageUrl": "/_cdn/static/9522e791-e7fa-41d6-867c-2d4013eb3982-hexars-dark-512.png", "color": "blue"},
+{"id": "hexagonal-chess", "parentId": null, "name": "Hexagonal Chess", "imageUrl": "/_cdn/static/5212c476-8b1a-456c-8c0f-0186a23e999a.png", "color": "blue"},
 {"id": "engines", "parentId": "hexagonal-chess", "name": "Engines", "color": "coral"},
 {"id": "tactical", "parentId": "engines", "name": "Tactical", "color": "blue"},
 {"id": "boards", "parentId": "hexagonal-chess", "name": "Boards", "color": "cyan"},
@@ -87,6 +88,7 @@ const seed:CloudNode[]=[
 ];
 seed.push(...horizontalRuleClouds());
 seed.push(...wellischRuleClouds());
+seed.push(...chessJourney);
 function descendants(nodes:CloudNode[],id:string){
  const children=new Map<string,CloudNode[]>();for(const n of nodes)if(n.parentId)children.set(n.parentId,[...(children.get(n.parentId)||[]),n]);
  const seen=new Set([id]),queue=[id];for(let i=0;i<queue.length;i++)for(const n of children.get(queue[i])||[])if(!seen.has(n.id)){seen.add(n.id);queue.push(n.id);}return seen.size-1;

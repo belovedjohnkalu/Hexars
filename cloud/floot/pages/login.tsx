@@ -10,6 +10,7 @@ import { Input } from "../components/Input";
 import { Form,FormControl,FormItem,FormLabel,FormMessage,useForm } from "../components/Form";
 import { PasswordResetForm } from "../components/PasswordResetForm";
 import { Spinner } from "../components/Spinner";
+import { useTitleRefresh } from '../helpers/useTitleRefresh';
 import { postLogin } from "../endpoints/auth/login_with_password_POST.schema";
 import { postRegister } from "../endpoints/auth/register_with_password_POST.schema";
 import { postAccounts,type OutputType } from "../endpoints/auth/accounts_POST.schema";
@@ -17,6 +18,7 @@ import { useAuth } from "../helpers/useAuth";
 import styles from "./login.module.css";
 const fields=z.object({email:z.string().trim().email('Enter your email.'),password:z.string().min(1,'Enter your password.')});
 export default function Login(){
+ const titleRefresh=useTitleRefresh();
  const {authState,onLogin,logout}=useAuth(),navigate=useNavigate(),[params,setParams]=useSearchParams(),register=params.get('mode')==='signup',[reset,setReset]=useState(params.get('mode')==='recover'),[adding,setAdding]=useState(params.get('add')==='1'),[remember,setRemember]=useState(params.get('remember')==='1'),[busy,setBusy]=useState(false),[error,setError]=useState(''),[saved,setSaved]=useState<OutputType['accounts']>([]);
  const accountSize=useViewportHeight()<550?1:2;
  const locked=useRef(false),[show,setShow]=useState(false),[accountPage,setAccountPage]=useState(0);
@@ -32,11 +34,11 @@ export default function Login(){
  const current=authState.type==='authenticated'?authState.user:null;
  if(!params.get('mode'))return <Navigate to="/?cloud=accounts&space=accounts" replace/>;
  return <main className={styles.page}><AppHead title="Accounts · ION"/><div className={styles.content}>
- {authState.type==='loading'?<Spinner aria-label="Opening accounts"/>:current&&!adding&&!params.get('mode')?<><h1>Accounts</h1><p>{current.email}</p><p className={styles.hint}>Remembered accounts open on this device without a password.</p>{!saved.some(a=>a.id===current.id)&&<Button disabled={busy} onClick={()=>void keep()}>Keep on this device</Button>}
+ {authState.type==='loading'?<Spinner aria-label="Opening accounts"/>:current&&!adding&&!params.get('mode')?<><h1 {...titleRefresh.handlers} aria-busy={titleRefresh.refreshing}>Accounts</h1><p>{current.email}</p><p className={styles.hint}>Remembered accounts open on this device without a password.</p>{!saved.some(a=>a.id===current.id)&&<Button disabled={busy} onClick={()=>void keep()}>Keep on this device</Button>}
  <div className={styles.accounts} role="group" aria-label="Saved accounts">{saved.slice(accountPage*accountSize,accountPage*accountSize+accountSize).map(a=><div key={a.id} className={styles.saved}><Button variant="ghost" disabled={busy||a.id===current.id} onClick={()=>void switchTo(a.id)}><span>{a.email}</span>{a.id===current.id&&<small>Current</small>}</Button><Button variant="ghost" size="icon" disabled={busy} aria-label={'Forget '+a.email} onClick={()=>void forget(a.id)}><X size={16}/></Button></div>)}</div><PageControls page={accountPage} total={Math.ceil(saved.length/accountSize)} onChange={setAccountPage} label="Accounts"/>
  <Button variant="outline" disabled={busy} onClick={()=>void addAccount()}>Add account</Button><Button variant="ghost" disabled={busy} onClick={()=>void logout().catch(()=>setError('Couldn’t sign out. Try again.'))}>Sign out</Button>
  </>:reset?<PasswordResetForm defaultEmail={form.values.email} onCancel={()=>setReset(false)} onDone={()=>{setReset(false);setError('Password updated. Sign in to continue.');}}/>:<>
- <h1>{register?'Create account':'Sign in'}</h1><Link className={styles.mode} to={{pathname:'/login',search:(()=>{const q=new URLSearchParams(params);q.set('mode',register?'signin':'signup');return '?'+q.toString();})()}} onClick={()=>{setError('');form.setFieldError('email','');form.setFieldError('password','');}}>{register?'Already have an account? Sign in':'Create an account'}</Link>
+ <h1 {...titleRefresh.handlers} aria-busy={titleRefresh.refreshing}>{register?'Create account':'Sign in'}</h1><Link className={styles.mode} to={{pathname:'/login',search:(()=>{const q=new URLSearchParams(params);q.set('mode',register?'signin':'signup');return '?'+q.toString();})()}} onClick={()=>{setError('');form.setFieldError('email','');form.setFieldError('password','');}}>{register?'Already have an account? Sign in':'Create an account'}</Link>
  {!adding&&saved.length>0&&<div className={styles.accounts} role="group" aria-label="Saved accounts">{saved.slice(accountPage*accountSize,accountPage*accountSize+accountSize).map(a=><div key={a.id} className={styles.saved}><Button variant="ghost" disabled={busy} onClick={()=>void switchTo(a.id)}>{a.email}</Button><Button variant="ghost" size="icon" disabled={busy} aria-label={'Forget '+a.email} onClick={()=>void forget(a.id)}><X size={16}/></Button></div>)}</div>}{!adding&&saved.length>accountSize&&<PageControls page={accountPage} total={Math.ceil(saved.length/accountSize)} onChange={setAccountPage} label="Accounts"/>}
  <Form {...form}><form aria-label={register?'Create account':'Sign in'} noValidate onSubmit={form.handleSubmit(save)}>
  <FormItem className={styles.field} name="email"><FormLabel className={styles.srOnly}>Email</FormLabel><FormControl><Input placeholder="Email" type="email" autoComplete="email" inputMode="email" value={form.values.email} readOnly={busy} onChange={e=>form.setValues(v=>({...v,email:e.target.value}))}/></FormControl><FormMessage/></FormItem>

@@ -11,6 +11,8 @@ export type Generated<T> = T extends ColumnType<infer S, infer I, infer U>
 
 export type Int8 = ColumnType<string, bigint | number | string, bigint | number | string>;
 
+export type IonLobbyStatus = "cancelled" | "playing" | "waiting";
+
 export type Json = JsonValue;
 
 export type JsonArray = JsonValue[];
@@ -31,6 +33,7 @@ export interface HexchessGames {
   accessTokenHash: string;
   createdAt: Generated<Timestamp>;
   difficulty: Generated<number>;
+  engineId: Generated<string>;
   humanPlayer: number;
   id: string;
   lastSearch: Json | null;
@@ -84,6 +87,34 @@ export interface IonDevAccounts {
 export interface IonDeviceAccounts {
   deviceHash: string;
   sessionId: string;
+  userId: number;
+}
+
+export interface IonGameMembers {
+  gameId: string;
+  seat: number | null;
+  userId: number;
+}
+
+export interface IonLobbyMembers {
+  lobbyId: string;
+  seat: number;
+  userId: number;
+}
+
+export interface IonMatchLobbies {
+  code: string | null;
+  createdAt: Generated<Timestamp>;
+  expiresAt: Generated<Timestamp>;
+  gameId: string | null;
+  hostUserId: number;
+  id: string;
+  status: Generated<IonLobbyStatus>;
+  variant: string;
+}
+
+export interface IonOnlineAttempts {
+  attemptedAt: Generated<Timestamp>;
   userId: number;
 }
 
@@ -159,6 +190,10 @@ export interface DB {
   ionCloudTransfers: IonCloudTransfers;
   ionDevAccounts: IonDevAccounts;
   ionDeviceAccounts: IonDeviceAccounts;
+  ionGameMembers: IonGameMembers;
+  ionLobbyMembers: IonLobbyMembers;
+  ionMatchLobbies: IonMatchLobbies;
+  ionOnlineAttempts: IonOnlineAttempts;
   ionRememberedDevices: IonRememberedDevices;
   ionSharedSpaces: IonSharedSpaces;
   ionWorkspaces: IonWorkspaces;
@@ -172,6 +207,7 @@ export interface DB {
 
 // Use these for zod schema enums or other purposes, since the kysely enums are just types
 export const UserRoleArrayValues: [UserRole, ...UserRole[]] = ["admin","user"];
+export const IonLobbyStatusArrayValues: [IonLobbyStatus, ...IonLobbyStatus[]] = ["cancelled","playing","waiting"];
 // Table/column names whose snake_case spelling kysely's default CamelCasePlugin
 // cannot recover from the camelCase name used in code (an underscore directly
 // before a digit, e.g. reminder_48h_sent ⇄ reminder48hSent). The db helper's

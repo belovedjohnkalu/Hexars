@@ -97,7 +97,7 @@ export function CloudBoard({
       aria-hidden={preview || undefined}
       aria-label={`${chessVariants.name(game.variant)} hexagonal chessboard`}
     >
-      <title>Select a piece to see its moves. Swipe horizontally for history. Swipe vertically or press F to flip the board; against Tactical, this switches your side.</title>
+      <title>Select a piece to see its moves. Swipe horizontally for history. Swipe vertically or press F to flip the board; against an engine, this switches your side before the first move and rotates the view afterward.</title>
       <g
         className={styles.canvas}
         style={{ transform: `rotate(${angle}deg)` }}
@@ -194,7 +194,9 @@ export function CloudBoard({
                 }
               }}
             >
+              <polygon points={hexPoints(28)} fill="transparent" className={styles.hitbox} data-hitbox="full-cell"/>
               <polygon
+                pointerEvents="none"
                 className={styles.hex}
                 points={points}
                 fill={colours[cell.colour]}

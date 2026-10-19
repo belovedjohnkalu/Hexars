@@ -15,3 +15,5 @@ artifacts/
 .dev.vars.*
 .cloudflare/
 .vercel/
+
+/engines/engine-2/engine-two

@@ -19,14 +19,17 @@ import { previewMove } from "../helpers/previewMove";
 import { gameCloudLayout } from "../helpers/gameCloudLayout";
 import { boardLayout } from "../helpers/boardLayout";
 import { chessVariants } from "../helpers/chessVariants";
+import { useAuth } from '../helpers/useAuth';
+import { useTitleRefresh } from '../helpers/useTitleRefresh';
 import styles from "./Play.module.css";
 const moveInput=(m:ChessMove)=>({from:m.from,to:m.to,...(m.promotion?{promotion:m.promotion}:{}),...(m.pass?{pass:true as const}:{})});
 const key=(h:Hex)=>h.q+','+h.r;
 export function Play({variant}:{variant:VariantId}){
- useInstallApp();const location=useLocation(),navigate=useNavigate();
+ useInstallApp();const titleRefresh=useTitleRefresh(),location=useLocation(),navigate=useNavigate();
  const mode=new URLSearchParams(location.search).get('mode')==='friend'?'two_players':'engine';
  const rawLevel=new URLSearchParams(location.search).get('level');const value=Number(rawLevel??3),difficulty=Number.isInteger(value)&&value>=0&&value<=5?value:3;
- const cloud=useCloudGame(variant,mode,difficulty),data=cloud.data,game=data?.game;
+ const {authState}=useAuth(),engineId=new URLSearchParams(location.search).get('engine')==='positional'?'positional':'tactical';
+ const cloud=useCloudGame(variant,mode,difficulty,engineId,authState.type==='authenticated'?authState.user.id:null),data=cloud.data,game=data?.game;
  const [selected,setSelected]=useState<Hex|null>(null),[promotions,setPromotions]=useState<ChessMove[]>([]),[reset,setReset]=useState(false),[resultOpen,setResultOpen]=useState(false);
  const [promotionPage,setPromotionPage]=useState(0);
  const [viewOffset,setViewOffset]=useState(0);
@@ -35,12 +38,12 @@ export function Play({variant}:{variant:VariantId}){
  const [size,setSize]=useState({width:390,height:650}),[measured,setMeasured]=useState(false),area=useRef<HTMLDivElement>(null),heading=useRef<HTMLHeadingElement>(null),keep=useRef<HTMLButtonElement>(null),endKey=useRef('');
  const desired=useRef<number|null>(null),sequence=useRef(0),reviewAbort=useRef<AbortController|null>(null),swipe=useRef<{x:number;y:number;axis:'x'|'y'|null;pointer:number}|null>(null),suppressClick=useRef(false);
  const shown=review?.game||(game?previewMove(game,cloud.pendingMove):undefined),ended=!!game&&game.result.status!=='ongoing',thinking=!!data&&data.mode==='engine'&&game?.activePlayer!==data.humanPlayer&&!ended;
- const facingPlayer=data?.mode==='two_players'?((game?.activePlayer??0)+viewOffset)%(variant==='wellisch'?3:2):data?.humanPlayer??0;
+ const facingPlayer=((data?.mode==='two_players'?(game?.activePlayer??0):(data?.humanPlayer??0))+viewOffset)%(variant==='wellisch'?3:2);
  const facing=useBoardFacing(data?.gameId,game?.ply,variant==='wellisch'?-120*facingPlayer:facingPlayer===1);
  const selectedGame=!!gameSessions.fromHash()||!!data&&data.mode===mode&&(mode==='two_players'||data.difficulty===difficulty);
- const canPlay=selectedGame&&!!game&&!ended&&!cloud.busy&&!cloud.switchingSide&&!cloud.error&&!thinking&&!facing.turning&&!review&&!reviewBusy;
+ const canPlay=selectedGame&&!!game&&!ended&&!cloud.busy&&!cloud.switchingSide&&!cloud.error&&!thinking&&(data?.mode!=='online'||game.activePlayer===data.humanPlayer)&&!facing.turning&&!review&&!reviewBusy;
  const candidates=game?.legalMoves.filter(m=>selected&&key(m.from)===key(selected))||[];
- const canUndo=selectedGame&&!!data?.moves.length&&!cloud.busy&&!facing.turning&&!review&&(data.mode==='two_players'||data.moves.some(m=>m.player===data.humanPlayer));
+ const canUndo=data?.mode!=='online'&&selectedGame&&!!data?.moves.length&&!cloud.busy&&!facing.turning&&!review&&(data.mode==='two_players'||data.moves.some(m=>m.player===data.humanPlayer));
  const name=chessVariants.name(variant)+'’s Variant';
  useEffect(()=>{const el=area.current;if(!el)return;const observer=new ResizeObserver(()=>{setSize({width:el.clientWidth,height:Math.max(1,el.clientHeight)});setMeasured(true);});observer.observe(el);return()=>observer.disconnect();},[]);
  useEffect(()=>{heading.current?.focus({preventScroll:true});},[variant]);
@@ -60,24 +63,24 @@ export function Play({variant}:{variant:VariantId}){
  }
  function down(e:PointerEvent<HTMLDivElement>){if(e.button!==0||!e.isPrimary){swipe.current=null;return;}suppressClick.current=false;swipe.current={x:e.clientX,y:e.clientY,axis:null,pointer:e.pointerId};}
  function move(e:PointerEvent<HTMLDivElement>){const start=swipe.current;if(!start||start.pointer!==e.pointerId)return;const dx=Math.abs(e.clientX-start.x),dy=Math.abs(e.clientY-start.y);if(!start.axis){if(dx>40&&dy<dx*.6)start.axis='x';else if(dy>40&&dx<dy*.6)start.axis='y';}if(start.axis){e.preventDefault();suppressClick.current=true;e.currentTarget.setPointerCapture(e.pointerId);}}
- function flipBoard(){if(!data)return;setSelected(null);setPromotions([]);setReview(null);desired.current=null;reviewAbort.current?.abort();if(data.mode==='engine')cloud.switchSide();else setViewOffset(value=>(value+1)%(variant==='wellisch'?3:2));}
+ function flipBoard(){if(!data)return;setSelected(null);setPromotions([]);setReview(null);desired.current=null;reviewAbort.current?.abort();if(data.mode==='engine'&&game?.ply===0)cloud.switchSide();else setViewOffset(value=>(value+1)%(variant==='wellisch'?3:2));}
  function up(e:PointerEvent<HTMLDivElement>){const start=swipe.current;swipe.current=null;if(start?.pointer===e.pointerId){if(start.axis==='x')void history((desired.current??game?.ply??0)+(e.clientX>start.x?-1:1));else if(start.axis==='y')flipBoard();}if(e.currentTarget.hasPointerCapture(e.pointerId))e.currentTarget.releasePointerCapture(e.pointerId);}
- async function restart(){if(await cloud.newGame(data?.mode==='two_players'?'two_players':'engine',(data?.humanPlayer===1?1:0),variant)){setReset(false);setResultOpen(false);setReview(null);}}
+ async function restart(){if(data?.mode==='online'){navigate('/?cloud=online');return;}if(await cloud.newGame(data?.mode==='two_players'?'two_players':'engine',(data?.humanPlayer===1?1:0),variant)){setReset(false);setResultOpen(false);setReview(null);}}
  const layout=boardLayout(shown?.board.cells??[],shown?.board.orientation);
  const {boardWidth,worldWidth,worldHeight,boardY,actions}=gameCloudLayout(size.width,size.height,layout.width/layout.height);
  const side=game?.activePlayer===0?'White':game?.activePlayer===2?'Gold':'Black';
- const status=review?`Move ${review.ply} of ${game?.ply}`:!game?cloud.missing?'Game expired':'Opening…':ended?'Game over':cloud.pendingMove?'Moving…':thinking?(variant==='wellisch'?`Tactical · ${side}`:'Thinking…'):game.check?(variant==='wellisch'?`${side} · Check`:'Check'):data?.mode==='two_players'?side+'’s turn':'Your turn';
- const outcome=game?gameOutcome(game.result,data?.mode||'two_players',data?.humanPlayer??0):{title:'Draw',score:'½ – ½',detail:''};
+ const status=review?`Move ${review.ply} of ${game?.ply}`:!game?cloud.missing?'Game unavailable':'Opening…':ended?'Game over':cloud.pendingMove?'Moving…':thinking?(variant==='wellisch'?`${data.engineId==='positional'?'Positional':'Tactical'} · ${side}`:'Thinking…'):game.check?(variant==='wellisch'?`${side} · Check`:'Check'):data?.mode==='two_players'?side+'’s turn':data?.mode==='online'&&game.activePlayer!==data.humanPlayer?side+'’s turn':'Your turn';
+ const outcome=game?gameOutcome(game.result,data?.mode||'two_players',data?.humanPlayer??0,data?.engineId==='positional'?'Positional':'Tactical'):{title:'Draw',score:'½ – ½',detail:''};
  return <div className={styles.app} data-game-id={data?.gameId} data-human-player={data?.humanPlayer} data-game-version={data?.version}><AppHead title={name+' · Hexagonal Chess'}/>
- <header className={styles.header}><h1 ref={heading} tabIndex={-1}>{name}</h1><div className={styles.status} data-three-players={variant==='wellisch'} role="status" aria-live="polite">{status}{thinking&&<Spinner size="sm" aria-label="Tactical is thinking"/>}{canPlay&&game?.legalMoves[0]?.pass&&<Button variant="ghost" onClick={()=>void cloud.play(moveInput(game.legalMoves[0]))}>Pass</Button>}</div></header>
+ <header className={styles.header}><h1 {...titleRefresh.handlers} aria-busy={titleRefresh.refreshing} ref={heading} tabIndex={-1}>{name}</h1><div className={styles.status} data-three-players={variant==='wellisch'} role="status" aria-live="polite">{status}{thinking&&<Spinner size="sm" aria-label="Tactical is thinking"/>}{canPlay&&game?.legalMoves[0]?.pass&&<Button variant="ghost" onClick={()=>void cloud.play(moveInput(game.legalMoves[0]))}>Pass</Button>}</div></header>
  <main ref={area} className={styles.space} aria-label={name+' game'}><SpatialViewport width={worldWidth} height={worldHeight} viewKey={'game-'+variant} label="Board space" ready={measured&&!!shown} refitKey={size.width+":"+size.height}>
  <nav className={styles.words} aria-label="Game actions" style={{width:worldWidth,height:worldHeight}}>
  <Button asChild variant="ghost" className={styles.word} style={{...actions.variants,color:'var(--word-cyan)'}}><Link to="/?cloud=boards">Variants</Link></Button>
- <Button asChild variant="ghost" className={styles.word} style={{...actions.rules,color:'var(--word-amber)'}}><Link to={'/?cloud=rules&return='+variant+'&mode='+(data?.mode==='two_players'?'friend':'engine')+'&level='+(data?.difficulty??difficulty)}>Rules</Link></Button>
- <Button asChild variant="ghost" className={styles.word} style={{...actions.engines,color:'var(--word-coral)'}}><Link to={'/?cloud=engines&return='+variant+'&mode='+(data?.mode==='two_players'?'friend':'engine')+'&level='+(data?.difficulty??difficulty)}>Engines</Link></Button>
+ <Button asChild variant="ghost" className={styles.word} style={{...actions.rules,color:'var(--word-amber)'}}><Link to={'/?cloud=rules&return='+variant+'&mode='+(data?.mode==='two_players'?'friend':'engine')+'&level='+(data?.difficulty??difficulty)+'&engine='+(data?.engineId??engineId)+'&saved='+encodeURIComponent(data?gameSessions.hash(data):'')}>Rules</Link></Button>
+ <Button asChild variant="ghost" className={styles.word} style={{...actions.engines,color:'var(--word-coral)'}}><Link to={'/?cloud=engines&return='+variant+'&mode='+(data?.mode==='two_players'?'friend':'engine')+'&level='+(data?.difficulty??difficulty)+'&engine='+(data?.engineId??engineId)+'&saved='+encodeURIComponent(data?gameSessions.hash(data):'')}>Engines</Link></Button>
  <Button asChild variant="ghost" className={styles.word} style={{...actions.friend,color:'var(--word-mint)'}}><Link to={'/'+variant+'?mode=friend'} aria-current={data?.mode==='two_players'?'page':undefined} onClick={()=>{try{localStorage.removeItem('ion.engine');}catch{}}}>Pass and Play</Link></Button>
- <Button variant="ghost" className={styles.word+' '+styles.secondaryWord} style={{...actions.reset}} disabled={cloud.busy} onClick={()=>game?.ply?setReset(true):void restart()}>Board Reset</Button>
- <Button variant="ghost" className={styles.word+' '+styles.secondaryWord} style={{...actions.undo}} disabled={!canUndo} onClick={()=>void cloud.undo()}>Undo</Button>
+ {data?.mode!=='online'&&<Button variant="ghost" className={styles.word+' '+styles.secondaryWord} style={{...actions.reset}} disabled={cloud.busy} onClick={()=>game?.ply?setReset(true):void restart()}>Board Reset</Button>}
+ {data?.mode!=='online'&&<Button variant="ghost" className={styles.word+' '+styles.secondaryWord} style={{...actions.undo}} disabled={!canUndo} onClick={()=>void cloud.undo()}>Undo</Button>}
  </nav>
  <div data-no-pan className={styles.board} data-pending-move={!!cloud.pendingMove} style={{width:boardWidth,left:(worldWidth-boardWidth)/2,top:boardY}} onKeyDown={e=>{if(e.key.toLowerCase()==='f'&&!e.repeat&&!e.ctrlKey&&!e.metaKey&&!e.altKey){e.preventDefault();flipBoard();}}} onPointerDown={down} onPointerMove={move} onPointerUp={up} onPointerCancel={()=>{swipe.current=null;}} onClickCapture={e=>{if(suppressClick.current){e.preventDefault();e.stopPropagation();suppressClick.current=false;}}}>
  {shown?<CloudBoard key={data?.gameId} game={shown} selected={review?null:selected} onCell={choose} flipped={facing.flipped} rotation={variant==='wellisch'?facing.rotation:undefined} coordinates={false} theme="neutral" lastMove={cloud.pendingMove??data?.moves[(review?.ply??game?.ply??0)-1]} disabled={!canPlay}/>:<div className={styles.loading}>{!cloud.error&&<Spinner aria-label="Opening board"/>}</div>}

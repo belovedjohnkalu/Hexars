@@ -1,0 +1,11 @@
+{
+  "passed": true,
+  "checks": [
+    "Rules opens in two visible columns",
+    "Underlined here opens IL025A9",
+    "Online join clearly requires an email account",
+    "First swipe switches engine side; later swipes rotate only, with full-cell hitboxes and distinct move outline",
+    "History skips single date levels and opens the selected saved variant",
+    "Pulling down the top title reloads the page and keeps the saved game"
+  ]
+}

@@ -1,0 +1,5 @@
+import { sql } from 'kysely';
+import { db } from '../helpers/db';
+import { onlineUser } from '../helpers/gameAccess';
+import { schema,type HistoryGame } from './history_POST.schema';
+export async function handle(request:Request){const headers={'Content-Type':'application/json','Cache-Control':'no-store'};try{const user=await onlineUser(request),{timeZone}=schema.parse(await request.json());new Intl.DateTimeFormat('en',{timeZone}).format();const rows=await sql<HistoryGame>`SELECT g.id,g.state->>'variant' AS variant,to_char(g.created_at AT TIME ZONE ${timeZone},'YYYY-MM-DD') AS date,to_char(g.created_at AT TIME ZONE ${timeZone},'HH24:MI') AS time FROM hexchess_games g JOIN ion_game_members m ON m.game_id=g.id WHERE m.user_id=${user.id} AND jsonb_array_length(g.moves)>0 ORDER BY g.created_at DESC,g.id`.execute(db);return new Response(JSON.stringify({games:rows.rows}),{headers});}catch(e){return new Response(JSON.stringify({error:e instanceof Error?e.message:'Couldn’t open History.'}),{status:e&&typeof e==='object'&&'status'in e?Number(e.status):400,headers});}}

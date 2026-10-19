@@ -15,7 +15,12 @@ export const engines = Object.freeze({
       process.platform === "win32" ? "engine-one.exe" : "engine-one",
     ),
     implemented: true,
-    stage: "communication",
+    stage: "playable",
+  },
+  "engine-2": {
+    id: "engine-2", name: "Positional",
+    path: path.join(root,"engines/engine-2",process.platform === "win32" ? "engine-two.exe" : "engine-two"),
+    implemented: true, stage: "initial-search",
   },
 });
 

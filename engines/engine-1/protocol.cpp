@@ -6,6 +6,9 @@
 #include <sstream>
 #include <stdexcept>
 
+#ifndef HEXCHESS_ENGINE_IDENTITY
+#define HEXCHESS_ENGINE_IDENTITY "Tactical 0.9.0"
+#endif
 namespace hexchess::engine_one {
 static const char* names[]{"none","pawn","knight","bishop","rook","queen","king"};
 static std::string keyString(std::uint64_t key) {
@@ -157,7 +160,7 @@ Json processRequest(const Json& request, std::optional<GameState>& state) {
     if(!request.is_object()||request.value("protocolVersion",0)!=1||!request.contains("type")||!request.at("type").is_string()) throw std::invalid_argument("Invalid protocol request");
     const auto type=request.at("type").get<std::string>();
     Json response{{"protocolVersion",1},{"requestId",request.value("requestId",std::string{})}};
-    if(type=="hello") { response.update({{"type","hello"},{"engine","Tactical 0.9.0"},{"capabilities",Json::array({"glinski","mccooey","shafran","brusky","devasa","wellisch","legal_moves","search","maxn"})}});return response; }
+    if(type=="hello") { response.update({{"type","hello"},{"engine",HEXCHESS_ENGINE_IDENTITY},{"capabilities",Json::array({"glinski","mccooey","shafran","brusky","devasa","wellisch","legal_moves","search","maxn"})}});return response; }
     if(type=="supported_variants") {response.update({{"type","supported_variants"},{"variants",Json::array({"glinski","mccooey","shafran","brusky","devasa","wellisch"})}});return response;}
     if(type=="new_game") {
         state=createGame(request.value("variant",std::string{"glinski"}));

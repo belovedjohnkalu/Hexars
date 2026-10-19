@@ -291,3 +291,14 @@ The clipped square spiral is replaced with two explicit columns and three rows.
 Both columns fit when Boards opens, including on 320px phones; the old camera
 cache is invalidated. Focused tests/typecheck and three-width browser checks pass.
 See ion-boards-grid-release.md and ion-boards-grid screenshots/QA JSONs.
+
+## Permanent History, Online and Positional — October 19
+
+Added date-based private History, removed automatic saved-game expiry, and added
+email-gated random matchmaking plus four-digit two/three-player rooms. Native
+rules validate every online turn; updates use private live channels. Added the
+first independent Positional executable. Title refresh, move-aware board swipes,
+balanced cloud layouts, linked Wellisch text, king chess branding, full-cell
+targets and distinct last-move outlines are live. Typecheck, eight Jasmine suites,
+36 native/protocol tests, cloud API and multi-browser checks passed. See
+ion-journeys-online-release.md for limits and deployment evidence.

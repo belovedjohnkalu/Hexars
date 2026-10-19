@@ -1,0 +1,8 @@
+{
+  "passed": true,
+  "checks": [
+    "Two email accounts match in the UI without polling",
+    "Both browsers enter the same saved game",
+    "White and Black alternate legal moves with live updates on the other device"
+  ]
+}

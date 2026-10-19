@@ -1,0 +1,7 @@
+{
+  "passed": true,
+  "checks": [
+    "A saved game dated February 2025 remains available",
+    "Its original year/month/day remains in account History"
+  ]
+}

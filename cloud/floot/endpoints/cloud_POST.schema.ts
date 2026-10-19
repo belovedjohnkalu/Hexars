@@ -23,8 +23,9 @@ export const schema = z.discriminatedUnion("action", [
   if (!result.success) for (const issue of result.error.issues) context.addIssue({ ...issue, path: ["name", ...issue.path] });
 });
 export type CloudNode = {
+  href?:string; savedGameId?:string; engineId?:'tactical'|'positional';
   id: string; parentId: string | null; name: string; color?:CloudColor; identifier?:string;
-  imageKey?: string; imageUrl?: string; imageKeys?:string[]; imageUrls?:string[]; isImage?: boolean; destination?: "board" | VariantId | "tactical" | "level" | "control" | "account" | "accounts" | "space"; space?:CloudScope; control?:"rename"|"move"|"copy"|"remove"|"copy-il"|"view-photos"; accountAction?:string; system?:boolean; note?: string; illustration?:string; variant?:VariantId; level?:number; createdBy?:number; canEdit?:boolean; canCopy?:boolean; sizeCount?:number;
+  imageKey?: string; imageUrl?: string; imageKeys?:string[]; imageUrls?:string[]; isImage?: boolean; destination?: "board" | VariantId | "tactical" | "level" | "control" | "account" | "accounts" | "space" | "saved-game"; space?:CloudScope; control?:"rename"|"move"|"copy"|"remove"|"copy-il"|"view-photos"; accountAction?:string; system?:boolean; note?: string; illustration?:string; variant?:VariantId; level?:number; createdBy?:number; canEdit?:boolean; canCopy?:boolean; sizeCount?:number;
   copyOperation?: string; removedBy?: string; removedAt?: string;
 };
 export type InputType = z.input<typeof schema>;

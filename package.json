@@ -29,6 +29,8 @@
     "api": "npm run dev --workspace @ion/api",
     "test:api": "npm run test --workspace @ion/api",
     "check:engine-worker": "npm run build --workspace @ion/engine-worker",
-    "check:gateway": "npm run check --workspace @ion/gateway"
+    "check:gateway": "npm run check --workspace @ion/gateway",
+    "build:positional": "node scripts/build-positional.mjs",
+    "test:positional": "node --test tests/engine/positional.test.mjs"
   }
 }

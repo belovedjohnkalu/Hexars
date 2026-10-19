@@ -12,7 +12,7 @@
 .indicator[data-indicator="check-move"] .indicatorColour,
 .indicator[data-indicator="capture-check"] .indicatorColour { stroke: #ff8176; }
 .indicator[data-indicator="selected"] .indicatorColour { stroke: #ffffff; }
-.indicator[data-indicator="last-move"] .indicatorColour { stroke: #c8c8d0; stroke-width: 3; opacity: 1; }
+.indicator[data-indicator="last-move"] .indicatorColour { stroke: var(--word-lavender); stroke-width: 3.5; opacity: 1; }
 .keyboardRing { opacity: 0; transition: opacity 120ms ease; }
 .cell:focus-visible .keyboardRing { opacity: 1; }
 .piecePosition { transition: transform 220ms cubic-bezier(.22,1,.36,1); }
@@ -30,3 +30,6 @@
 
 .board { animation: boardIn 220ms var(--ease) both; }
 @keyframes boardIn { from { opacity: 0; } to { opacity: 1; } }
+
+.hitbox { pointer-events:all; }
+.indicator[data-indicator="last-move"] .indicatorColour { stroke-dasharray:5 2; }

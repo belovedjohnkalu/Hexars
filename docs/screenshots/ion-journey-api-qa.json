@@ -1,0 +1,11 @@
+{
+  "passed": true,
+  "checks": [
+    "Email accounts required for online and private History",
+    "Concurrent code joins atomically fill three distinct Wellisch seats",
+    "Online turns, membership and no-Undo enforced by the server",
+    "History is account-private; online participants share only their own match",
+    "Random matching pairs accounts for the selected variant",
+    "Cloud Positional runs independently; side switching locks after the first move"
+  ]
+}

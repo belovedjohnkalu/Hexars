@@ -24,3 +24,5 @@
 @media(max-height:450px) { .page { padding:8px 20px; } .content h1 { font-size:26px; margin-bottom:6px; } .content form { gap:6px; margin-top:6px; } .back { margin-top:4px; } .content p { font-size:12px; } }
 
 .content .field { margin:0; gap:4px; }
+
+.content h1 { touch-action:none; -webkit-tap-highlight-color:transparent; user-select:none; }

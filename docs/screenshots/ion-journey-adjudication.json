@@ -1,0 +1,10 @@
+{
+  "rawFindings": 22,
+  "priorReviewedFindings": 20,
+  "additionalFindings": [
+    { "file": "components/CloudExplorer.tsx", "reason": "History Sign in uses Button asChild with a real sign-in Link; checked in browser." },
+    { "file": "components/OnlineSpace.tsx", "reason": "Online Sign in uses Button asChild with a real sign-in Link; checked in browser." }
+  ],
+  "newBlockingFindings": 0,
+  "rawStrictPass": false
+}
