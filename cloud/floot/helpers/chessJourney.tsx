@@ -1,7 +1,11 @@
 import type { CloudNode } from '../endpoints/cloud_POST.schema';
 import { chessVariants } from './chessVariants';
 export const chessJourney:CloudNode[]=[
- {id:'chess-history',parentId:'hexagonal-chess',name:'History',color:'lavender',system:true},
+ {id:'chess-history',parentId:'hexagonal-chess',name:'Library',color:'lavender',system:true},
+ {id:'game-history',parentId:'chess-history',name:'History',color:'cyan',system:true},
+ {id:'shared-games',parentId:'chess-history',name:'Shared Games',color:'mint',system:true},
+ {id:'shared-received',parentId:'shared-games',name:'Received',color:'lavender',system:true},
+ {id:'shared-sent',parentId:'shared-games',name:'Shared',color:'amber',system:true},
  {id:'online',parentId:'hexagonal-chess',name:'Online',color:'mint',system:true},
  {id:'online-random',parentId:'online',name:'Random matchmaking',color:'cyan',system:true},
  {id:'online-code',parentId:'online',name:'4-digit code',color:'amber',system:true},

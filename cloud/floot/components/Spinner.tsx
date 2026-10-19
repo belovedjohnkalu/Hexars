@@ -1,5 +1,6 @@
 import React from "react";
 import styles from "./Spinner.module.css";
+import { AppMark } from './AppMark';
 
 interface SpinnerProps extends React.HTMLAttributes<HTMLDivElement> {
   size?: "sm" | "md" | "lg";
@@ -16,7 +17,7 @@ export const Spinner: React.FC<SpinnerProps> = ({
       {...props}
       role="status"
     >
-      <div className={styles.spinnerInner}></div>
+      <AppMark className={styles.spinnerInner}/>
     </div>
   );
 };

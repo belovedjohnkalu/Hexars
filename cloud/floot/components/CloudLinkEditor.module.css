@@ -1,0 +1,8 @@
+.sheet { max-width:480px; }
+.row { display:flex; gap:6px; flex-wrap:wrap; margin:12px 0; justify-content:center; }
+.row > input { flex:1; min-width:120px; }
+.words { display:flex; gap:2px; flex-wrap:wrap; justify-content:center; }
+.words button { max-width:100%; overflow-wrap:anywhere; white-space:normal; }
+.destinations { display:flex; flex-direction:column; min-height:132px; gap:2px; }
+.destinations button { white-space:normal; overflow-wrap:anywhere; height:auto; min-height:40px; }
+.error { color:var(--error); font-size:14px; text-align:center; }

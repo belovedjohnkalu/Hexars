@@ -7,7 +7,7 @@ type Credentials={workspaceId:string;accessToken:string};
 import type { CloudColor } from "./cloudColors";
 import {mapPhotos,type CloudPhotoDraft,type PhotoType} from './cloudPhotos';
 type NewNode={id:string;photos?:CloudPhotoDraft[];name:string;parentId:string|null;file?:File;uploaded?:boolean;color?:CloudColor};
-type Change=Extract<InputType,{action:'rename'|'remove'|'restore'|'move'|'copy'|'transfer'}>;
+type Change=Extract<InputType,{action:'rename'|'remove'|'restore'|'move'|'copy'|'transfer'|'link'}>;
 const blank=(scope:CloudScope):OutputType=>({nodes:cloudTree.forScope(scope),version:0,scope,canAdd:false});
 const failureMessage=(e:unknown)=>e instanceof Error&&!(e instanceof TypeError)&&!(e instanceof SyntaxError)?e.message:'Couldn’t save. Check your connection and try again.';
 function credentials():Credentials{
@@ -47,6 +47,7 @@ export function useCloudSpace(accountId:number|null=null,authLoading=false,scope
  }
  const matches=scopeKey.current===scope+':'+(accountId||'guest'),visibleData=matches?data:blank(scope);
  return {...visibleData,undo:matches&&data.undo&&(!data.undo.expiresAt||data.undo.expiresAt>undoClock)?data.undo:undefined,loading:!matches||loading,ready:matches&&ready,busy,error,phase,add:(node:NewNode)=>mutate(node,'add'),rename:(id:string,name:string,color?:CloudColor)=>mutate({action:'rename',id,name,color},'change'),remove:(id:string,expectedCount:number,operationId:string)=>mutate({action:'remove',id,expectedCount,operationId},'change'),restore:(operationId:string)=>mutate({action:'restore',operationId},'change'),
+  link:(id:string,target:import('./cloudLinks').CloudRedirect|null,words?:number[])=>mutate({action:'link',id,target,words},'change'),
   relocate:(id:string,parentId:string|null,copy:boolean,operationId:string)=>mutate({action:copy?'copy':'move',id,parentId,operationId},'change'),
   transfer:(id:string,targetScope:'public'|'private',targetParent:string,targetVersion:number,copy:boolean,operationId:string)=>mutate({action:'transfer',id,targetScope,targetParent,targetVersion,mode:copy?'copy':'move',operationId},'change'),
   loadTarget:(targetScope:CloudScope)=>postCloud({action:'load',scope:targetScope,...(identity.current||credentials())}),

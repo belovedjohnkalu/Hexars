@@ -74,3 +74,10 @@ Online uses email-authenticated accounts, transactional random queues and 4-digi
 useTitleRefresh owns downward title pulls (72px, one primary pointer); canceled gestures never refresh. Before the first engine move, a vertical board swipe may swap the saved human side; after any move it only changes viewOffset and never changes side or position. All six full-cell hexagon hitboxes use radius 28, with pieces and decorative layers ignoring pointer events. Last-move outlines use the existing lavender token plus a dashed pattern, distinct from legal blue moves. Wellisch Reference links the underlined here to App draw rules, preserving paragraph pagination. Rules/engine round trips retain the saved game link.
 
 Positional is the second independent native executable, initially 0.1.0. It shares serialization/rules, not Tactical's search implementation. New-game engine selection is an allowlisted ID persisted with the game; web requests never provide an executable path. The chess cloud/favicon uses the generated king-in-hexagon photo; the ION icon remains unchanged outside chess.
+
+## Library, redirects and organic packing
+- All collections use collision-free organic packing with descendant-based dramatic font sizes, whole labels and stable retained centers. No rigid columns; no document scrolling.
+- IL04 remains permanent and is named Library. History and Shared Games remain explicit navigation choices. History uses final saved positions, account-isolated permanent dev ILs, and origin-aware Back. Saved views expose only Notations and Opponent(s), never live game mutations or capability tokens. Everyone can copy notations.
+- Link in Controls targets a whole cloud or chosen words and either another accessible cloud or an http/https URL; all mutation permissions and version checks remain authoritative.
+- Game sharing grants read-only inspection. Shared/Received track sender/recipient, revocation and local hiding separately. Deletion cannot remove an opponent's copy. Undo expires after ten seconds, including reload.
+- Loading uses AppMark paths and honors reduced motion. Favicon, touch icon and install manifest use the same mark.

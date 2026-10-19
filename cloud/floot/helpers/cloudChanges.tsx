@@ -1,7 +1,7 @@
 import { unusedColor,colorHex } from "./cloudColors";
 import { randomUUID } from "node:crypto";
 import type { CloudNode, InputType } from "../endpoints/cloud_POST.schema";
-type Change = Extract<InputType, {action:"rename"|"remove"|"restore"|"move"|"copy"}>;
+type Change = Extract<InputType, {action:"rename"|"remove"|"restore"|"move"|"copy"|"link"}>;
 const fail=(message:string,status:number):never=>{throw Object.assign(new Error(message),{status});};
 function applyAll(nodes:CloudNode[],input:Change,currentVersion:number,seeds:CloudNode[]=[]) {
   if(input.action==="restore") {
@@ -17,11 +17,17 @@ function applyAll(nodes:CloudNode[],input:Change,currentVersion:number,seeds:Clo
   const node=nodes.find(n=>n.id===input.id);
   if(input.action==="remove"&&node?.removedBy===input.operationId)return nodes;
   if(!node||node.removedBy)return fail("This cloud is no longer here.",404);
+  if(input.action==='link'){
+    if(input.version!==currentVersion)return fail('Your space changed. Try again.',409);
+    const words=input.words?[...new Set(input.words)].sort((a,b)=>a-b):undefined,count=node.name.match(/\S+/g)?.length||0;
+    if(words&&(!words.length||words.some(n=>n>=count)))return fail('Choose words from this cloud.',400);
+    return nodes.map(n=>n.id===input.id?{...n,redirect:input.target&&!words?input.target:undefined,wordRedirect:input.target&&words?{words,target:input.target}:undefined}:n);
+  }
   if(input.action==="rename"&&node.name===input.name&&(!input.color||node.color===input.color))return nodes;
   if(input.action==="move"&&node.parentId===input.parentId)return nodes;
   if(input.action==="copy"&&nodes.some(n=>n.id===input.operationId))return fail("Choose a new copy operation.",409);
   if(input.version!==currentVersion)return fail("Your space changed. Try again.",409);
-  if(input.action==="rename")return nodes.map(n=>n.id===input.id?{...n,name:input.name,...(input.color&&colorHex(input.color)!==colorHex(n.color)?{color:unusedColor(input.color,nodes.filter(other=>other.id!==n.id&&!other.removedBy&&other.parentId===n.parentId).map(other=>other.color))}:{})}:n);
+  if(input.action==="rename")return nodes.map(n=>n.id===input.id?{...n,name:input.name,...(n.name!==input.name?{wordRedirect:undefined}:{}),...(input.color&&colorHex(input.color)!==colorHex(n.color)?{color:unusedColor(input.color,nodes.filter(other=>other.id!==n.id&&!other.removedBy&&other.parentId===n.parentId).map(other=>other.color))}:{})}:n);
   const ids=new Set([input.id]);
   let grew=true;
   while(grew){grew=false;for(const n of nodes)if(!n.removedBy&&n.parentId&&ids.has(n.parentId)&&!ids.has(n.id)){ids.add(n.id);grew=true;}}

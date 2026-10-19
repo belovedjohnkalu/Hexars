@@ -2,6 +2,16 @@
 
 Published: **https://ion.floot.app**
 
+## 2026-10-19 — Organic clouds, redirects and Library
+
+Cloud collections now use close, collision-free organic packing with dramatic
+descendant sizing. IL04 is Library, with History and Shared Games. Saved cards
+show their last position; read-only views offer Notations and Opponent(s), with
+origin-aware Back. Controls supports whole-cloud/selected-word redirects and
+saved-game sharing/deletion. Dev histories have permanent ILs. The app uses the
+supplied geometric mark, traced for favicon and animated reduced-motion-aware
+loading. See [release details](ion-organic-library-release.md).
+
 ## 2026-10-18 — Shafran, Public colors and responsive moves
 
 Shafran joins Boards, Rules and Tactical on ION: 70 authoritative cells, 36 starting pieces,

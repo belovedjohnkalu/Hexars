@@ -92,8 +92,20 @@ export interface IonDeviceAccounts {
 
 export interface IonGameMembers {
   gameId: string;
+  hiddenAt: Timestamp | null;
   seat: number | null;
   userId: number;
+}
+
+export interface IonGameShares {
+  createdAt: Generated<Timestamp>;
+  gameId: string;
+  id: string;
+  recipientHiddenAt: Timestamp | null;
+  recipientId: number | null;
+  revokedAt: Timestamp | null;
+  senderId: number;
+  tokenHash: string;
 }
 
 export interface IonLobbyMembers {
@@ -191,6 +203,7 @@ export interface DB {
   ionDevAccounts: IonDevAccounts;
   ionDeviceAccounts: IonDeviceAccounts;
   ionGameMembers: IonGameMembers;
+  ionGameShares: IonGameShares;
   ionLobbyMembers: IonLobbyMembers;
   ionMatchLobbies: IonMatchLobbies;
   ionOnlineAttempts: IonOnlineAttempts;

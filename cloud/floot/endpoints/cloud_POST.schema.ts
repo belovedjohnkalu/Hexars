@@ -1,6 +1,7 @@
 import { cloudNames } from "../helpers/cloudNames";
 import type { VariantId } from "./game_POST.schema";
 import { z } from "zod";
+import { redirectSchema,type CloudRedirect } from '../helpers/cloudLinks';
 import { isCloudColor,type CloudColor } from "../helpers/cloudColors";
 export type CloudScope="home"|"public"|"private"|"chess"|"accounts";
 const credentials = { scope: z.enum(["home","public","private","chess","accounts"]).default("private"), account: z.boolean().optional(), workspaceId: z.string().uuid(), accessToken: z.string().regex(/^[a-f0-9]{64}$/) };
@@ -12,6 +13,7 @@ export const schema = z.discriminatedUnion("action", [
   z.object({ action: z.literal("add"), ...credentials, id: z.string().uuid(), parentId, name, version, color:z.custom<CloudColor>(isCloudColor,"Choose a color from the wheel.").optional(), imageType: z.enum(["image/png", "image/jpeg", "image/webp", "image/gif"]).optional(), images:z.array(z.object({id:z.string().uuid(),contentType:z.enum(["image/png","image/jpeg","image/webp","image/gif"])})).optional() }),
   z.object({ action: z.literal("upload"), ...credentials, id: z.string().uuid(), fileId:z.string().uuid().optional(), contentType: z.enum(["image/png", "image/jpeg", "image/webp", "image/gif"]), sizeBytes: z.number().int().positive().max(3 * 1024 * 1024) }),
   z.object({ action: z.literal("rename"), ...credentials, id: z.string().min(1).max(80), name, color:z.custom<CloudColor>(isCloudColor,"Choose a color from the wheel.").optional(), version }),
+  z.object({action:z.literal('link'),...credentials,id:z.string().min(1).max(80),target:redirectSchema.nullable(),words:z.array(z.number().int().nonnegative()).optional(),version}),
   z.object({ action: z.literal("remove"), ...credentials, id: z.string().min(1).max(80), operationId: z.string().uuid(), expectedCount: z.number().int().nonnegative(), version }),
   z.object({ action: z.literal("move"), ...credentials, id: z.string().min(1).max(80), parentId, version }),
   z.object({ action: z.literal("copy"), ...credentials, id: z.string().min(1).max(80), parentId, operationId: z.string().uuid(), version }),
@@ -23,9 +25,10 @@ export const schema = z.discriminatedUnion("action", [
   if (!result.success) for (const issue of result.error.issues) context.addIssue({ ...issue, path: ["name", ...issue.path] });
 });
 export type CloudNode = {
+  redirect?:CloudRedirect;wordRedirect?:{words:number[];target:CloudRedirect};shareId?:string;
   href?:string; savedGameId?:string; engineId?:'tactical'|'positional';
   id: string; parentId: string | null; name: string; color?:CloudColor; identifier?:string;
-  imageKey?: string; imageUrl?: string; imageKeys?:string[]; imageUrls?:string[]; isImage?: boolean; destination?: "board" | VariantId | "tactical" | "level" | "control" | "account" | "accounts" | "space" | "saved-game"; space?:CloudScope; control?:"rename"|"move"|"copy"|"remove"|"copy-il"|"view-photos"; accountAction?:string; system?:boolean; note?: string; illustration?:string; variant?:VariantId; level?:number; createdBy?:number; canEdit?:boolean; canCopy?:boolean; sizeCount?:number;
+  imageKey?: string; imageUrl?: string; imageKeys?:string[]; imageUrls?:string[]; isImage?: boolean; destination?: "board" | VariantId | "tactical" | "level" | "control" | "account" | "accounts" | "space" | "saved-game"; space?:CloudScope; control?:"rename"|"move"|"copy"|"remove"|"copy-il"|"view-photos"|"link"; accountAction?:string; system?:boolean; note?: string; illustration?:string; variant?:VariantId; level?:number; createdBy?:number; canEdit?:boolean; canCopy?:boolean; sizeCount?:number;
   copyOperation?: string; removedBy?: string; removedAt?: string;
 };
 export type InputType = z.input<typeof schema>;

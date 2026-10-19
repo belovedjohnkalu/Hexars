@@ -1,0 +1,12 @@
+.app { height:100dvh; display:flex; flex-direction:column; background:var(--background); color:var(--foreground); }
+.header { flex-shrink:0; text-align:center; padding:calc(16px + env(safe-area-inset-top)) 20px 8px; }
+.header h1 { margin:0; font-size:20px; font-weight:500; letter-spacing:-.04em; outline:none; touch-action:none; user-select:none; }
+.main { flex:1; position:relative; min-height:0; }
+.board { position:absolute; touch-action:none; }
+.word { position:absolute; transform:translate(-50%,-50%); font-size:24px; background:transparent; box-shadow:none; color:var(--word-cyan); }
+.opponent { color:var(--word-lavender); }
+.footer { padding:4px 18px calc(12px + env(safe-area-inset-bottom)); }
+.back { width:56px; height:56px; color:var(--muted-foreground); background:transparent; box-shadow:none; }
+.back svg { width:32px; height:32px; }
+.error { height:100%; display:flex; flex-direction:column; justify-content:center; align-items:center; gap:16px; padding:24px; text-align:center; }
+.copy { display:flex; gap:10px; justify-content:center; }

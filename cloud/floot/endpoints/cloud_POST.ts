@@ -70,12 +70,19 @@ export async function handle(request: Request) {
         version = updated.version;
       }
     }
-    if(input.action==="rename"||input.action==="remove"||input.action==="restore"||input.action==="move"||input.action==="copy"){
+    if(input.action==="link"||input.action==="rename"||input.action==="remove"||input.action==="restore"||input.action==="move"||input.action==="copy"){
       if(input.action==='restore'){
         if(!cloudPolicy.writable(input.scope,context.userId,context.owner)||nodes.filter(n=>n.removedBy===input.operationId).some(n=>!cloudPolicy.edit(input.scope,{...n,removedBy:undefined},context.userId,context.owner)))cloudPolicy.fail('You cannot restore this branch.');
       }else if(input.action!=='copy')cloudPolicy.assert(input.scope,all,input.id,context.userId,context.owner,input.action==='remove'||input.action==='move');
       else if(!cloudPolicy.writable(input.scope,context.userId,context.owner))cloudPolicy.fail('You cannot copy here.');
       if((input.action==='move'||input.action==='copy')&&!input.parentId)cloudPolicy.fail('Choose a cloud inside this space.',400);
+      if(input.action==='link'&&input.target?.kind==='cloud'){
+        if(input.target.scope===input.scope&&input.target.id===input.id)cloudPolicy.fail('Choose another cloud.',400);
+        const target=await cloudContext(request,{action:'load',scope:input.target.scope,workspaceId:input.workspaceId,accessToken:input.accessToken});
+        const saved=target.row&&Array.isArray(target.row.nodes)?target.row.nodes as unknown as CloudNode[]:[];
+        const available=[...new Map([...target.seeds,...saved].map(n=>[n.id,n])).values()];
+        if(!available.some(n=>n.id===(input.target as {id:string}).id&&!n.removedBy))cloudPolicy.fail('Choose an available cloud.',400);
+      }
       let next=cloudChanges.apply(nodes,input,row.version,context.seeds);
       if(input.action==='copy')next=next.map(n=>n.copyOperation===input.operationId?{...n,createdBy:context.userId!}:n);
       if(next!==nodes){

@@ -4,6 +4,8 @@ import { ArrowLeft, ChevronLeft, ChevronRight } from "lucide-react";
 import { AppHead } from "./AppHead";
 import { Button } from "./Button";
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from "./Dialog";
+import { SavedGame } from './SavedGame';
+import { LoadingScreen } from './LoadingScreen';
 import { Spinner } from "./Spinner";
 import { PageControls } from "./PageControls";
 import { CloudBoard } from "./CloudBoard";
@@ -24,7 +26,8 @@ import { useTitleRefresh } from '../helpers/useTitleRefresh';
 import styles from "./Play.module.css";
 const moveInput=(m:ChessMove)=>({from:m.from,to:m.to,...(m.promotion?{promotion:m.promotion}:{}),...(m.pass?{pass:true as const}:{})});
 const key=(h:Hex)=>h.q+','+h.r;
-export function Play({variant}:{variant:VariantId}){
+export function Play({variant}:{variant:VariantId}){const location=useLocation();return new URLSearchParams(location.search).get('mode')==='saved'?<SavedGame variant={variant}/>:<LivePlay variant={variant}/>;}
+function LivePlay({variant}:{variant:VariantId}){
  useInstallApp();const titleRefresh=useTitleRefresh(),location=useLocation(),navigate=useNavigate();
  const mode=new URLSearchParams(location.search).get('mode')==='friend'?'two_players':'engine';
  const rawLevel=new URLSearchParams(location.search).get('level');const value=Number(rawLevel??3),difficulty=Number.isInteger(value)&&value>=0&&value<=5?value:3;
@@ -83,7 +86,7 @@ export function Play({variant}:{variant:VariantId}){
  {data?.mode!=='online'&&<Button variant="ghost" className={styles.word+' '+styles.secondaryWord} style={{...actions.undo}} disabled={!canUndo} onClick={()=>void cloud.undo()}>Undo</Button>}
  </nav>
  <div data-no-pan className={styles.board} data-pending-move={!!cloud.pendingMove} style={{width:boardWidth,left:(worldWidth-boardWidth)/2,top:boardY}} onKeyDown={e=>{if(e.key.toLowerCase()==='f'&&!e.repeat&&!e.ctrlKey&&!e.metaKey&&!e.altKey){e.preventDefault();flipBoard();}}} onPointerDown={down} onPointerMove={move} onPointerUp={up} onPointerCancel={()=>{swipe.current=null;}} onClickCapture={e=>{if(suppressClick.current){e.preventDefault();e.stopPropagation();suppressClick.current=false;}}}>
- {shown?<CloudBoard key={data?.gameId} game={shown} selected={review?null:selected} onCell={choose} flipped={facing.flipped} rotation={variant==='wellisch'?facing.rotation:undefined} coordinates={false} theme="neutral" lastMove={cloud.pendingMove??data?.moves[(review?.ply??game?.ply??0)-1]} disabled={!canPlay}/>:<div className={styles.loading}>{!cloud.error&&<Spinner aria-label="Opening board"/>}</div>}
+ {shown?<CloudBoard key={data?.gameId} game={shown} selected={review?null:selected} onCell={choose} flipped={facing.flipped} rotation={variant==='wellisch'?facing.rotation:undefined} coordinates={false} theme="neutral" lastMove={cloud.pendingMove??data?.moves[(review?.ply??game?.ply??0)-1]} disabled={!canPlay}/>:<div className={styles.loading}>{!cloud.error&&<LoadingScreen label="Opening board"/>}</div>}
  </div>
  </SpatialViewport></main>
  {(review||reviewBusy)&&<div className={styles.history} role="group" aria-label="Move history"><Button variant="ghost" size="icon" aria-label="Previous move" disabled={(desired.current??review?.ply??0)<=0} onClick={()=>void history((desired.current??review?.ply??0)-1)}><ChevronLeft size={18}/></Button><Button variant="ghost" disabled={reviewBusy} onClick={()=>void history(game?.ply??0)}>{reviewBusy?'Opening…':'Present'}</Button><Button variant="ghost" size="icon" aria-label="Next move" onClick={()=>void history((desired.current??review?.ply??0)+1)}><ChevronRight size={18}/></Button></div>}
