@@ -1,3 +1,4 @@
+import { TimeProvider } from '../helpers/useTime';
 import { useVisualViewport } from "../helpers/useVisualViewport";
 import { AuthProvider } from "../helpers/useAuth";
 import { ReactNode, useEffect } from "react";
@@ -25,13 +26,13 @@ export const GlobalContextProviders = ({
   useEffect(()=>{const guard=(event:BeforeUnloadEvent)=>{if(cloudDrafts.hasPictures()){event.preventDefault();event.returnValue="";}};window.addEventListener("beforeunload",guard);return()=>window.removeEventListener("beforeunload",guard);},[]);
   return (
     <QueryClientProvider client={queryClient}>
-      <AuthProvider><ThemeModeProvider>
+      <AuthProvider><TimeProvider><ThemeModeProvider>
         <ScrollToHashElement />
         <TooltipProvider>
           {children}
           <SonnerToaster />
         </TooltipProvider>
-      </ThemeModeProvider></AuthProvider>
+      </ThemeModeProvider></TimeProvider></AuthProvider>
     </QueryClientProvider>
   );
 };

@@ -143,6 +143,91 @@ export interface IonSharedSpaces {
   workspaceId: string;
 }
 
+export interface IonTimeAccounts {
+  balanceUs: Generated<Int8>;
+  closedAt: Timestamp | null;
+  id: string;
+  kind: string;
+  userId: number | null;
+}
+
+export interface IonTimeConfig {
+  createdAt: Generated<Timestamp>;
+  freeProposalId: string | null;
+  id: Generated<boolean>;
+  productionStartedAt: Timestamp | null;
+}
+
+export interface IonTimeCostProposals {
+  authorId: number;
+  basis: string;
+  createdAt: Generated<Timestamp>;
+  durationUs: Int8;
+  id: string;
+  productId: string;
+}
+
+export interface IonTimeEarning {
+  active: Generated<boolean>;
+  idleUntil: Timestamp;
+  lastSeen: Timestamp;
+  leaseId: string;
+  sequence: Generated<Int8>;
+  sessionId: string;
+  userId: number;
+}
+
+export interface IonTimeEntitlements {
+  createdAt: Generated<Timestamp>;
+  productId: string;
+  transactionId: string;
+  userId: number;
+}
+
+export interface IonTimeEntries {
+  accountId: string;
+  amountUs: Int8;
+  transactionId: string;
+}
+
+export interface IonTimeProducts {
+  approvedBy: number | null;
+  directUs: Int8 | null;
+  freeUs: Int8 | null;
+  id: string;
+  kind: string;
+  name: string;
+  proposalId: string | null;
+  publishedAt: Timestamp | null;
+  reference: string;
+}
+
+export interface IonTimeQuotes {
+  actorId: number;
+  amountUs: Int8;
+  buyers: number | null;
+  calculation: Generated<Json>;
+  createdAt: Generated<Timestamp>;
+  expiresAt: Timestamp;
+  id: string;
+  kind: string;
+  productId: string | null;
+  recipientId: number | null;
+  usedTransactionId: string | null;
+}
+
+export interface IonTimeTransactions {
+  actorId: number;
+  amountUs: Int8;
+  createdAt: Generated<Timestamp>;
+  fromAccount: string;
+  id: string;
+  kind: string;
+  metadata: Generated<Json>;
+  requestKey: string;
+  toAccount: string;
+}
+
 export interface IonWorkspaces {
   accessTokenHash: string;
   createdAt: Generated<Timestamp>;
@@ -172,6 +257,7 @@ export interface PasswordResetCodes {
 
 export interface Sessions {
   createdAt: Generated<Timestamp | null>;
+  credentialExpiresAt: Timestamp | null;
   expiresAt: Timestamp;
   id: string;
   lastAccessed: Generated<Timestamp | null>;
@@ -211,6 +297,15 @@ export interface DB {
   ionOnlineAttempts: IonOnlineAttempts;
   ionRememberedDevices: IonRememberedDevices;
   ionSharedSpaces: IonSharedSpaces;
+  ionTimeAccounts: IonTimeAccounts;
+  ionTimeConfig: IonTimeConfig;
+  ionTimeCostProposals: IonTimeCostProposals;
+  ionTimeEarning: IonTimeEarning;
+  ionTimeEntitlements: IonTimeEntitlements;
+  ionTimeEntries: IonTimeEntries;
+  ionTimeProducts: IonTimeProducts;
+  ionTimeQuotes: IonTimeQuotes;
+  ionTimeTransactions: IonTimeTransactions;
   ionWorkspaces: IonWorkspaces;
   loginAttempts: LoginAttempts;
   passwordResetCodes: PasswordResetCodes;

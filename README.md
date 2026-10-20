@@ -82,6 +82,10 @@ motion. The Pro hosting badge setting is disabled.
 
 [Brusky](docs/variants/brusky.md) and [De Vasa](docs/variants/devasa.md) are playable with their own pawn rules, en passant, promotion, castling, results and Tactical search. Their 84-cell and 81-cell boards use native pointy geometry. [Wellisch](docs/variants/wellisch.md) adds three-player pass-and-play and human-versus-two-Tactical games: first king capture transfers the army, pawns keep their direction, and the remaining game ends by normal mate/stalemate. Captured-piece promotion reserves, delayed promotion and king–rook swaps are saved natively. Tactical 0.9.0 uses MaxN for this variant. Positional, Defensive, Materialist and Unconventional are also playable here; Universal is the sixth independent engine, with phase-adaptive PVS and selective three-player MaxN. Strength has not been rated. See [Universal](docs/universal-engine.md) and [ION 0.26](docs/releases/ion-0.26.md).
 
+## Time
+
+ION’s sixth word opens a cloud-backed wallet: active-use earning, private activity, player-name transfers, permanent unlocks and a dev treasury. Prices use full approved creation estimates divided by unique signed-in accounts. Charging requires approved estimates and a 24-hour production count warm-up; no historic costs are invented. See [Time](docs/time/README.md) and [ION 0.27](docs/releases/ion-0.27.md).
+
 ## Work on the source
 
 Node.js 24 LTS is recommended (minimum 22.18), with a C++20 G++ compiler for development. Install dependencies:

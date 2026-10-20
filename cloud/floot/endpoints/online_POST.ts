@@ -1,3 +1,4 @@
+import { timeAccess } from '../helpers/timeAccess';
 import { randomUUID,randomBytes,randomInt,createHash } from 'node:crypto';
 import { sql } from 'kysely';
 import { publish } from '@floot/realtime';
@@ -11,6 +12,8 @@ function fail(message:string,status=400):never{throw Object.assign(new Error(mes
 export async function handle(request:Request){const headers={'Content-Type':'application/json','Cache-Control':'no-store'};try{
  const user=await onlineUser(request),input=schema.parse(await request.json());
  const result=await db.transaction().execute(async tx=>{
+  const available=await timeAccess.variants(user.id,tx);
+  if((input.action==='find'||input.action==='create')&&input.variant!=='random')await timeAccess.assert(user.id,input.variant,undefined,tx);
   // One short lock serializes joining, code allocation and matchmaking. Native
   // setup has no search, and all seats/game creation commit atomically.
   await sql`SELECT pg_advisory_xact_lock(74209,19001)`.execute(tx);
@@ -33,17 +36,18 @@ export async function handle(request:Request){const headers={'Content-Type':'app
    else if(input.action==='join'){
     lobby=await tx.selectFrom('ionMatchLobbies').selectAll().where('code','=',input.code).where('status','=','waiting').executeTakeFirst();if(!lobby)fail('No open room with that code.',404);
    }else if(input.action==='find'){
-    let query=tx.selectFrom('ionMatchLobbies').selectAll().where('code','is',null).where('status','=','waiting').where('hostUserId','!=',user.id).orderBy('createdAt');
+    let query=tx.selectFrom('ionMatchLobbies').selectAll().where('code','is',null).where('status','=','waiting').where('hostUserId','!=',user.id).where('variant','in',available).orderBy('createdAt');
     if(input.variant!=='random')query=query.where('variant','=',input.variant);
     lobby=await query.executeTakeFirst();
    }
    if(!lobby){
     if(input.action==='join')fail('No open room with that code.',404);
     let code:string|null=null;if(input.action==='create'){for(let n=0;n<100;n++){const candidate=String(randomInt(10000)).padStart(4,'0');if(!await tx.selectFrom('ionMatchLobbies').select('id').where('code','=',candidate).where('status','=','waiting').executeTakeFirst()){code=candidate;break;}}if(!code)fail('All rooms are busy. Try again.',503);}
-    const variant=input.variant==='random'?chessVariants.all[randomInt(chessVariants.all.length)].id:input.variant;
+    const variant=input.variant==='random'?available[randomInt(available.length)]:input.variant;
     lobby=await tx.insertInto('ionMatchLobbies').values({id:randomUUID(),hostUserId:user.id,code,variant}).returningAll().executeTakeFirstOrThrow();
    }
-   const members=await tx.selectFrom('ionLobbyMembers').selectAll().where('lobbyId','=',lobby.id).execute();
+   await timeAccess.assert(user.id,lobby.variant,undefined,tx);
+  const members=await tx.selectFrom('ionLobbyMembers').selectAll().where('lobbyId','=',lobby.id).execute();
    if(!members.some(m=>m.userId===user.id)){
     const seat=[0,1,2].find(n=>!members.some(m=>m.seat===n));if(seat===undefined||seat>=(lobby.variant==='wellisch'?3:2))fail('This room is full.',409);
     await tx.insertInto('ionLobbyMembers').values({lobbyId:lobby.id,userId:user.id,seat}).execute();

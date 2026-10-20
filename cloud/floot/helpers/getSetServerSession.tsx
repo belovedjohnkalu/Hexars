@@ -1,3 +1,5 @@
+import { db } from './db';
+import { sql } from 'kysely';
 import { jwtVerify, SignJWT } from "jose";
 
 const encoder = new TextEncoder();
@@ -14,6 +16,7 @@ export interface Session {
   id: string;
   createdAt: number;
   lastAccessed: number;
+  credentialExpiresAt?: number;
 
   // Whether the user needs to change their password
   // Useful for password reset or setting up new user with initial password
@@ -56,6 +59,7 @@ export async function getServerSessionOrThrow(
     const { payload } = await jwtVerify(sessionCookie, encoder.encode(secret));
     return {
       id: payload.id as string,
+      credentialExpiresAt: Number(payload.exp)*1000,
       createdAt: payload.createdAt as number,
       lastAccessed: payload.lastAccessed as number,
       passwordChangeRequired: payload.passwordChangeRequired as boolean,
@@ -69,6 +73,7 @@ export async function setServerSession(
   response: Response,
   session: Session
 ): Promise<void> {
+  const expires=Math.floor(Date.now()/1000)+86400;
   const token = await new SignJWT({
     id: session.id,
     createdAt: session.createdAt,
@@ -77,9 +82,10 @@ export async function setServerSession(
   })
     .setProtectedHeader({ alg: "HS256" })
     .setIssuedAt()
-    .setExpirationTime("1d")
+    .setExpirationTime(expires)
     .sign(encoder.encode(secret));
 
+  await db.updateTable('sessions').set({credentialExpiresAt:sql`greatest(credential_expires_at,${new Date(expires*1000)})`}).where('id','=',session.id).execute();
   const cookieValue = [
     `${CookieName}=${token}`,
     "HttpOnly",

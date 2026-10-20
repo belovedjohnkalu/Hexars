@@ -1,3 +1,4 @@
+import { sql } from 'kysely';
 import { db } from "./db";
 import { User } from "./User";
 
@@ -62,7 +63,7 @@ export async function getServerUserSession(request: Request) {
   const now = new Date();
   await db
     .updateTable("sessions")
-    .set({ lastAccessed: now })
+    .set({ lastAccessed: now,...(session.credentialExpiresAt?{credentialExpiresAt:sql`greatest(credential_expires_at,${new Date(session.credentialExpiresAt)})`}:{}) })
     .where("id", "=", session.id)
     .execute();
 

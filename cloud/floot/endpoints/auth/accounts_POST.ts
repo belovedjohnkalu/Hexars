@@ -11,13 +11,23 @@ export async function handle(request:Request){
   if(input.action==='remember'){
    const {user,session}=await getServerUserSession(request);let device=hash?await db.selectFrom('ionRememberedDevices').selectAll().where('tokenHash','=',hash).where('expiresAt','>',now).executeTakeFirst():undefined;
    if(!device){token=randomBytes(32).toString('hex');hash=digest(token);await db.insertInto('ionRememberedDevices').values({tokenHash:hash,expiresAt:new Date(Date.now()+30*86400000)}).execute();setCookie='ion_device='+token+'; HttpOnly; Secure; SameSite=Lax; Path=/; Max-Age=2592000';}
-   await db.insertInto('ionDeviceAccounts').values({deviceHash:hash,userId:user.id,sessionId:session.id}).onConflict(c=>c.columns(['deviceHash','userId']).doUpdateSet({sessionId:session.id})).execute();
+   await db.transaction().execute(async tx=>{
+    const previous=await tx.selectFrom('ionDeviceAccounts').select('sessionId').where('deviceHash','=',hash).where('userId','=',user.id).forUpdate().executeTakeFirst();
+    await tx.insertInto('ionDeviceAccounts').values({deviceHash:hash,userId:user.id,sessionId:session.id}).onConflict(c=>c.columns(['deviceHash','userId']).doUpdateSet({sessionId:session.id})).execute();
+    if(previous&&previous.sessionId!==session.id&&!await tx.selectFrom('ionDeviceAccounts').select('sessionId').where('sessionId','=',previous.sessionId).executeTakeFirst())await tx.deleteFrom('sessions').where('id','=',previous.sessionId).where('userId','=',user.id).execute();
+   });
   }
   const accounts=hash?await db.selectFrom('ionDeviceAccounts').innerJoin('ionRememberedDevices','ionDeviceAccounts.deviceHash','ionRememberedDevices.tokenHash').innerJoin('sessions','ionDeviceAccounts.sessionId','sessions.id').innerJoin('users','ionDeviceAccounts.userId','users.id').select(['users.id','users.email','users.displayName','sessions.id as sessionId']).whereRef('sessions.userId','=','ionDeviceAccounts.userId').where('deviceHash','=',hash).where('ionRememberedDevices.expiresAt','>',now).where('sessions.expiresAt','>',now).execute():[];
   if(input.action==='forget'){await db.deleteFrom('ionDeviceAccounts').where('deviceHash','=',hash).where('userId','=',input.userId).execute();}
   if(input.action==='switch'){
    const account=accounts.find(a=>a.id===input.userId);if(!account)return new Response(JSON.stringify({error:'Sign in to that account again.'}),{status:401,headers});
-   const sessionId=randomBytes(32).toString('hex');await db.transaction().execute(async tx=>{await tx.insertInto('sessions').values({id:sessionId,userId:account.id,createdAt:now,lastAccessed:now,expiresAt:new Date(Date.now()+SessionExpirationSeconds*1000)}).execute();await tx.updateTable('ionDeviceAccounts').set({sessionId}).where('deviceHash','=',hash).where('userId','=',account.id).execute();});
+   const sessionId=randomBytes(32).toString('hex');await db.transaction().execute(async tx=>{
+    const previous=await tx.selectFrom('ionDeviceAccounts').innerJoin('sessions','sessions.id','ionDeviceAccounts.sessionId').select('ionDeviceAccounts.sessionId').where('deviceHash','=',hash).where('ionDeviceAccounts.userId','=',account.id).whereRef('sessions.userId','=','ionDeviceAccounts.userId').where('sessions.expiresAt','>',new Date()).forUpdate('ionDeviceAccounts').executeTakeFirst();
+    if(!previous)throw new Error('Sign in to that account again.');
+    await tx.insertInto('sessions').values({id:sessionId,userId:account.id,createdAt:now,lastAccessed:now,expiresAt:new Date(Date.now()+SessionExpirationSeconds*1000)}).execute();
+    await tx.updateTable('ionDeviceAccounts').set({sessionId}).where('deviceHash','=',hash).where('userId','=',account.id).execute();
+    if(!await tx.selectFrom('ionDeviceAccounts').select('sessionId').where('sessionId','=',previous.sessionId).executeTakeFirst())await tx.deleteFrom('sessions').where('id','=',previous.sessionId).where('userId','=',account.id).execute();
+   });
    const response=new Response(JSON.stringify({accounts:accounts.map(a=>({id:a.id,email:a.email,displayName:a.displayName})),switched:true}),{headers});await setServerSession(response,{id:sessionId,createdAt:now.getTime(),lastAccessed:now.getTime()});return response;
   }
   const response=new Response(JSON.stringify({accounts:accounts.filter(a=>input.action!=='forget'||a.id!==input.userId).map(a=>({id:a.id,email:a.email,displayName:a.displayName}))}),{headers});if(setCookie)response.headers.append('Set-Cookie',setCookie);return response;

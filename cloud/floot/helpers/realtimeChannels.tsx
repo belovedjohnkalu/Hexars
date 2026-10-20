@@ -7,6 +7,9 @@
 // every room. Keep each channel aligned with its React Query key, e.g.
 //   channels.room(id)   <->   queryKey ["room", id]
 export const channels = {
+  time:(id:number)=>'time-user:'+id,
+  timeCatalog:'time:catalog',
+  timeTreasury:'time:treasury',
   player:(id:number)=>'chess-player:'+id,
   cloud:(scope:string,userId:number)=>scope==="private"?"cloud-user:"+userId:scope==="accounts"?"cloud-accounts:"+userId:scope==="chess"?"cloud:chess":scope==="home"?"cloud:home":"cloud:public",
   room: (id: string | number) => "room:" + id,

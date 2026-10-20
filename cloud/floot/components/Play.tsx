@@ -1,3 +1,4 @@
+import { TimeAccess } from './TimeAccess';
 import { engineId as resolveEngineId, engineName } from '../helpers/chessEngines';
 import { useEffect, useRef, useState, type PointerEvent } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
@@ -28,12 +29,12 @@ import { useTitleRefresh } from '../helpers/useTitleRefresh';
 import styles from "./Play.module.css";
 const moveInput=(m:ChessMove)=>({from:m.from,to:m.to,...(m.promotion?{promotion:m.promotion}:{}),...(m.pass?{pass:true as const}:{})});
 const key=(h:Hex)=>h.q+','+h.r;
-export function Play({variant}:{variant:VariantId}){const location=useLocation();return new URLSearchParams(location.search).get('mode')==='saved'?<SavedGame variant={variant}/>:<LivePlay variant={variant}/>;}
+export function Play({variant}:{variant:VariantId}){const location=useLocation(),params=new URLSearchParams(location.search),engine=params.get('engine')||'universal',items=[...(variant==='glinski'?[]:['variant:'+variant]),...(params.get('mode')!=='friend'&&params.get('mode')!=='online'&&engine!=='universal'?['engine:'+engine]:[])];return params.get('mode')==='saved'?<SavedGame variant={variant}/>:<TimeAccess items={items}><LivePlay variant={variant}/></TimeAccess>;}
 function LivePlay({variant}:{variant:VariantId}){
  useInstallApp();const titleRefresh=useTitleRefresh(),location=useLocation(),navigate=useNavigate();
  const mode=new URLSearchParams(location.search).get('mode')==='friend'?'two_players':'engine';
  const rawLevel=new URLSearchParams(location.search).get('level');const value=Number(rawLevel??3),difficulty=Number.isInteger(value)&&value>=0&&value<=5?value:3;
- const {authState}=useAuth(),engineId=resolveEngineId(new URLSearchParams(location.search).get('engine'));
+ const {authState}=useAuth(),engineId=resolveEngineId(new URLSearchParams(location.search).get('engine')||'universal');
  const cloud=useCloudGame(variant,mode,difficulty,engineId,authState.type==='authenticated'?authState.user.id:null),data=cloud.data,game=data?.game;
  const [selected,setSelected]=useState<Hex|null>(null),[promotions,setPromotions]=useState<ChessMove[]>([]),[reset,setReset]=useState(false),[resultOpen,setResultOpen]=useState(false);
  const [promotionPage,setPromotionPage]=useState(0);
@@ -92,7 +93,7 @@ function LivePlay({variant}:{variant:VariantId}){
  </div>
  </SpatialViewport></main>
  {(review||reviewBusy)&&<div className={styles.history} role="group" aria-label="Move history"><Button variant="ghost" size="icon" aria-label="Previous move" disabled={(desired.current??review?.ply??0)<=0} onClick={()=>void history((desired.current??review?.ply??0)-1)}><ChevronLeft size={18}/></Button><Button variant="ghost" disabled={reviewBusy} onClick={()=>void history(game?.ply??0)}>{reviewBusy?'Opening…':'Present'}</Button><Button variant="ghost" size="icon" aria-label="Next move" onClick={()=>void history((desired.current??review?.ply??0)+1)}><ChevronRight size={18}/></Button></div>}
- {(cloud.error||reviewError)&&<div role="alert" className={styles.error}>{cloud.error||reviewError}<Button variant="link" onClick={()=>cloud.missing?void restart():cloud.error?void cloud.refresh():void history(desired.current??review?.ply??game?.ply??0)}>{cloud.missing?'New game':'Retry'}</Button></div>}
+ {(cloud.error||reviewError)&&<div role="alert" className={styles.error}>{cloud.error||reviewError}<Button variant="link" onClick={()=>cloud.missing?void restart():cloud.error?void cloud.refresh():void history(desired.current??review?.ply??game?.ply??0)}>{cloud.missing?'New game':'Retry'}</Button><Button asChild variant="link"><Link to="/?cloud=time-prices&space=home">Time</Link></Button></div>}
  <footer className={styles.footer}/><FloatingBack to="/?cloud=boards" label="Back to variants"/><span className={styles.srOnly} data-ply={game?.ply??0} data-review-ply={review?.ply??'present'}>{game?.ply??0} moves</span>
  <Dialog open={reset} onOpenChange={open=>{if(!cloud.busy)setReset(open);}}><DialogContent closeDisabled={cloud.busy} className={styles.sheet} onOpenAutoFocus={e=>{e.preventDefault();keep.current?.focus();}}><DialogTitle>Reset the board?</DialogTitle><DialogDescription>Your current game will be replaced.</DialogDescription><div className={styles.actions}><Button ref={keep} variant="ghost" disabled={cloud.busy} onClick={()=>setReset(false)}>Keep playing</Button><Button disabled={cloud.busy} onClick={()=>void restart()}>{cloud.busy?'Opening…':'Reset board'}</Button></div>{cloud.error&&<p role="alert">{cloud.error}</p>}</DialogContent></Dialog>
  <Dialog open={!!promotions.length} onOpenChange={open=>{if(!open&&!cloud.busy)setPromotions([]);}}><DialogContent closeDisabled={cloud.busy} className={styles.sheet}><DialogTitle>Promote</DialogTitle><DialogDescription>Choose your piece.</DialogDescription><div className={styles.promotions}>{promotions.slice(promotionPage*3,promotionPage*3+3).map(m=><Button key={key(m.from)+'-'+m.promotion} variant="ghost" aria-label={'Promote '+(m.fromNotation?m.fromNotation+' ':'')+'to '+m.promotion} disabled={cloud.busy} onClick={()=>void cloud.play(moveInput(m)).then(ok=>{if(ok)setPromotions([]);})}><ChessPiece type={m.promotion!} player={game?.activePlayer??0}/>{promotions.some(other=>key(other.from)!==key(m.from))&&<span>{m.fromNotation}</span>}</Button>)}</div><PageControls page={promotionPage} total={Math.ceil(promotions.length/3)} onChange={setPromotionPage} label="Promotion choices"/>{cloud.error&&<p role="alert">{cloud.error}</p>}</DialogContent></Dialog>

@@ -1,3 +1,4 @@
+import { timeAccess } from '../helpers/timeAccess';
 import { engineId as resolveEngineId } from '../helpers/chessEngines';
 import { createHash, randomBytes, randomUUID } from "node:crypto";
 import superjson from "superjson";
@@ -42,10 +43,11 @@ export async function handle(request: Request) {
     const input = schema.parse(superjson.parse(text));
     const user=await optionalGameUser(request);
     if (input.action === "new") {
+      await timeAccess.assert(user?.id??null,input.variant,input.mode==='engine'?(input.engineId??'universal'):undefined);
       const native = await runNativeEngine({
         action: "new",
         variant: input.variant,
-        engineId:input.engineId,
+        engineId:input.engineId??'universal',
         origin: request.url,
         signal: request.signal,
       });
@@ -58,7 +60,7 @@ export async function handle(request: Request) {
           accessTokenHash: tokenHash(accessToken),
           mode: input.mode,
           difficulty:input.difficulty??3,
-          engineId:input.engineId??'tactical',
+          engineId:input.engineId??'universal',
           humanPlayer: input.humanPlayer,
           state: native.state,
           timeline: [],
@@ -77,7 +79,7 @@ export async function handle(request: Request) {
           difficulty:input.difficulty??3,
           humanPlayer: input.humanPlayer,
           engine: native.engine,
-          engineId:input.engineId??'tactical',
+          engineId:input.engineId??'universal',
           execution: "cloud",
           game: native.game,
           moves: [],
@@ -92,6 +94,7 @@ export async function handle(request: Request) {
     const capability=!!row&&row.accessTokenHash===tokenHash(input.accessToken);
     if(!row||(!member&&!capability)||(row.mode==='online'&&!member))throw new GameError('This saved game is not available to this account.',404);
     if(user&&capability&&row.mode!=='online'&&!member)await db.insertInto('ionGameMembers').values({gameId:row.id,userId:user.id,seat:null}).onConflict(oc=>oc.columns(['gameId','userId']).doNothing()).execute();
+    if(input.action!=='get'&&input.action!=='review'){const state=row.state as {variant?:string};await timeAccess.assert(user?.id??null,state.variant||'glinski',row.mode==='engine'?resolveEngineId(row.engineId):undefined);}
     if(row.mode==='online'){
       if(input.action==='engine'||input.action==='undo'||input.action==='switch_side')throw new GameError('This action is not available in an online match.',400);
       if(input.action==='move'&&activePlayer(row.state)!==member?.seat)throw new GameError('Wait for your turn.',403);

@@ -8,7 +8,7 @@ import type { CloudColor } from "./cloudColors";
 import {mapPhotos,type CloudPhotoDraft,type PhotoType} from './cloudPhotos';
 type NewNode={id:string;photos?:CloudPhotoDraft[];name:string;parentId:string|null;file?:File;uploaded?:boolean;color?:CloudColor};
 type Change=Extract<InputType,{action:'rename'|'remove'|'restore'|'move'|'copy'|'transfer'|'link'}>;
-const blank=(scope:CloudScope):OutputType=>({nodes:cloudTree.forScope(scope),version:0,scope,canAdd:false});
+const blank=(scope:CloudScope):OutputType=>({nodes:cloudTree.forScope(scope).map(({note,...node})=>node),version:0,scope,canAdd:false});
 const failureMessage=(e:unknown)=>e instanceof Error&&!(e instanceof TypeError)&&!(e instanceof SyntaxError)?e.message:'Couldn’t save. Check your connection and try again.';
 function credentials():Credentials{
  try{const saved=JSON.parse(localStorage.getItem('ion.private-space.v1')||'null');if(saved&&/^[a-f0-9-]{36}$/.test(saved.workspaceId)&&/^[a-f0-9]{64}$/.test(saved.accessToken))return saved;
