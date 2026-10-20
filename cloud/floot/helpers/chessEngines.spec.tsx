@@ -3,10 +3,10 @@ import { cloudTree } from './cloudTree';
 import { gameSessions } from './gameSessions';
 import type { OutputType } from '../endpoints/game_POST.schema';
 describe('independent engines',()=>{
- it('provides all five engine names and rejects executable paths',()=>{
-  expect(engineIds).toEqual(['tactical','positional','defensive','materialist','unconventional']);
+ it('provides all six engine names and rejects executable paths',()=>{
+  expect(engineIds).toEqual(['tactical','positional','defensive','materialist','unconventional','universal']);
   for(const engine of chessEngines) expect(engineName(engine.id)).toBe(engine.name);
-  expect(isEngineId('universal')).toBe(false);expect(isEngineId('/tmp/engine')).toBe(false);expect(isEngineId('constructor')).toBe(false);expect(engineId(null)).toBe('tactical');
+  expect(isEngineId('universal')).toBe(true);expect(isEngineId('/tmp/engine')).toBe(false);expect(isEngineId('constructor')).toBe(false);expect(engineId(null)).toBe('tactical');
  });
  it('offers a complete ladder before each engine’s board selection',()=>{
   for(const id of engineIds){expect(cloudTree.seed.find(n=>n.id===id)?.parentId).toBe('engines');expect(cloudTree.seed.filter(n=>n.parentId===id).map(n=>n.level)).toEqual([0,1,2,3,4,5]);}

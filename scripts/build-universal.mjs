@@ -1,0 +1,8 @@
+import {spawn} from 'node:child_process';
+import{mkdirSync,existsSync}from'node:fs';import path from'node:path';import{fileURLToPath}from'node:url';
+const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..'),windows=process.platform==='win32',cloud=process.argv.includes('--cloud'),compiler=process.env.HEXCHESS_CXX||(windows&&existsSync('C:\\msys64\\ucrt64\\bin\\g++.exe')?'C:\\msys64\\ucrt64\\bin\\g++.exe':'g++');
+if(cloud&&(process.platform!=='linux'||process.arch!=='x64'))throw new Error('Cloud binaries must be built on Linux x64');
+mkdirSync(path.join(root,cloud?'build':'engines/engine-6'),{recursive:true});
+const sources=['engines/engine-6/main.cpp','engines/engine-1/protocol.cpp','engines/engine-6/search.cpp','shared/src/geometry.cpp','shared/src/hex_rules.cpp','shared/src/wellisch_rules.cpp',...['glinski','mccooey','shafran','brusky','devasa','wellisch','variant'].map(v=>'shared/variants/'+v+'.cpp')];
+const flags=['-std=c++20','-O2','-Wall','-Wextra','-Wpedantic','-DHEXCHESS_ENGINE_IDENTITY="Universal 1.0.0"','-DHEXCHESS_SEARCH_CAPABILITY="adaptive-pvs-maxn"','-I','shared/include','-I','shared/third_party',...(cloud?['-static','-s']:windows?['-static-libgcc','-static-libstdc++']:[]),...sources,'-o',cloud?'build/engine-six-linux-x64.bin':'engines/engine-6/engine-six'+(windows?'.exe':'')];
+const child=spawn(compiler,flags,{cwd:root,stdio:'inherit'});child.on('error',e=>{console.error(e.message);process.exitCode=1;});child.on('exit',code=>{process.exitCode=code??1;if(code===0)console.log('Built independent Universal 1.0.0'+(cloud?' (static cloud binary)':''));});

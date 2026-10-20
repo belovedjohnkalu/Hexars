@@ -29,7 +29,7 @@ const assert = require('node:assert/strict');
     if (!new URL(response.url()).pathname.endsWith('/_api/game') || !response.ok()) return;
     try { const {json} = await response.json(); if (json?.gameId) {ids.add(json.gameId); if(json.lastSearch) replies.push(json.engineId);} } catch { /* Not a game response. */ }
   });
-  const pair=process.env.ION_TEST_ENGINES==='new'?['Materialist','Unconventional']:['Defensive','Positional'];
+  const pair=process.env.ION_TEST_ENGINES==='universal'?['Universal','Unconventional']:process.env.ION_TEST_ENGINES==='new'?['Materialist','Unconventional']:['Defensive','Positional'];
   const link = name => page.getByRole('link', {name, exact: true});
   const ready = () => page.getByRole('status').filter({hasText: 'Your turn'}).waitFor({timeout: 30000});
   async function playTurn() {
@@ -48,7 +48,7 @@ const assert = require('node:assert/strict');
   try {
     await page.goto(process.env.ION_TEST_ORIGIN || 'https://ion.floot.app');
     await link('Hexagonal Chess').click(); await link('Engines').click();
-    assert.deepEqual((await page.locator('[data-node-id]').allTextContents()).sort(), ['Defensive','Materialist','Positional','Tactical','Unconventional']);
+    assert.deepEqual((await page.locator('[data-node-id]').allTextContents()).sort(), ['Defensive','Materialist','Positional','Tactical','Unconventional','Universal']);
     await link(pair[0]).focus(); await page.keyboard.press('Enter');
     await link('Beginner').waitFor(); assert.equal(await page.locator('[data-node-id]').count(),6);
     await link('Beginner').click(); await link('Gliński’s Variant').click(); await playTurn();

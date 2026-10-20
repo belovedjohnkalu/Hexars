@@ -1,3 +1,4 @@
+import { accountDeviceNodes } from '../helpers/accountDeviceNodes';
 import { namespaceIdentifier } from '../helpers/cloudIdentifiers';
 import { accountClouds } from "../helpers/accountClouds";
 import { validateCloudPhoto } from "../helpers/validateCloudPhoto";
@@ -36,7 +37,8 @@ export async function handle(request: Request) {
     const row=context.row;
     let nodes = (Array.isArray(row.nodes) ? row.nodes : []) as unknown as CloudNode[];
     let version = row.version;
-    const all = [...new Map([...context.seeds,...nodes].map(n=>[n.id,n])).values()].filter(n=>!n.removedBy);
+    const combine=(stored:CloudNode[])=>input.scope==='accounts'?accountDeviceNodes(context.seeds,stored):[...new Map([...context.seeds,...stored].map(n=>[n.id,n])).values()];
+    const all=combine(nodes).filter(n=>!n.removedBy);
     if (input.action === "upload") {
       if(!cloudPolicy.writable(input.scope,context.userId,context.owner))cloudPolicy.fail("Sign in to add a picture.",401);
       const filename = "ion/" + row.id + "/" + context.userId + "/" + input.id + (input.fileId?"/"+input.fileId:"") + "." + extensions[input.contentType];
@@ -94,7 +96,7 @@ export async function handle(request: Request) {
       }
     }
     if(version!==row.version){try{await publish(channels.cloud(input.scope,context.userId||0),{version,workspaceId:row.id});}catch{console.error('Cloud refresh delayed');}}
-    const merged=[...new Map([...context.seeds,...nodes].map(n=>[n.id,n])).values()];
+    const merged=combine(nodes);
     // Keep removed rows in the registry. Allocation is serialized across devices;
     // labels are never recycled or exposed in another account's Private space.
     const identifiers=context.isDev||(['public','chess','home'].includes(input.scope)&&input.action!=='load')
@@ -112,9 +114,9 @@ export async function handle(request: Request) {
       const personal=context.userId?await db.selectFrom('ionCloudAccounts').innerJoin('ionWorkspaces','ionCloudAccounts.workspaceId','ionWorkspaces.id').select('nodes').where('userId','=',context.userId).executeTakeFirst():undefined;
       const accountSeeds=await accountClouds(request,context.userId);
       const accountSaved=context.userId?await db.selectFrom('ionAccountSpaces').innerJoin('ionWorkspaces','ionAccountSpaces.workspaceId','ionWorkspaces.id').select('nodes').where('userId','=',context.userId).executeTakeFirst():undefined;
-      const accountNodes=[...new Map([...accountSeeds,...(Array.isArray(accountSaved?.nodes)?accountSaved.nodes as unknown as CloudNode[]:[])].map(n=>[n.id,n])).values()];
-      const count=(v:unknown)=>Array.isArray(v)?(v as CloudNode[]).filter(n=>!n.removedBy).length:0;
-      visible=visible.map(n=>({...n,...(n.id==='accounts'?{sizeCount:Math.max(0,count(accountNodes)-1)}:n.id==='private'?{sizeCount:count(personal?.nodes)}:n.id==='public'?{sizeCount:count(shared.find(s=>s.kind==='public')?.nodes)}:n.id==='hexagonal-chess'?{sizeCount:cloudTree.forScope('chess').length-1+count(shared.find(s=>s.kind==='chess')?.nodes)}:{})}));
+      const accountNodes=accountDeviceNodes(accountSeeds,Array.isArray(accountSaved?.nodes)?accountSaved.nodes as unknown as CloudNode[]:[]);
+      const weight=(seeds:CloudNode[],stored:unknown,id:string)=>{const combined=[...new Map([...seeds,...(Array.isArray(stored)?stored as CloudNode[]:[])].map(n=>[n.id,n])).values()];return cloudTree.characterWeights(combined).get(id)||0;};
+      visible=visible.map(n=>({...n,...(n.id==='accounts'?{sizeCharacters:cloudTree.characterWeights(accountNodes).get('accounts')||0}:n.id==='private'?{sizeCharacters:weight(cloudTree.forScope('private'),personal?.nodes,'private')}:n.id==='public'?{sizeCharacters:weight(cloudTree.forScope('public'),shared.find(s=>s.kind==='public')?.nodes,'public')}:n.id==='hexagonal-chess'?{sizeCharacters:weight(cloudTree.forScope('chess'),shared.find(s=>s.kind==='chess')?.nodes,'hexagonal-chess')}:{})}));
     }
     return new Response(JSON.stringify({ nodes: visible, version, workspaceId:row.id, account:input.scope==='private', scope:input.scope, canAdd:cloudPolicy.writable(input.scope,context.userId,context.owner), dev:context.isDev,owner:context.owner,userId:context.userId||undefined, undo: cloudChanges.undo(nodes.filter(n=>cloudPolicy.edit(input.scope,n,context.userId,context.owner))) } satisfies OutputType), { headers });
   } catch (error) {

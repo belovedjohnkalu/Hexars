@@ -132,3 +132,20 @@ if(BUILD_TESTING)
   target_link_libraries(materialist-oracle-tests PRIVATE hexchess_rules)
   add_test(NAME materialist-oracle COMMAND materialist-oracle-tests)
 endif()
+
+add_executable(engine-six engines/engine-6/main.cpp engines/engine-1/protocol.cpp engines/engine-6/search.cpp)
+target_include_directories(engine-six PRIVATE shared/third_party)
+target_compile_definitions(engine-six PRIVATE HEXCHESS_ENGINE_IDENTITY="Universal 1.0.0" HEXCHESS_SEARCH_CAPABILITY="adaptive-pvs-maxn")
+target_link_libraries(engine-six PRIVATE hexchess_rules)
+set_target_properties(engine-six PROPERTIES
+  RUNTIME_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/engines/engine-6"
+  RUNTIME_OUTPUT_DIRECTORY_DEBUG "${CMAKE_SOURCE_DIR}/engines/engine-6"
+  RUNTIME_OUTPUT_DIRECTORY_RELEASE "${CMAKE_SOURCE_DIR}/engines/engine-6")
+if(MINGW)
+  target_link_options(engine-six PRIVATE -static-libgcc -static-libstdc++)
+endif()
+if(BUILD_TESTING)
+  add_executable(universal-search-tests tests/engine/search-quality.cpp engines/engine-6/search.cpp)
+  target_link_libraries(universal-search-tests PRIVATE hexchess_rules)
+  add_test(NAME universal-search COMMAND universal-search-tests)
+endif()

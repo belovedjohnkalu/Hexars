@@ -9,7 +9,7 @@ export function registerEngineTests(test,engineId,name){
   const child=spawn(engines[engineId].path),lines=createInterface({input:child.stdout});let seq=0;
   t.after(()=>{child.kill();lines.close();});
   async function request(input){const id=String(++seq),line=once(lines,'line',{signal:AbortSignal.timeout(6000)});child.stdin.write(JSON.stringify({protocolVersion:1,requestId:id,...input})+'\n');const out=JSON.parse((await line)[0]);assert.equal(out.requestId,id);return out;}
-  const hello=await request({type:'hello'});assert.equal(hello.engine,`${name} 1.0.0`);assert.ok(hello.capabilities.includes(variant));assert.ok(hello.capabilities.includes(({Defensive:'paranoid',Materialist:'mtdf-paranoid',Unconventional:'puct-maxn'}[name]||'maxn')));
+  const hello=await request({type:'hello'});assert.equal(hello.engine,`${name} 1.0.0`);assert.ok(hello.capabilities.includes(variant));assert.ok(hello.capabilities.includes(({Defensive:'paranoid',Materialist:'mtdf-paranoid',Unconventional:'puct-maxn',Universal:'adaptive-pvs-maxn'}[name]||'maxn')));
   let state=await request({type:'new_game',variant});assert.equal(state.type,'game');
   assert.equal((await request({type:'position',state:{variant}})).type,'error');
   assert.equal((await request({type:'go',stateId:'stale',limits:{timeMs:1}})).type,'error');

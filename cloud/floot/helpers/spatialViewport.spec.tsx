@@ -26,3 +26,14 @@ describe('Spatial camera lifecycle',()=>{
  });
 
 });
+
+describe('Occupied-content opening frame',()=>{
+ it('fills the viewport using occupied bounds rather than the empty world and keeps subsequent panning',()=>{
+  const width=spyOnProperty(HTMLElement.prototype,'clientWidth','get').and.returnValue(390),height=spyOnProperty(HTMLElement.prototype,'clientHeight','get').and.returnValue(700);
+  const props={width:2000,height:2000,viewKey:'bounds-'+crypto.randomUUID(),contentBounds:{x:800,y:850,width:400,height:200}};
+  const v=render(<SpatialViewport {...props}>Words</SpatialViewport>),world=v.container.querySelector('[data-camera-zoom]') as HTMLElement;
+  expect(Number(world.dataset.cameraZoom)).toBeCloseTo(.925,5);
+  fireEvent.keyDown(v.getByRole('region'),{key:'ArrowLeft'});const camera=world.style.transform;
+  v.rerender(<SpatialViewport {...props} contentBounds={{x:500,y:500,width:1000,height:1000}}>More words</SpatialViewport>);expect(world.style.transform).toBe(camera);cleanup();
+ });
+});

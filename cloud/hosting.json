@@ -18,7 +18,7 @@
     "devasa",
     "wellisch"
   ],
-  "ui_version": "0.25.0",
+  "ui_version": "0.26.0",
   "routes": [
     "/",
     "/login",
@@ -30,7 +30,7 @@
     "/wellisch"
   ],
   "font_asset": "/_cdn/static/6e6c9250-599e-4bf4-a9ae-66ff948afb59-InterVariable.woff2",
-  "published_ui_version": "0.25.0",
+  "published_ui_version": "0.26.0",
   "release_status": "published",
   "favicon": "/_api/icon?v=2",
   "tactical_levels": [
@@ -83,6 +83,14 @@
       "asset": "/_cdn/static/d1e2ca35-1add-4217-a1ee-842a86fe0b0f-unconventional-1.0.0-static-linux-x64.bin",
       "sha256": "e7d8e6ec417d39ec304b3b5414b46612f23a7475121964babe4f50995a1fe279",
       "size": 2246904
+    },
+    {
+      "id": "universal",
+      "name": "Universal",
+      "version": "1.0.0",
+      "asset": "/_cdn/static/0802177b-0a09-42fd-b9bd-1ef52f88f305-universal-1.0.0-static-linux-x64.bin",
+      "sha256": "2de069ac6844e8c742c7dff857a9d0424b233a4f131ab8d32728a46ce09c3d59",
+      "size": 2222328
     }
   ],
   "online": {
@@ -92,6 +100,6 @@
     "wellisch_players": 3
   },
   "chess_favicon": "/_cdn/static/5212c476-8b1a-456c-8c0f-0186a23e999a.png",
-  "checkpoint_id": "d2505f65-d50f-4bb7-9610-c2458680929a",
-  "publish_job_id": "98978640-e1f0-4c6f-9473-0728dafa0bf8"
+  "checkpoint_id": "f178f3ec-faaf-4b9c-b5fb-60be5c90618f",
+  "publish_job_id": "6a3947e7-b196-4103-8b5c-0054da91d0c6"
 }

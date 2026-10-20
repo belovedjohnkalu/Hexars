@@ -1,5 +1,6 @@
+import { cloudTextLines } from './cloudText';
 import { identifierFootprint } from "./cloudIdentifiers";
-type Item={id:string;name:string;identifier?:string;imageUrl?:string;isImage?:boolean;percent:number};
+type Item={id:string;name:string;identifier?:string;imageUrl?:string;isImage?:boolean;percent:number;characters?:number};
 export type Rect={x:number;y:number;width:number;height:number};
 export type CloudLayout={width:number;height:number;items:Array<Rect&{id:string;fontSize:number;pictureSize?:number;captionSize?:number;gridSlot?:number}>};
 export function cloudLayout(items:Item[],width:number,height:number,measure:(text:string,size:number)=>number,options:{organic?:boolean;square?:boolean;boardGrid?:boolean;columns?:number;compact?:boolean;previous?:CloudLayout}={}){
@@ -10,10 +11,10 @@ export function cloudLayout(items:Item[],width:number,height:number,measure:(tex
   const binary=options.organic&&new Set(items.map(n=>n.percent)).size===2;
   const measured=[...items].sort((a,b)=>b.percent-a.percent||items.indexOf(a)-items.indexOf(b)).map(item=>{
     const percent=binary?30+item.percent*.4:item.percent;
-    const identifier=identifierFootprint(item.identifier),fontSize=options.organic?(narrow?15:17)+Math.pow(percent/100,1.15)*(narrow?44:57):(narrow?17:20)+item.percent/100*(narrow?13:18);
-    const name=item.name.replace(/\s+/g,' '),picture=options.organic?(narrow?82:110)+percent*.65:(narrow?105:135)+item.percent*.25,captionSize=options.organic?14+percent*.09:16,isPicture=item.isImage||item.imageUrl;
-    const labelWidth=measure(name,isPicture?captionSize:fontSize)+(options.organic?12:24)+identifier.width;
-    return {id:item.id,fontSize,width:Math.max(64,labelWidth,isPicture?picture+24:0),height:isPicture?picture+Math.max(captionSize*1.3,identifier.height)+(options.organic?20:32):Math.max(fontSize*1.18,identifier.height)+(options.organic?12:20),...(isPicture?{pictureSize:picture,captionSize}:{})};
+    const identifier=identifierFootprint(item.identifier),fontSize=options.organic?(narrow?15:17)+Math.pow(percent/100,1.15)*(narrow?44:57)+(item.characters===undefined?0:6*item.characters/(item.characters+80)):(narrow?17:20)+item.percent/100*(narrow?13:18);
+    const lines=cloudTextLines(item.name),picture=options.organic?(narrow?82:110)+percent*.65+(item.characters===undefined?0:4*item.characters/(item.characters+80)):(narrow?105:135)+item.percent*.25,captionSize=options.organic?14+percent*.09+(item.characters===undefined?0:2*item.characters/(item.characters+80)):16,isPicture=item.isImage||item.imageUrl;
+    const labelWidth=Math.max(...lines.map(line=>measure(line,isPicture?captionSize:fontSize)))+(options.organic?12:24)+identifier.width;
+    return {id:item.id,fontSize,width:Math.max(64,labelWidth,isPicture?picture+24:0),height:isPicture?picture+Math.max(lines.length*captionSize*1.3,identifier.height)+(options.organic?20:32):Math.max(lines.length*fontSize*1.18,identifier.height)+(options.organic?12:20),...(isPicture?{pictureSize:picture,captionSize}:{})};
   });
   if(options.organic&&measured.length>1)width=Math.max(width,Math.max(...measured.map(n=>n.width))*2.25+32,Math.sqrt(measured.reduce((sum,n)=>sum+(n.width+gap)*(n.height+gap),0))*1.4);
   if(options.boardGrid){
@@ -27,7 +28,7 @@ export function cloudLayout(items:Item[],width:number,height:number,measure:(tex
     const left=(worldWidth-columns*cellWidth-gap)/2,top=16;
     return {width:worldWidth,height:worldHeight,items:placed.map(item=>({...item,x:left+(item.gridSlot%columns)*(cellWidth+gap)+(cellWidth-item.width)/2,y:top+Math.floor(item.gridSlot/columns)*(cellHeight+gap)}))};
   }
-  // The spatial world grows to fit whole labels; labels never split or shrink.
+  // The world reserves every whole-word line, picture and identifier footprint.
   width=Math.max(width,previous?.width||0,...measured.map(item=>item.width+32));
   const pending:typeof measured=[];
   // Keep retained words anchored before placing additions. Never normalize the

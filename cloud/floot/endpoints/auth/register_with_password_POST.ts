@@ -105,7 +105,7 @@ export async function handle(request: Request) {
   } catch (error: unknown) {
     console.error("Registration failed",error instanceof Error?error.name:"Unknown error");
     const nicknameTaken=isNicknameTaken(error);
-    const errorMessage = nicknameTaken?'That nickname is taken. Choose another.':
+    const errorMessage = nicknameTaken?'That player name is taken. Choose another.':
       error&&typeof error==="object"&&"issues" in error ? "Check your email and use at least 8 characters for the password." : "Couldn’t create the account. Try again.";
     return new Response(
       superjson.stringify({ message: errorMessage }),

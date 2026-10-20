@@ -1,0 +1,13 @@
+# ION 0.26
+
+- Universal 1.0.0 completes the six independent server-side C++ engines. Phase-aware PVS and selective multiplayer MaxN adapt its decisions without duplicating another engine's search. All six variants and six budget levels use the existing selection, save/resume and cancellation workflow.
+- Spatial labels wrap at eight whole words. Their exact line dimensions are measured before packing, including linked words, picture captions and dev identifiers. Names remain unchanged in storage.
+- Branch sizing counts every Unicode character in names and rule notes throughout the complete subtree, including the branch's own label. Counts for deletion remain separate. A continuous magnitude term makes even an additional character at a sibling minimum/maximum affect font size.
+- First entry fits the occupied word/picture bounds with a 10px inset rather than unused world area. Previously established pan/zoom survives content refresh.
+- History previews reuse the contained starting-board image frame, retaining the bottoms of Gliński, McCooey and Shafran boards.
+- Accounts generated for a device are no longer recreated from another device's synced workspace snapshot. Fresh device associations own remembered membership/actions; permitted dev label edits remain. Stale snapshot rows remain stored, but are never returned as imported accounts or counted on Home. Session associations additionally require matching users. No real user account content is deleted.
+- Controls says “Hold a word or picture”. Saved games say “Share”; sharing and signup refer to “Player name”, preserving the existing case-insensitive unique-name enforcement.
+
+Verification: 14 CTest targets; 65 native/manager protocol checks; all 38 Floot helper spec files (including three hook specs); hosted Universal requests for every variant and all six difficulty levels; two-device/two-account isolation with a reproduced stale snapshot; mobile/desktop gameplay, reset failure recovery and keyboard interaction. Preview browser TypeScript is clean. Phone History checks wait for the actual chessboard SVG (not the loading mark) and verify its entire viewBox fits inside the photo frame. QA rows are removed only by recorded exact IDs.
+
+Design reconciliation: earlier one-line-label and descendant-count rules are superseded by this explicit request. Runtime owners and maintained design/UX contracts changed together. The existing static premium audit flags the React Form provider as a native form; its real nested form already declares `noValidate`. No unrelated redesign, single-child traversal, retention expiry or hosting migration is introduced.

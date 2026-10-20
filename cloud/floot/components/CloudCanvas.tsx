@@ -1,3 +1,4 @@
+import { cloudText } from '../helpers/cloudText';
 import { engineId as resolveEngineId, isEngineId } from '../helpers/chessEngines';
 import { useLayoutEffect,useMemo,useRef,useState,type CSSProperties,type MouseEvent } from 'react';
 import { Link,useLocation } from 'react-router-dom';
@@ -21,7 +22,7 @@ export function CloudCanvas({nodes,parentId,onOpen,opening,loading,addedId,onPic
  const area=useRef<HTMLDivElement>(null),[size,setSize]=useState({width:360,height:480}),[fontReady,setFontReady]=useState(0),location=useLocation(),hold=useCloudHold(onHighlight);
  useLayoutEffect(()=>{const el=area.current;if(!el)return;const measure=()=>setSize(old=>({width:Math.max(240,el.clientWidth),height:el.closest('[data-keyboard="true"]')?old.height:Math.max(160,el.clientHeight)}));measure();const observer=new ResizeObserver(measure);observer.observe(el);let alive=true;void document.fonts.ready.then(()=>{if(alive)setFontReady(1);});return()=>{alive=false;observer.disconnect();};},[]);
  const siblings=useMemo(()=>cloudTree.sizes(nodes,parentId).map(n=>n.note?{...n,isImage:false,imageUrl:undefined,imageUrls:undefined}:n),[nodes,parentId]);
- const boardGrid=false,square=scope==='chess'&&(parentId==='boards'||parentId==='rules'||!!parentId?.endsWith('-rules')),lastLayout=useRef<{key:string;viewportWidth:number;generation:number;layout:CloudLayout}|null>(null),layoutKey=identity+':'+scope+':'+(parentId||'root')+':organic-v6';
+ const boardGrid=false,square=scope==='chess'&&(parentId==='boards'||parentId==='rules'||!!parentId?.endsWith('-rules')),lastLayout=useRef<{key:string;viewportWidth:number;generation:number;layout:CloudLayout}|null>(null),layoutKey=identity+':'+scope+':'+(parentId||'root')+':organic-v7';
  const layout=useMemo(()=>{
   const context=document.createElement('canvas').getContext('2d');
   const saved=lastLayout.current?.key===layoutKey?lastLayout.current:layoutCache.get(layoutKey),old=saved?.viewportWidth===size.width?saved.layout:undefined;
@@ -31,6 +32,8 @@ export function CloudCanvas({nodes,parentId,onOpen,opening,loading,addedId,onPic
   return {...packed,generation:(saved?.generation||0)+(removed?1:0)};
  },[siblings,size,fontReady,scope,square,boardGrid,layoutKey,showIdentifiers,parentId]);
  useLayoutEffect(()=>{if(!fontReady||loading)return;lastLayout.current={key:layoutKey,viewportWidth:size.width,generation:layout.generation,layout};layoutCache.set(layoutKey,lastLayout.current);},[layout,size.width,fontReady,loading,layoutKey]);
+ const bounds=layout.items.length?{x:Math.min(...layout.items.map(n=>n.x)),y:Math.min(...layout.items.map(n=>n.y)),width:0,height:0}:undefined;
+ if(bounds){bounds.width=Math.max(...layout.items.map(n=>n.x+n.width))-bounds.x;bounds.height=Math.max(...layout.items.map(n=>n.y+n.height))-bounds.y;}
  const rectangles=new Map(layout.items.map(n=>[n.id,n]));
  function destination(node:CloudNode){
   if(node.redirect)return redirectURL(node.redirect);
@@ -45,15 +48,15 @@ export function CloudCanvas({nodes,parentId,onOpen,opening,loading,addedId,onPic
   if(chessVariants.isId(node.destination)){let mode='friend',level='3',engine='tactical';try{const chosen=localStorage.getItem('ion.engine');if(isEngineId(chosen)){mode='engine';engine=chosen;level=localStorage.getItem('ion.difficulty')||'3';}}catch{}if(query.has('engine')){mode='engine';engine=resolveEngineId(query.get('engine'));level=query.get('level')||'3';}return '/'+node.destination+'?mode='+mode+(mode==='engine'?'&engine='+engine+'&level='+level:'');}
   return cloudURL(node.id,scope)+context;
  }
- return <div ref={area} className={styles.viewport+' '+className}><SpatialViewport width={layout.width} height={layout.height} viewKey={layoutKey+':'+layout.generation} ready={!!fontReady&&!loading} refitKey={size.width+':'+size.height} initialZoom={siblings.length<=9?Math.min(1,size.width/layout.width,size.height/layout.height):Math.max(.65,Math.min(1,size.width/layout.width))}>
+ return <div ref={area} className={styles.viewport+' '+className}><SpatialViewport width={layout.width} height={layout.height} viewKey={layoutKey+':'+layout.generation} ready={!!fontReady&&!loading} refitKey={size.width+':'+size.height} contentBounds={bounds}>
  <div className={styles.canvas+(opening?' '+styles.leaving:'')} data-home={scope==='home'&&parentId==='ion'} role="group" aria-label={parentId?'Droplets':'Clouds'} aria-busy={loading} style={{width:layout.width,height:layout.height,visibility:fontReady&&!loading?'visible':'hidden'}}>
  {siblings.map(node=>{const rect=rectangles.get(node.id);if(!rect)return null;const picture=node.isImage||cloudPhotoUrls(node).length>0,identifier=showIdentifiers?node.identifier:undefined;
   const label=identifier?<span className={styles.identifier} data-identifier={identifier} style={{width:identifierFootprint(identifier).width-6}}>{identifier}</span>:null;
-  const content=picture?<><CloudPhoto node={node} size={rect.pictureSize??rect.width-24} onError={onPictureError}/><span className={styles.caption}><span className={styles.text}>{node.name}</span>{label}</span></>:<><span className={styles.text}>{node.name}</span>{label}</>;
-  const props={...hold.handlers(node),className:[styles.node,picture?styles.picture:'',opening&&opening!==node.id?styles.fading:'',node.id===addedId?styles.justAdded:''].join(' '),'data-node-id':node.id,'data-percent':node.percent,'data-descendants':node.count,'data-holding':hold.holding===node.id,'aria-label':node.name,'aria-description':(identifier?identifier+'. ':'')+(node.destination?'Open '+node.name:node.count+' droplets inside. Hold for Controls.'),style:{color:colorValue(node.color||cloudTree.seed.find(n=>n.id===node.id)?.color),'--node-x':rect.x+'px','--node-y':rect.y+'px',width:rect.width,minHeight:rect.height,fontSize:rect.fontSize,'--caption-size':(rect.captionSize??16)+'px'} as CSSProperties};
+  const content=picture?<><CloudPhoto node={node} size={rect.pictureSize??rect.width-24} onError={onPictureError}/><span className={styles.caption}><span className={styles.text}>{cloudText(node.name)}</span>{label}</span></>:<><span className={styles.text}>{cloudText(node.name)}</span>{label}</>;
+  const props={...hold.handlers(node),className:[styles.node,picture?styles.picture:'',opening&&opening!==node.id?styles.fading:'',node.id===addedId?styles.justAdded:''].join(' '),'data-node-id':node.id,'data-percent':node.percent,'data-descendants':node.count,'data-characters':node.characters,'data-holding':hold.holding===node.id,'aria-label':node.name,'aria-description':(identifier?identifier+'. ':'')+(node.destination?'Open '+node.name:node.count+' inside. Hold for Controls.'),style:{color:colorValue(node.color||cloudTree.seed.find(n=>n.id===node.id)?.color),'--node-x':rect.x+'px','--node-y':rect.y+'px',width:rect.width,minHeight:rect.height,fontSize:rect.fontSize,'--caption-size':(rect.captionSize??16)+'px'} as CSSProperties};
   if(node.wordRedirect){
    const own=destination({...node,wordRedirect:undefined});
-   const words=<span className={styles.linkedLabel}>{linkedLabelParts(node).map((part,i)=>{if(!part.word)return <span key={i}>{part.text}</span>;const target=part.linked?redirectURL(node.wordRedirect!.target):own;return /^https?:/.test(target)?<a key={i} className={part.linked?styles.linkedWord:undefined} href={target} target="_blank" rel="noopener noreferrer">{part.text}</a>:<Link key={i} className={part.linked?styles.linkedWord:undefined} to={target} onClick={e=>onOpen(e,node.id,target)}>{part.text}</Link>;})}</span>;
+   const words=<span className={styles.linkedLabel}>{linkedLabelParts({...node,name:cloudText(node.name)}).map((part,i)=>{if(!part.word)return <span key={i}>{part.text}</span>;const target=part.linked?redirectURL(node.wordRedirect!.target):own;return /^https?:/.test(target)?<a key={i} className={part.linked?styles.linkedWord:undefined} href={target} target="_blank" rel="noopener noreferrer">{part.text}</a>:<Link key={i} className={part.linked?styles.linkedWord:undefined} to={target} onClick={e=>onOpen(e,node.id,target)}>{part.text}</Link>;})}</span>;
    return <span key={node.id} {...props} role="group">{picture&&<Link to={own} onClick={e=>onOpen(e,node.id,own)}><CloudPhoto node={node} size={rect.pictureSize??rect.width-24}/></Link>}{picture?<span className={styles.caption}>{words}{label}</span>:<>{words}{label}</>}</span>;
   }
   const target=destination(node);if(/^https?:/.test(target))return <a key={node.id} {...props} href={target} target="_blank" rel="noopener noreferrer">{content}</a>;

@@ -31,5 +31,11 @@ const assets = {
     checksum: 'e7d8e6ec417d39ec304b3b5414b46612f23a7475121964babe4f50995a1fe279',
     size: 2246904,
   },
+  universal: {
+    identity: 'Universal 1.0.0',
+    asset: '/_cdn/static/0802177b-0a09-42fd-b9bd-1ef52f88f305-universal-1.0.0-static-linux-x64.bin',
+    checksum: '2de069ac6844e8c742c7dff857a9d0424b233a4f131ab8d32728a46ce09c3d59',
+    size: 2222328,
+  },
 } satisfies Record<EngineId, {identity: string; asset: string; checksum: string; size: number}>;
 export function nativeEngineAsset(value: unknown) { return assets[engineId(value)]; }

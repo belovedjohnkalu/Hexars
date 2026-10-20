@@ -27,3 +27,15 @@ describe("Cloud hierarchy and relative size", () => {
     expect(cloudTree.path(cycle,"a").length).toBe(2);
   });
 });
+
+describe('Recursive character weights',()=>{
+ const nodes=[{id:'a',parentId:null,name:'A'},{id:'b',parentId:null,name:'B'},{id:'c',parentId:'a',name:'ten letters'},{id:'d',parentId:'c',name:'🫧',note:'Rule text'},{id:'e',parentId:'b',name:'Short'}];
+ it('includes every character at every depth, including note text and Unicode code points',()=>{
+  const weights=cloudTree.characterWeights(nodes);expect(weights.get('d')).toBe(10);expect(weights.get('c')).toBe(21);expect(weights.get('a')).toBe(22);expect(weights.get('b')).toBe(6);
+  const after=cloudTree.characterWeights(nodes.map(n=>n.id==='d'?{...n,name:n.name+'!'}:n));expect(after.get('a')).toBe(23);expect(after.get('c')).toBe(22);expect(after.get('b')).toBe(6);
+ });
+ it('keeps descendant counts separate for deletion confirmation and excludes deleted text',()=>{
+  const sizes=cloudTree.sizes(nodes,null);expect(sizes[0].count).toBe(2);expect(sizes[0].characters).toBe(22);
+  expect(cloudTree.characterWeights([...nodes,{id:'gone',name:'Deleted text',parentId:'a',removedBy:'removed'}]).get('a')).toBe(22);
+ });
+});

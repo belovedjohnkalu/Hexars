@@ -162,3 +162,10 @@ Engines contains Tactical, Positional and Defensive, each with the existing six-
 
 ## Five independent engines — 0.25
 Materialist and Unconventional append after Defensive in the existing Engines cloud. Each uses the same six-level journey and the central chessEngines allowlist; existing IDs, ILs, names, owner overrides and saved games remain intact. Amber and coral come from the existing word palette. No new routes, controls, fonts or motion tokens are added. Materialist owns its MTD(f) material/exchange search; Unconventional owns its PUCT tree and sampled rollout strategy. Both support all six authoritative variants and the existing cancellation, state validation, save/resume and result/Opponent(s) contracts. Universal remains unavailable.
+
+## Text-sensitive spaces and Universal — 0.26
+The current request supersedes the earlier one-line label rule: long labels break after every eight whole words. Words, email addresses and Unicode characters are never split, clipped or abbreviated in the spatial canvas. cloudText owns line formation; cloudLayout measures those exact lines and reserves their full height alongside pictures and dev identifiers. Both ordinary labels and linked words follow the same lines.
+
+Sizing compares visible siblings using the total Unicode character count of each branch, including its own label, rule text and all descendant labels/text. Descendant counts remain separate for deletion confirmation. A small continuous magnitude contribution also makes an added character matter when the branch stays the largest or smallest. The established softened two-level contrast remains. Existing colors, Inter, transitions and no-scroll behavior remain unchanged.
+
+A first visit frames occupied bounds with a 10px inset instead of fitting the empty world. Existing panned cameras remain stable through content refresh; a viewport resize refits. SavedBoardPreview reuses BoardPreview's fitted frame so tall boards cannot extend below the image. Universal appends in cyan, using the same six-level journey; all six engines are now available.
