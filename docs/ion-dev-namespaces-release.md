@@ -25,3 +25,18 @@ Home for another dev. No real accounts were renamed; existing nicknames were uni
 
 Automatic one-child traversal was deliberately retained in this first deployment.
 Its removal is a separate second deployment, as requested.
+
+## Second deployment: explicit navigation
+After the first publish succeeded, the single-child navigation effect was removed.
+Every child remains a choice for every account, including nested private clouds
+and each History date level. Browser checks with an ordinary account verify no
+automatic traversal, explicit activation, and visited Back without re-entry.
+The first and second deployments have separate checkpoints and commits.
+
+Final live-site checks passed for visited Back, nickname sharing, IL01–IL05,
+other-dev read-only Home, explicit private nesting and explicit History dates.
+DESIGN.md lint reports zero errors/warnings. The strict static audit retains the
+known Form-wrapper false positive in login.tsx; its actual HTML form declares
+noValidate. No new static findings were introduced. Dedicated QA accounts,
+workspaces, shares and games were removed after verification; dev namespace 1
+remains unassigned for the next real dev account.

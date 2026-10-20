@@ -2,6 +2,14 @@
 
 Published: **https://ion.floot.app**
 
+## 2026-10-20 — Dev namespaces, nickname sharing and explicit navigation
+
+Published in two requested stages: visited-page Back, dev namespace 0 with IL01–IL05
+Home roots, owner-only Home/Chess edits and unique-nickname saved-game sharing;
+then removal of all automatic single-droplet traversal. Nickname races, account
+isolation, Received delivery, visited Back and explicit History dates passed API
+and browser checks. See [release details](ion-dev-namespaces-release.md).
+
 ## 2026-10-19 — Floating navigation and account refinement
 
 Shared glass Back bubbles free the composer footer. Title holds open Controls;

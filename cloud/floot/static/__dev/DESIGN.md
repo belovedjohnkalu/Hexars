@@ -153,3 +153,6 @@ Private shows one stable Sign in prompt while signed out, without unauthorized l
 FloatingBack retains its existing glass treatment and now traverses same-app visited history; a directly opened URL uses its existing safe fallback. Public nickname sharing uses the shared saved-game Controls, Dialog and Input. A Share to nickname cloud is available alongside saved-board actions. Nicknames are unique after trimming and ignoring case, enforced by the database, with a clear conflict error that preserves form values.
 
 Dev namespaces are assigned once on the server. Namespace 0 belongs to the first dev. ION is IL0; its existing roots are IL01 Chess, IL02 Public, IL03 Private, IL04 Controls, IL05 Accounts. Descendant suffixes and immutable birth paths are preserved (old IL201 becomes IL0301). Raw historical paths remain in the registry, with a separate permanent dev_number; public-facing ILs combine the namespace and one-based root. Dev membership alone never permits another dev to edit the first dev's shared Home/Chess workspace. Existing public-author permissions remain.
+
+## Explicit navigation — 0.23
+Every cloud remains a visible choice, including an only child. Opening a page never triggers another navigation by itself. Visited-page Back and the existing pan/zoom layout remain unchanged.
