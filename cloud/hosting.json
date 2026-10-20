@@ -18,7 +18,7 @@
     "devasa",
     "wellisch"
   ],
-  "ui_version": "0.24.0",
+  "ui_version": "0.25.0",
   "routes": [
     "/",
     "/login",
@@ -30,7 +30,7 @@
     "/wellisch"
   ],
   "font_asset": "/_cdn/static/6e6c9250-599e-4bf4-a9ae-66ff948afb59-InterVariable.woff2",
-  "published_ui_version": "0.24.0",
+  "published_ui_version": "0.25.0",
   "release_status": "published",
   "favicon": "/_api/icon?v=2",
   "tactical_levels": [
@@ -67,6 +67,22 @@
       "asset": "/_cdn/static/21ae015c-47cb-45c7-b71d-273102b8da48-defensive-1.0.0-static-linux-x64.bin",
       "sha256": "952090e0139b6d0ecd057d9517a1d94a0b395086706e0c145c791746fc891578",
       "size": 2222328
+    },
+    {
+      "id": "materialist",
+      "name": "Materialist",
+      "version": "1.0.0",
+      "asset": "/_cdn/static/39ed551e-1d0f-477f-afdb-479ff5a7174f-materialist-1.0.0-static-linux-x64.bin",
+      "sha256": "c4fedd007e2bb691d8f8f7b6fc4b22add2382db00ac8d5ff8f4bc6f0ba2f8d5a",
+      "size": 2242808
+    },
+    {
+      "id": "unconventional",
+      "name": "Unconventional",
+      "version": "1.0.0",
+      "asset": "/_cdn/static/d1e2ca35-1add-4217-a1ee-842a86fe0b0f-unconventional-1.0.0-static-linux-x64.bin",
+      "sha256": "e7d8e6ec417d39ec304b3b5414b46612f23a7475121964babe4f50995a1fe279",
+      "size": 2246904
     }
   ],
   "online": {
@@ -76,6 +92,6 @@
     "wellisch_players": 3
   },
   "chess_favicon": "/_cdn/static/5212c476-8b1a-456c-8c0f-0186a23e999a.png",
-  "checkpoint_id": "6ccd8d45-f863-45bf-a9b8-822e9b0ea394",
-  "publish_job_id": "17d7b88b-e273-42b0-a3f2-af5572c83384"
+  "checkpoint_id": "d2505f65-d50f-4bb7-9610-c2458680929a",
+  "publish_job_id": "98978640-e1f0-4c6f-9473-0728dafa0bf8"
 }

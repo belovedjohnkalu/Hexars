@@ -1,4 +1,8 @@
-# Current release — independent engines (0.24)
+# Current release — five independent engines (0.25)
+
+Materialist 1.0.0 and Unconventional 1.0.0 join Tactical, Positional and Defensive. Published at https://ion.floot.app and verified on the public site. Each is an independent executable with its own strategic search. All six variants and six difficulty levels use the same authoritative rules and saved-game flow. See [the new engine release](ion-materialist-unconventional-release.md). Earlier releases below are historical.
+
+# Prior release — independent engines (0.24)
 
 Positional 1.0.0 is complete and Defensive 1.0.0 is installed as a third independent executable. All six variants and six difficulty levels are supported. The authoritative shared rules remain separate from each engine's search. Engine-specific saves, reset/return links, result sheets and Opponent(s) labels are integrated. Published at https://ion.floot.app and verified through real browser/native replies. See [engine verification and build instructions](ion-independent-engines-release.md). Earlier releases below are historical.
 

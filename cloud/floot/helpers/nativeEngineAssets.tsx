@@ -19,5 +19,17 @@ const assets = {
     checksum: '952090e0139b6d0ecd057d9517a1d94a0b395086706e0c145c791746fc891578',
     size: 2222328,
   },
+  materialist: {
+    identity: 'Materialist 1.0.0',
+    asset: '/_cdn/static/39ed551e-1d0f-477f-afdb-479ff5a7174f-materialist-1.0.0-static-linux-x64.bin',
+    checksum: 'c4fedd007e2bb691d8f8f7b6fc4b22add2382db00ac8d5ff8f4bc6f0ba2f8d5a',
+    size: 2242808,
+  },
+  unconventional: {
+    identity: 'Unconventional 1.0.0',
+    asset: '/_cdn/static/d1e2ca35-1add-4217-a1ee-842a86fe0b0f-unconventional-1.0.0-static-linux-x64.bin',
+    checksum: 'e7d8e6ec417d39ec304b3b5414b46612f23a7475121964babe4f50995a1fe279',
+    size: 2246904,
+  },
 } satisfies Record<EngineId, {identity: string; asset: string; checksum: string; size: number}>;
 export function nativeEngineAsset(value: unknown) { return assets[engineId(value)]; }

@@ -92,3 +92,43 @@ if(BUILD_TESTING)
     add_test(NAME ${name}-search COMMAND ${name}-search-tests)
   endforeach()
 endif()
+
+add_executable(engine-four engines/engine-4/main.cpp engines/engine-1/protocol.cpp engines/engine-4/search.cpp)
+target_include_directories(engine-four PRIVATE shared/third_party)
+target_compile_definitions(engine-four PRIVATE HEXCHESS_ENGINE_IDENTITY="Materialist 1.0.0" HEXCHESS_SEARCH_CAPABILITY="mtdf-paranoid")
+target_link_libraries(engine-four PRIVATE hexchess_rules)
+set_target_properties(engine-four PROPERTIES
+  RUNTIME_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/engines/engine-4"
+  RUNTIME_OUTPUT_DIRECTORY_DEBUG "${CMAKE_SOURCE_DIR}/engines/engine-4"
+  RUNTIME_OUTPUT_DIRECTORY_RELEASE "${CMAKE_SOURCE_DIR}/engines/engine-4")
+if(MINGW)
+  target_link_options(engine-four PRIVATE -static-libgcc -static-libstdc++)
+endif()
+if(BUILD_TESTING)
+  add_executable(materialist-search-tests tests/engine/search-quality.cpp engines/engine-4/search.cpp)
+  target_link_libraries(materialist-search-tests PRIVATE hexchess_rules)
+  add_test(NAME materialist-search COMMAND materialist-search-tests)
+endif()
+
+add_executable(engine-five engines/engine-5/main.cpp engines/engine-1/protocol.cpp engines/engine-5/search.cpp)
+target_include_directories(engine-five PRIVATE shared/third_party)
+target_compile_definitions(engine-five PRIVATE HEXCHESS_ENGINE_IDENTITY="Unconventional 1.0.0" HEXCHESS_SEARCH_CAPABILITY="puct-maxn")
+target_link_libraries(engine-five PRIVATE hexchess_rules)
+set_target_properties(engine-five PROPERTIES
+  RUNTIME_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/engines/engine-5"
+  RUNTIME_OUTPUT_DIRECTORY_DEBUG "${CMAKE_SOURCE_DIR}/engines/engine-5"
+  RUNTIME_OUTPUT_DIRECTORY_RELEASE "${CMAKE_SOURCE_DIR}/engines/engine-5")
+if(MINGW)
+  target_link_options(engine-five PRIVATE -static-libgcc -static-libstdc++)
+endif()
+if(BUILD_TESTING)
+  add_executable(unconventional-search-tests tests/engine/search-quality.cpp engines/engine-5/search.cpp)
+  target_link_libraries(unconventional-search-tests PRIVATE hexchess_rules)
+  add_test(NAME unconventional-search COMMAND unconventional-search-tests)
+endif()
+
+if(BUILD_TESTING)
+  add_executable(materialist-oracle-tests tests/engine/materialist-oracle.cpp engines/engine-4/search.cpp)
+  target_link_libraries(materialist-oracle-tests PRIVATE hexchess_rules)
+  add_test(NAME materialist-oracle COMMAND materialist-oracle-tests)
+endif()

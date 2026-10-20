@@ -20,7 +20,7 @@
     "dev": "npm run dev --workspace web",
     "manager": "npm run start --workspace manager",
     "test:native": "node scripts/build-native.mjs --test",
-    "test:manager": "npm run build:positional && npm run build:defensive && node --test tests/engine/*.test.mjs",
+    "test:manager": "npm run build:positional && npm run build:defensive && npm run build:materialist && npm run build:unconventional && node --test tests/engine/*.test.mjs",
     "test:web": "npm run test --workspace web",
     "test": "npm run test:native && npm run test:search && npm run test:manager && npm run test:web && npm run test:api",
     "package:source": "node scripts/package-source.mjs",
@@ -33,8 +33,12 @@
     "build:positional": "node scripts/build-positional.mjs",
     "test:positional": "npm run build:positional && node --test tests/engine/positional.test.mjs",
     "build:defensive": "node scripts/build-defensive.mjs",
-    "build:engines": "npm run build:engine && npm run build:positional && npm run build:defensive",
+    "build:engines": "npm run build:engine && npm run build:positional && npm run build:defensive && npm run build:materialist && npm run build:unconventional",
     "test:defensive": "npm run build:defensive && node --test tests/engine/defensive.test.mjs",
-    "test:search": "node scripts/test-search-engines.mjs"
+    "test:search": "node scripts/test-search-engines.mjs",
+    "build:materialist": "node scripts/build-materialist.mjs",
+    "build:unconventional": "node scripts/build-unconventional.mjs",
+    "test:materialist": "npm run build:materialist && node --test tests/engine/materialist.test.mjs",
+    "test:unconventional": "npm run build:unconventional && node --test tests/engine/unconventional.test.mjs"
   }
 }

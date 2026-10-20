@@ -1,3 +1,4 @@
+import { chessEngines } from './chessEngines';
 import { tacticalLevels } from './tacticalLevels';
 import type { CloudNode } from '../endpoints/cloud_POST.schema';
 import { chessVariants } from './chessVariants';
@@ -19,5 +20,9 @@ export const chessJourney:CloudNode[]=[
  {id:'positional',parentId:'engines',name:'Positional',color:'mint',system:true},
  ...['Pre-Beginner','Beginner','Easy','Medium','Hard','Expert'].map((name,i)=>({id:'positional-level-'+i,parentId:'positional',name,engineId:'positional' as const,destination:'level' as const,level:i,color:'mint' as const,system:true})),
  {id:'defensive',parentId:'engines',name:'Defensive',color:'lavender',system:true},
- ...tacticalLevels.map(l=>({id:'defensive-level-'+l.level,parentId:'defensive',name:l.name,engineId:'defensive' as const,destination:'level' as const,level:l.level,color:'lavender' as const,system:true}))
+ ...tacticalLevels.map(l=>({id:'defensive-level-'+l.level,parentId:'defensive',name:l.name,engineId:'defensive' as const,destination:'level' as const,level:l.level,color:'lavender' as const,system:true})),
+ ...chessEngines.filter(e=>e.id==='materialist'||e.id==='unconventional').flatMap(engine=>[
+  {id:engine.id,parentId:'engines',name:engine.name,color:engine.color,system:true},
+  ...tacticalLevels.map(l=>({id:engine.id+'-level-'+l.level,parentId:engine.id,name:l.name,engineId:engine.id,destination:'level' as const,level:l.level,color:engine.color,system:true}))
+ ])
 ];

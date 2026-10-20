@@ -29,11 +29,34 @@ int main(){
  const auto promotion=engine_one::search(waiting,{80,2,500});require(promotion.move&&promotion.move->from==promotion.move->to&&promotion.move->promotion==PieceType::Knight,"Missed mandatory same-turn promotion");
  auto promoted=applyMove(waiting,*promotion.move);require(promoted.activePlayer==0,"Promotion consumed the turn");
  const auto continuation=engine_one::search(promoted,{40,2,500});require(continuation.move.has_value(),"No move after delayed promotion");applyMove(promoted,*continuation.move);
+
+ // An initial Wellisch king capture must transfer its army and preserve the
+ // original pawn directions, rather than being scored as an orthodox mate.
+ auto takeover=createGame("wellisch");for(auto& p:takeover.occupants)p={};
+ std::fill(takeover.wellisch->origins.begin(),takeover.wellisch->origins.end(),255);
+ const auto set=[&](const char* at,PieceType t,PlayerId p){const int i=wellisch::index(wellisch::fromNotation(at));takeover.occupants[i]={t,p,false};takeover.wellisch->origins[i]=p;};
+ set("d1",PieceType::King,0);set("f8",PieceType::King,1);set("k9",PieceType::King,2);set("f6",PieceType::Rook,0);set("g6",PieceType::Pawn,1);set("d9",PieceType::Knight,1);takeover.positionHistory.clear();
+ const auto conquer=engine_one::search(takeover,{500,2,6000});require(conquer.move&&conquer.move->to==wellisch::fromNotation("f8"),"Missed a safe army takeover");
+ takeover=applyMove(takeover,*conquer.move);require(takeover.wellisch->controllers[1]==0&&takeover.activePlayer==2,"Takeover turn order failed");
+ const auto capturedPawn=wellisch::index(wellisch::fromNotation("g6"));require(takeover.occupants[capturedPawn].player==0&&takeover.wellisch->origins[capturedPawn]==1,"Takeover erased original pawn direction");
+
+ auto forced=createGame("wellisch");for(auto& p:forced.occupants)p={};std::fill(forced.wellisch->origins.begin(),forced.wellisch->origins.end(),255);
+ const auto blocked=[&](const char* at,PieceType t,PlayerId p){const int i=wellisch::index(wellisch::fromNotation(at));forced.occupants[i]={t,p,false};forced.wellisch->origins[i]=p;};
+ blocked("a6",PieceType::King,0);blocked("a4",PieceType::King,1);blocked("f11",PieceType::King,2);blocked("e9",PieceType::Queen,0);forced.activePlayer=2;forced.positionHistory.clear();
+ const auto forcedDecision=engine_one::search(forced,{80,2,500});require(forcedDecision.move&&forcedDecision.move->pass,"Failed a mandatory Wellisch pass");applyMove(forced,*forcedDecision.move);
  auto stale=GameState{};stale.occupants.resize(91);stale.activePlayer=1;
  stale.occupants[glinskiIndex(glinskiFromNotation("h8"))]={PieceType::King,0,false};
  stale.occupants[glinskiIndex(glinskiFromNotation("f11"))]={PieceType::King,1,false};
  stale.occupants[glinskiIndex(glinskiFromNotation("e8"))]={PieceType::Queen,0,false};
  const auto stalemate=engine_one::search(stale,{10,2,100});require(!stalemate.move&&stalemate.score<0,"Fractional stalemate scoring ignored");
+
+ // A free queen must outrank a quiet move. Include a pawn so the house
+ // low-material draw does not disguise a mistaken exchange evaluation.
+ GameState exchange;exchange.occupants.resize(91);
+ const auto place=[&](const char* at,PieceType t,PlayerId p){exchange.occupants[glinskiIndex(glinskiFromNotation(at))]={t,p,false};};
+ place("a2",PieceType::King,0);place("l5",PieceType::King,1);place("f6",PieceType::Rook,0);place("f8",PieceType::Queen,1);place("c3",PieceType::Pawn,0);
+ const auto captured=engine_one::search(exchange,{500,2,6000});require(captured.move&&captured.move->to==glinskiFromNotation("f8"),"Declined a safe free queen");
+ const auto gained=applyMove(exchange,*captured.move);require(gained.occupants[glinskiIndex(glinskiFromNotation("f8"))].player==0,"Capture did not apply");
  std::mt19937 random(14921);
  int games=0,movesPlayed=0;
  for(const auto variant:{"glinski","mccooey","shafran","brusky","devasa","wellisch"}){

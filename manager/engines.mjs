@@ -27,6 +27,17 @@ export const engines = Object.freeze({
     path: path.join(root,"engines/engine-3",process.platform === "win32" ? "engine-three.exe" : "engine-three"),
     implemented: true, stage: "playable",
   },
+  "engine-4": {
+    id: "engine-4", name: "Materialist",
+    path: path.join(root,"engines/engine-4",process.platform === "win32" ? "engine-four.exe" : "engine-four"),
+    implemented: true, stage: "playable",
+  },
+  "engine-5": {
+    id: "engine-5", name: "Unconventional",
+    path: path.join(root,"engines/engine-5",process.platform === "win32" ? "engine-five.exe" : "engine-five"),
+    implemented: true, stage: "playable",
+  },
+
 });
 
 export const allowedOrigins = new Set(["http://localhost:5173", "http://127.0.0.1:5173"]);
