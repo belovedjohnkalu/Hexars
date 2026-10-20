@@ -341,3 +341,7 @@ ion-journeys-online-release.md for limits and deployment evidence.
 ## Time — October 20
 
 Time banking is published with exact microsecond balances, one-session active-use earning, reviewed player-name transfers, private receipts, owner-approved feature estimates and permanent unlocks. Full creation cost is divided by unique valid signed-in accounts; purchases do not reduce it. No historical costs are fabricated or approved. Charging requires approved estimates and the production 24-hour count warm-up. All 42 hosted helper suites and TypeScript pass. See [ION 0.27](releases/ion-0.27.md) and [Time policy](time/README.md).
+
+## Typing, live Activity and functional identifiers — October 20
+
+Published desktop composer focus, safe Left/Right visited-page navigation, three live Activity totals and permanently allocated dev ILs for Time words, receipt fields and variant actions. All six variant boards include Online and Library. Existing pricing, earning authority, saved games and public root labels are unchanged. All 45 helper spec files and hosted TypeScript pass. See [ION 0.28](releases/ion-0.28.md).

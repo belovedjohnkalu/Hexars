@@ -1,3 +1,5 @@
+import { functionIdentifiers } from './functionIdentifiers';
+import { receiptClouds } from './functionClouds';
 import { randomUUID } from 'node:crypto';
 import { sql } from 'kysely';
 import { db } from './db';
@@ -11,9 +13,11 @@ export async function timeOperations(input:Exclude<TimeInput,{action:'snapshot'}
   if(input.treasury&&!(await timeLedger.roles(userId)).dev)timeFail('Dev accounts only.',403);
   const account=input.treasury?'treasury':timeLedger.wallet(userId);
   let query=db.selectFrom('ionTimeTransactions').select(['id','createdAt']).where(e=>e.or([e('fromAccount','=',account),e('toAccount','=',account)]));
+  if(input.direction)query=query.where(input.direction==='in'?'toAccount':'fromAccount','=',account);
   if(input.before)query=query.where(e=>e.or([e('createdAt','<',new Date(input.before!.at)),e.and([e('createdAt','=',new Date(input.before!.at)),e('id','<',input.before!.id)])]));
   const rows=await query.orderBy('createdAt','desc').orderBy('id','desc').limit(13).execute(),page=rows.slice(0,12),last=page.at(-1);
-  return{activity:await Promise.all(page.map(r=>timeLedger.receipt(db,r.id,userId))),next:rows.length>12&&last?{at:when(last.createdAt),id:last.id}:null};
+  const activity=await Promise.all(page.map(r=>timeLedger.receipt(db,r.id,userId,false))),identifiers=await functionIdentifiers(userId,activity.flatMap(receiptClouds));
+  return{activity:activity.map(r=>({...r,...(identifiers?{identifier:identifiers['time-tx-'+r.id]}:{})})),next:rows.length>12&&last?{at:when(last.createdAt),id:last.id}:null};
  }
  if(input.action==='administration'){
   if(!(await timeLedger.roles(userId)).dev)timeFail('Only dev accounts can open these records.',403);

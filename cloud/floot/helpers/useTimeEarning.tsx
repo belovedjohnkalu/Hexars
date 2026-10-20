@@ -10,7 +10,7 @@ export function useTimeEarning(userId:number|null,onCredit:()=>void){
    if(!alive&&operation!=='stop')return;
    const age=Math.min(86400000,Math.max(0,Math.floor(performance.now()-lastInteraction)));
    try{const result=await postTime({action:'earning',operation,leaseId,sequence:++sequence,idleAgeMs:age});if(!alive)return;
-    elsewhere=!!result.earning?.elsewhere;claimed=!!result.earning?.active&&!elsewhere;if(result.earning?.creditedUs&&result.earning.creditedUs!=='0')onCredit();
+    elsewhere=!!result.earning?.elsewhere;claimed=!!result.earning?.active&&!elsewhere;if(result.earning?.creditedUs&&result.earning.creditedUs!=='0'||operation==='claim'&&claimed)onCredit();
     setStatus(result.earning?.elsewhere?'elsewhere':eligible()&&result.earning?.active?'earning':'paused');
    }catch(e){if(alive){claimed=false;setStatus('offline');if(e&&typeof e==='object'&&'status'in e&&e.status===401)window.dispatchEvent(new Event('ion.session-expired'));}}
   });};

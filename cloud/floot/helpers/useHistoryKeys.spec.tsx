@@ -1,0 +1,8 @@
+import { historyKey } from './useHistoryKeys';
+describe('Visited-page keyboard navigation',()=>{
+ function key(element:Element,init:KeyboardEventInit={}){const event=new window.KeyboardEvent('keydown',{key:'ArrowLeft',bubbles:true,cancelable:true,...init});element.dispatchEvent(event);return historyKey(event);}
+ afterEach(()=>document.body.replaceChildren());
+ it('uses plain left/right keys for history and ignores held/modifier/composition keys',()=>{expect(key(document.body)).toBe(-1);expect(key(document.body,{key:'ArrowRight'})).toBe(1);for(const init of [{repeat:true},{shiftKey:true},{altKey:true},{ctrlKey:true},{metaKey:true},{isComposing:true},{key:'ArrowUp'}])expect(key(document.body,init)).toBe(0);});
+ it('allows history from an empty composer while preserving every text caret',()=>{const input=document.createElement('input');document.body.append(input);input.dataset.cloudInput='';expect(key(input)).toBe(-1);input.value='A thought';expect(key(input)).toBe(0);input.value='';delete input.dataset.cloudInput;expect(key(input)).toBe(0);});
+ it('does not steal keys from dialogs, sliders, menus or chess cells',()=>{for(const role of ['dialog','alertdialog','slider','combobox','listbox','menu','tablist']){const element=document.createElement('div');element.setAttribute('role',role);const child=document.createElement('button');element.append(child);document.body.append(element);expect(key(child)).toBe(0);}const cell=document.createElement('div');cell.dataset.cell='a1';document.body.append(cell);expect(key(cell)).toBe(0);});
+});

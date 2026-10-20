@@ -1,3 +1,5 @@
+import { functionIdentifiers } from './functionIdentifiers';
+import { receiptClouds } from './functionClouds';
 import { sql,type Kysely,type Transaction } from 'kysely';
 import { db } from './db';
 import type { DB,Json } from './schema';
@@ -22,19 +24,21 @@ async function catalog(userId:number|null,tx:TimeDB=db){
 }
 async function snapshot(userId:number|null):Promise<TimeSnapshot>{
  const market=await catalog(userId);
- if(!userId)return{...market,userId:null,balanceUs:'0',earnedUs:'0'};
- const [account,user,earned,earning,treasury]=await Promise.all([
-  db.selectFrom('ionTimeAccounts').select('balanceUs').where('id','=',wallet(userId)).executeTakeFirst(),db.selectFrom('users').select('displayName').where('id','=',userId).executeTakeFirstOrThrow(),
+ if(!userId)return{...market,userId:null,balanceUs:'0',earnedUs:'0',addedUs:'0',spentUs:'0',observedAt:new Date().toISOString()};
+ const [accountResult,user,earned,treasury,identifiers]=await Promise.all([
+  sql<{balanceUs:string;addedUs:string;spentUs:string;leaseId:string|null;active:boolean|null;lastSeen:Date|null;idleUntil:Date|null;observedAt:Date}>`select totals.*,e.lease_id,e.active,e.last_seen,e.idle_until,clock_timestamp() as observed_at from (select coalesce(sum(amount_us),0)::text as balance_us,coalesce(sum(amount_us) filter(where amount_us>0),0)::text as added_us,(-coalesce(sum(amount_us) filter(where amount_us<0),0))::text as spent_us from ion_time_entries where account_id=${wallet(userId)}) totals left join ion_time_earning e on e.user_id=${userId}`.execute(db),db.selectFrom('users').select('displayName').where('id','=',userId).executeTakeFirstOrThrow(),
   db.selectFrom('ionTimeTransactions').select(sql<string>`coalesce(sum(amount_us),0)::text`.as('total')).where('toAccount','=',wallet(userId)).where('kind','=','earn').executeTakeFirstOrThrow(),
-  db.selectFrom('ionTimeEarning').selectAll().where('userId','=',userId).executeTakeFirst(),market.dev?db.selectFrom('ionTimeAccounts').select('balanceUs').where('id','=','treasury').executeTakeFirst():Promise.resolve(undefined)
+  market.dev?db.selectFrom('ionTimeAccounts').select('balanceUs').where('id','=','treasury').executeTakeFirst():Promise.resolve(undefined),market.dev?functionIdentifiers(userId):Promise.resolve(undefined)
  ]);
- return{...market,userId,playerName:user.displayName,balanceUs:account?.balanceUs||'0',earnedUs:earned.total,...(treasury?{treasuryUs:treasury.balanceUs}:{}),...(earning?{earning:{leaseId:earning.leaseId,active:earning.active&&new Date(earning.idleUntil).getTime()>Date.now()&&Date.now()-new Date(earning.lastSeen).getTime()<30000,lastSeen:new Date(earning.lastSeen).toISOString(),idleUntil:new Date(earning.idleUntil).toISOString()}}:{})};
+ const account=accountResult.rows[0],earning=account.leaseId&&account.lastSeen&&account.idleUntil?{leaseId:account.leaseId,active:!!account.active,lastSeen:account.lastSeen,idleUntil:account.idleUntil}:null;
+ return{...market,userId,playerName:user.displayName,balanceUs:account.balanceUs,addedUs:account.addedUs,spentUs:account.spentUs,observedAt:new Date(account.observedAt).toISOString(),earnedUs:earned.total,...(identifiers?{identifiers}:{}),...(treasury?{treasuryUs:treasury.balanceUs}:{}),...(earning?{earning:{leaseId:earning.leaseId,active:earning.active&&new Date(earning.idleUntil).getTime()>Date.now()&&Date.now()-new Date(earning.lastSeen).getTime()<30000,lastSeen:new Date(earning.lastSeen).toISOString(),idleUntil:new Date(earning.idleUntil).toISOString()}}:{})};
 }
-async function receipt(tx:TimeDB,id:string,userId:number):Promise<TimeReceipt>{
+async function receipt(tx:TimeDB,id:string,userId:number,withIdentifiers=true):Promise<TimeReceipt>{
  const role=await roles(userId,tx),row=await tx.selectFrom('ionTimeTransactions as t').innerJoin('ionTimeAccounts as a','a.id','t.fromAccount').innerJoin('ionTimeAccounts as b','b.id','t.toAccount').leftJoin('users as u','u.id','a.userId').leftJoin('users as v','v.id','b.userId').select(['t.id','t.kind','t.amountUs','t.createdAt','t.metadata','t.fromAccount','t.toAccount','u.displayName as fromName','v.displayName as toName']).where('t.id','=',id).executeTakeFirst();
  if(!row||(row.fromAccount!==wallet(userId)&&row.toAccount!==wallet(userId)&&!(role.dev&&(row.fromAccount==='treasury'||row.toAccount==='treasury'))))timeFail('This transaction is not available.',404);
  const incoming=row.toAccount===wallet(userId),outgoing=row.fromAccount===wallet(userId),other=incoming?row.fromName||(row.fromAccount==='issuance'?'Active use':'ION treasury'):row.toName||'ION treasury';
- return{id:row.id,kind:row.kind,amountUs:row.amountUs,direction:incoming?'in':outgoing?'out':'none',other,createdAt:new Date(row.createdAt).toISOString(),metadata:row.metadata&&typeof row.metadata==='object'&&!Array.isArray(row.metadata)?row.metadata as Record<string,unknown>:{}};
+ const identifiers=role.dev&&withIdentifiers?await functionIdentifiers(userId,receiptClouds({id:row.id,direction:incoming?'in':outgoing?'out':'none'})):undefined;
+ return{...(identifiers?{identifier:identifiers['time-tx-'+row.id],identifiers:Object.fromEntries(Object.entries(identifiers).filter(([key])=>key.startsWith('time-tx-'+row.id)))}:{}),id:row.id,kind:row.kind,amountUs:row.amountUs,direction:incoming?'in':outgoing?'out':'none',other,createdAt:new Date(row.createdAt).toISOString(),metadata:row.metadata&&typeof row.metadata==='object'&&!Array.isArray(row.metadata)?row.metadata as Record<string,unknown>:{}};
 }
 async function post(tx:TimeDB,input:{id:string;actor:number;key:string;kind:string;from:string;to:string;amount:string;metadata:Record<string,unknown>}){
  const result=await sql<{id:string}>`select ion_time_post(${input.id}::uuid,${input.actor},${input.key},${input.kind},${input.from},${input.to},${input.amount}::bigint,${input.metadata as Json}::jsonb) as id`.execute(tx);return result.rows[0].id;

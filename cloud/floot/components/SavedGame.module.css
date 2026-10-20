@@ -10,3 +10,6 @@
 .back svg { width:32px; height:32px; }
 .error { height:100%; display:flex; flex-direction:column; justify-content:center; align-items:center; gap:16px; padding:24px; text-align:center; }
 .copy { display:flex; gap:10px; justify-content:center; }
+
+.word .identifier { display:block; font:400 9px/11px var(--font-family-base); color:var(--muted-foreground); letter-spacing:0; }
+.word:has(.identifier) { flex-direction:column; gap:0; }

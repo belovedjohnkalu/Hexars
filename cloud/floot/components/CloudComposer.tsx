@@ -2,6 +2,7 @@ import { useEffect,useRef,useState } from 'react';
 import { z } from 'zod';
 import { ArrowUp,ImagePlus,X } from 'lucide-react';
 import { cloudNames } from '../helpers/cloudNames';
+import { focusCloudComposer } from '../helpers/cloudTyping';
 import { photoFileError,type CloudPhotoDraft } from '../helpers/cloudPhotos';
 import type { CloudScope } from '../endpoints/cloud_POST.schema';
 import { colorValue,unusedColor,type CloudColor } from '../helpers/cloudColors';
@@ -19,6 +20,7 @@ export function CloudComposer({parentId,busy,disabled,onAdd,draft,onDraft,upload
  const [photos,setPhotos]=useState<CloudPhotoDraft[]>(()=>draft.photos??(draft.file?[{id:crypto.randomUUID(),file:draft.file}]:[])),[fileError,setFileError]=useState(''),[previews,setPreviews]=useState<string[]>([]),[page,setPage]=useState(0);
  const fileInput=useRef<HTMLInputElement>(null),wordInput=useRef<HTMLInputElement>(null),pending=useRef<Submission|null>(null),composing=useRef(false),mounted=useRef(true),submitting=useRef(false);
  useEffect(()=>{mounted.current=true;return()=>{mounted.current=false;};},[]);
+ useEffect(()=>{if(disabled)return;const frame=requestAnimationFrame(()=>focusCloudComposer());return()=>cancelAnimationFrame(frame);},[parentId,disabled]);
  useEffect(()=>{onDraft({name:form.values.name,file:photos[0]?.file,photos,...(colors?{color}:{})});pending.current=null;},[form.values.name,photos,onDraft,color,colors]);
  useEffect(()=>{const urls=photos.map(p=>typeof URL.createObjectURL==='function'?URL.createObjectURL(p.file):'');setPreviews(urls);return()=>urls.forEach(url=>{if(url)URL.revokeObjectURL(url);});},[photos]);
  useEffect(()=>setPage(p=>Math.min(p,Math.max(0,photos.length-1))),[photos.length]);
@@ -39,7 +41,7 @@ export function CloudComposer({parentId,busy,disabled,onAdd,draft,onDraft,upload
  <div className={styles.bar}>
  <Button variant="ghost" size="icon" className={styles.photo} aria-label={uploading?'Stop upload':'Choose pictures'} title={uploading?'Stop upload':'JPEG, PNG, WebP or GIF · 3 MB each'} disabled={busy&&!uploading} onClick={()=>uploading?onCancelUpload?.():fileInput.current?.click()}>{uploading?<X size={24}/>:<ImagePlus size={24} strokeWidth={1.6}/>}</Button>
  <Input type="file" multiple ref={fileInput} accept="image/png,image/jpeg,image/webp,image/gif" className={styles.hidden} aria-label="Picture file" aria-invalid={!!fileError} aria-describedby={fileError?'cloud-picture-error':undefined} tabIndex={-1} onChange={e=>{choose(Array.from(e.target.files||[]));e.target.value='';}} disabled={busy}/>
- <FormItem name="name" className={styles.field}><FormLabel className={styles.hidden}>Add a word or a picture name</FormLabel><FormControl><Input ref={wordInput} onFocus={()=>setEditing(true)} className={styles.input} style={{color:colorValue(colors?color:undefined)}} placeholder={photos.length?'Name these pictures…':'Add…'} autoComplete="off" enterKeyHint="done" maxLength={scope==='private'?undefined:80} value={form.values.name} onChange={e=>form.setValues({name:e.target.value})} onCompositionStart={()=>{composing.current=true;}} onCompositionEnd={()=>{composing.current=false;}} onKeyDown={e=>{if(e.key==='Enter'&&(e.nativeEvent.isComposing||composing.current))e.preventDefault();}} readOnly={busy} aria-busy={busy}/></FormControl><FormMessage className={styles.fieldError}/></FormItem>
+ <FormItem name="name" className={styles.field}><FormLabel className={styles.hidden}>Add a word or a picture name</FormLabel><FormControl><Input ref={wordInput} data-cloud-input onFocus={()=>setEditing(true)} className={styles.input} style={{color:colorValue(colors?color:undefined)}} placeholder={photos.length?'Name these pictures…':'Add…'} autoComplete="off" enterKeyHint="done" maxLength={scope==='private'?undefined:80} value={form.values.name} onChange={e=>form.setValues({name:e.target.value})} onCompositionStart={()=>{composing.current=true;}} onCompositionEnd={()=>{composing.current=false;}} onKeyDown={e=>{if(e.key==='Enter'&&(e.nativeEvent.isComposing||composing.current))e.preventDefault();}} readOnly={busy||disabled} aria-busy={busy||disabled}/></FormControl><FormMessage className={styles.fieldError}/></FormItem>
  <Button type="submit" size="icon" className={styles.add} aria-label={busy?'Saving':'Add'} title={disabled?'Opening your space':busy?'Saving':'Add'} disabled={busy||disabled||(!form.values.name.trim()&&!photos.length)} aria-busy={busy}>{busy?<span className={styles.saving}/>:<ArrowUp size={24} strokeWidth={2}/>}</Button>
  </div>
  {fileError&&<p id="cloud-picture-error" className={styles.error} role="alert">{fileError}</p>}

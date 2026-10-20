@@ -33,3 +33,5 @@
 .linkedLabel a:focus-visible { outline:2px solid var(--primary); outline-offset:3px; }
 
 .node,.node * { -webkit-user-select:none; user-select:none; -webkit-touch-callout:none; -webkit-tap-highlight-color:transparent; }
+
+.tabular .node { font-variant-numeric:tabular-nums; }

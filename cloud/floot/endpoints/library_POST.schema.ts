@@ -7,7 +7,7 @@ export const schema=z.discriminatedUnion('action',[
  z.object({action:z.literal('restore'),gameId:z.string().uuid().optional(),shareId:z.string().uuid().optional(),removedAt:z.string().datetime()}).strict(),
  z.object({action:z.literal('share'),gameId:z.string().uuid(),recipientEmail:z.string().trim().toLowerCase().email().optional(),recipientNickname:z.string().trim().min(1).max(40).optional()}).strict()
 ]);
-export type LibraryGame={gameId:string;game:GameView;moves:MoveRecord[];mode:string;engineName:string;humanPlayer:number|null;players:Array<{seat:number;name:string}>;canShare:boolean;canRemove:boolean;shareRole?:'sender'|'recipient';dev:boolean;identifier?:string};
+export type LibraryGame={gameId:string;game:GameView;moves:MoveRecord[];mode:string;engineName:string;humanPlayer:number|null;players:Array<{seat:number;name:string}>;canShare:boolean;canRemove:boolean;shareRole?:'sender'|'recipient';dev:boolean;identifier?:string;identifiers?:Record<string,string>};
 export type LibraryUndo={gameId?:string;shareId?:string;removedAt:string;expiresAt:number};
 export type LibraryInput=z.infer<typeof schema>;
 export async function postLibrary<T=LibraryGame>(input:LibraryInput,signal?:AbortSignal):Promise<T>{const r=await fetch('/_api/library',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(schema.parse(input)),signal});const out=await r.json();if(!r.ok)throw Object.assign(new Error(out.error||'Couldn’t open this game.'),{status:r.status});return out;}

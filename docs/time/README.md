@@ -34,6 +34,8 @@ Active-use earning is an ION policy, not proof that browsing constitutes product
 
 ION → Time → Balance / Activity / Send / Receive / Earn / Prices. Devs also see Treasury and Estimates. Activity and receipts are private to their participants; treasury records require dev membership. Receipt references can be copied. Earlier activity uses explicit fitted pages; there is no document scrolling. Earn → Principles contains an explicitly abridged, 26-part account of the user's paper, retaining open theoretical questions and distinguishing them from ION's implementation policy.
 
+Activity presents three totals: Added (every positive journal entry), Spent (every negative entry) and Balance (their difference). Added/Spent open filtered receipt pages. Its second-by-second counter is a bounded display projection of the active earning interval; server-confirmed journal balances alone authorize payments. It stops with the earning session and reconciles to each posted snapshot. Private functional words and receipt fields have permanent dev identifiers; changing amounts never changes an IL.
+
 Gliński, Universal, online coordination, saved viewing, notations and Library remain free. All players need access to an online match's variant. Random matchmaking filters to available variants. Continuing an old game requires its paid variant and engine unlocks; read-only viewing does not. Saved Tactical games retain their identity; only newly created games default to Universal.
 
 ## Rollout

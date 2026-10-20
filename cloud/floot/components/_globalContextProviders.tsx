@@ -1,4 +1,5 @@
 import { TimeProvider } from '../helpers/useTime';
+import { HistoryKeys } from './HistoryKeys';
 import { useVisualViewport } from "../helpers/useVisualViewport";
 import { AuthProvider } from "../helpers/useAuth";
 import { ReactNode, useEffect } from "react";
@@ -28,6 +29,7 @@ export const GlobalContextProviders = ({
     <QueryClientProvider client={queryClient}>
       <AuthProvider><TimeProvider><ThemeModeProvider>
         <ScrollToHashElement />
+        <HistoryKeys />
         <TooltipProvider>
           {children}
           <SonnerToaster />
