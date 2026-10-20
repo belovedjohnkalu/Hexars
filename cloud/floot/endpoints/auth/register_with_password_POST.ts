@@ -1,4 +1,5 @@
 // adapt this to the database schema and helpers if necessary
+import { isNicknameTaken } from "../../helpers/nickname";
 import { sql } from "kysely";
 import { db } from "../../helpers/db";
 import { schema } from "./register_with_password_POST.schema";
@@ -103,12 +104,13 @@ export async function handle(request: Request) {
     return response;
   } catch (error: unknown) {
     console.error("Registration failed",error instanceof Error?error.name:"Unknown error");
-    const errorMessage =
+    const nicknameTaken=isNicknameTaken(error);
+    const errorMessage = nicknameTaken?'That nickname is taken. Choose another.':
       error&&typeof error==="object"&&"issues" in error ? "Check your email and use at least 8 characters for the password." : "Couldn’t create the account. Try again.";
     return new Response(
       superjson.stringify({ message: errorMessage }),
       {
-        status: 400,
+        status: nicknameTaken?409:400,
         headers: {
           "Content-Type": "application/json",
         },

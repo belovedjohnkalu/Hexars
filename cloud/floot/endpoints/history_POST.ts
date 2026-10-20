@@ -1,3 +1,4 @@
+import { namespaceIdentifier } from '../helpers/cloudIdentifiers';
 import { sql } from 'kysely';
 import { db } from '../helpers/db';
 import { onlineUser } from '../helpers/gameAccess';
@@ -13,8 +14,8 @@ export async function handle(request:Request){const headers={'Content-Type':'app
  const shares=await db.selectFrom('ionGameShares').innerJoin('hexchessGames','hexchessGames.id','ionGameShares.gameId').select(['ionGameShares.id','gameId','senderId','recipientId',sql<string>`hexchess_games.state->>'variant'`.as('variant')]).where('revokedAt','is',null).where(eb=>eb.or([eb('senderId','=',user.id),eb.and([eb('recipientId','=',user.id),eb('recipientHiddenAt','is',null)])])).orderBy('ionGameShares.createdAt','desc').execute();
  let nodes:CloudNode[]=historyClouds(rows.rows,user.id);
  for(const share of shares){if(!chessVariants.isId(share.variant))continue;for(const parentId of [...(share.senderId===user.id?['shared-sent']:[]),...(share.recipientId===user.id?['shared-received']:[])])nodes.push({id:parentId+'-'+share.id+'-u'+user.id,parentId,name:chessVariants.name(share.variant)+'’s Variant',savedGameId:share.gameId,shareId:share.id,variant:share.variant,destination:'saved-game',isImage:true,color:parentId==='shared-sent'?'amber':'lavender',system:true});}
- const dev=!!await db.selectFrom('ionDevAccounts').select('userId').where('userId','=',user.id).executeTakeFirst();
- if(dev){const identifiers=await cloudIdentifierStore([...cloudTree.forScope('chess'),...nodes]);nodes=nodes.map(node=>({...node,identifier:identifiers.get(node.id)?.label}));}
+ const dev=await db.selectFrom('ionDevAccounts').select(['userId','devNumber']).where('userId','=',user.id).executeTakeFirst();
+ if(dev){const identifiers=await cloudIdentifierStore([...cloudTree.forScope('chess'),...nodes],Number(dev.devNumber));nodes=nodes.map(node=>({...node,identifier:namespaceIdentifier(identifiers.get(node.id)?.label,Number(identifiers.get(node.id)?.devNumber??dev.devNumber))}));}
  const cutoff=new Date(Date.now()-10000);
  const hidden=await db.selectFrom('ionGameMembers').select(['gameId','hiddenAt']).where('userId','=',user.id).where('hiddenAt','>',cutoff).orderBy('hiddenAt','desc').executeTakeFirst();
  const removedShares=await db.selectFrom('ionGameShares').selectAll().where(eb=>eb.or([eb.and([eb('senderId','=',user.id),eb('revokedAt','>',cutoff)]),eb.and([eb('recipientId','=',user.id),eb('recipientHiddenAt','>',cutoff)])])).execute();

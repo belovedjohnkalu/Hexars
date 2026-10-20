@@ -1,5 +1,5 @@
 import type { CloudNode } from '../endpoints/cloud_POST.schema';
-export type IdentifierRecord={nodeId:string;parentId:string|null;label:string;arrivalOrdinal:string};
+export type IdentifierRecord={nodeId:string;parentId:string|null;label:string;arrivalOrdinal:string;devNumber?:string};
 export const rootIdentifiers:Record<string,string>={'hexagonal-chess':'IL0',public:'IL1',private:'IL2',controls:'IL3',accounts:'IL4'};
 // Zero-based segments: 0..9, A0..Z9, AA0..ZZ9, AAA0..ZZZ9. A digit closes each
 // segment, so nested paths remain distinct without placeholder zeros.
@@ -37,4 +37,13 @@ export function identifierFootprint(identifier?:string){
 // A move preserves identity across Public/Private; a copy creates a new branch.
 export function transferNodeIds(nodes:Pick<CloudNode,'id'>[],rootId:string,operationId:string,copy:boolean,createId:()=>string){
  return new Map(nodes.map(node=>[node.id,copy?(node.id===rootId?operationId:createId()):node.id]));
+}
+
+export function namespaceIdentifier(label:string|undefined,devNumber:number){
+ if(!label)return undefined;
+ const prefix='IL'+identifierSegment(devNumber);
+ if(label==='IL')return prefix;
+ const match=/^IL([A-Z]*)([0-9])(.*)$/.exec(label);if(!match)throw new Error('Invalid identifier.');
+ let group=0;for(const letter of match[1])group=group*26+letter.charCodeAt(0)-64;
+ return prefix+identifierSegment(group*10+Number(match[2])+1)+match[3];
 }

@@ -1,3 +1,4 @@
+import { namespaceIdentifier } from '../helpers/cloudIdentifiers';
 import { accountClouds } from "../helpers/accountClouds";
 import { validateCloudPhoto } from "../helpers/validateCloudPhoto";
 import { mapPhotos } from "../helpers/cloudPhotos";
@@ -96,11 +97,11 @@ export async function handle(request: Request) {
     const merged=[...new Map([...context.seeds,...nodes].map(n=>[n.id,n])).values()];
     // Keep removed rows in the registry. Allocation is serialized across devices;
     // labels are never recycled or exposed in another account's Private space.
-    const identifiers=context.owner||(['public','chess','home'].includes(input.scope)&&input.action!=='load')
-      ?await cloudIdentifierStore(merged):undefined;
+    const identifiers=context.isDev||(['public','chess','home'].includes(input.scope)&&input.action!=='load')
+      ?await cloudIdentifierStore(merged,context.devNumber):undefined;
     // Signed picture URLs are refreshed on every read, and never stored as authority.
     let visible = await Promise.all(merged.filter(n=>!n.removedBy&&(context.scope!=='accounts'||n.id!=='account-remember'||context.seeds.some(seed=>seed.id==='account-remember'))).map(async node => {
-      const visibleNode={...node,identifier:context.owner?identifiers?.get(node.id)?.label:undefined,createdBy:undefined,canEdit:cloudPolicy.edit(input.scope,node,context.userId,context.owner),canCopy:!!context.userId&&cloudPolicy.writable(input.scope,context.userId,context.owner)&&(context.owner||!cloudTree.roots.some(r=>r.id===node.id))};
+      const visibleNode={...node,identifier:context.isDev?namespaceIdentifier(identifiers?.get(node.id)?.label,Number((input.scope==='private'&&node.id==='private'||input.scope==='accounts'&&context.seeds.some(s=>s.id===node.id))?context.devNumber:identifiers?.get(node.id)?.devNumber??context.devNumber)):undefined,createdBy:undefined,canEdit:cloudPolicy.edit(input.scope,node,context.userId,context.owner),canCopy:!!context.userId&&cloudPolicy.writable(input.scope,context.userId,context.owner)&&(context.owner||!cloudTree.roots.some(r=>r.id===node.id))};
       const keys=node.imageKeys?.length?node.imageKeys:node.imageKey?[node.imageKey]:[];
       if(!keys.length)return visibleNode;
       const urls=await Promise.all(keys.map(async filename=>{const result=await getUrl({visibility:'private',filename,expiresInSeconds:3600});return result.ok?result.url:'';}));
@@ -115,7 +116,7 @@ export async function handle(request: Request) {
       const count=(v:unknown)=>Array.isArray(v)?(v as CloudNode[]).filter(n=>!n.removedBy).length:0;
       visible=visible.map(n=>({...n,...(n.id==='accounts'?{sizeCount:Math.max(0,count(accountNodes)-1)}:n.id==='private'?{sizeCount:count(personal?.nodes)}:n.id==='public'?{sizeCount:count(shared.find(s=>s.kind==='public')?.nodes)}:n.id==='hexagonal-chess'?{sizeCount:cloudTree.forScope('chess').length-1+count(shared.find(s=>s.kind==='chess')?.nodes)}:{})}));
     }
-    return new Response(JSON.stringify({ nodes: visible, version, workspaceId:row.id, account:input.scope==='private', scope:input.scope, canAdd:cloudPolicy.writable(input.scope,context.userId,context.owner), dev:context.owner,owner:context.owner,userId:context.userId||undefined, undo: cloudChanges.undo(nodes.filter(n=>cloudPolicy.edit(input.scope,n,context.userId,context.owner))) } satisfies OutputType), { headers });
+    return new Response(JSON.stringify({ nodes: visible, version, workspaceId:row.id, account:input.scope==='private', scope:input.scope, canAdd:cloudPolicy.writable(input.scope,context.userId,context.owner), dev:context.isDev,owner:context.owner,userId:context.userId||undefined, undo: cloudChanges.undo(nodes.filter(n=>cloudPolicy.edit(input.scope,n,context.userId,context.owner))) } satisfies OutputType), { headers });
   } catch (error) {
     const status = error instanceof Error && "status" in error && typeof error.status === "number" ? error.status : error instanceof SyntaxError || (error && typeof error === "object" && "issues" in error) ? 400 : 503;
     if (status === 503) console.error("ION space request failed", error instanceof Error ? error.message : "Unknown error");

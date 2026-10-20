@@ -63,6 +63,7 @@ export interface IonCloudIdentifierCounters {
 export interface IonCloudIdentifiers {
   arrivalOrdinal: Int8;
   assignedAt: Generated<Timestamp>;
+  devNumber: Generated<Int8>;
   label: string;
   nodeId: string;
   parentId: string | null;
@@ -80,6 +81,7 @@ export interface IonCloudTransfers {
 }
 
 export interface IonDevAccounts {
+  devNumber: Generated<Int8>;
   grantedAt: Generated<Timestamp>;
   userId: number;
 }

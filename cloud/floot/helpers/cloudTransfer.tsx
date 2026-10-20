@@ -13,7 +13,7 @@ export async function cloudTransfer(request:Request,raw:Extract<InputType,{actio
  if(!['public','private'].includes(input.scope)||input.scope===input.targetScope)cloudPolicy.fail('Choose the other space.',400);
  const source=await cloudContext(request,input),target=await cloudContext(request,{...input,scope:input.targetScope,action:'load'});
  if(!source.userId||!source.row||!target.row)cloudPolicy.fail('Sign in to transfer a cloud.',401);
- if(source.owner||input.scope==='public')await cloudIdentifierStore([...cloudTree.forScope(input.scope),...(source.row!.nodes as unknown as CloudNode[])]);
+ if(source.owner||input.scope==='public')await cloudIdentifierStore([...cloudTree.forScope(input.scope),...(source.row!.nodes as unknown as CloudNode[])],source.devNumber);
  const uid=source.userId!,sourceId=source.row!.id,targetId=target.row!.id;
  await db.transaction().execute(async tx=>{
   await tx.selectFrom('users').select('id').where('id','=',uid).forUpdate().executeTakeFirstOrThrow();

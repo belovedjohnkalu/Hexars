@@ -1,3 +1,5 @@
+import { namespaceIdentifier } from '../helpers/cloudIdentifiers';
+import { sql } from 'kysely';
 import { createHash,randomBytes,randomUUID } from 'node:crypto';
 import { publish } from '@floot/realtime';
 import { db } from '../helpers/db';
@@ -22,8 +24,8 @@ export async function handle(request:Request){const headers={'Content-Type':'app
   const native=await runNativeEngine({action:'inspect',state,origin:request.url});
   const players=row.mode==='online'?await db.selectFrom('ionGameMembers').innerJoin('users','users.id','ionGameMembers.userId').select(['ionGameMembers.seat','users.displayName as name']).where('gameId','=',row.id).where('seat','is not',null).orderBy('seat').execute():[];
   const dev=!!user&&!!await db.selectFrom('ionDevAccounts').select('userId').where('userId','=',user.id).executeTakeFirst();
-  const identifier=dev?await db.selectFrom('ionCloudIdentifiers').select('label').where('nodeId','=',input.nodeId&&input.nodeId.endsWith('-u'+user!.id)?input.nodeId:`history-game-${row.id}-u${user!.id}`).executeTakeFirst():undefined;
-  const out:LibraryGame={gameId:row.id,game:native.game,moves:(Array.isArray(row.moves)?row.moves:[]) as unknown as MoveRecord[],mode:row.mode,engineName:row.engineId==='positional'?'Positional':'Tactical',humanPlayer:row.mode==='online'?member?.seat??null:row.humanPlayer,players:players.map(p=>({seat:p.seat!,name:p.name})),canShare:!!member||!!share&&!!user&&(share.senderId===user.id||share.recipientId===user.id),...(share&&user?{shareRole:share.senderId===user.id?'sender' as const:'recipient' as const}:{}),canRemove:!!member||!!share&&!!user&&(share.senderId===user.id||share.recipientId===user.id),dev,identifier:identifier?.label};
+  const identifier=dev?await db.selectFrom('ionCloudIdentifiers').select(['label','devNumber']).where('nodeId','=',input.nodeId&&input.nodeId.endsWith('-u'+user!.id)?input.nodeId:`history-game-${row.id}-u${user!.id}`).executeTakeFirst():undefined;
+  const out:LibraryGame={gameId:row.id,game:native.game,moves:(Array.isArray(row.moves)?row.moves:[]) as unknown as MoveRecord[],mode:row.mode,engineName:row.engineId==='positional'?'Positional':'Tactical',humanPlayer:row.mode==='online'?member?.seat??null:row.humanPlayer,players:players.map(p=>({seat:p.seat!,name:p.name})),canShare:!!member||!!share&&!!user&&(share.senderId===user.id||share.recipientId===user.id),...(share&&user?{shareRole:share.senderId===user.id?'sender' as const:'recipient' as const}:{}),canRemove:!!member||!!share&&!!user&&(share.senderId===user.id||share.recipientId===user.id),dev,identifier:identifier?namespaceIdentifier(identifier.label,Number(identifier.devNumber)):undefined};
   return new Response(JSON.stringify(out),{headers});
  }
  const user=await onlineUser(request);
@@ -35,7 +37,8 @@ export async function handle(request:Request){const headers={'Content-Type':'app
   await publish(channels.player(user.id),{library:true});const undo:LibraryUndo={gameId:input.gameId,shareId:input.shareId,removedAt:removedAt.toISOString(),expiresAt:removedAt.getTime()+10000};return new Response(JSON.stringify({ok:true,...(!restoring?{undo}:{})}),{headers});
  }
  const member=await db.selectFrom('ionGameMembers').select('gameId').where('gameId','=',input.gameId).where('userId','=',user.id).where('hiddenAt','is',null).executeTakeFirst();if(!member&&!await db.selectFrom('ionGameShares').select('id').where('gameId','=',input.gameId).where('revokedAt','is',null).where(eb=>eb.or([eb('senderId','=',user.id),eb.and([eb('recipientId','=',user.id),eb('recipientHiddenAt','is',null)])])).executeTakeFirst())fail('Only someone with this game can share it.',403);
- const recipient=input.recipientEmail?await db.selectFrom('users').select(['id','displayName']).where('email','=',input.recipientEmail).executeTakeFirst():undefined;
+ const recipient=input.recipientNickname?await db.selectFrom('users').select(['id','displayName']).where(sql`lower(btrim(display_name))`,'=',input.recipientNickname.trim().toLowerCase()).executeTakeFirst():input.recipientEmail?await db.selectFrom('users').select(['id','displayName']).where('email','=',input.recipientEmail).executeTakeFirst():undefined;
+ if(input.recipientNickname&&!recipient)fail('No account has that nickname. Check the spelling.',400);
  if(input.recipientEmail&&!recipient)fail('That email does not have an account yet. Share a link instead.',400);if(recipient?.id===user.id)fail('Choose another account.',400);
  const game=await db.selectFrom('hexchessGames').select('state').where('id','=',input.gameId).executeTakeFirstOrThrow(),variant=game.state&&typeof game.state==='object'&&!Array.isArray(game.state)?String(game.state.variant):'glinski';
  const token=randomBytes(32).toString('hex'),id=randomUUID();await db.insertInto('ionGameShares').values({id,gameId:input.gameId,senderId:user.id,recipientId:recipient?.id??null,tokenHash:createHash('sha256').update(token).digest('hex')}).execute();
