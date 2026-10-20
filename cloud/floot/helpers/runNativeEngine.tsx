@@ -1,3 +1,5 @@
+import { nativeEngineAsset } from './nativeEngineAssets';
+import type { EngineId } from './chessEngines';
 import { chessVariants } from "./chessVariants";
 import { tacticalLevels } from "./tacticalLevels";
 import { spawn } from "node:child_process";
@@ -9,14 +11,12 @@ import { createInterface } from "node:readline";
 import type { Json } from "./schema";
 import type { ChessMove, GameView, SearchDiagnostics, VariantId } from "../endpoints/game_POST.schema";
 
-const asset = "/_cdn/static/9f65e48d-88fe-4aeb-b6dd-467b03953d57-tactical-0.9.0-linux-x64.bin";
-const checksum = "33a4d360905b37806e16fe9709ec323b0e48fdd5ebd240adf7af9a76ebc71b93";
 type Options = {
   action: "new" | "inspect" | "move" | "search";
   origin: string;
   variant?: VariantId;
   difficulty?:number;
-  engineId?:'tactical'|'positional';
+  engineId?:EngineId;
   state?: Json;
   move?: ChessMove;
   signal?: AbortSignal;
@@ -32,8 +32,9 @@ type NativeResult = {
 
 // Only immutable compiled code is cached in /tmp. Every game state lives in
 // Postgres; serverless process memory and temporary files are never game storage.
-async function executable(origin: string,engineId='tactical') {
-  const positional=engineId==='positional',selectedAsset=positional?'/_cdn/static/4ba245d9-6ade-4313-8ee1-9a234e41517e-positional-0.1.0-static-linux-x64.bin':asset,selectedChecksum=positional?'71ddf694c874a26ee780e3aa85a8e57b4f3ca3b01babc3e3bec7e3f9125ee15b':checksum,selectedSize=positional?2797000:2222328;
+async function executable(origin: string, engineId?: EngineId, signal?: AbortSignal) {
+  const { asset: selectedAsset, checksum: selectedChecksum, size: selectedSize } = nativeEngineAsset(engineId);
+  if (signal?.aborted) throw new Error("Game request cancelled");
   if (platform() !== "linux" || arch() !== "x64")
     throw new Error("Unsupported cloud engine platform");
   const filename = path.join(tmpdir(), `hexchess-engine-${selectedChecksum}`);
@@ -44,7 +45,7 @@ async function executable(origin: string,engineId='tactical') {
     /* First request in a new runtime. */
   }
   if (binary && createHash("sha256").update(binary).digest("hex") === selectedChecksum) return filename;
-  const response = await fetch(new URL(selectedAsset, origin), { signal: AbortSignal.timeout(15000) });
+  const response = await fetch(new URL(selectedAsset, origin), { signal: signal ? AbortSignal.any([signal, AbortSignal.timeout(15000)]) : AbortSignal.timeout(15000) });
   if (!response.ok) throw new Error("The cloud engine could not be loaded");
   binary = Buffer.from(await response.arrayBuffer());
   if (binary.length !== selectedSize || createHash("sha256").update(binary).digest("hex") !== selectedChecksum)
@@ -61,7 +62,7 @@ async function executable(origin: string,engineId='tactical') {
 }
 
 export async function runNativeEngine(options: Options): Promise<NativeResult> {
-  const filename = await executable(options.origin,options.engineId);
+  const filename = await executable(options.origin,options.engineId,options.signal);
   if (options.signal?.aborted) throw new Error("Game request cancelled");
   return await new Promise((resolve, reject) => {
     const child = spawn(filename, [], { shell: false, stdio: ["pipe", "pipe", "pipe"] });
@@ -135,6 +136,7 @@ export async function runNativeEngine(options: Options): Promise<NativeResult> {
           if (packet.type !== "hello" || typeof packet.engine !== "string")
             throw new Error("Cloud engine handshake failed");
           identity = packet.engine;
+          if (identity !== nativeEngineAsset(options.engineId).identity) throw new Error("Cloud engine identity mismatch");
           stage = "position";
           send(
             options.action === "new"

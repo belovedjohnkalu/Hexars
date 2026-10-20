@@ -1,3 +1,4 @@
+import { engineId as resolveEngineId, isEngineId } from '../helpers/chessEngines';
 import { useLayoutEffect,useMemo,useRef,useState,type CSSProperties,type MouseEvent } from 'react';
 import { Link,useLocation } from 'react-router-dom';
 import { chessVariants } from '../helpers/chessVariants';
@@ -39,9 +40,9 @@ export function CloudCanvas({nodes,parentId,onOpen,opening,loading,addedId,onPic
   if(node.destination==='accounts'||node.id==='accounts')return cloudURL('accounts','accounts');
   if(node.id==='hexagonal-chess')return cloudURL('hexagonal-chess','chess');
   if(node.id==='public'||node.id==='private')return cloudURL(node.id,node.id);
-  const query=new URLSearchParams(location.search),back=query.get('return'),context=back?'&return='+encodeURIComponent(back)+'&mode='+(query.get('mode')==='friend'?'friend':'engine')+'&level='+encodeURIComponent(query.get('level')??'3')+'&engine='+(query.get('engine')==='positional'?'positional':'tactical')+'&saved='+encodeURIComponent(query.get('saved')||''):'';
+  const query=new URLSearchParams(location.search),back=query.get('return'),context=back?'&return='+encodeURIComponent(back)+'&mode='+(query.get('mode')==='friend'?'friend':'engine')+'&level='+encodeURIComponent(query.get('level')??'3')+'&engine='+(resolveEngineId(query.get('engine')))+'&saved='+encodeURIComponent(query.get('saved')||''):'';
   if(node.destination==='level'){const level=node.level??3,engine=node.engineId??'tactical';return chessVariants.isId(back)?'/'+back+'?mode=engine&engine='+engine+'&level='+level:'/?cloud=boards&engine='+engine+'&level='+level;}
-  if(chessVariants.isId(node.destination)){let mode='friend',level='3',engine='tactical';try{const chosen=localStorage.getItem('ion.engine');if(chosen==='tactical'||chosen==='positional'){mode='engine';engine=chosen;level=localStorage.getItem('ion.difficulty')||'3';}}catch{}if(query.has('engine')){mode='engine';engine=query.get('engine')==='positional'?'positional':'tactical';level=query.get('level')||'3';}return '/'+node.destination+'?mode='+mode+(mode==='engine'?'&engine='+engine+'&level='+level:'');}
+  if(chessVariants.isId(node.destination)){let mode='friend',level='3',engine='tactical';try{const chosen=localStorage.getItem('ion.engine');if(isEngineId(chosen)){mode='engine';engine=chosen;level=localStorage.getItem('ion.difficulty')||'3';}}catch{}if(query.has('engine')){mode='engine';engine=resolveEngineId(query.get('engine'));level=query.get('level')||'3';}return '/'+node.destination+'?mode='+mode+(mode==='engine'?'&engine='+engine+'&level='+level:'');}
   return cloudURL(node.id,scope)+context;
  }
  return <div ref={area} className={styles.viewport+' '+className}><SpatialViewport width={layout.width} height={layout.height} viewKey={layoutKey+':'+layout.generation} ready={!!fontReady&&!loading} refitKey={size.width+':'+size.height} initialZoom={siblings.length<=9?Math.min(1,size.width/layout.width,size.height/layout.height):Math.max(.65,Math.min(1,size.width/layout.width))}>

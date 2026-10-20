@@ -1,3 +1,4 @@
+import { engineIds, type EngineId } from '../helpers/chessEngines';
 import { z } from "zod";
 import superjson from "superjson";
 
@@ -24,7 +25,7 @@ export const schema = z.discriminatedUnion("action", [
       mode: z.enum(["engine", "two_players"]),
       variant: variantSchema.default("glinski"),
       difficulty:z.number().int().min(0).max(5).optional(),
-      engineId:z.enum(['tactical','positional']).optional(),
+      engineId:z.enum(engineIds).optional(),
       humanPlayer: z.union([z.literal(0), z.literal(1)]),
     })
     .strict(),
@@ -93,7 +94,7 @@ export type OutputType = {
   difficulty?:number;
   humanPlayer: number;
   engine: string;
-  engineId?:'tactical'|'positional';
+  engineId?:EngineId;
   players?:Array<{seat:number;name:string}>;
   execution: "cloud";
   game: GameView;

@@ -100,3 +100,8 @@ Positional is the second independent native executable, initially 0.1.0. It shar
 
 ## Explicit cloud navigation — second release 0.23
 Automatic single-droplet traversal is removed for every account and every cloud. An only child is displayed normally and opens only after an explicit click, tap or keyboard activation. No account role, history date hierarchy or entry method bypasses a cloud. Back continues to follow visited history. Earlier single-child shortcut rules above are historical and superseded by this explicit-navigation rule.
+
+## Independent engines — 0.24
+Engines contains Tactical, Positional and Defensive, each with the existing six-level ladder before variant selection. Positional 1.0.0 uses structure/coordination evaluation and full-width MaxN with a history-aware transposition cache. Defensive 1.0.0 uses king-danger/exposed-material evaluation and paranoid alpha-beta, treating Wellisch opponents as a coalition. Each has its own executable and search source; all legal moves and results remain authoritative C++. The engine ID is saved and resumed with the game, including Opponent(s), result sheets and return links. Resume slots are separate per variant, engine and level. Existing cloud IDs and arrival order remain unchanged; Defensive appends after Positional. Public metadata belongs to chessEngines, executable hashes to server-only nativeEngineAssets. The established black/Inter/organic-cloud design, explicit navigation and visited Back are preserved.
+
+Pointer focus never recenters SpatialViewport; only focus-visible keyboard navigation reveals a clipped target. Portrait gameCloudLayout includes complete 44px action bounds so a tap cannot move its own target before release.

@@ -1,15 +1,7 @@
-# Positional — first implementation
+# Positional 1.0.0
 
-A separate executable with a structure-and-coordination evaluation and bounded
-strategic beam search. It rewards connected pawn chains, piece coordination,
-central activity and king cover. Branches are ranked strategically and narrowed
-at each level; Wellisch uses separate player utilities. This is independent of
-Tactical's alpha-beta and quiescence implementation. Protocol serialization and
-the result ABI are reused; legal moves and game results come from shared rules.
+Full-width MaxN and history-aware transposition caching with structure, coordination and king-phase evaluation.
 
-Build with `node scripts/build-positional.mjs`, or add `--cloud` for the fully
-static Linux executable required by Floot. CMake target: `engine-two`.
-Verify with `node --test tests/engine/positional.test.mjs`.
+This is an independent C++ executable. Only rules, serialization and protocol ABI are shared. Supports all six variants, bounded iterative search, legal fallback and native validation.
 
-This is version 0.1.0. Strength and a distinctive playing style need more arena
-testing; it should not be treated as an established strength benchmark.
+Build from repository root: `npm run build:positional` (or append `-- --cloud` on Linux x64). `npm run test:search` verifies both new searches, including complete games. See [release details](../../docs/ion-independent-engines-release.md).

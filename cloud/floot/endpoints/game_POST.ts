@@ -1,3 +1,4 @@
+import { engineId as resolveEngineId } from '../helpers/chessEngines';
 import { createHash, randomBytes, randomUUID } from "node:crypto";
 import superjson from "superjson";
 import { optionalGameUser } from '../helpers/gameAccess';
@@ -143,7 +144,7 @@ export async function handle(request: Request) {
       origin: request.url,
       state: nextState,
       difficulty:row.difficulty,
-      engineId:row.engineId==='positional'?'positional':'tactical',
+      engineId:resolveEngineId(row.engineId),
       move: input.action === "move" ? input.move : undefined,
       signal: request.signal,
     });
@@ -218,7 +219,7 @@ export async function handle(request: Request) {
       mode: row.mode,
       difficulty:row.difficulty,
       humanPlayer:row.mode==='online'?member!.seat!:humanPlayer,
-      engineId:row.engineId==='positional'?'positional':'tactical',
+      engineId:resolveEngineId(row.engineId),
       ...(players?{players:players.filter(p=>p.seat!==null).map(p=>({seat:p.seat!,name:p.name}))}:{}),
       engine: native.engine,
       execution: "cloud",

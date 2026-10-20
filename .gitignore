@@ -17,3 +17,5 @@ artifacts/
 .vercel/
 
 /engines/engine-2/engine-two
+
+/engines/engine-3/engine-three

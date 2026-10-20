@@ -2,7 +2,7 @@
 
 ION is live on **Floot** at https://ion.floot.app. Its main navigation is a
 pannable, zoomable cloud of words and pictures. Open **Hexagonal Chess**, then
-**Boards** to choose Gliński, McCooey, Shafran, Brusky, De Vasa or Wellisch, **Engines** to select Tactical or the first Positional implementation, or **Rules**
+**Boards** to choose Gliński, McCooey, Shafran, Brusky, De Vasa or Wellisch, **Engines** to select Tactical, Positional or Defensive, or **Rules**
 for separate rule paragraphs. Rule lists are words; illustrations appear inside each paragraph, and long text uses fitted pages without scrolling.
 
 Home starts with **Hexagonal Chess**, **Public**, **Private**, **Controls** and **Accounts**. Dev accounts may add more. Public has the same saved continuous-gradient color wheel as Private and is readable
@@ -17,7 +17,7 @@ Dev accounts see permanent IL labels beside accessible clouds and can copy them 
 Every confirmed word and picture is stored on the server. Select multiple photos for a collage; hold it and choose View photos to inspect each image full screen with pan/zoom. Accounts and Controls use the same cloud navigation. Remember accounts on a
 trusted device to switch without re-entering passwords; forgetting removes that
 shortcut. No passwords are stored in browser storage. Each cloud accepts 1,024 immediate droplets; total workspace size and nesting are independent. React/TypeScript renders the interface; authoritative rules and
-Tactical search run in C++ on the cloud server. No local engine installation is
+the three independent engines run in C++ on the cloud server. No local engine installation is
 required. A domain change requires signing in again; account content persists.
 
 Shafran is available on the live ION app, with 70 cells, triple pawn advances,
@@ -47,11 +47,11 @@ configuration. Package workspaces now use `@ion/` names.
 
 The **Install** action appears only when the browser supplies an installation prompt or when manual installation is supported in top-level iPhone/iPad Safari. It is hidden in incompatible browsers, embedded frames and an already installed app. The home-screen app uses a standalone window. This is an installable web app, not an App Store or Play Store binary. Internet access is required for cloud play.
 
-Games are saved without automatic expiry. Signed-in games appear in private **History** under Hexagonal Chess, grouped by year, month and day, then by individual variant previews. Redundant single-child levels are skipped for ordinary accounts. Valid older local saved links can attach on opening; ownership of unrelated anonymous games is never guessed. Existing capability links still authorize local games, while online matches require account membership and the assigned seat.
+Games are saved without automatic expiry. Signed-in games appear in private **History** under Hexagonal Chess, grouped by year, month and day, then by individual variant previews. Each level opens explicitly, including a single-child level. Valid older local saved links can attach on opening; ownership of unrelated anonymous games is never guessed. Existing capability links still authorize local games, while online matches require account membership and the assigned seat.
 
 **Online** supports email-authenticated random matching by variant (or Random), and four-digit rooms for two players or three in Wellisch. Waiting rooms expire after 15 minutes; saved games do not. Moves are native-validated and delivered through private live update channels, without match polling. Downward title pulls refresh. Vertical board swipes switch the engine side only before the first move, then rotate the view. Each cell has a complete hexagonal hitbox, and dashed lavender last-move outlines differ from legal blue destinations.
 
-**Positional 0.1.0** is a separate executable with strategic beam/MaxN search. Its strength is still under development. Build it with `npm run build:positional`; add `-- --cloud` for a fully static Linux binary. See [the release notes](docs/ion-journeys-online-release.md).
+**Positional 1.0.0** and **Defensive 1.0.0** are separate C++ executables with independent search and evaluation. All three engines support all six variants and the six-level ladder. Build them with `npm run build:engines`; test the new searches with `npm run test:search`. Add `-- --cloud` to `build:positional` or `build:defensive` for a static Linux binary. See [engine release notes](docs/ion-independent-engines-release.md).
 
 
 ## Design
@@ -74,11 +74,11 @@ motion. The Pro hosting badge setting is disabled.
 - A native-authoritative 91-cell board: 36 starting pieces in Gliński, 32 in McCooey. Choose its starting picture in Boards.
 - All six piece movements, checks and pins, en passant and four promotion choices. Gliński pawns regain a double advance from friendly original pawn cells. McCooey pawns capture along bishop diagonals and double-advance only on their first move, excluding the center pawn.
 - Checkmate, Gliński fractional stalemate (¾–¼), McCooey equal stalemate (½–½), automatic threefold repetition, the fifty-move rule, and automatic material draws. ION ends in a ½–½ draw when each side has only its king plus at most one bishop, knight, or rook. Pawns, queens, or two pieces on either side prevent this house-rule draw; an already-delivered checkmate wins. Gliński and McCooey have no castling; Shafran supports short and long castling on both flanks.
-- Human versus Tactical as White or Black, or a shared two-player board.
+- Human versus Tactical, Positional or Defensive as White or Black, or a shared two-player board.
 - Separate saved games per variant, shared links, undo, automatic pass-and-play orientation, promotion and keyboard/touch controls.
 - Tactical: material and positional evaluation, iterative-deepening alpha-beta, capture ordering, bounded quiescence, and time/node limits. Six levels before board selection: Pre-Beginner (40 ms/depth 1/125 nodes, with a 50% random legal choice), Beginner (80 ms/depth 1), Easy (200 ms/depth 2), Medium (750 ms/depth 3), Hard (1.5 s/depth 4), Expert (3 s/depth 5), each with its own node limit. These are not Elo ratings.
 
-[Brusky](docs/variants/brusky.md) and [De Vasa](docs/variants/devasa.md) are playable with their own pawn rules, en passant, promotion, castling, results and Tactical search. Their 84-cell and 81-cell boards use native pointy geometry. [Wellisch](docs/variants/wellisch.md) adds three-player pass-and-play and human-versus-two-Tactical games: first king capture transfers the army, pawns keep their direction, and the remaining game ends by normal mate/stalemate. Captured-piece promotion reserves, delayed promotion and king–rook swaps are saved natively. Tactical 0.9.0 uses MaxN for this variant. Engines 2–6 remain planned independent executables. Strength has not been rated.
+[Brusky](docs/variants/brusky.md) and [De Vasa](docs/variants/devasa.md) are playable with their own pawn rules, en passant, promotion, castling, results and Tactical search. Their 84-cell and 81-cell boards use native pointy geometry. [Wellisch](docs/variants/wellisch.md) adds three-player pass-and-play and human-versus-two-Tactical games: first king capture transfers the army, pawns keep their direction, and the remaining game ends by normal mate/stalemate. Captured-piece promotion reserves, delayed promotion and king–rook swaps are saved natively. Tactical 0.9.0 uses MaxN for this variant. Positional and Defensive are also playable here; Engines 4–6 remain planned independent executables. Strength has not been rated.
 
 ## Work on the source
 
@@ -117,10 +117,12 @@ cloud/schema.sql            Cloud game-table schema
 web/                        Vite entry point for playable UI and optional foundation diagnostics
 manager/                    Loopback WebSocket diagnostic manager
 engines/engine-1/            C++ protocol, search, evaluation
-engines/engine-2/ … engine-6/ Reserved independent engines
+engines/engine-2/            Independent Positional MaxN search/evaluation
+engines/engine-3/            Independent Defensive paranoid alpha-beta/evaluation
+engines/engine-4/ … engine-6/ Reserved independent engines
 shared/include/hexchess/     Geometry, pieces, moves, game state, rules
 shared/src/                 Geometry and shared authoritative variant rules
-shared/variants/            Five playable setups and experimental Wellisch foundation
+shared/variants/            Six playable variant setups and policies
 shared/protocol/            Versioned native and cloud contracts
 tests/                      Native rules, games, protocol, manager, frontend checks
 docs/                       Architecture, rules references, progress, browser evidence

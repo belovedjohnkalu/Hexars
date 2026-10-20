@@ -156,3 +156,6 @@ Dev namespaces are assigned once on the server. Namespace 0 belongs to the first
 
 ## Explicit navigation — 0.23
 Every cloud remains a visible choice, including an only child. Opening a page never triggers another navigation by itself. Visited-page Back and the existing pan/zoom layout remain unchanged.
+
+## Independent engines — 0.24
+Engines contains Tactical, Positional and Defensive, each with the existing six-level ladder before variant selection. Positional 1.0.0 uses structure/coordination evaluation and full-width MaxN with a history-aware transposition cache. Defensive 1.0.0 uses king-danger/exposed-material evaluation and paranoid alpha-beta, treating Wellisch opponents as a coalition. Each has its own executable and search source; all legal moves and results remain authoritative C++. The engine ID is saved and resumed with the game, including Opponent(s), result sheets and return links. Resume slots are separate per variant, engine and level. Existing cloud IDs and arrival order remain unchanged; Defensive appends after Positional. Public metadata belongs to chessEngines, executable hashes to server-only nativeEngineAssets. The established black/Inter/organic-cloud design, explicit navigation and visited Back are preserved.

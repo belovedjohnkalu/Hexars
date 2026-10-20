@@ -20,7 +20,12 @@ export const engines = Object.freeze({
   "engine-2": {
     id: "engine-2", name: "Positional",
     path: path.join(root,"engines/engine-2",process.platform === "win32" ? "engine-two.exe" : "engine-two"),
-    implemented: true, stage: "initial-search",
+    implemented: true, stage: "playable",
+  },
+  "engine-3": {
+    id: "engine-3", name: "Defensive",
+    path: path.join(root,"engines/engine-3",process.platform === "win32" ? "engine-three.exe" : "engine-three"),
+    implemented: true, stage: "playable",
   },
 });
 

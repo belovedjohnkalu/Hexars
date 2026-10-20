@@ -1,3 +1,7 @@
+# Current release — independent engines (0.24)
+
+Positional 1.0.0 is complete and Defensive 1.0.0 is installed as a third independent executable. All six variants and six difficulty levels are supported. The authoritative shared rules remain separate from each engine's search. Engine-specific saves, reset/return links, result sheets and Opponent(s) labels are integrated. Published at https://ion.floot.app and verified through real browser/native replies. See [engine verification and build instructions](ion-independent-engines-release.md). Earlier releases below are historical.
+
 # Development progress · cloud edition 0.5
 
 Published: **https://ion.floot.app**

@@ -18,7 +18,7 @@
     "devasa",
     "wellisch"
   ],
-  "ui_version": "0.19.0",
+  "ui_version": "0.24.0",
   "routes": [
     "/",
     "/login",
@@ -30,7 +30,7 @@
     "/wellisch"
   ],
   "font_asset": "/_cdn/static/6e6c9250-599e-4bf4-a9ae-66ff948afb59-InterVariable.woff2",
-  "published_ui_version": "0.19.0",
+  "published_ui_version": "0.24.0",
   "release_status": "published",
   "favicon": "/_api/icon?v=2",
   "tactical_levels": [
@@ -55,9 +55,18 @@
     {
       "id": "positional",
       "name": "Positional",
-      "version": "0.1.0",
-      "asset": "/_cdn/static/4ba245d9-6ade-4313-8ee1-9a234e41517e-positional-0.1.0-static-linux-x64.bin",
-      "sha256": "71ddf694c874a26ee780e3aa85a8e57b4f3ca3b01babc3e3bec7e3f9125ee15b"
+      "version": "1.0.0",
+      "asset": "/_cdn/static/7a595edd-a309-42df-8989-28543cd6221a-positional-1.0.0-static-linux-x64.bin",
+      "sha256": "11dcd1f5fa62d6bc3025c51d480686b885ee6d245dd6b98723e257fe32181585",
+      "size": 2242808
+    },
+    {
+      "id": "defensive",
+      "name": "Defensive",
+      "version": "1.0.0",
+      "asset": "/_cdn/static/21ae015c-47cb-45c7-b71d-273102b8da48-defensive-1.0.0-static-linux-x64.bin",
+      "sha256": "952090e0139b6d0ecd057d9517a1d94a0b395086706e0c145c791746fc891578",
+      "size": 2222328
     }
   ],
   "online": {
@@ -66,5 +75,7 @@
     "room_code_digits": 4,
     "wellisch_players": 3
   },
-  "chess_favicon": "/_cdn/static/5212c476-8b1a-456c-8c0f-0186a23e999a.png"
+  "chess_favicon": "/_cdn/static/5212c476-8b1a-456c-8c0f-0186a23e999a.png",
+  "checkpoint_id": "6ccd8d45-f863-45bf-a9b8-822e9b0ea394",
+  "publish_job_id": "17d7b88b-e273-42b0-a3f2-af5572c83384"
 }

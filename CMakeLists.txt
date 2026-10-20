@@ -63,6 +63,32 @@ endif()
 
 add_executable(engine-two engines/engine-2/main.cpp engines/engine-1/protocol.cpp engines/engine-2/search.cpp)
 target_include_directories(engine-two PRIVATE shared/third_party)
-target_compile_definitions(engine-two PRIVATE HEXCHESS_ENGINE_IDENTITY="Positional 0.1.0")
+target_compile_definitions(engine-two PRIVATE HEXCHESS_ENGINE_IDENTITY="Positional 1.0.0")
 target_link_libraries(engine-two PRIVATE hexchess_rules)
 set_target_properties(engine-two PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/engines/engine-2")
+
+add_executable(engine-three engines/engine-3/main.cpp engines/engine-1/protocol.cpp engines/engine-3/search.cpp)
+target_include_directories(engine-three PRIVATE shared/third_party)
+target_compile_definitions(engine-three PRIVATE HEXCHESS_ENGINE_IDENTITY="Defensive 1.0.0" HEXCHESS_SEARCH_CAPABILITY="paranoid")
+target_link_libraries(engine-three PRIVATE hexchess_rules)
+foreach(pair "engine-two;engine-2" "engine-three;engine-3")
+  list(GET pair 0 target)
+  list(GET pair 1 folder)
+  set_target_properties(${target} PROPERTIES
+    RUNTIME_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/engines/${folder}"
+    RUNTIME_OUTPUT_DIRECTORY_DEBUG "${CMAKE_SOURCE_DIR}/engines/${folder}"
+    RUNTIME_OUTPUT_DIRECTORY_RELEASE "${CMAKE_SOURCE_DIR}/engines/${folder}")
+  if(MINGW)
+    target_link_options(${target} PRIVATE -static-libgcc -static-libstdc++)
+  endif()
+endforeach()
+
+if(BUILD_TESTING)
+  foreach(pair "positional;engine-2" "defensive;engine-3")
+    list(GET pair 0 name)
+    list(GET pair 1 folder)
+    add_executable(${name}-search-tests tests/engine/search-quality.cpp engines/${folder}/search.cpp)
+    target_link_libraries(${name}-search-tests PRIVATE hexchess_rules)
+    add_test(NAME ${name}-search COMMAND ${name}-search-tests)
+  endforeach()
+endif()

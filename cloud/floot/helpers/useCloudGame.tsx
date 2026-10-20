@@ -1,3 +1,4 @@
+import type { EngineId } from './chessEngines';
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
   postGame,
@@ -12,7 +13,7 @@ import { channels } from './realtimeChannels';
 import { gameSessions } from "./gameSessions";
 type Credentials = { gameId: string; accessToken: string };
 
-export function useCloudGame(variant: VariantId, defaultMode: "engine" | "two_players" = "engine", difficulty=3,engineId:'tactical'|'positional'='tactical',userId:number|null=null) {
+export function useCloudGame(variant: VariantId, defaultMode: "engine" | "two_players" = "engine", difficulty=3,engineId:EngineId='tactical',userId:number|null=null) {
   const [data, setData] = useState<OutputType | null>(null);
   const [busy, setBusy] = useState(false);
   const [pendingMove, setPendingMove] = useState<ChessMove | null>(null);
@@ -52,7 +53,7 @@ export function useCloudGame(variant: VariantId, defaultMode: "engine" | "two_pl
       try {
         let result = await postGame(body, { signal: abort.signal });
         if (sequence !== requestSequence.current) return false;
-        if (initialVariant && (result.game.variant !== initialVariant||(defaultMode==="engine"&&(result.difficulty!==difficulty||result.engineId&&result.engineId!==engineId)))) {
+        if (initialVariant && (result.game.variant !== initialVariant||(defaultMode==="engine"&&(result.difficulty!==difficulty||(result.engineId??'tactical')!==engineId)))) {
           // Keep the old variant's game before opening the requested variant.
           gameSessions.save(result);
           result = await postGame({ action: "new", mode: defaultMode, difficulty,engineId,humanPlayer: 0, variant: initialVariant }, { signal: abort.signal });
@@ -105,7 +106,7 @@ export function useCloudGame(variant: VariantId, defaultMode: "engine" | "two_pl
     sideGoal.current=null;setSideTarget(null);
     const timer = setTimeout(() => {
       const linked = gameSessions.fromHash();
-      const saved = linked || gameSessions.stored(variant, defaultMode);
+      const saved = linked || gameSessions.stored(variant, defaultMode, engineId, difficulty);
       engineKey.current = "";
       credentials.current = saved;
       void perform(
@@ -152,7 +153,7 @@ export function useCloudGame(variant: VariantId, defaultMode: "engine" | "two_pl
       error ||
       sideGoal.current!==null ||
       data.mode !== "engine" ||
-      (!gameSessions.fromHash()&&(defaultMode!=="engine" || data.difficulty!==difficulty)) ||
+      (!gameSessions.fromHash()&&(defaultMode!=="engine" || data.difficulty!==difficulty||(data.engineId??'tactical')!==engineId)) ||
       data.game.result.status !== "ongoing" ||
       data.game.activePlayer === data.humanPlayer
     )
@@ -166,7 +167,7 @@ export function useCloudGame(variant: VariantId, defaultMode: "engine" | "two_pl
       accessToken: data.accessToken,
       version: data.version,
     });
-  }, [data, busy, error, perform, variant,defaultMode,difficulty]);
+  }, [data, busy, error, perform, variant,defaultMode,difficulty,engineId]);
 
   useEffect(()=>{if(!data)return;let alive=true,timer:ReturnType<typeof setTimeout>|undefined;const update=()=>{clearTimeout(timer);timer=setTimeout(()=>{if(!alive||document.visibilityState!=='visible')return;if(controller.current&&!controller.current.signal.aborted&&current.current&&busy){update();return;}const saved=current.current;if(!saved)return;void postGame({action:'get',gameId:saved.gameId,accessToken:saved.accessToken}).then(result=>{if(alive&&current.current?.gameId===result.gameId&&result.version>current.current.version)accept(result);}).catch(()=>{});},120);};
     const client=userId?new RealtimeClient():null,off=client?.subscribe(channels.player(userId!),event=>{if(!event.gameId||event.gameId===current.current?.gameId)update();}),again=client?.onReconnect(update),status=client?.onStatus(s=>{if(s==='connected')update();});if(client)void client.connect();window.addEventListener('focus',update);window.addEventListener('online',update);document.addEventListener('visibilitychange',update);return()=>{alive=false;clearTimeout(timer);off?.();again?.();status?.();client?.close();window.removeEventListener('focus',update);window.removeEventListener('online',update);document.removeEventListener('visibilitychange',update);};
@@ -199,7 +200,7 @@ export function useCloudGame(variant: VariantId, defaultMode: "engine" | "two_pl
     newGame: (mode: "engine" | "two_players", humanPlayer: 0 | 1, variant: VariantId) => {
       sideGoal.current=null;setSideTarget(null);
       engineKey.current = "";
-      return perform({ action: "new", mode, humanPlayer, variant,difficulty,engineId });
+      return perform({ action: "new", mode, humanPlayer, variant,difficulty:current.current?.difficulty??difficulty,engineId:current.current?.engineId??engineId });
     },
     openGame: (link: string) => {
       try {

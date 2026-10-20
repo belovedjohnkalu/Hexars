@@ -20,9 +20,9 @@
     "dev": "npm run dev --workspace web",
     "manager": "npm run start --workspace manager",
     "test:native": "node scripts/build-native.mjs --test",
-    "test:manager": "node --test tests/engine/*.test.mjs",
+    "test:manager": "npm run build:positional && npm run build:defensive && node --test tests/engine/*.test.mjs",
     "test:web": "npm run test --workspace web",
-    "test": "npm run test:native && npm run test:manager && npm run test:web && npm run test:api",
+    "test": "npm run test:native && npm run test:search && npm run test:manager && npm run test:web && npm run test:api",
     "package:source": "node scripts/package-source.mjs",
     "build:web": "npm run build --workspace web",
     "build:api": "npm run build --workspace @ion/api",
@@ -31,6 +31,10 @@
     "check:engine-worker": "npm run build --workspace @ion/engine-worker",
     "check:gateway": "npm run check --workspace @ion/gateway",
     "build:positional": "node scripts/build-positional.mjs",
-    "test:positional": "node --test tests/engine/positional.test.mjs"
+    "test:positional": "npm run build:positional && node --test tests/engine/positional.test.mjs",
+    "build:defensive": "node scripts/build-defensive.mjs",
+    "build:engines": "npm run build:engine && npm run build:positional && npm run build:defensive",
+    "test:defensive": "npm run build:defensive && node --test tests/engine/defensive.test.mjs",
+    "test:search": "node scripts/test-search-engines.mjs"
   }
 }
