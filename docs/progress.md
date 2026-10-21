@@ -363,3 +363,6 @@ Live counter and thousand-word pictures; Controls-free Back; downward-only swipe
 
 ## ION 0.34 — Consistent variant discovery
 Variant Board/Rules roots without explicit variant metadata now receive the same hidden/affordable/owned policy as engines, including legacy and renamed entries. See docs/releases/ion-0.34.md.
+
+## ION 0.35 — Direct Time navigation and descendant character sizing
+Full signed-in price catalog, minimal purchase pages, direct Time totals, paragraph earning clouds, incoming Receive/Empty, clean hold actions, descendant-character-only sizing and engine reset to White. See docs/releases/ion-0.35.md.

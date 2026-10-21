@@ -20,7 +20,7 @@ function CloudNodeControls({nodes,onFeedback,className=''}:{nodes:CloudNode[];on
  const location=useLocation(),navigate=useNavigate(),params=new URLSearchParams(location.search),selectedId=params.get('selected'),source=cloudScope(new URLSearchParams({space:params.get('source')||'home'})),origin=safeCloudReturn(params.get('origin'));
  const {authState}=useAuth(),uid=authState.type==='authenticated'?authState.user.id:null,space=useCloudSpace(uid,authState.type==='loading',source),node=space.nodes.find(n=>n.id===selectedId),[mode,setMode]=useState<'rename'|'move'|'copy'|'remove'|null>(null),[linking,setLinking]=useState(false),[viewer,setViewer]=useState(false),[clipboard,setClipboard]=useState(false),[copyingText,setCopyingText]=useState(false);
  const dev=space.dev===true&&space.userId===uid;
- const allowed=(n:CloudNode)=>!n.control||!!node&&(n.control==='copy-text'?true:n.control==='copy-il'?dev&&!!node.identifier:n.control==='view-photos'?cloudPhotoUrls(node).length>0:n.control==='copy'?!!node.canCopy:!!node.canEdit);
+ const allowed=(n:CloudNode)=>!!n.control&&!!node&&(n.control==='copy-text'?true:n.control==='copy-il'?dev&&!!node.identifier:n.control==='view-photos'?cloudPhotoUrls(node).length>0:n.control==='copy'?!!node.canCopy:!!node.canEdit);
  const visible=nodes.filter(n=>n.parentId!=='controls'||(selectedId?allowed(n):!n.control));
  const hasActions=visible.some(n=>n.parentId==='controls');
  const done=(message:string,to=origin)=>{navigate(to,{state:{restoreCamera:true,notice:message}});return true;};

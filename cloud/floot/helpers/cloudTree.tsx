@@ -1,4 +1,3 @@
-import {contentWords} from './cloudWordLimits';
 import { functionClouds } from './functionClouds';
 import { characterLength } from './cloudText';
 import { chessJourney } from "./chessJourney";
@@ -9,7 +8,7 @@ import type { CloudNode,CloudScope } from "../endpoints/cloud_POST.schema";
 const roots:CloudNode[]=[{"id": "hexagonal-chess", "parentId": null, "name": "Hexagonal Chess", "imageUrl": "/_cdn/static/5212c476-8b1a-456c-8c0f-0186a23e999a.png", "color": "blue"}, {"id": "public", "parentId": null, "name": "Public", "color": "mint"}, {"id": "private", "parentId": null, "name": "Private", "color": "lavender"}];
 roots.forEach((n,i)=>{n.parentId='ion';n.destination='space';n.space=(['chess','public','private'] as const)[i];});
 roots.push(...systemClouds.filter(n=>n.parentId==='ion'));
-const homeSeed=[systemClouds[0],...roots,...systemClouds.filter(n=>n.parentId==='controls'),...functionClouds.filter(n=>n.parentId==='time'&&n.id!=='time-balance').map(n=>({...n,color:({ 'time-activity':'mint','time-send':'cyan','time-receive':'lavender','time-earn':'amber','time-prices':'blue','time-treasury':'amber','time-estimates':'lavender'} as const)[n.id as 'time-activity'],href:'/?cloud='+n.id+'&space=home'}))];
+const homeSeed=[systemClouds[0],...roots,...systemClouds.filter(n=>n.parentId==='controls'),...functionClouds.filter(n=>n.parentId==='time'&&!['time-balance','time-activity'].includes(n.id)).map(n=>({...n,color:({ 'time-activity':'mint','time-send':'cyan','time-receive':'lavender','time-earn':'amber','time-prices':'blue','time-treasury':'amber','time-estimates':'lavender','time-added':'mint','time-spent':'coral','time-remaining':'amber'} as const)[n.id as 'time-activity'],href:'/?cloud='+n.id+'&space=home'}))];
 const seed:CloudNode[]=[
 {"id": "hexagonal-chess", "parentId": null, "name": "Hexagonal Chess", "imageUrl": "/_cdn/static/5212c476-8b1a-456c-8c0f-0186a23e999a.png", "color": "blue"},
 {"id": "engines", "parentId": "hexagonal-chess", "name": "Engines", "color": "coral"},
@@ -97,15 +96,16 @@ function descendants(nodes:CloudNode[],id:string){
  const seen=new Set([id]),queue=[id];for(let i=0;i<queue.length;i++)for(const n of children.get(queue[i])||[])if(!seen.has(n.id)){seen.add(n.id);queue.push(n.id);}return seen.size-1;
 }
 function statistics(nodes:CloudNode[]){
- const byId=new Map(nodes.filter(n=>!n.removedBy).map(n=>[n.id,n])),pending=new Map<string,number>(),weights=new Map<string,number>(),counts=new Map<string,number>(),words=new Map<string,number>();
- for(const n of byId.values()){words.set(n.id,contentWords(n));weights.set(n.id,characterLength(n.name)+characterLength(n.note||''));counts.set(n.id,0);if(n.parentId&&byId.has(n.parentId))pending.set(n.parentId,(pending.get(n.parentId)||0)+1);}
+ const byId=new Map(nodes.filter(n=>!n.removedBy).map(n=>[n.id,n])),pending=new Map<string,number>(),weights=new Map<string,number>(),counts=new Map<string,number>();
+ for(const n of byId.values()){weights.set(n.id,characterLength(n.name)+characterLength(n.note||''));counts.set(n.id,0);if(n.parentId&&byId.has(n.parentId))pending.set(n.parentId,(pending.get(n.parentId)||0)+1);}
  const queue=[...byId.values()].filter(n=>!pending.get(n.id)).map(n=>n.id);
- for(let i=0;i<queue.length;i++){const id=queue[i],node=byId.get(id)!,parent=node.parentId;if(parent&&byId.has(parent)){words.set(parent,(words.get(parent)||0)+(node.sizeWords??words.get(id)??0));weights.set(parent,(weights.get(parent)||0)+(node.sizeCharacters??weights.get(id)??0));counts.set(parent,(counts.get(parent)||0)+(counts.get(id)||0)+1);pending.set(parent,pending.get(parent)!-1);if(!pending.get(parent))queue.push(parent);}}
- return{byId,weights,counts,words};
+ for(let i=0;i<queue.length;i++){const id=queue[i],node=byId.get(id)!,parent=node.parentId;if(parent&&byId.has(parent)){weights.set(parent,(weights.get(parent)||0)+(node.sizeCharacters===undefined?(weights.get(id)||0):characterLength(node.name)+characterLength(node.note||'')+node.sizeCharacters));counts.set(parent,(counts.get(parent)||0)+(counts.get(id)||0)+1);pending.set(parent,pending.get(parent)!-1);if(!pending.get(parent))queue.push(parent);}}
+ return{byId,weights,counts};
 }
 function characterWeights(nodes:CloudNode[]){return statistics(nodes).weights;}
+function descendantCharacterWeights(nodes:CloudNode[]){const {byId,weights}=statistics(nodes);return new Map([...byId.values()].map(n=>[n.id,n.sizeCharacters??Math.max(0,(weights.get(n.id)||0)-characterLength(n.name)-characterLength(n.note||''))]));}
 function sizes(nodes:CloudNode[],parentId:string|null){
- const {byId,weights,counts,words}=statistics(nodes),siblings=[...byId.values()].filter(n=>n.parentId===parentId),values=siblings.map(n=>n.sizeWords??words.get(n.id)??0),min=Math.min(...values),max=Math.max(...values);
- return siblings.map((node,i)=>({...node,count:counts.get(node.id)||0,characters:node.sizeCharacters??weights.get(node.id)??0,words:values[i],percent:max===min?50:(values[i]-min)/(max-min)*100}));
+ const {byId,weights,counts}=statistics(nodes),siblings=[...byId.values()].filter(n=>n.parentId===parentId),values=siblings.map(n=>n.sizeCharacters??Math.max(0,(weights.get(n.id)||0)-characterLength(n.name)-characterLength(n.note||''))),min=Math.min(...values),max=Math.max(...values);
+ return siblings.map((node,i)=>({...node,count:counts.get(node.id)||0,characters:values[i],percent:max===min?50:(values[i]-min)/(max-min)*100}));
 }
-export const cloudTree={roots,seed,forScope(scope:CloudScope):CloudNode[]{return scope==='chess'?seed:scope==='public'?[{...roots[1],parentId:null,destination:undefined}]:scope==='private'?[{...roots[2],parentId:null,destination:undefined}]:scope==='accounts'?[{...roots[4],parentId:null,destination:undefined}]:homeSeed;},resolve(nodes:CloudNode[]){return [...new Map([...seed,...nodes].map(n=>[n.id,n])).values()];},descendants,characterWeights,wordWeights:(nodes:CloudNode[])=>statistics(nodes).words,sizes,path(nodes:CloudNode[],id:string|null){const byId=new Map(nodes.map(n=>[n.id,n])),result:CloudNode[]=[],seen=new Set<string>();let current=id?byId.get(id):undefined;while(current&&!seen.has(current.id)){seen.add(current.id);result.unshift(current);current=current.parentId?byId.get(current.parentId):undefined;}return result;}};
+export const cloudTree={roots,seed,forScope(scope:CloudScope):CloudNode[]{return scope==='chess'?seed:scope==='public'?[{...roots[1],parentId:null,destination:undefined}]:scope==='private'?[{...roots[2],parentId:null,destination:undefined}]:scope==='accounts'?[{...roots[4],parentId:null,destination:undefined}]:homeSeed;},resolve(nodes:CloudNode[]){return [...new Map([...seed,...nodes].map(n=>[n.id,n])).values()];},descendants,characterWeights,descendantCharacterWeights,sizes,path(nodes:CloudNode[],id:string|null){const byId=new Map(nodes.map(n=>[n.id,n])),result:CloudNode[]=[],seen=new Set<string>();let current=id?byId.get(id):undefined;while(current&&!seen.has(current.id)){seen.add(current.id);result.unshift(current);current=current.parentId?byId.get(current.parentId):undefined;}return result;}};

@@ -13,3 +13,7 @@ describe('Permanent functional cloud identities',()=>{
  });
  it('keeps all ten game actions represented for all six variants',()=>{for(const variant of ['glinski','mccooey','shafran','brusky','devasa','wellisch'])expect(functionClouds.filter(n=>n.parentId===variant+'-board').length).toBe(10);});
 });
+
+describe('Moved Time identifiers',()=>{
+ it('keeps existing Activity child ILs when their presentation moves under Time',()=>{const existing:IdentifierRecord[]=[{nodeId:'time',parentId:'ion',label:'IL8',arrivalOrdinal:'8'},{nodeId:'time-added',parentId:'time-activity',label:'IL810',arrivalOrdinal:'0'}];const result=allocateIdentifiers([{id:'time-added',parentId:'time'}],existing,new Map());expect(result.added.length).toBe(0);expect(result.records.get('time-added')?.label).toBe('IL810');});
+});

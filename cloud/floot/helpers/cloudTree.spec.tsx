@@ -1,3 +1,4 @@
+import {contentWords} from './cloudWordLimits';
 import { cloudTree } from "./cloudTree";
 describe("Cloud hierarchy and relative size", () => {
   const nodes = [
@@ -35,12 +36,18 @@ describe('Recursive character weights',()=>{
   const after=cloudTree.characterWeights(nodes.map(n=>n.id==='d'?{...n,name:n.name+'!'}:n));expect(after.get('a')).toBe(23);expect(after.get('c')).toBe(22);expect(after.get('b')).toBe(6);
  });
  it('keeps descendant counts separate for deletion confirmation and excludes deleted text',()=>{
-  const sizes=cloudTree.sizes(nodes,null);expect(sizes[0].count).toBe(2);expect(sizes[0].characters).toBe(22);
+  const sizes=cloudTree.sizes(nodes,null);expect(sizes[0].count).toBe(2);expect(sizes[0].characters).toBe(21);
   expect(cloudTree.characterWeights([...nodes,{id:'gone',name:'Deleted text',parentId:'a',removedBy:'removed'}]).get('a')).toBe(22);
  });
 });
 
 describe('Picture word equivalents',()=>{
- it('gives one picture exactly the same content weight as one thousand words',()=>{const nodes=[{id:'photo',parentId:null,name:'Label',isImage:true},{id:'text',parentId:null,name:'Label '+Array(1000).fill('word').join(' ')}];const weights=cloudTree.wordWeights(nodes);expect(weights.get('photo')).toBe(weights.get('text'));expect(cloudTree.sizes(nodes,null).map(n=>n.percent)).toEqual([50,50]);});
- it('adds each picture in a collage through every ancestor without inflating descendant count',()=>{const nodes=[{id:'root',parentId:null,name:'Root'},{id:'photos',parentId:'root',name:'Photos',imageUrls:['one','two','three']}];expect(cloudTree.wordWeights(nodes).get('root')).toBe(3002);expect(cloudTree.descendants(nodes,'root')).toBe(1);});
+ it('gives one picture exactly the same content weight as one thousand words',()=>{const nodes=[{id:'photo',parentId:null,name:'Label',isImage:true},{id:'text',parentId:null,name:'Label '+Array(1000).fill('word').join(' ')}];expect(contentWords(nodes[0])).toBe(contentWords(nodes[1]));expect(cloudTree.sizes(nodes,null).map(n=>n.percent)).toEqual([50,50]);});
+ it('keeps picture allowance separate from descendant character size and deletion count',()=>{const nodes=[{id:'root',parentId:null,name:'Root'},{id:'photos',parentId:'root',name:'Photos',imageUrls:['one','two','three']}];expect(contentWords(nodes[1])).toBe(3001);expect(cloudTree.sizes(nodes,null)[0].characters).toBe(6);expect(cloudTree.descendants(nodes,'root')).toBe(1);});
+});
+
+
+describe('Font sizes use descendant characters only',()=>{
+ it('ignores the current label, word count and picture allowance',()=>{const nodes=[{id:'a',parentId:null,name:'A very long own label with many words',isImage:true},{id:'b',parentId:null,name:'B'},{id:'x',parentId:'a',name:'abcd'},{id:'y',parentId:'b',name:'a bc' }];expect(cloudTree.sizes(nodes,null).map(n=>n.characters)).toEqual([4,4]);expect(cloudTree.sizes(nodes,null).map(n=>n.percent)).toEqual([50,50]);expect(cloudTree.sizes(nodes.map(n=>n.id==='a'?{...n,name:'Short'}:n),null).map(n=>n.percent)).toEqual([50,50]);});
+ it('leaves every leaf equal and propagates characters from every deeper descendant',()=>{const nodes=[{id:'a',parentId:null,name:'A'},{id:'b',parentId:null,name:'A long leaf label'},{id:'c',parentId:'a',name:'🫧x'},{id:'d',parentId:'c',name:'Deep',note:'Text'}];expect(cloudTree.sizes(nodes,null).map(n=>n.characters)).toEqual([10,0]);expect(cloudTree.sizes(nodes,'a')[0].characters).toBe(8);expect(cloudTree.sizes(nodes,'c')[0].characters).toBe(0);});
 });

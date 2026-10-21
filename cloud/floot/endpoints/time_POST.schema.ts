@@ -2,7 +2,7 @@ import { z } from 'zod';
 const amount=z.string().regex(/^(0|[1-9]\d{0,17})$/),uuid=z.string().uuid();
 export const schema=z.discriminatedUnion('action',[
  z.object({action:z.literal('snapshot')}),
- z.object({action:z.literal('activity'),treasury:z.boolean().optional(),direction:z.enum(['in','out']).optional(),before:z.object({at:z.string().datetime(),id:uuid}).optional()}),
+ z.object({action:z.literal('activity'),treasury:z.boolean().optional(),direction:z.enum(['in','out']).optional(),receivedOnly:z.boolean().optional(),before:z.object({at:z.string().datetime(),id:uuid}).optional()}),
  z.object({action:z.literal('receipt'),id:uuid}),
  z.object({action:z.literal('earning'),operation:z.enum(['claim','heartbeat','stop']),leaseId:uuid,sequence:z.number().int().min(0).max(Number.MAX_SAFE_INTEGER),idleAgeMs:z.number().int().min(0).max(86400000)}),
  z.object({action:z.literal('quote'),kind:z.enum(['purchase','transfer','payout']),productId:z.string().max(80).optional(),playerName:z.string().trim().min(1).max(40).optional(),amountUs:amount.optional()}),
