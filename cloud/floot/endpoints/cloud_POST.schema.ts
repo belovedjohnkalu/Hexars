@@ -29,7 +29,7 @@ export type CloudNode = {
   lockedItem?:string;redirect?:CloudRedirect;wordRedirect?:{words:number[];target:CloudRedirect};shareId?:string;
   href?:string; savedGameId?:string; engineId?:EngineId;
   id: string; parentId: string | null; name: string; color?:CloudColor; identifier?:string;
-  imageKey?: string; imageUrl?: string; imageKeys?:string[]; imageUrls?:string[]; isImage?: boolean; destination?: "board" | VariantId | "tactical" | "level" | "control" | "account" | "accounts" | "space" | "saved-game"; space?:CloudScope; control?:"rename"|"move"|"copy"|"remove"|"copy-il"|"view-photos"|"link"|"copy-text"; accountAction?:string; system?:boolean; note?: string; illustration?:string; variant?:VariantId; level?:number; createdBy?:number; canEdit?:boolean; canCopy?:boolean; sizeCount?:number; sizeCharacters?:number;
+  imageKey?: string; imageUrl?: string; imageKeys?:string[]; imageUrls?:string[]; isImage?: boolean; destination?: "board" | VariantId | "tactical" | "level" | "control" | "account" | "accounts" | "space" | "saved-game"; space?:CloudScope; control?:"rename"|"move"|"copy"|"remove"|"copy-il"|"view-photos"|"link"|"copy-text"; accountAction?:string; system?:boolean; note?: string; illustration?:string; variant?:VariantId; level?:number; createdBy?:number; canEdit?:boolean; canCopy?:boolean; sizeCount?:number; sizeCharacters?:number; sizeWords?:number;
   copyOperation?: string; removedBy?: string; removedAt?: string;
 };
 export type InputType = z.input<typeof schema>;

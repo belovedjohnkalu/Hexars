@@ -357,3 +357,6 @@ Paid access verifies purchase receipts despite legacy unlock flags. Other saved 
 
 ## ION 0.32 — Simpler spaces and affordable discovery
 Editable Time hub without duplicate Balance; affordable purchase gates; Redirect wording; exponentially growing word limits; shared policies and bounded spatial caches. See docs/releases/ion-0.32.md.
+
+## ION 0.33 — Word allowance and page views
+Live counter and thousand-word pictures; Controls-free Back; downward-only swipe rotation; independent keyboard-created page views. See docs/releases/ion-0.33.md.

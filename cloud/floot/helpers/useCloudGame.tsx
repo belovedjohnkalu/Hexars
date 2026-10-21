@@ -37,7 +37,7 @@ export function useCloudGame(variant: VariantId, defaultMode: "engine" | "two_pl
     if (hash.has("game")) {
       const url = new URL(window.location.href);
       url.hash = new URLSearchParams({ game: result.gameId, key: result.accessToken }).toString();
-      window.history.replaceState(null, "", url);
+      window.history.replaceState(window.history.state, "", url);
     }
   }, []);
 

@@ -39,3 +39,8 @@ describe('Recursive character weights',()=>{
   expect(cloudTree.characterWeights([...nodes,{id:'gone',name:'Deleted text',parentId:'a',removedBy:'removed'}]).get('a')).toBe(22);
  });
 });
+
+describe('Picture word equivalents',()=>{
+ it('gives one picture exactly the same content weight as one thousand words',()=>{const nodes=[{id:'photo',parentId:null,name:'Label',isImage:true},{id:'text',parentId:null,name:'Label '+Array(1000).fill('word').join(' ')}];const weights=cloudTree.wordWeights(nodes);expect(weights.get('photo')).toBe(weights.get('text'));expect(cloudTree.sizes(nodes,null).map(n=>n.percent)).toEqual([50,50]);});
+ it('adds each picture in a collage through every ancestor without inflating descendant count',()=>{const nodes=[{id:'root',parentId:null,name:'Root'},{id:'photos',parentId:'root',name:'Photos',imageUrls:['one','two','three']}];expect(cloudTree.wordWeights(nodes).get('root')).toBe(3002);expect(cloudTree.descendants(nodes,'root')).toBe(1);});
+});

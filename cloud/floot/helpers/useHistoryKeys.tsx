@@ -1,4 +1,5 @@
-import { useEffect,useRef } from 'react';
+import {recordVisitedPage,previousPageStep} from './visitedPages';
+import { useEffect,useLayoutEffect,useRef } from 'react';
 import { useLocation,useNavigate,useNavigationType } from 'react-router-dom';
 export function historyKey(event:KeyboardEvent):number{
  if(event.defaultPrevented||event.repeat||event.isComposing||event.keyCode===229||event.altKey||event.ctrlKey||event.metaKey||event.shiftKey)return 0;
@@ -11,6 +12,6 @@ export function historyKey(event:KeyboardEvent):number{
 }
 export function useHistoryKeys(){
  const location=useLocation(),kind=useNavigationType(),navigate=useNavigate(),ceiling=useRef(Number(window.history.state?.idx)||0);
- useEffect(()=>{const index=Number(window.history.state?.idx)||0;ceiling.current=kind==='PUSH'?index:Math.max(ceiling.current,index);},[location.key,kind]);
- useEffect(()=>{const key=(event:KeyboardEvent)=>{const step=historyKey(event),index=Number(window.history.state?.idx)||0;if(!step||step<0&&index<=0||step>0&&index>=ceiling.current)return;event.preventDefault();navigate(step);};window.addEventListener('keydown',key);return()=>window.removeEventListener('keydown',key);},[navigate]);
+ useLayoutEffect(()=>{const index=Number(window.history.state?.idx)||0;recordVisitedPage(index,location.pathname+location.search+location.hash,kind==='PUSH');ceiling.current=kind==='PUSH'?index:Math.max(ceiling.current,index);},[location.key,kind]);
+ useEffect(()=>{const key=(event:KeyboardEvent)=>{const step=historyKey(event),index=Number(window.history.state?.idx)||0;if(!step||step<0&&index<=0||step>0&&index>=ceiling.current)return;event.preventDefault();if(step<0){const back=previousPageStep(index);if(back)navigate(back);else navigate('/',{replace:true});}else navigate(step);};window.addEventListener('keydown',key);return()=>window.removeEventListener('keydown',key);},[navigate]);
 }

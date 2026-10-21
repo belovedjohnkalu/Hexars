@@ -1,0 +1,5 @@
+const pages=new Map<number,string>();
+export function isControlsPage(path:string){try{return new URL(path,'https://ion.floot.app').searchParams.get('cloud')==='controls';}catch{return false;}}
+export function safeBackTarget(path:string){const seen=new Set<string>();let value=path;while(isControlsPage(value)){if(seen.has(value))return '/';seen.add(value);const origin=new URL(value,'https://ion.floot.app').searchParams.get('origin');value=origin?.startsWith('/')&&!origin.startsWith('//')?origin:'/';}try{const url=new URL(value,'https://ion.floot.app');return value.startsWith('/')&&url.origin==='https://ion.floot.app'?url.pathname+url.search+url.hash:'/';}catch{return '/';}}
+export function recordVisitedPage(index:number,path:string,pushed=false){if(pushed)for(const key of pages.keys())if(key>index)pages.delete(key);pages.set(index,path);}
+export function previousPageStep(index:number){for(let i=index-1;i>=0;i--){const path=pages.get(i);if(path===undefined)return 0;if(!isControlsPage(path)&&path!==pages.get(index))return i-index;}return 0;}

@@ -1,3 +1,4 @@
+import { PageWorkspace } from './PageWorkspace';
 import { TimeProvider } from '../helpers/useTime';
 import { HistoryKeys } from './HistoryKeys';
 import { useVisualViewport } from "../helpers/useVisualViewport";
@@ -31,7 +32,7 @@ export const GlobalContextProviders = ({
         <ScrollToHashElement />
         <HistoryKeys />
         <TooltipProvider>
-          {children}
+          <PageWorkspace>{children}</PageWorkspace>
           <SonnerToaster />
         </TooltipProvider>
       </ThemeModeProvider></TimeProvider></AuthProvider>

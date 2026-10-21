@@ -8,3 +8,9 @@ describe('Depth-based word limits',()=>{
  it('allows long single words and applies the same public/private policy',()=>{expect(cloudNames.schema('public',false,1n).safeParse('a'.repeat(500)).success).toBeTrue();expect(cloudNames.schema('public',false,1n).safeParse('two words').success).toBeFalse();expect(cloudNames.schema('private',false,2n).safeParse('two words').success).toBeTrue();expect(()=>assertCloudWordLimits(nodes,[...nodes,{id:'new',parentId:'private',name:'two words'}],'home')).not.toThrow();});
  it('rejects ancestry cycles without recursion',()=>{expect(()=>cloudWordLimit([{id:'a',parentId:'b',name:'A'},{id:'b',parentId:'a',name:'B'}],'a')).toThrow();});
 });
+
+describe('Picture allowance',()=>{
+ it('charges each picture one thousand words and checks collages on copy/move',()=>{const chain:Array<{id:string;parentId:string|null;name:string}>=[{id:'private',parentId:null,name:'Private'}];for(let i=1;i<=11;i++)chain.push({id:'d'+i,parentId:i===1?'private':'d'+(i-1),name:'D'});const picture={id:'p',parentId:'d10',name:'Picture',imageKeys:['a']};expect(()=>assertCloudWordLimits(chain,[...chain,picture],'private')).not.toThrow();expect(()=>assertCloudWordLimits(chain,[...chain,{...picture,parentId:'d9'}],'private')).toThrow();expect(()=>assertCloudWordLimits(chain,[...chain,{...picture,imageKeys:['a','b']}],'private')).toThrow();expect(()=>assertCloudWordLimits(chain,[...chain,{...picture,parentId:'d11',imageKeys:['a','b']}],'private')).not.toThrow();});
+});
+
+describe('Legacy picture Undo',()=>{it('restores unchanged original content without permitting a new over-budget copy',()=>{const old={id:'picture',parentId:'private',name:'Picture',imageKey:'old.png',removedBy:'operation'},before=[...nodes,old],restored={...old,removedBy:undefined};expect(()=>assertCloudWordLimits(before,[...nodes,restored],'private')).not.toThrow();expect(()=>assertCloudWordLimits(before,[...nodes,{...restored,id:'copy'}],'private')).toThrow();});});

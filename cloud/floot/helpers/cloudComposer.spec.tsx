@@ -53,3 +53,11 @@ describe("Cloud composer", () => {
     expect(view.getByRole("alert").textContent).toContain("PNG");
   });
 });
+
+describe('Live word counter',()=>{
+ afterEach(cleanup);
+ const nodes=[{id:'private',parentId:null,name:'Private'}];
+ const props={parentId:'private',busy:false,disabled:false,draft:{name:''},onDraft:()=>{},onAdd:async()=>true,nodes,scope:'private' as const};
+ it('counts whitespace-separated words as typed and hides pictures below the allowance',()=>{const view=render(<CloudComposer {...props}/>);expect(view.getByLabelText('0 words of 1')).toBeTruthy();fireEvent.change(view.getByLabelText('Add a word or a picture name'),{target:{value:'One two'}});expect(view.getByLabelText('2 words of 1')).toBeTruthy();expect((view.getByRole('button',{name:'Add'}) as HTMLButtonElement).disabled).toBeTrue();expect(view.queryByRole('button',{name:'Choose pictures'})).toBeNull();});
+ it('offers pictures only once another thousand words fit',()=>{const deep=[...nodes];for(let i=1;i<=10;i++)deep.push({id:'d'+i,parentId:i===1?'private':'d'+(i-1),name:'D'});const view=render(<CloudComposer {...props} nodes={deep} parentId="d10"/>);expect(view.getByRole('button',{name:'Choose pictures'})).toBeTruthy();fireEvent.change(view.getByLabelText('Add a word or a picture name'),{target:{value:Array(25).fill('word').join(' ')}});expect(view.queryByRole('button',{name:'Choose pictures'})).toBeNull();});
+});

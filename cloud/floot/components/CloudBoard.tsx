@@ -97,7 +97,7 @@ export function CloudBoard({
       aria-hidden={preview || undefined}
       aria-label={`${chessVariants.name(game.variant)} hexagonal chessboard`}
     >
-      <title>Select a piece to see its moves. Swipe horizontally for history. Swipe vertically or press F to flip the board; against an engine, this switches your side before the first move and rotates the view afterward.</title>
+      <title>Select a piece to see its moves. Swipe horizontally for history. Swipe downward or press F to flip the board; against an engine, this switches your side before the first move and rotates the view afterward.</title>
       <g
         className={styles.canvas}
         style={{ transform: `rotate(${angle}deg)` }}

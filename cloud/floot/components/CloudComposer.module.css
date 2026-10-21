@@ -30,3 +30,7 @@
 .extras { position:absolute; left:0; right:0; bottom:calc(100% + 4px); z-index:2; border-radius:var(--radius); background:var(--background); animation:colorEntry 140ms var(--ease) both; }
 .extras .attachment { margin:0; padding:4px 8px; }
 @media(prefers-reduced-motion:reduce){.extras{animation:none;}}
+
+.wordCounter { flex-shrink:0; max-width:36%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; color:var(--muted-foreground); font:400 11px/1.2 var(--font-family-base); font-variant-numeric:tabular-nums; padding-inline:6px; }
+.wordCounter[data-over-limit=true] { color:var(--error); }
+.input.input { padding-left:12px; }
