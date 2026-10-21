@@ -1,3 +1,4 @@
+import { onlineMatchState,withOnlineResult,decideOnlineMatch } from '../helpers/onlineMatch';
 import { timeAccess } from '../helpers/timeAccess';
 import { engineId as resolveEngineId } from '../helpers/chessEngines';
 import { createHash, randomBytes, randomUUID } from "node:crypto";
@@ -94,8 +95,11 @@ export async function handle(request: Request) {
     const capability=!!row&&row.accessTokenHash===tokenHash(input.accessToken);
     if(!row||(!member&&!capability)||(row.mode==='online'&&!member))throw new GameError('This saved game is not available to this account.',404);
     if(user&&capability&&row.mode!=='online'&&!member)await db.insertInto('ionGameMembers').values({gameId:row.id,userId:user.id,seat:null}).onConflict(oc=>oc.columns(['gameId','userId']).doNothing()).execute();
-    if(input.action!=='get'&&input.action!=='review'){const state=row.state as {variant?:string};await timeAccess.assert(user?.id??null,state.variant||'glinski',row.mode==='engine'?resolveEngineId(row.engineId):undefined);}
+    if(input.action!=='get'&&input.action!=='review'&&input.action!=='forfeit'&&input.action!=='draw'){const state=row.state as {variant?:string};await timeAccess.assert(user?.id??null,state.variant||'glinski',row.mode==='engine'?resolveEngineId(row.engineId):undefined);}
+    if((input.action==='forfeit'||input.action==='draw')&&row.mode!=='online')throw new GameError('This action is only for online matches.',400);
+    let onlineState=onlineMatchState(row.onlineState);
     if(row.mode==='online'){
+      if(onlineState.result&&input.action!=='get'&&input.action!=='review')throw new GameError('This match has ended.',409);
       if(input.action==='engine'||input.action==='undo'||input.action==='switch_side')throw new GameError('This action is not available in an online match.',400);
       if(input.action==='move'&&activePlayer(row.state)!==member?.seat)throw new GameError('Wait for your turn.',403);
     }
@@ -152,6 +156,9 @@ export async function handle(request: Request) {
       signal: request.signal,
     });
 
+    if(input.action==='forfeit'||input.action==='draw')onlineState=decideOnlineMatch(native.game,onlineState,member!.seat!,input.action);
+    if(row.mode==='online'&&input.action==='move')onlineState={};
+
     if (input.action === "move" || input.action === "engine") {
       const selected = native.appliedMove;
       if (!selected || !native.previousGame)
@@ -197,6 +204,7 @@ export async function handle(request: Request) {
         .updateTable("hexchessGames")
         .set({
           state: nextState,
+          onlineState:onlineState as unknown as Json,
           timeline,
           moves: moves as unknown as Json,
           lastSearch: lastSearch as unknown as Json,
@@ -226,7 +234,8 @@ export async function handle(request: Request) {
       ...(players?{players:players.filter(p=>p.seat!==null).map(p=>({seat:p.seat!,name:p.name}))}:{}),
       engine: native.engine,
       execution: "cloud",
-      game: native.game,
+      game: row.mode==='online'&&(input.action!=='review'||input.ply===timeline.length)?withOnlineResult(native.game,onlineState):native.game,
+      ...(row.mode==='online'?{drawVotes:onlineState.votes??[]}:{}),
       moves,
       lastSearch,
     };

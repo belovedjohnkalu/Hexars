@@ -31,6 +31,8 @@ export const schema = z.discriminatedUnion("action", [
     .strict(),
   z.object({ action: z.literal("review"), ...session, ply: z.number().int().nonnegative() }).strict(),
   z.object({ action: z.literal("get"), ...session }).strict(),
+  z.object({ action: z.literal("forfeit"), ...mutation }).strict(),
+  z.object({ action: z.literal("draw"), ...mutation }).strict(),
   z.object({ action: z.literal("move"), ...mutation, move }).strict(),
   z.object({ action: z.literal("engine"), ...mutation }).strict(),
   z.object({ action: z.literal("undo"), ...mutation }).strict(),
@@ -96,6 +98,7 @@ export type OutputType = {
   engine: string;
   engineId?:EngineId;
   players?:Array<{seat:number;name:string}>;
+  drawVotes?:number[];
   execution: "cloud";
   game: GameView;
   moves: MoveRecord[];

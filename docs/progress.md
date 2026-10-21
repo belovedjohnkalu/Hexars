@@ -345,3 +345,6 @@ Time banking is published with exact microsecond balances, one-session active-us
 ## Typing, live Activity and functional identifiers — October 20
 
 Published desktop composer focus, safe Left/Right visited-page navigation, three live Activity totals and permanently allocated dev ILs for Time words, receipt fields and variant actions. All six variant boards include Online and Library. Existing pricing, earning authority, saved games and public root labels are unchanged. All 45 helper spec files and hosted TypeScript pass. See [ION 0.28](releases/ion-0.28.md).
+
+## ION 0.29 — Online controls and chat
+Forfeit/Draw online-only action set, consent/version checks, saved adjudicated results, participant-only transient chat words without droplets. See docs/releases/ion-0.29.md for retention, three-player forfeit policy and verification.

@@ -1,3 +1,4 @@
+import { withOnlineResult } from '../helpers/onlineMatch';
 import { functionIdentifiers } from '../helpers/functionIdentifiers';
 import { savedFunctionClouds } from '../helpers/functionClouds';
 import { engineName } from '../helpers/chessEngines';
@@ -30,7 +31,7 @@ export async function handle(request:Request){const headers={'Content-Type':'app
   const identifier=dev?await db.selectFrom('ionCloudIdentifiers').select(['label','devNumber']).where('nodeId','=',input.nodeId&&input.nodeId.endsWith('-u'+user!.id)?input.nodeId:`history-game-${row.id}-u${user!.id}`).executeTakeFirst():undefined;
   const functional=dev?await functionIdentifiers(user!.id,savedFunctionClouds(row.id,(Array.isArray(row.moves)?row.moves:[]) as unknown as MoveRecord[],native.game.board.players)):undefined;
   const identifiers=functional?Object.fromEntries(Object.entries(functional).filter(([key])=>key.startsWith('saved-view-'+row.id+':')).map(([key,value])=>[key.slice(('saved-view-'+row.id+':').length),value])):undefined;
-  const out:LibraryGame={...(identifiers?{identifiers}:{}),gameId:row.id,game:native.game,moves:(Array.isArray(row.moves)?row.moves:[]) as unknown as MoveRecord[],mode:row.mode,engineName:engineName(row.engineId),humanPlayer:row.mode==='online'?member?.seat??null:row.humanPlayer,players:players.map(p=>({seat:p.seat!,name:p.name})),canShare:!!member||!!share&&!!user&&(share.senderId===user.id||share.recipientId===user.id),...(share&&user?{shareRole:share.senderId===user.id?'sender' as const:'recipient' as const}:{}),canRemove:!!member||!!share&&!!user&&(share.senderId===user.id||share.recipientId===user.id),dev,identifier:identifier?namespaceIdentifier(identifier.label,Number(identifier.devNumber)):functional?.['saved-view-'+row.id]};
+  const out:LibraryGame={...(identifiers?{identifiers}:{}),gameId:row.id,game:row.mode==='online'&&(input.ply===undefined||input.ply===timeline.length)?withOnlineResult(native.game,row.onlineState):native.game,moves:(Array.isArray(row.moves)?row.moves:[]) as unknown as MoveRecord[],mode:row.mode,engineName:engineName(row.engineId),humanPlayer:row.mode==='online'?member?.seat??null:row.humanPlayer,players:players.map(p=>({seat:p.seat!,name:p.name})),canShare:!!member||!!share&&!!user&&(share.senderId===user.id||share.recipientId===user.id),...(share&&user?{shareRole:share.senderId===user.id?'sender' as const:'recipient' as const}:{}),canRemove:!!member||!!share&&!!user&&(share.senderId===user.id||share.recipientId===user.id),dev,identifier:identifier?namespaceIdentifier(identifier.label,Number(identifier.devNumber)):functional?.['saved-view-'+row.id]};
   return new Response(JSON.stringify(out),{headers});
  }
  const user=await onlineUser(request);

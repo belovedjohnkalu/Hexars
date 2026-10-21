@@ -170,7 +170,7 @@ export function useCloudGame(variant: VariantId, defaultMode: "engine" | "two_pl
   }, [data, busy, error, perform, variant,defaultMode,difficulty,engineId]);
 
   useEffect(()=>{if(!data)return;let alive=true,timer:ReturnType<typeof setTimeout>|undefined;const update=()=>{clearTimeout(timer);timer=setTimeout(()=>{if(!alive||document.visibilityState!=='visible')return;if(controller.current&&!controller.current.signal.aborted&&current.current&&busy){update();return;}const saved=current.current;if(!saved)return;void postGame({action:'get',gameId:saved.gameId,accessToken:saved.accessToken}).then(result=>{if(alive&&current.current?.gameId===result.gameId&&result.version>current.current.version)accept(result);}).catch(()=>{});},120);};
-    const client=userId?new RealtimeClient():null,off=client?.subscribe(channels.player(userId!),event=>{if(!event.gameId||event.gameId===current.current?.gameId)update();}),again=client?.onReconnect(update),status=client?.onStatus(s=>{if(s==='connected')update();});if(client)void client.connect();window.addEventListener('focus',update);window.addEventListener('online',update);document.addEventListener('visibilitychange',update);return()=>{alive=false;clearTimeout(timer);off?.();again?.();status?.();client?.close();window.removeEventListener('focus',update);window.removeEventListener('online',update);document.removeEventListener('visibilitychange',update);};
+    const client=userId?new RealtimeClient():null,off=client?.subscribe(channels.player(userId!),event=>{if(!event.chat&&(!event.gameId||event.gameId===current.current?.gameId))update();}),again=client?.onReconnect(update),status=client?.onStatus(s=>{if(s==='connected')update();});if(client)void client.connect();window.addEventListener('focus',update);window.addEventListener('online',update);document.addEventListener('visibilitychange',update);return()=>{alive=false;clearTimeout(timer);off?.();again?.();status?.();client?.close();window.removeEventListener('focus',update);window.removeEventListener('online',update);document.removeEventListener('visibilitychange',update);};
   },[data?.gameId,userId,busy,accept]);
 
   const withSession = (action: "move" | "undo", move?: ChessMove) => {
@@ -216,6 +216,7 @@ export function useCloudGame(variant: VariantId, defaultMode: "engine" | "two_pl
     },
     play: (move: ChessMove) => withSession("move", move),
     undo: () => withSession("undo"),
+    onlineAction:(action:'forfeit'|'draw')=>{const session=current.current;return session&&session.mode==='online'?perform({action,gameId:session.gameId,accessToken:session.accessToken,version:session.version}):Promise.resolve(false);},
     refresh: () => {
       engineKey.current = "";
       return perform(

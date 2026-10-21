@@ -39,6 +39,7 @@ export interface HexchessGames {
   lastSearch: Json | null;
   mode: string;
   moves: Generated<Json>;
+  onlineState: Generated<Json>;
   state: Json;
   timeline: Generated<Json>;
   updatedAt: Generated<Timestamp>;

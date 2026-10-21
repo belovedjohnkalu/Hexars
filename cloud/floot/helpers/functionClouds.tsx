@@ -3,7 +3,7 @@ import { chessVariants } from './chessVariants';
 import { chessEngines } from './chessEngines';
 import { timePrinciples } from './timePrinciples';
 const node=(id:string,parentId:string,name:string):CloudNode=>({id,parentId,name,system:true});
-export const gameActionNames={variants:'Variants',rules:'Rules',engines:'Engines',friend:'Pass and Play',reset:'Board Reset',undo:'Undo',online:'Online',library:'Library'};
+export const gameActionNames={variants:'Variants',rules:'Rules',engines:'Engines',friend:'Pass and Play',reset:'Board Reset',undo:'Undo',online:'Online',library:'Library',forfeit:'Forfeit',draw:'Draw'};
 const products=[...chessVariants.all.filter(v=>v.id!=='glinski').map(v=>({id:'variant:'+v.id,name:v.name})),...chessEngines.filter(e=>e.id!=='universal').map(e=>({id:'engine:'+e.id,name:e.name}))];
 // Stable functional identities. Names/amounts may change; identifiers never do.
 export const functionClouds:CloudNode[]=[

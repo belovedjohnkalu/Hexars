@@ -1,4 +1,4 @@
-.app { position:relative; height:100dvh; display:flex; flex-direction:column; background:var(--background); color:var(--foreground); overflow:hidden; font-family:var(--font-family-base); }
+.app { position:relative; height:var(--ion-visual-height,100dvh); top:var(--ion-visual-top,0px); display:flex; flex-direction:column; background:var(--background); color:var(--foreground); overflow:hidden; font-family:var(--font-family-base); }
 .app * { box-sizing:border-box; }
 .header { flex-shrink:0; text-align:center; padding:calc(16px + env(safe-area-inset-top)) 20px 0; }
 .header h1 { font-size:20px; font-weight:500; letter-spacing:-.04em; margin:0; outline:none; }
@@ -32,3 +32,15 @@
 
 .word .identifier { display:block; font:400 9px/11px var(--font-family-base); color:var(--muted-foreground); letter-spacing:0; }
 .word:has(.identifier) { flex-direction:column; gap:0; padding-block:4px; font-size:18px; line-height:1.1; }
+
+.drawCount { display:block; font-size:11px; line-height:14px; color:var(--muted-foreground); }
+.word:has(.drawCount) { flex-direction:column; gap:0; line-height:1.1; }
+.chatWord { position:absolute; margin:0; padding:6px; font-weight:450; line-height:1.25; text-align:center; user-select:none; -webkit-user-select:none; -webkit-touch-callout:none; pointer-events:none; }
+.chatName { display:block; font-size:11px; line-height:16px; color:var(--muted-foreground); }
+.chatLine { display:block; white-space:nowrap; }
+.chatWord .identifier { display:block; font-size:9px; color:var(--muted-foreground); }
+.chatComposer { position:absolute; z-index:4; bottom:calc(12px + env(safe-area-inset-bottom)); left:16px; right:16px; }
+.chatComposer form { display:flex; align-items:center; gap:8px; width:100%; padding:5px 6px 5px 14px; border:1px solid var(--glass-border); border-radius:var(--radius-full); background:var(--glass-solid); backdrop-filter:blur(20px); }
+.chatComposer input { flex:1; min-width:0; border:0; background:transparent; box-shadow:none; font-size:16px; }
+.chatComposer button { flex-shrink:0; border-radius:var(--radius-full); }
+.chatComposer p { margin:4px 12px 0; color:var(--error); font-size:12px; }

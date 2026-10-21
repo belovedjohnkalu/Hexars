@@ -11,5 +11,5 @@ describe('Permanent functional cloud identities',()=>{
   expect(again.records.get('time-added')?.label).toBe(first.records.get('time-added')?.label);
   expect(new Set([...first.records.values()].map(n=>n.label)).size).toBe(first.records.size);
  });
- it('keeps all eight game actions represented for all six variants',()=>{for(const variant of ['glinski','mccooey','shafran','brusky','devasa','wellisch'])expect(functionClouds.filter(n=>n.parentId===variant+'-board').length).toBe(8);});
+ it('keeps all ten game actions represented for all six variants',()=>{for(const variant of ['glinski','mccooey','shafran','brusky','devasa','wellisch'])expect(functionClouds.filter(n=>n.parentId===variant+'-board').length).toBe(10);});
 });

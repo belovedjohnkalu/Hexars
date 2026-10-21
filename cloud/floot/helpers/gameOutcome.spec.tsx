@@ -10,5 +10,6 @@ describe('Game result announcement',()=>{
  expect(gameOutcome({status:'stalemate',winner:1,scores:[.25,.75],reason:''},'engine',0)).toEqual({title:'Stalemate',score:'¼ – ¾',detail:'Black ¾'});
  expect(gameOutcome({status:'stalemate',winner:-1,scores:[.5,.5],reason:''},'two_players',0)).toEqual({title:'Stalemate',score:'½ – ½',detail:''});
  });
+ it('announces online forfeits for both players',()=>{const result={status:'draw' as const,winner:1,scores:[0,1],reason:'forfeit:0'};expect(gameOutcome(result,'online',0).title).toBe('You Lose');expect(gameOutcome(result,'online',1).title).toBe('You Win');});
  it('announces automatic draws without naming a winner',()=>{expect(gameOutcome({status:'draw',winner:-1,scores:[.5,.5],reason:'material'},'engine',0)).toEqual({title:'Draw',score:'½ – ½',detail:''});});
 });
