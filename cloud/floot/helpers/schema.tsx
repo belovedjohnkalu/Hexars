@@ -168,6 +168,16 @@ export interface IonTimeCostProposals {
   productId: string;
 }
 
+export interface IonTimeCostRevisions {
+  actorId: number;
+  afterCost: Json;
+  beforeCost: Json;
+  createdAt: Generated<Timestamp>;
+  id: string;
+  productId: string;
+  proposalId: string;
+}
+
 export interface IonTimeEarning {
   active: Generated<boolean>;
   idleUntil: Timestamp;
@@ -301,6 +311,7 @@ export interface DB {
   ionTimeAccounts: IonTimeAccounts;
   ionTimeConfig: IonTimeConfig;
   ionTimeCostProposals: IonTimeCostProposals;
+  ionTimeCostRevisions: IonTimeCostRevisions;
   ionTimeEarning: IonTimeEarning;
   ionTimeEntitlements: IonTimeEntitlements;
   ionTimeEntries: IonTimeEntries;

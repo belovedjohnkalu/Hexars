@@ -178,3 +178,6 @@ Activity uses three organic words: mint Added, coral Spent and amber Balance. Th
 
 ## Online match words — 0.29
 Online game actions reduce to coral Forfeit and cyan Draw; offline/engine boards retain their established words. Inert chat words reuse the organic packing, Inter whole-word wrapping and seat-associated cyan/lavender/amber palette, below the board. Sender names remain part of the text. They cannot open another space or expose controls. The compact black/glass composer uses the visual viewport and existing full-width footer footprint. The shared black Dialog owns forfeit confirmation and result announcements. No new tokens, fonts, native scrolling or elevation style.
+
+## Estimate revisions — 0.30
+Published estimates reuse TimeSpace's existing compact amount fields and black publication Dialog. The estimate and revision form remain in one stable surface; long basis text moves into the review sheet to preserve the no-scroll mobile canvas. Save revision and the total-time explanation distinguish a correction from adding a delta. Existing tokens and typography are unchanged.

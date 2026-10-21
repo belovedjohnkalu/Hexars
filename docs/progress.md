@@ -348,3 +348,6 @@ Published desktop composer focus, safe Left/Right visited-page navigation, three
 
 ## ION 0.29 — Online controls and chat
 Forfeit/Draw online-only action set, consent/version checks, saved adjudicated results, participant-only transient chat words without droplets. See docs/releases/ion-0.29.md for retention, three-player forfeit policy and verification.
+
+## ION 0.30 — Revisable published estimates
+Dev draft revisions, owner-reviewed publication, immutable publication audit and preserved quote/purchase terms. See docs/releases/ion-0.30.md.
