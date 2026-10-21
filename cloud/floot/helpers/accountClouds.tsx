@@ -1,4 +1,5 @@
 import type { CloudNode } from '../endpoints/cloud_POST.schema';
+import { accountListNodes } from './accountListNodes';
 import { rememberedAccounts } from './rememberedAccounts';
 import { cloudTree } from './cloudTree';
 import { db } from './db';
@@ -9,7 +10,7 @@ export async function accountClouds(request:Request,userId:number|null){
  if(userId){add('account-add','Add account','add','accounts','cyan');if(!saved.some(a=>a.id===userId))add('account-remember','Remember','remember','accounts','mint');add('account-signout','Sign out','signout','accounts','coral');}
  else{add('account-signin','Sign in','signin','accounts','blue');add('account-create','Create account','signup','accounts','mint');}
  add('account-recover','Recover password','recover','accounts','amber');
- for(const a of saved){const id='remembered-'+a.id;nodes.push({id,parentId:'accounts',name:a.displayName,color:a.id===userId?'mint':'lavender',system:true});if(a.id!==userId)add(id+'-open','Open','switch:'+a.id,id,'blue');add(id+'-forget','Forget','forget:'+a.id,id,'coral');}
+ nodes.push(...accountListNodes(saved,userId));
  return nodes;
 }
 export async function accountWorkspace(userId:number){

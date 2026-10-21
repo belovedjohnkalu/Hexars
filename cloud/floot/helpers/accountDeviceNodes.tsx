@@ -16,6 +16,6 @@ export function accountDeviceNodes(seeds:CloudNode[],stored:CloudNode[]):CloudNo
  };
  return [...new Map([...seeds,...stored.filter(visible).map(n=>{
   const generated=current.get(n.id);
-  return generated&&(generated.accountAction||n.id.startsWith('remembered-'))?{...generated,...n,id:generated.id,parentId:generated.parentId,destination:generated.destination,accountAction:generated.accountAction}:n;
+  return generated&&(generated.accountAction||n.id==='account-others'||n.id.startsWith('remembered-'))?{...generated,...n,id:generated.id,parentId:generated.parentId,destination:generated.destination,accountAction:generated.accountAction}:n;
  })].map(n=>[n.id,n])).values()];
 }

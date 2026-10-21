@@ -351,3 +351,6 @@ Forfeit/Draw online-only action set, consent/version checks, saved adjudicated r
 
 ## ION 0.30 — Revisable published estimates
 Dev draft revisions, owner-reviewed publication, immutable publication audit and preserved quote/purchase terms. See docs/releases/ion-0.30.md.
+
+## ION 0.31 — Purchase-only access and Other Accounts
+Paid access verifies purchase receipts despite legacy unlock flags. Other saved device accounts group beneath Other Accounts, preserving fixed identifiers.

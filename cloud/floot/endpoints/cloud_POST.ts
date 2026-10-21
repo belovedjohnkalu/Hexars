@@ -110,7 +110,7 @@ export async function handle(request: Request) {
       const urls=await Promise.all(keys.map(async filename=>{const result=await getUrl({visibility:'private',filename,expiresInSeconds:3600});return result.ok?result.url:'';}));
       return {...visibleNode,isImage:true,imageKey:undefined,imageKeys:undefined,imageUrl:urls[0],imageUrls:urls};
     }));
-    if(input.scope==='chess'){const market=await timeLedger.catalog(context.userId);const locked=new Set(market.products.filter(p=>p.kind==='variant'&&!p.owned&&!p.available).map(p=>p.reference));visible=visible.map(n=>n.variant&&locked.has(n.variant)?{...n,note:undefined,lockedItem:'variant:'+n.variant}:n);}
+    if(input.scope==='chess'){const market=await timeLedger.catalog(context.userId);const locked=new Set(market.products.filter(p=>p.kind==='variant'&&!market.dev&&!p.owned).map(p=>p.reference));visible=visible.map(n=>n.variant&&locked.has(n.variant)?{...n,note:undefined,lockedItem:'variant:'+n.variant}:n);}
     if(input.scope==='home'){
       const shared=await db.selectFrom('ionSharedSpaces').innerJoin('ionWorkspaces','ionSharedSpaces.workspaceId','ionWorkspaces.id').select(['kind','nodes']).where('kind','in',['public','chess']).execute();
       const personal=context.userId?await db.selectFrom('ionCloudAccounts').innerJoin('ionWorkspaces','ionCloudAccounts.workspaceId','ionWorkspaces.id').select('nodes').where('userId','=',context.userId).executeTakeFirst():undefined;

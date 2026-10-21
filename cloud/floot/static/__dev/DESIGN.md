@@ -181,3 +181,6 @@ Online game actions reduce to coral Forfeit and cyan Draw; offline/engine boards
 
 ## Estimate revisions — 0.30
 Published estimates reuse TimeSpace's existing compact amount fields and black publication Dialog. The estimate and revision form remain in one stable surface; long basis text moves into the review sheet to preserve the no-scroll mobile canvas. Save revision and the total-time explanation distinguish a correction from adding a delta. Existing tokens and typography are unchanged.
+
+## Other Accounts — 0.31
+Other Accounts uses the existing lavender organic cloud, explicit navigation and permanent dev identifier allocation. The current account stays mint at the root. No new style, routes, typography or interaction pattern.

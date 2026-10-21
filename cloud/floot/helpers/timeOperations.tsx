@@ -83,7 +83,7 @@ export async function timeOperations(input:Exclude<TimeInput,{action:'snapshot'}
   if(input.kind==='purchase'){
    const market=await timeLedger.catalog(userId),product=market.products.find(p=>p.id===input.productId);
    if(!product)timeFail('Choose a feature.');if(product.owned)timeFail('You already have access to this feature.',409);
-   if(!product.published||!market.pricingReady)timeFail('This feature is available while its price is being prepared.',409);
+   if(!product.published||!market.pricingReady)timeFail('This feature’s price is being prepared.',409);
    if(product.priceUs===null||market.buyers<1)timeFail('Sign in again to see a price.',401);
    quote={id,kind:'purchase',amountUs:product.priceUs,productId:product.id,productName:product.name,buyers:market.buyers,expiresAt:expiresAt.toISOString()};
    const source=product;
@@ -114,7 +114,7 @@ export async function timeOperations(input:Exclude<TimeInput,{action:'snapshot'}
    let from=timeLedger.wallet(userId),to='treasury';
    if(quote.kind==='purchase'){
     await sql`select pg_advisory_xact_lock(hashtextextended(${`time-unlock:${userId}:${quote.productId}`},0))`.execute(tx);
-    const owned=await tx.selectFrom('ionTimeEntitlements').select('transactionId').where('userId','=',userId).where('productId','=',quote.productId!).executeTakeFirst();
+    const owned=await timeLedger.purchases(tx,userId).where('e.productId','=',quote.productId!).executeTakeFirst();
     if(owned){await tx.updateTable('ionTimeQuotes').set({usedTransactionId:owned.transactionId}).where('id','=',quote.id).execute();return owned.transactionId;}
    }else{
     if(quote.kind==='payout'){if(!(await timeLedger.roles(userId,tx)).owner)timeFail('Only ION’s owner can make payouts.',403);from='treasury';}
@@ -123,7 +123,7 @@ export async function timeOperations(input:Exclude<TimeInput,{action:'snapshot'}
    }
    await timeLedger.ensureWallet(tx,userId);
    const id=await timeLedger.post(tx,{id:randomUUID(),actor:userId,key,kind:quote.kind,from,to,amount:quote.amountUs,metadata:{quoteId:quote.id,...(quote.productId?{productId:quote.productId,buyers:quote.buyers,creationCostUs:calculation.creationCostUs,directUs:calculation.directUs,freeUs:calculation.freeUs,costVersion:calculation.costVersion}:{}),...(quote.recipientId?{recipientId:quote.recipientId}:{})}});
-   if(quote.kind==='purchase')await tx.insertInto('ionTimeEntitlements').values({userId,productId:quote.productId!,transactionId:id}).execute();
+   if(quote.kind==='purchase')await tx.insertInto('ionTimeEntitlements').values({userId,productId:quote.productId!,transactionId:id}).onConflict(c=>c.columns(['userId','productId']).doUpdateSet({transactionId:id})).execute();
    await tx.updateTable('ionTimeQuotes').set({usedTransactionId:id}).where('id','=',quote.id).execute();return id;
   });return{receipt:await timeLedger.receipt(db,transactionId,userId),snapshot:await timeLedger.snapshot(userId)};
  }

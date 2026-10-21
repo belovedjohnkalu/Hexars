@@ -95,7 +95,7 @@ export async function handle(request: Request) {
     const capability=!!row&&row.accessTokenHash===tokenHash(input.accessToken);
     if(!row||(!member&&!capability)||(row.mode==='online'&&!member))throw new GameError('This saved game is not available to this account.',404);
     if(user&&capability&&row.mode!=='online'&&!member)await db.insertInto('ionGameMembers').values({gameId:row.id,userId:user.id,seat:null}).onConflict(oc=>oc.columns(['gameId','userId']).doNothing()).execute();
-    if(input.action!=='get'&&input.action!=='review'&&input.action!=='forfeit'&&input.action!=='draw'){const state=row.state as {variant?:string};await timeAccess.assert(user?.id??null,state.variant||'glinski',row.mode==='engine'?resolveEngineId(row.engineId):undefined);}
+    if(input.action!=='forfeit'&&input.action!=='draw'){const state=row.state as {variant?:string};await timeAccess.assert(user?.id??null,state.variant||'glinski',row.mode==='engine'?resolveEngineId(row.engineId):undefined);}
     if((input.action==='forfeit'||input.action==='draw')&&row.mode!=='online')throw new GameError('This action is only for online matches.',400);
     let onlineState=onlineMatchState(row.onlineState);
     if(row.mode==='online'){

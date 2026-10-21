@@ -49,3 +49,6 @@ Canonical migration: [20261020_time.sql](../../cloud/floot/migrations/20261020_t
 Every posted transaction has exactly two immutable journal entries with zero net value. Account locks are taken in deterministic order. Idempotency keys and quotes prevent duplicate effects. Corrections append an exact linked reversal; no journal edits or deletions. Account balance caches must equal journal sums. Issuance is the sole account permitted a negative balance.
 
 Validation includes exact-precision/math and all variant-engine policy combinations, browser earning lifecycle tests, hosted transfer/purchase concurrency, expiry, cross-account privacy, session rotation and SQL immutability/balance constraints. Browser tests are under `tests/e2e/time-bank.live.cjs`; SQL invariants under `tests/cloud/time-ledger.sql`. Test accounts are archived with reversed ledger effects, never erased from the journal.
+
+## Purchase-only access (0.31)
+The user superseded temporary grace access: a non-dev must hold an entitlement backed by that account's unreversed Time purchase to the treasury for the same product. Availability/legacy unlock flags do not qualify. Unpriced or warming paid features remain locked until a purchase can be made. Free features, dev exemptions and saved-game viewing remain unchanged. No old journal entries or balances are changed by this policy.
