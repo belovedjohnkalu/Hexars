@@ -1,3 +1,4 @@
+import { signedInUsersChanged } from './signedInUsers';
 import { db } from './db';
 import { sql } from 'kysely';
 import { jwtVerify, SignJWT } from "jose";
@@ -96,6 +97,7 @@ export async function setServerSession(
   ].join("; ");
 
   response.headers.set("Set-Cookie", cookieValue);
+  await signedInUsersChanged();
 }
 
 export function clearServerSession(response: Response) {

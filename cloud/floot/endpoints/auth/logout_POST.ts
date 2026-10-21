@@ -1,3 +1,4 @@
+import { signedInUsersChanged } from '../../helpers/signedInUsers';
 // adapt this to your database schema
 import { db } from "../../helpers/db";
 import {
@@ -30,6 +31,7 @@ export async function handle(request: Request) {
     );
 
     clearServerSession(response);
+    await signedInUsersChanged();
 
     return response;
   } catch (error) {

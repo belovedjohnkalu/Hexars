@@ -1,3 +1,4 @@
+import { signedInUsersChanged } from '../../helpers/signedInUsers';
 import { db } from "../../helpers/db";
 import { sql } from "kysely";
 import { createHash, timingSafeEqual } from "crypto";
@@ -87,6 +88,7 @@ export async function handle(request: Request) {
     });
 
     if (outcome === "invalid") return invalidCode();
+    await signedInUsersChanged();
     return new Response(superjson.stringify({ ok: true }), {
       headers: { "Content-Type": "application/json" },
     });

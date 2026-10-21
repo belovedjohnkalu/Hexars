@@ -368,3 +368,5 @@ Variant Board/Rules roots without explicit variant metadata now receive the same
 Full signed-in price catalog, minimal purchase pages, direct Time totals, paragraph earning clouds, incoming Receive/Empty, clean hold actions, descendant-character-only sizing and engine reset to White. See docs/releases/ion-0.35.md.
 
 - 0.35.1: replaced standalone Empty messages across the shared canvas and Time Receive with “Nothing here yet”; published, typechecked and verified desktop/phone states.
+
+- 0.36: investigated lower prices (approved cost divided by four valid signed-in accounts, unchanged formula/estimates); added the live dev Accounts population, server-protected IL0A0, empty IL0A00/IL0A01 prompt pages and Complete-only development workflow. Published and verified count/error recovery and anonymous API privacy; preserved existing ILs, owner editing and all financial data.

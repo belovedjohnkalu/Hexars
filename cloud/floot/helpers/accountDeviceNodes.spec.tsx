@@ -15,4 +15,9 @@ describe('Device-local account lists',()=>{
  it('does not restore stale sign-in/sign-out commands after session changes',()=>{
   const nodes=accountDeviceNodes([root,{id:'account-signin',parentId:'accounts',name:'Sign in',accountAction:'signin'}],[{id:'account-signout',parentId:'accounts',name:'Sign out',accountAction:'signout'},...stored]);expect(nodes.map(n=>n.id)).toEqual(['accounts','account-signin','custom']);
  });
+ it('never resurrects a dev-only user-count word for a regular account',()=>{
+  const counter:CloudNode={id:'account-signed-in-users',parentId:'accounts',name:'Signed in'};
+  expect(accountDeviceNodes([root],[counter]).map(n=>n.id)).toEqual(['accounts']);
+  expect(accountDeviceNodes([root,counter],[]).some(n=>n.id===counter.id)).toBeTrue();
+ });
 });

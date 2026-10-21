@@ -55,3 +55,6 @@ The user superseded temporary grace access: a non-dev must hold an entitlement b
 
 ## Affordable discovery (0.32)
 An unpurchased feature appears only when its published, usable price is no greater than the account's posted balance. Purchased features and dev access remain visible. Affordable entries are struck through and open their trade page. Unpriced/warming features remain undiscoverable; no price, ledger or entitlement is altered by this presentation policy. Time's duplicate Balance page is removed in favour of Activity. The shared Time hub is owner-editable through ordinary cloud controls; financial records are not editable labels.
+
+## Dev population display — 0.36
+Dev Accounts (IL05) includes a live Signed in word. It reuses pricing's exact distinct-valid-credential count; devices and tabs do not multiply it. Authentication issuance/sign-out/password reset invalidate the catalog immediately. Visible dev Accounts pages reconcile every five seconds for expiry, with existing focus/reconnect refresh and last-confirmed-value error recovery. This release changes neither creation estimates nor prices' formula, wallet balances, eligibility or entitlements. At inspection, four accounts were signed in; Defensive's 5,203,000,000μs approved cost divided by four was 1,300,750,000μs (21m 40.75s).

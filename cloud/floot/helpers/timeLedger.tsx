@@ -1,3 +1,4 @@
+import { signedInUserCount } from './signedInUsers';
 import { functionIdentifiers } from './functionIdentifiers';
 import { receiptClouds } from './functionClouds';
 import { sql,type Kysely,type Transaction } from 'kysely';
@@ -15,13 +16,13 @@ async function catalog(userId:number|null,tx:TimeDB=db){
  const [role,rows,owned,count,config,revenue,account]=await Promise.all([
   roles(userId,tx),tx.selectFrom('ionTimeProducts').selectAll().orderBy('id').execute(),
   userId?purchases(tx,userId).execute():Promise.resolve([]),
-  tx.selectFrom('sessions').select(sql<number>`count(distinct user_id)::int`.as('buyers')).where('credentialExpiresAt','>',new Date()).executeTakeFirstOrThrow(),
+  signedInUserCount(tx),
   tx.selectFrom('ionTimeConfig').selectAll().where('id','=',true).executeTakeFirstOrThrow(),
   sql<{productId:string;total:string}>`select metadata->>'productId' as product_id,sum(case when kind='purchase' then amount_us else -amount_us end)::text as total from ion_time_transactions where kind in ('purchase','correction') and metadata ? 'productId' group by metadata->>'productId'`.execute(tx),userId?tx.selectFrom('ionTimeAccounts').select('balanceUs').where('userId','=',userId).executeTakeFirst():Promise.resolve(undefined)
  ]);
  const readyAt=config.productionStartedAt?new Date(new Date(config.productionStartedAt).getTime()+86400000).toISOString():null,pricingReady=!!readyAt&&Date.parse(readyAt)<=Date.now(),purchased=new Set(owned.map(n=>n.productId)),recovered=new Map(revenue.rows.map(r=>[r.productId,r.total]));
- const products:TimeProduct[]=rows.map(p=>{const cost=p.directUs!==null&&p.freeUs!==null?(BigInt(p.directUs)+BigInt(p.freeUs)).toString():null;return{id:p.id,kind:p.kind as 'variant'|'engine',reference:p.reference,name:p.name,directUs:p.directUs,freeUs:p.freeUs,costUs:cost,proposalId:p.proposalId,affordable:!!p.publishedAt&&pricingReady&&cost!==null&&count.buyers>0&&BigInt(timePrice(cost,count.buyers))<=BigInt(account?.balanceUs||'0'),published:!!p.publishedAt,available:false,owned:role.dev||purchased.has(p.id),priceUs:cost!==null&&count.buyers?timePrice(cost,count.buyers):null,revenueUs:recovered.get(p.id)||'0'};});
- return{...role,products,buyers:count.buyers,readyAt,pricingReady};
+ const products:TimeProduct[]=rows.map(p=>{const cost=p.directUs!==null&&p.freeUs!==null?(BigInt(p.directUs)+BigInt(p.freeUs)).toString():null;return{id:p.id,kind:p.kind as 'variant'|'engine',reference:p.reference,name:p.name,directUs:p.directUs,freeUs:p.freeUs,costUs:cost,proposalId:p.proposalId,affordable:!!p.publishedAt&&pricingReady&&cost!==null&&count>0&&BigInt(timePrice(cost,count))<=BigInt(account?.balanceUs||'0'),published:!!p.publishedAt,available:false,owned:role.dev||purchased.has(p.id),priceUs:cost!==null&&count?timePrice(cost,count):null,revenueUs:recovered.get(p.id)||'0'};});
+ return{...role,products,buyers:count,readyAt,pricingReady};
 }
 async function snapshot(userId:number|null):Promise<TimeSnapshot>{
  const market=await catalog(userId);

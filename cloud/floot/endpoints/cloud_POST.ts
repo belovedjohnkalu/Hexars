@@ -1,3 +1,5 @@
+import { signedInUserCount } from '../helpers/signedInUsers';
+import { visibleDevClouds } from '../helpers/devPromptWorkflow';
 import { featureClouds } from '../helpers/featureClouds';
 import { functionClouds } from '../helpers/functionClouds';
 import { functionIdentifiers } from '../helpers/functionIdentifiers';
@@ -91,7 +93,7 @@ export async function handle(request: Request) {
         const target=await cloudContext(request,{action:'load',scope:input.target.scope,workspaceId:input.workspaceId,accessToken:input.accessToken});
         const saved=target.row&&Array.isArray(target.row.nodes)?target.row.nodes as unknown as CloudNode[]:[];
         const available=[...new Map([...target.seeds,...saved].map(n=>[n.id,n])).values()];
-        if(!available.some(n=>n.id===(input.target as {id:string}).id&&!n.removedBy))cloudPolicy.fail('Choose an available cloud.',400);
+        if(!visibleDevClouds(available,target.isDev).some(n=>n.id===(input.target as {id:string}).id&&!n.removedBy))cloudPolicy.fail('Choose an available cloud.',400);
       }
       let next=cloudChanges.apply(nodes,input,row.version,context.seeds);
       if(input.action==='copy')next=next.map(n=>n.copyOperation===input.operationId?{...n,createdBy:context.userId!}:n);
@@ -111,7 +113,7 @@ export async function handle(request: Request) {
     const identifiers=context.isDev||(['public','chess','home'].includes(input.scope)&&input.action!=='load')
       ?await cloudIdentifierStore(merged.filter(n=>!hubIds.has(n.id)),context.devNumber):undefined;
     // Signed picture URLs are refreshed on every read, and never stored as authority.
-    let visible:CloudNode[] = await Promise.all(merged.filter(n=>!n.removedBy&&!['time-balance','time-activity'].includes(n.id)&&(context.isDev||!['time-treasury','time-estimates'].includes(n.id))&&(context.scope!=='accounts'||n.id!=='account-remember'||context.seeds.some(seed=>seed.id==='account-remember'))).map(async node => {
+    let visible:CloudNode[] = await Promise.all(visibleDevClouds(merged,context.isDev).filter(n=>!n.removedBy&&!['time-balance','time-activity'].includes(n.id)&&(context.isDev||!['time-treasury','time-estimates'].includes(n.id))&&(context.scope!=='accounts'||n.id!=='account-remember'||context.seeds.some(seed=>seed.id==='account-remember'))).map(async node => {
       const visibleNode={...node,...(['time-added','time-spent','time-remaining'].includes(node.id)?{parentId:'time'}:{}),...(node.id==='control-link'&&node.name==='Link'?{name:'Redirect'}:{}),identifier:functional?.[node.id]??(context.isDev?namespaceIdentifier(identifiers?.get(node.id)?.label,Number((input.scope==='private'&&node.id==='private'||input.scope==='accounts'&&context.seeds.some(s=>s.id===node.id))?context.devNumber:identifiers?.get(node.id)?.devNumber??context.devNumber)):undefined),createdBy:undefined,canEdit:cloudPolicy.edit(input.scope,node,context.userId,context.owner),canCopy:!!context.userId&&cloudPolicy.writable(input.scope,context.userId,context.owner)&&(context.owner||!cloudTree.roots.some(r=>r.id===node.id))};
       const keys=node.imageKeys?.length?node.imageKeys:node.imageKey?[node.imageKey]:[];
       if(!keys.length)return visibleNode;
@@ -122,13 +124,13 @@ export async function handle(request: Request) {
     if(input.scope==='home'){
       const shared=await db.selectFrom('ionSharedSpaces').innerJoin('ionWorkspaces','ionSharedSpaces.workspaceId','ionWorkspaces.id').select(['kind','nodes']).where('kind','in',['public','chess']).execute();
       const personal=context.userId?await db.selectFrom('ionCloudAccounts').innerJoin('ionWorkspaces','ionCloudAccounts.workspaceId','ionWorkspaces.id').select('nodes').where('userId','=',context.userId).executeTakeFirst():undefined;
-      const accountSeeds=await accountClouds(request,context.userId);
+      const accountSeeds=await accountClouds(request,context.userId,context.isDev);
       const accountSaved=context.userId?await db.selectFrom('ionAccountSpaces').innerJoin('ionWorkspaces','ionAccountSpaces.workspaceId','ionWorkspaces.id').select('nodes').where('userId','=',context.userId).executeTakeFirst():undefined;
       const accountNodes=accountDeviceNodes(accountSeeds,Array.isArray(accountSaved?.nodes)?accountSaved.nodes as unknown as CloudNode[]:[]);
       const weight=(seeds:CloudNode[],stored:unknown,id:string)=>{const combined=[...new Map([...seeds,...(Array.isArray(stored)?stored as CloudNode[]:[])].map(n=>[n.id,n])).values()];return cloudTree.descendantCharacterWeights(combined).get(id)||0;};
       visible=visible.map(n=>({...n,...(n.id==='accounts'?{sizeCharacters:cloudTree.descendantCharacterWeights(accountNodes).get('accounts')||0}:n.id==='private'?{sizeCharacters:weight(cloudTree.forScope('private'),personal?.nodes,'private')}:n.id==='public'?{sizeCharacters:weight(cloudTree.forScope('public'),shared.find(s=>s.kind==='public')?.nodes,'public')}:n.id==='hexagonal-chess'?{sizeCharacters:weight(cloudTree.forScope('chess'),shared.find(s=>s.kind==='chess')?.nodes,'hexagonal-chess')}:{})}));
     }
-    return new Response(JSON.stringify({ nodes: visible, version, workspaceId:row.id, account:input.scope==='private', scope:input.scope, canAdd:cloudPolicy.writable(input.scope,context.userId,context.owner), dev:context.isDev,owner:context.owner,userId:context.userId||undefined, undo: cloudChanges.undo(nodes.filter(n=>cloudPolicy.edit(input.scope,n,context.userId,context.owner))) } satisfies OutputType), { headers });
+    return new Response(JSON.stringify({ nodes: visible, version, ...(context.isDev&&input.scope==='accounts'?{signedInUsers:await signedInUserCount()}:{}), workspaceId:row.id, account:input.scope==='private', scope:input.scope, canAdd:cloudPolicy.writable(input.scope,context.userId,context.owner), dev:context.isDev,owner:context.owner,userId:context.userId||undefined, undo: cloudChanges.undo(nodes.filter(n=>cloudPolicy.edit(input.scope,n,context.userId,context.owner))) } satisfies OutputType), { headers });
   } catch (error) {
     const status = error instanceof Error && "status" in error && typeof error.status === "number" ? error.status : error instanceof SyntaxError || (error && typeof error === "object" && "issues" in error) ? 400 : 503;
     if (status === 503) console.error("ION space request failed", error instanceof Error ? error.message : "Unknown error");
