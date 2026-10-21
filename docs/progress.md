@@ -366,3 +366,5 @@ Variant Board/Rules roots without explicit variant metadata now receive the same
 
 ## ION 0.35 — Direct Time navigation and descendant character sizing
 Full signed-in price catalog, minimal purchase pages, direct Time totals, paragraph earning clouds, incoming Receive/Empty, clean hold actions, descendant-character-only sizing and engine reset to White. See docs/releases/ion-0.35.md.
+
+- 0.35.1: replaced standalone Empty messages across the shared canvas and Time Receive with “Nothing here yet”; published, typechecked and verified desktop/phone states.

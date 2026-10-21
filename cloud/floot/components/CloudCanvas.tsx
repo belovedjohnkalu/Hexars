@@ -63,6 +63,6 @@ export function CloudCanvas({tabularNumbers=false,fitOnChange=false,nodes,parent
   const target=destination(node);if(/^https?:/.test(target))return <a key={node.id} {...props} href={target} target="_blank" rel="noopener noreferrer">{content}</a>;
   return node.destination==='control'||node.destination==='account'?<Button key={node.id} variant="ghost" {...props} onClick={()=>onCommand?.(node)}>{content}</Button>:<Link key={node.id} {...props} to={destination(node)} onClick={e=>{if(node.destination==='level'&&!node.lockedItem)try{localStorage.setItem('ion.engine',node.engineId??'tactical');localStorage.setItem('ion.difficulty',String(node.level??3));}catch{}onOpen(e,node.id,destination(node));}}>{content}</Link>;
  })}
- {!siblings.length&&!loading&&<p className={styles.empty}>Empty</p>}
+ {!siblings.length&&!loading&&<p className={styles.empty}>Nothing here yet</p>}
  </div></SpatialViewport></div>;
 }
