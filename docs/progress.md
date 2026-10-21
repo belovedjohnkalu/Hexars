@@ -354,3 +354,6 @@ Dev draft revisions, owner-reviewed publication, immutable publication audit and
 
 ## ION 0.31 — Purchase-only access and Other Accounts
 Paid access verifies purchase receipts despite legacy unlock flags. Other saved device accounts group beneath Other Accounts, preserving fixed identifiers.
+
+## ION 0.32 — Simpler spaces and affordable discovery
+Editable Time hub without duplicate Balance; affordable purchase gates; Redirect wording; exponentially growing word limits; shared policies and bounded spatial caches. See docs/releases/ion-0.32.md.

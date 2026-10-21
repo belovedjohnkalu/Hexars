@@ -184,3 +184,8 @@ Published estimates reuse TimeSpace's existing compact amount fields and black p
 
 ## Other Accounts — 0.31
 Other Accounts uses the existing lavender organic cloud, explicit navigation and permanent dev identifier allocation. The current account stays mint at the root. No new style, routes, typography or interaction pattern.
+
+## Affordable gates and simpler spaces — 0.32
+Unaffordable paid entries are absent. Affordable unpurchased names use a 2px line-through in their existing word color and open the Time trade view. They remain focusable links with a purchase-required accessible description. Time hub reuses the ordinary organic home canvas and owner composer; its redundant Balance entry is removed. Redirect uses the existing Controls/editor presentation. Public/Private composers show the depth-specific word allowance as a short input hint. No new visual tokens, routes, fonts or animation system.
+
+Saved cloud mutations synchronize mounted views immediately for the same account/scope; other accounts continue to receive server-authorized realtime snapshots.

@@ -14,7 +14,7 @@ describe("Private cloud names",()=>{
     expect(schema.parse({...credentials,action:"add",scope:"private",id:"bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb",parentId:"private",name:"A".repeat(6000)}).action).toBe("add");
   });
   it("preserves public validation, empty-name validation and full private drafts",()=>{
-    expect(cloudNames.schema("public").safeParse(long).success).toBeFalse();
+    expect(cloudNames.schema("public").safeParse(long).success).toBeTrue();
     expect(cloudNames.schema("private").safeParse("   ").success).toBeFalse();
     const key="private-long-qa";cloudDrafts.set(key,{name:long});
     expect(cloudDrafts.get(key).name).toBe(long);

@@ -1,10 +1,11 @@
 import { useEffect,useRef,useState } from 'react';
 import { z } from 'zod';
 import { ArrowUp,ImagePlus,X } from 'lucide-react';
+import { cloudWordLimit } from '../helpers/cloudWordLimits';
 import { cloudNames } from '../helpers/cloudNames';
 import { focusCloudComposer } from '../helpers/cloudTyping';
 import { photoFileError,type CloudPhotoDraft } from '../helpers/cloudPhotos';
-import type { CloudScope } from '../endpoints/cloud_POST.schema';
+import type { CloudScope,CloudNode } from '../endpoints/cloud_POST.schema';
 import { colorValue,unusedColor,type CloudColor } from '../helpers/cloudColors';
 import { CloudColorWheel } from './CloudColorWheel';
 import { PageControls } from './PageControls';
@@ -14,8 +15,9 @@ import { Form,FormItem,FormLabel,FormControl,FormMessage,useForm } from './Form'
 import styles from './CloudComposer.module.css';
 type Draft={name:string;file?:File;photos?:CloudPhotoDraft[];color?:CloudColor};
 type Submission=Draft&{id:string;parentId:string|null;uploaded?:boolean};
-export function CloudComposer({parentId,busy,disabled,onAdd,draft,onDraft,uploading=false,onCancelUpload,colors=false,scope='private',usedColors=[],className=''}:{parentId:string|null;busy:boolean;disabled:boolean;draft:Draft;onDraft:(draft:Draft)=>void;onAdd:(value:Submission)=>Promise<boolean>;uploading?:boolean;onCancelUpload?:()=>void;colors?:boolean;scope?:CloudScope;usedColors?:(CloudColor|undefined)[];className?:string}){
- const form=useForm({defaultValues:{name:draft.name},schema:z.object({name:cloudNames.schema(scope,true)})});
+export function CloudComposer({parentId,busy,disabled,onAdd,draft,onDraft,uploading=false,onCancelUpload,colors=false,scope='private',usedColors=[],nodes=[],className=''}:{parentId:string|null;busy:boolean;disabled:boolean;draft:Draft;onDraft:(draft:Draft)=>void;onAdd:(value:Submission)=>Promise<boolean>;uploading?:boolean;onCancelUpload?:()=>void;colors?:boolean;scope?:CloudScope;usedColors?:(CloudColor|undefined)[];nodes?:CloudNode[];className?:string}){
+ const limit=(scope==='public'||scope==='private')&&nodes.length?cloudWordLimit(nodes,parentId):undefined;
+ const form=useForm({defaultValues:{name:draft.name},schema:z.object({name:cloudNames.schema(scope,true,limit)})});
  const [editing,setEditing]=useState(false),[color,setColor]=useState<CloudColor>(()=>unusedColor(draft.color||'white',usedColors));
  const [photos,setPhotos]=useState<CloudPhotoDraft[]>(()=>draft.photos??(draft.file?[{id:crypto.randomUUID(),file:draft.file}]:[])),[fileError,setFileError]=useState(''),[previews,setPreviews]=useState<string[]>([]),[page,setPage]=useState(0);
  const fileInput=useRef<HTMLInputElement>(null),wordInput=useRef<HTMLInputElement>(null),pending=useRef<Submission|null>(null),composing=useRef(false),mounted=useRef(true),submitting=useRef(false);
@@ -27,8 +29,9 @@ export function CloudComposer({parentId,busy,disabled,onAdd,draft,onDraft,upload
  function choose(files:File[]){const valid:CloudPhotoDraft[]=[],errors:string[]=[];for(const file of files){const error=photoFileError(file);if(error)errors.push(file.name+': '+error);else valid.push({id:crypto.randomUUID(),file});}if(valid.length)setPhotos(old=>[...old,...valid]);setFileError(errors.length?errors[0]+(errors.length>1?' '+(errors.length-1)+' more invalid pictures.':''):'');}
  const submit=form.handleSubmit(async values=>{
   if(busy||disabled||submitting.current||composing.current)return;
-  const fileName=photos[0]?.file.name.replace(/\.[^.]+$/,'').trim()||'',name=values.name.trim()||(scope==='private'?fileName:fileName.slice(0,80));
+  const fileName=photos[0]?.file.name.replace(/\.[^.]+$/,'').trim()||'',name=values.name.trim()||(scope==='private'||scope==='public'?fileName:fileName.slice(0,80));
   if(!name){form.setFieldError('name','Add a word or choose pictures.');wordInput.current?.focus();return;}
+  const checked=cloudNames.schema(scope,false,limit).safeParse(name);if(!checked.success){form.setFieldError('name',checked.error.issues[0]?.message||'Check the name.');wordInput.current?.focus();return;}
   const item=pending.current??{id:crypto.randomUUID(),parentId,name,file:photos[0]?.file,photos,...(colors?{color:unusedColor(color,usedColors)}:{})};pending.current=item;
   const shouldFocus=!!wordInput.current&&document.activeElement?.closest('#cloud-composer-form')!==null;submitting.current=true;
   try{if(await onAdd(item)){const nextColor=colors?unusedColor(color,[...usedColors,item.color]):color;pending.current=null;onDraft({name:'',...(colors?{color:nextColor}:{})});if(mounted.current){form.setValues({name:''});setColor(nextColor);setPhotos([]);setFileError('');if(shouldFocus)wordInput.current?.focus({preventScroll:true});}}}finally{submitting.current=false;}
@@ -41,10 +44,10 @@ export function CloudComposer({parentId,busy,disabled,onAdd,draft,onDraft,upload
  <div className={styles.bar}>
  <Button variant="ghost" size="icon" className={styles.photo} aria-label={uploading?'Stop upload':'Choose pictures'} title={uploading?'Stop upload':'JPEG, PNG, WebP or GIF · 3 MB each'} disabled={busy&&!uploading} onClick={()=>uploading?onCancelUpload?.():fileInput.current?.click()}>{uploading?<X size={24}/>:<ImagePlus size={24} strokeWidth={1.6}/>}</Button>
  <Input type="file" multiple ref={fileInput} accept="image/png,image/jpeg,image/webp,image/gif" className={styles.hidden} aria-label="Picture file" aria-invalid={!!fileError} aria-describedby={fileError?'cloud-picture-error':undefined} tabIndex={-1} onChange={e=>{choose(Array.from(e.target.files||[]));e.target.value='';}} disabled={busy}/>
- <FormItem name="name" className={styles.field}><FormLabel className={styles.hidden}>Add a word or a picture name</FormLabel><FormControl><Input ref={wordInput} data-cloud-input onFocus={()=>setEditing(true)} className={styles.input} style={{color:colorValue(colors?color:undefined)}} placeholder={photos.length?'Name these pictures…':'Add…'} autoComplete="off" enterKeyHint="done" maxLength={scope==='private'?undefined:80} value={form.values.name} onChange={e=>form.setValues({name:e.target.value})} onCompositionStart={()=>{composing.current=true;}} onCompositionEnd={()=>{composing.current=false;}} onKeyDown={e=>{if(e.key==='Enter'&&(e.nativeEvent.isComposing||composing.current))e.preventDefault();}} readOnly={busy||disabled} aria-busy={busy||disabled}/></FormControl><FormMessage className={styles.fieldError}/></FormItem>
+ <FormItem name="name" className={styles.field}><FormLabel className={styles.hidden}>Add a word or a picture name</FormLabel><FormControl><Input ref={wordInput} data-cloud-input onFocus={()=>setEditing(true)} className={styles.input} style={{color:colorValue(colors?color:undefined)}} placeholder={photos.length?'Name…':limit===undefined?'Add…':limit+' '+(limit===1n?'word':'words')+'…'} autoComplete="off" enterKeyHint="done" maxLength={scope==='private'||scope==='public'?undefined:80} value={form.values.name} onChange={e=>form.setValues({name:e.target.value})} onCompositionStart={()=>{composing.current=true;}} onCompositionEnd={()=>{composing.current=false;}} onKeyDown={e=>{if(e.key==='Enter'&&(e.nativeEvent.isComposing||composing.current))e.preventDefault();}} readOnly={busy||disabled} aria-busy={busy||disabled}/></FormControl><FormMessage className={styles.fieldError}/></FormItem>
  <Button type="submit" size="icon" className={styles.add} aria-label={busy?'Saving':'Add'} title={disabled?'Opening your space':busy?'Saving':'Add'} disabled={busy||disabled||(!form.values.name.trim()&&!photos.length)} aria-busy={busy}>{busy?<span className={styles.saving}/>:<ArrowUp size={24} strokeWidth={2}/>}</Button>
  </div>
  {fileError&&<p id="cloud-picture-error" className={styles.error} role="alert">{fileError}</p>}
- {scope!=='private'&&form.values.name.length>=70&&<span className={styles.counter} aria-label={form.values.name.length+' of 80 characters'}>{form.values.name.length}/80</span>}
+ {scope!=='private'&&scope!=='public'&&form.values.name.length>=70&&<span className={styles.counter} aria-label={form.values.name.length+' of 80 characters'}>{form.values.name.length}/80</span>}
  </form></Form></div>;
 }

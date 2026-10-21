@@ -1,7 +1,7 @@
 import React,{useState} from 'react';
 import { render,act,cleanup,waitFor,fireEvent } from '@testing-library/react';
 import { QueryClient,QueryClientProvider } from '@tanstack/react-query';
-import { MemoryRouter } from 'react-router-dom';
+import { MemoryRouter,useLocation } from 'react-router-dom';
 import { AuthProvider,AUTH_QUERY_KEY } from './useAuth';
 import { TimeProvider } from './useTime';
 import { TimeAccess } from '../components/TimeAccess';
@@ -9,7 +9,9 @@ import { RealtimeClient } from './RealtimeClient';
 import type { TimeSnapshot } from '../endpoints/time_POST.schema';
 const market:TimeSnapshot={userId:null,dev:false,owner:false,balanceUs:'0',earnedUs:'0',buyers:1,readyAt:null,pricingReady:false,products:[{id:'engine:tactical',kind:'engine',reference:'tactical',name:'Tactical',directUs:null,freeUs:null,costUs:null,priceUs:null,published:false,available:true,owned:true,revenueUs:'0'}]};
 function Game(){const [value,setValue]=useState(0);return <button onClick={()=>setValue(value+1)}>Game dialog {value}</button>;}
-function App({client}:{client:QueryClient}){return <QueryClientProvider client={client}><AuthProvider><TimeProvider><MemoryRouter><TimeAccess items={['engine:tactical']}><Game/></TimeAccess></MemoryRouter></TimeProvider></AuthProvider></QueryClientProvider>;}
+function TestEntry(){return useLocation().search?<span>Purchase page</span>:<TimeAccess items={['engine:tactical']}><Game/></TimeAccess>;}
+function App({client}:{client:QueryClient}){return <QueryClientProvider client={client}><AuthProvider><TimeProvider><MemoryRouter><TestEntry/></MemoryRouter></TimeProvider></AuthProvider></QueryClientProvider>;}
+
 describe('Time account and connection recovery',()=>{
  let client:QueryClient;
  beforeEach(()=>{client=new QueryClient({defaultOptions:{queries:{retry:false,gcTime:Infinity}}});spyOn(RealtimeClient.prototype,'connect').and.callFake(async()=>{});spyOn(document,'hasFocus').and.returnValue(false);});
@@ -28,7 +30,7 @@ describe('Time account and connection recovery',()=>{
  it('blocks a legacy available flag when the feature was not purchased',async()=>{
   const unpaid={...market,products:market.products.map(p=>({...p,owned:false}))};client.setQueryData(AUTH_QUERY_KEY,null);client.setQueryData(['time',null],unpaid);
   spyOn(globalThis,'fetch').and.callFake(async url=>new Response(JSON.stringify(String(url).includes('auth/session')?{json:{user:null}}:{snapshot:unpaid}),{status:200}));
-  const view=render(<App client={client}/>);expect(view.queryByText('Game dialog 0')).toBeNull();expect(view.getByText('View Tactical')).toBeTruthy();
+  const view=render(<App client={client}/>);expect(view.queryByText('Game dialog 0')).toBeNull();await waitFor(()=>expect(view.getByText('Purchase page')).toBeTruthy());
  });
  it('rejects a wallet response belonging to a different account',async()=>{
   client.setQueryData(AUTH_QUERY_KEY,{id:22,email:'time-hook@example.invalid',displayName:'Time hook',role:'user',avatarUrl:null});

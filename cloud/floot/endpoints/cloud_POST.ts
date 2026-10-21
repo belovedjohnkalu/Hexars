@@ -1,3 +1,7 @@
+import { featureClouds } from '../helpers/featureClouds';
+import { functionClouds } from '../helpers/functionClouds';
+import { functionIdentifiers } from '../helpers/functionIdentifiers';
+import { assertCloudWordLimits } from '../helpers/cloudWordLimits';
 import { timeLedger } from '../helpers/timeLedger';
 import { accountDeviceNodes } from '../helpers/accountDeviceNodes';
 import { namespaceIdentifier } from '../helpers/cloudIdentifiers';
@@ -66,6 +70,7 @@ export async function handle(request: Request) {
           const keys=await mapPhotos(input.images,image=>validateCloudPhoto("ion/"+row.id+"/"+context.userId+"/"+input.id+"/"+image.id+"."+extensions[image.contentType],image.contentType));
           node.imageKeys=keys;
         }
+        assertCloudWordLimits(all,[...all,node],input.scope);
         assertCloudCapacity([...context.seeds,...nodes],[...context.seeds,...nodes,node]);
         nodes = [...nodes, node];
         const updated = await db.updateTable("ionWorkspaces").set({ nodes: nodes as unknown as Json, version: row.version + 1, updatedAt: new Date() })
@@ -90,6 +95,7 @@ export async function handle(request: Request) {
       let next=cloudChanges.apply(nodes,input,row.version,context.seeds);
       if(input.action==='copy')next=next.map(n=>n.copyOperation===input.operationId?{...n,createdBy:context.userId!}:n);
       if(next!==nodes){
+        assertCloudWordLimits([...context.seeds,...nodes],[...context.seeds,...next],input.scope);
         assertCloudCapacity([...context.seeds,...nodes],[...context.seeds,...next]);
         const updated=await db.updateTable("ionWorkspaces").set({nodes:next as unknown as Json,version:row.version+1,updatedAt:new Date()}).where("id","=",row.id).where("version","=",row.version).returning("version").executeTakeFirst();
         if(!updated)throw new CloudError("Your space changed. Try again.",409);
@@ -100,17 +106,18 @@ export async function handle(request: Request) {
     const merged=combine(nodes);
     // Keep removed rows in the registry. Allocation is serialized across devices;
     // labels are never recycled or exposed in another account's Private space.
+    const hubIds=new Set(functionClouds.filter(n=>n.parentId==='time').map(n=>n.id)),functional=context.isDev&&input.scope==='home'?await functionIdentifiers(context.userId!):undefined;
     const identifiers=context.isDev||(['public','chess','home'].includes(input.scope)&&input.action!=='load')
-      ?await cloudIdentifierStore(merged,context.devNumber):undefined;
+      ?await cloudIdentifierStore(merged.filter(n=>!hubIds.has(n.id)),context.devNumber):undefined;
     // Signed picture URLs are refreshed on every read, and never stored as authority.
-    let visible = await Promise.all(merged.filter(n=>!n.removedBy&&(context.scope!=='accounts'||n.id!=='account-remember'||context.seeds.some(seed=>seed.id==='account-remember'))).map(async node => {
-      const visibleNode={...node,identifier:context.isDev?namespaceIdentifier(identifiers?.get(node.id)?.label,Number((input.scope==='private'&&node.id==='private'||input.scope==='accounts'&&context.seeds.some(s=>s.id===node.id))?context.devNumber:identifiers?.get(node.id)?.devNumber??context.devNumber)):undefined,createdBy:undefined,canEdit:cloudPolicy.edit(input.scope,node,context.userId,context.owner),canCopy:!!context.userId&&cloudPolicy.writable(input.scope,context.userId,context.owner)&&(context.owner||!cloudTree.roots.some(r=>r.id===node.id))};
+    let visible:CloudNode[] = await Promise.all(merged.filter(n=>!n.removedBy&&n.id!=='time-balance'&&(context.isDev||!['time-treasury','time-estimates'].includes(n.id))&&(context.scope!=='accounts'||n.id!=='account-remember'||context.seeds.some(seed=>seed.id==='account-remember'))).map(async node => {
+      const visibleNode={...node,...(node.id==='control-link'&&node.name==='Link'?{name:'Redirect'}:{}),identifier:functional?.[node.id]??(context.isDev?namespaceIdentifier(identifiers?.get(node.id)?.label,Number((input.scope==='private'&&node.id==='private'||input.scope==='accounts'&&context.seeds.some(s=>s.id===node.id))?context.devNumber:identifiers?.get(node.id)?.devNumber??context.devNumber)):undefined),createdBy:undefined,canEdit:cloudPolicy.edit(input.scope,node,context.userId,context.owner),canCopy:!!context.userId&&cloudPolicy.writable(input.scope,context.userId,context.owner)&&(context.owner||!cloudTree.roots.some(r=>r.id===node.id))};
       const keys=node.imageKeys?.length?node.imageKeys:node.imageKey?[node.imageKey]:[];
       if(!keys.length)return visibleNode;
       const urls=await Promise.all(keys.map(async filename=>{const result=await getUrl({visibility:'private',filename,expiresInSeconds:3600});return result.ok?result.url:'';}));
       return {...visibleNode,isImage:true,imageKey:undefined,imageKeys:undefined,imageUrl:urls[0],imageUrls:urls};
     }));
-    if(input.scope==='chess'){const market=await timeLedger.catalog(context.userId);const locked=new Set(market.products.filter(p=>p.kind==='variant'&&!market.dev&&!p.owned).map(p=>p.reference));visible=visible.map(n=>n.variant&&locked.has(n.variant)?{...n,note:undefined,lockedItem:'variant:'+n.variant}:n);}
+    if(input.scope==='chess'){const market=await timeLedger.catalog(context.userId);visible=featureClouds(visible,market.products,market.dev);}
     if(input.scope==='home'){
       const shared=await db.selectFrom('ionSharedSpaces').innerJoin('ionWorkspaces','ionSharedSpaces.workspaceId','ionWorkspaces.id').select(['kind','nodes']).where('kind','in',['public','chess']).execute();
       const personal=context.userId?await db.selectFrom('ionCloudAccounts').innerJoin('ionWorkspaces','ionCloudAccounts.workspaceId','ionWorkspaces.id').select('nodes').where('userId','=',context.userId).executeTakeFirst():undefined;

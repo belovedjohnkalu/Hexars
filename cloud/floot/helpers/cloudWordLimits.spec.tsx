@@ -1,0 +1,10 @@
+import { cloudWordLimit,assertCloudWordLimits } from './cloudWordLimits';
+import { cloudNames } from './cloudNames';
+import type { CloudNode } from '../endpoints/cloud_POST.schema';
+const nodes:CloudNode[]=[{id:'private',parentId:null,name:'Private'},{id:'a',parentId:'private',name:'A'},{id:'b',parentId:'a',name:'B'},{id:'c',parentId:'b',name:'C'}];
+describe('Depth-based word limits',()=>{
+ it('doubles from one word with no numeric depth ceiling',()=>{expect(cloudWordLimit(nodes,'private')).toBe(1n);expect(cloudWordLimit(nodes,'a')).toBe(2n);expect(cloudWordLimit(nodes,'b')).toBe(4n);const deep=[nodes[0]];for(let i=0;i<2000;i++)deep.push({id:'d'+i,parentId:i?'d'+(i-1):'private',name:'D'});expect(cloudWordLimit(deep,'d1999')).toBe(1n<<2000n);});
+ it('enforces additions and rename/move constraints while preserving old content',()=>{const add={id:'new',parentId:'private',name:'Two words'};expect(()=>assertCloudWordLimits(nodes,[...nodes,add],'private')).toThrow();expect(()=>assertCloudWordLimits(nodes,[...nodes,{...add,parentId:'a'}],'private')).not.toThrow();const legacy=[...nodes,{...add,id:'old'}];expect(()=>assertCloudWordLimits(legacy,legacy,'private')).not.toThrow();expect(()=>assertCloudWordLimits(legacy,legacy.map(n=>n.id==='old'?{...n,name:'Three new words'}:n),'private')).toThrow();const branch=[...nodes,{...add,parentId:'a'}];expect(()=>assertCloudWordLimits(branch,branch.map(n=>n.id==='new'?{...n,parentId:'private'}:n),'private')).toThrow();});
+ it('allows long single words and applies the same public/private policy',()=>{expect(cloudNames.schema('public',false,1n).safeParse('a'.repeat(500)).success).toBeTrue();expect(cloudNames.schema('public',false,1n).safeParse('two words').success).toBeFalse();expect(cloudNames.schema('private',false,2n).safeParse('two words').success).toBeTrue();expect(()=>assertCloudWordLimits(nodes,[...nodes,{id:'new',parentId:'private',name:'two words'}],'home')).not.toThrow();});
+ it('rejects ancestry cycles without recursion',()=>{expect(()=>cloudWordLimit([{id:'a',parentId:'b',name:'A'},{id:'b',parentId:'a',name:'B'}],'a')).toThrow();});
+});

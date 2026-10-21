@@ -2,10 +2,10 @@ import { z } from "zod";
 import type { CloudScope } from "../endpoints/cloud_POST.schema";
 
 export const cloudNames = {
-  schema(scope: CloudScope, allowEmpty = false) {
+  schema(scope: CloudScope, allowEmpty = false, maxWords?:bigint) {
     const value = z.string().trim();
     const required = allowEmpty ? value : value.min(1, "Give this cloud a name.");
-    return scope === "private" ? required : required.max(80, "Use up to 80 characters.");
+    return scope==='private'||scope==='public'?required.refine(name=>maxWords===undefined||BigInt(name.trim().match(/\S+/gu)?.length??0)<=maxWords,'Use up to '+maxWords+' '+(maxWords===1n?'word':'words')+' here.'):required.max(80,'Use up to 80 characters.');
   },
   preview(name: string, length = 160) {
     const characters = Array.from(name);

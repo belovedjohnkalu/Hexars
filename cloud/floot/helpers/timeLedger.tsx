@@ -12,15 +12,15 @@ async function roles(userId:number|null,tx:TimeDB=db){if(!userId)return{dev:fals
 async function ensureWallet(tx:TimeDB,userId:number){await tx.insertInto('ionTimeAccounts').values({id:wallet(userId),kind:'user',userId}).onConflict(c=>c.column('id').doNothing()).execute();}
 function purchases(tx:TimeDB,userId:number){return tx.selectFrom('ionTimeEntitlements as e').innerJoin('ionTimeTransactions as t','t.id','e.transactionId').select(['e.productId','e.transactionId']).where('e.userId','=',userId).where('t.kind','=','purchase').where('t.actorId','=',userId).where('t.fromAccount','=',wallet(userId)).where('t.toAccount','=','treasury').where(sql<boolean>`t.metadata->>'productId'=e.product_id`).where(sql<boolean>`NOT EXISTS (SELECT 1 FROM ion_time_transactions c WHERE c.kind='correction' AND c.metadata->>'reverses'=t.id::text)`);}
 async function catalog(userId:number|null,tx:TimeDB=db){
- const [role,rows,owned,count,config,revenue]=await Promise.all([
+ const [role,rows,owned,count,config,revenue,account]=await Promise.all([
   roles(userId,tx),tx.selectFrom('ionTimeProducts').selectAll().orderBy('id').execute(),
   userId?purchases(tx,userId).execute():Promise.resolve([]),
   tx.selectFrom('sessions').select(sql<number>`count(distinct user_id)::int`.as('buyers')).where('credentialExpiresAt','>',new Date()).executeTakeFirstOrThrow(),
   tx.selectFrom('ionTimeConfig').selectAll().where('id','=',true).executeTakeFirstOrThrow(),
-  sql<{productId:string;total:string}>`select metadata->>'productId' as product_id,sum(case when kind='purchase' then amount_us else -amount_us end)::text as total from ion_time_transactions where kind in ('purchase','correction') and metadata ? 'productId' group by metadata->>'productId'`.execute(tx)
+  sql<{productId:string;total:string}>`select metadata->>'productId' as product_id,sum(case when kind='purchase' then amount_us else -amount_us end)::text as total from ion_time_transactions where kind in ('purchase','correction') and metadata ? 'productId' group by metadata->>'productId'`.execute(tx),userId?tx.selectFrom('ionTimeAccounts').select('balanceUs').where('userId','=',userId).executeTakeFirst():Promise.resolve(undefined)
  ]);
  const readyAt=config.productionStartedAt?new Date(new Date(config.productionStartedAt).getTime()+86400000).toISOString():null,pricingReady=!!readyAt&&Date.parse(readyAt)<=Date.now(),purchased=new Set(owned.map(n=>n.productId)),recovered=new Map(revenue.rows.map(r=>[r.productId,r.total]));
- const products:TimeProduct[]=rows.map(p=>{const cost=p.directUs!==null&&p.freeUs!==null?(BigInt(p.directUs)+BigInt(p.freeUs)).toString():null;return{id:p.id,kind:p.kind as 'variant'|'engine',reference:p.reference,name:p.name,directUs:p.directUs,freeUs:p.freeUs,costUs:cost,proposalId:p.proposalId,published:!!p.publishedAt,available:false,owned:role.dev||purchased.has(p.id),priceUs:cost!==null&&count.buyers?timePrice(cost,count.buyers):null,revenueUs:recovered.get(p.id)||'0'};});
+ const products:TimeProduct[]=rows.map(p=>{const cost=p.directUs!==null&&p.freeUs!==null?(BigInt(p.directUs)+BigInt(p.freeUs)).toString():null;return{id:p.id,kind:p.kind as 'variant'|'engine',reference:p.reference,name:p.name,directUs:p.directUs,freeUs:p.freeUs,costUs:cost,proposalId:p.proposalId,affordable:!!p.publishedAt&&pricingReady&&cost!==null&&count.buyers>0&&BigInt(timePrice(cost,count.buyers))<=BigInt(account?.balanceUs||'0'),published:!!p.publishedAt,available:false,owned:role.dev||purchased.has(p.id),priceUs:cost!==null&&count.buyers?timePrice(cost,count.buyers):null,revenueUs:recovered.get(p.id)||'0'};});
  return{...role,products,buyers:count.buyers,readyAt,pricingReady};
 }
 async function snapshot(userId:number|null):Promise<TimeSnapshot>{

@@ -35,3 +35,5 @@
 .node,.node * { -webkit-user-select:none; user-select:none; -webkit-touch-callout:none; -webkit-tap-highlight-color:transparent; }
 
 .tabular .node { font-variant-numeric:tabular-nums; }
+
+.locked .text { text-decoration-line:line-through; text-decoration-thickness:2px; text-decoration-color:currentColor; }

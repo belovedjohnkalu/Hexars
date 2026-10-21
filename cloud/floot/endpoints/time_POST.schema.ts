@@ -12,7 +12,7 @@ export const schema=z.discriminatedUnion('action',[
  z.object({action:z.literal('administration')})
 ]);
 export type TimeInput=z.infer<typeof schema>;
-export type TimeProduct={id:string;kind:'variant'|'engine';reference:string;name:string;directUs:string|null;freeUs:string|null;costUs:string|null;priceUs:string|null;proposalId?:string|null;published:boolean;available:boolean;owned:boolean;revenueUs:string};
+export type TimeProduct={id:string;kind:'variant'|'engine';reference:string;name:string;directUs:string|null;freeUs:string|null;costUs:string|null;priceUs:string|null;affordable?:boolean;proposalId?:string|null;published:boolean;available:boolean;owned:boolean;revenueUs:string};
 export type TimeReceipt={id:string;kind:string;amountUs:string;direction:'in'|'out'|'none';other:string;createdAt:string;metadata:Record<string,unknown>;identifier?:string;identifiers?:Record<string,string>};
 export type TimeSnapshot={userId:number|null;dev:boolean;owner:boolean;playerName?:string;balanceUs:string;earnedUs:string;addedUs?:string;spentUs?:string;observedAt?:string;identifiers?:Record<string,string>;buyers:number;readyAt:string|null;pricingReady:boolean;products:TimeProduct[];treasuryUs?:string;earning?:{leaseId:string;active:boolean;lastSeen:string;idleUntil:string}};
 export type TimeQuote={id:string;kind:'purchase'|'transfer'|'payout';amountUs:string;recipient?:string;productId?:string;productName?:string;buyers?:number;expiresAt:string};

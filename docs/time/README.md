@@ -52,3 +52,6 @@ Validation includes exact-precision/math and all variant-engine policy combinati
 
 ## Purchase-only access (0.31)
 The user superseded temporary grace access: a non-dev must hold an entitlement backed by that account's unreversed Time purchase to the treasury for the same product. Availability/legacy unlock flags do not qualify. Unpriced or warming paid features remain locked until a purchase can be made. Free features, dev exemptions and saved-game viewing remain unchanged. No old journal entries or balances are changed by this policy.
+
+## Affordable discovery (0.32)
+An unpurchased feature appears only when its published, usable price is no greater than the account's posted balance. Purchased features and dev access remain visible. Affordable entries are struck through and open their trade page. Unpriced/warming features remain undiscoverable; no price, ledger or entitlement is altered by this presentation policy. Time's duplicate Balance page is removed in favour of Activity. The shared Time hub is owner-editable through ordinary cloud controls; financial records are not editable labels.
