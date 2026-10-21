@@ -360,3 +360,6 @@ Editable Time hub without duplicate Balance; affordable purchase gates; Redirect
 
 ## ION 0.33 — Word allowance and page views
 Live counter and thousand-word pictures; Controls-free Back; downward-only swipe rotation; independent keyboard-created page views. See docs/releases/ion-0.33.md.
+
+## ION 0.34 — Consistent variant discovery
+Variant Board/Rules roots without explicit variant metadata now receive the same hidden/affordable/owned policy as engines, including legacy and renamed entries. See docs/releases/ion-0.34.md.
