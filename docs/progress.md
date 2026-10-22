@@ -374,3 +374,6 @@ Full signed-in price catalog, minimal purchase pages, direct Time totals, paragr
 - 0.37: sign-in/sign-up land on ION regardless of caller return link; Remember is a clear outlined toggle button on both forms, and optional device-remember failures no longer block successful sign-in.
 
 - 0.37.1: extended dev-only privacy to the entire ION Prompts root and every descendant, preserving content and permanent ILs.
+
+- 0.38: published visitor recovery: Library cancellation/account masking/Retry, receipt Retry, online waiting-room reconciliation, touch targets and unobstructed offline Back. Hosted checks and preview fixtures passed; independent live native game/API/database checks passed. Full post-publish browser rerun was initially limited by a workspace network tunnel failure.
+- 0.39: implemented the three moved Complete prompts at the owner’s direct request, plus Delete → Keep children with version checks, branch authorization, preserved ILs and ten-second Undo. Exact sixteen-place percentage arithmetic, linear page-relative sizing and interrupted typing restoration. Twelve hosted suites and phone/desktop deletion failure-retry fixtures passed; physical mobile keyboard display remains OS-controlled. See docs/releases/ion-0.39.md.

@@ -26,3 +26,5 @@
 .sheet[data-compact=true] .destinations { margin-top:4px; }
 .sheet[data-compact=true] .destinations button { min-height:40px; font-size:14px; line-height:1.3; padding:6px; }
 .sheet[data-compact=true] .actions { margin-top:6px; }
+
+.scopes button { white-space:normal; }

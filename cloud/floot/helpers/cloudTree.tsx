@@ -1,3 +1,4 @@
+import { cloudPercent } from './cloudPercent';
 import { functionClouds } from './functionClouds';
 import { characterLength } from './cloudText';
 import { chessJourney } from "./chessJourney";
@@ -106,6 +107,6 @@ function characterWeights(nodes:CloudNode[]){return statistics(nodes).weights;}
 function descendantCharacterWeights(nodes:CloudNode[]){const {byId,weights}=statistics(nodes);return new Map([...byId.values()].map(n=>[n.id,n.sizeCharacters??Math.max(0,(weights.get(n.id)||0)-characterLength(n.name)-characterLength(n.note||''))]));}
 function sizes(nodes:CloudNode[],parentId:string|null){
  const {byId,weights,counts}=statistics(nodes),siblings=[...byId.values()].filter(n=>n.parentId===parentId),values=siblings.map(n=>n.sizeCharacters??Math.max(0,(weights.get(n.id)||0)-characterLength(n.name)-characterLength(n.note||''))),min=Math.min(...values),max=Math.max(...values);
- return siblings.map((node,i)=>({...node,count:counts.get(node.id)||0,characters:values[i],percent:max===min?50:(values[i]-min)/(max-min)*100}));
+ return siblings.map((node,i)=>({...node,count:counts.get(node.id)||0,characters:values[i],percent:cloudPercent(values[i],min,max).value,percentExact:cloudPercent(values[i],min,max).exact}));
 }
 export const cloudTree={roots,seed,forScope(scope:CloudScope):CloudNode[]{return scope==='chess'?seed:scope==='public'?[{...roots[1],parentId:null,destination:undefined}]:scope==='private'?[{...roots[2],parentId:null,destination:undefined}]:scope==='accounts'?[{...roots[4],parentId:null,destination:undefined}]:homeSeed;},resolve(nodes:CloudNode[]){return [...new Map([...seed,...nodes].map(n=>[n.id,n])).values()];},descendants,characterWeights,descendantCharacterWeights,sizes,path(nodes:CloudNode[],id:string|null){const byId=new Map(nodes.map(n=>[n.id,n])),result:CloudNode[]=[],seen=new Set<string>();let current=id?byId.get(id):undefined;while(current&&!seen.has(current.id)){seen.add(current.id);result.unshift(current);current=current.parentId?byId.get(current.parentId):undefined;}return result;}};

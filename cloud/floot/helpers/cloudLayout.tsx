@@ -3,18 +3,19 @@ import { identifierFootprint } from "./cloudIdentifiers";
 type Item={id:string;name:string;identifier?:string;imageUrl?:string;isImage?:boolean;percent:number;characters?:number};
 export type Rect={x:number;y:number;width:number;height:number};
 export type CloudLayout={width:number;height:number;items:Array<Rect&{id:string;fontSize:number;pictureSize?:number;captionSize?:number;gridSlot?:number}>};
-export function cloudLayout(items:Item[],width:number,height:number,measure:(text:string,size:number)=>number,options:{organic?:boolean;square?:boolean;boardGrid?:boolean;columns?:number;compact?:boolean;previous?:CloudLayout}={}){
+export function cloudLayout(items:Item[],width:number,height:number,measure:(text:string,size:number)=>number,options:{organic?:boolean;square?:boolean;boardGrid?:boolean;columns?:number;compact?:boolean;minTargetSize?:number;previous?:CloudLayout}={}){
   const previous=options.previous,narrow=options.compact??width<600,gap=options.organic?(narrow?5:8):narrow?16:24,cells=new Map<string,Rect[]>(),result:CloudLayout['items']=[];
   function keys(rect:Rect){const list:string[]=[];for(let x=Math.floor(rect.x/128);x<=Math.floor((rect.x+rect.width)/128);x++)for(let y=Math.floor(rect.y/128);y<=Math.floor((rect.y+rect.height)/128);y++)list.push(x+","+y);return list;}
   const overlaps=(rect:Rect)=>keys(rect).some(k=>(cells.get(k)||[]).some(r=>rect.x<r.x+r.width&&rect.x+rect.width>r.x&&rect.y<r.y+r.height&&rect.y+rect.height>r.y));
   const reserve=(rect:Rect)=>{for(const k of keys(rect))cells.set(k,[...(cells.get(k)||[]),rect]);};
-  const binary=options.organic&&new Set(items.map(n=>n.percent)).size===2;
+  const minFont=narrow?15:17;
+  const pageFont=Math.max(minFont,Math.min(...items.filter(n=>!n.isImage&&!n.imageUrl).map(item=>{const lines=cloudTextLines(item.name),unit=Math.max(1,...lines.map(line=>measure(line,1)));return Math.min((width-48-identifierFootprint(item.identifier).width)/unit,(height-48)/(lines.length*1.18));}),Math.min(width,height)*.34));
   const measured=[...items].sort((a,b)=>b.percent-a.percent||items.indexOf(a)-items.indexOf(b)).map(item=>{
-    const percent=binary?30+item.percent*.4:item.percent;
-    const identifier=identifierFootprint(item.identifier),fontSize=options.organic?(narrow?15:17)+Math.pow(percent/100,1.15)*(narrow?44:57)+(item.characters===undefined?0:6*item.characters/(item.characters+80)):(narrow?17:20)+item.percent/100*(narrow?13:18);
+    const percent=Math.max(0,Math.min(100,item.percent));
+    const identifier=identifierFootprint(item.identifier),fontSize=options.organic?minFont+(pageFont-minFont)*percent/100:(narrow?17:20)+item.percent/100*(narrow?13:18);
     const lines=cloudTextLines(item.name),picture=options.organic?(narrow?82:110)+percent*.65+(item.characters===undefined?0:4*item.characters/(item.characters+80)):(narrow?105:135)+item.percent*.25,captionSize=options.organic?14+percent*.09+(item.characters===undefined?0:2*item.characters/(item.characters+80)):16,isPicture=item.isImage||item.imageUrl;
     const labelWidth=Math.max(...lines.map(line=>measure(line,isPicture?captionSize:fontSize)))+(options.organic?12:24)+identifier.width;
-    return {id:item.id,fontSize,width:Math.max(64,labelWidth,isPicture?picture+24:0),height:isPicture?picture+Math.max(lines.length*captionSize*1.3,identifier.height)+(options.organic?20:32):Math.max(lines.length*fontSize*1.18,identifier.height)+(options.organic?12:20),...(isPicture?{pictureSize:picture,captionSize}:{})};
+    return {id:item.id,fontSize,width:Math.max(64,options.minTargetSize??0,labelWidth,isPicture?picture+24:0),height:Math.max(options.minTargetSize??0,isPicture?picture+Math.max(lines.length*captionSize*1.3,identifier.height)+(options.organic?20:32):Math.max(lines.length*fontSize*1.18,identifier.height)+(options.organic?12:20)),...(isPicture?{pictureSize:picture,captionSize}:{})};
   });
   if(options.organic&&measured.length>1)width=Math.max(width,Math.max(...measured.map(n=>n.width))*2.25+32,Math.sqrt(measured.reduce((sum,n)=>sum+(n.width+gap)*(n.height+gap),0))*1.4);
   if(options.boardGrid){

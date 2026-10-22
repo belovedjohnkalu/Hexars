@@ -14,3 +14,10 @@ describe('Picture allowance',()=>{
 });
 
 describe('Legacy picture Undo',()=>{it('restores unchanged original content without permitting a new over-budget copy',()=>{const old={id:'picture',parentId:'private',name:'Picture',imageKey:'old.png',removedBy:'operation'},before=[...nodes,old],restored={...old,removedBy:undefined};expect(()=>assertCloudWordLimits(before,[...nodes,restored],'private')).not.toThrow();expect(()=>assertCloudWordLimits(before,[...nodes,{...restored,id:'copy'}],'private')).toThrow();});});
+
+describe('Keep children preserves existing contents',()=>{it('grandfathers preserved descendants when deleting their wrapper, while ordinary moves still enforce depth',()=>{
+ const before=[...nodes,{id:'words',parentId:'b',name:'Four whole words here'}],op='delete';
+ const after=before.map(n=>n.id==='a'?{...n,removedBy:op}:n.id==='b'?{...n,parentId:'private',promotedBy:op,promotedFrom:'a'}:n);
+ expect(()=>assertCloudWordLimits(before,after,'private')).not.toThrow();
+ expect(()=>assertCloudWordLimits(before,after.map(n=>n.id==='words'?{...n,name:'Changed four words here'}:n),'private')).toThrow();
+});});

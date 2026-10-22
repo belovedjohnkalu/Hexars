@@ -15,7 +15,7 @@ export const schema = z.discriminatedUnion("action", [
   z.object({ action: z.literal("upload"), ...credentials, id: z.string().uuid(), fileId:z.string().uuid().optional(), contentType: z.enum(["image/png", "image/jpeg", "image/webp", "image/gif"]), sizeBytes: z.number().int().positive().max(3 * 1024 * 1024) }),
   z.object({ action: z.literal("rename"), ...credentials, id: z.string().min(1).max(80), name, color:z.custom<CloudColor>(isCloudColor,"Choose a color from the wheel.").optional(), version }),
   z.object({action:z.literal('link'),...credentials,id:z.string().min(1).max(80),target:redirectSchema.nullable(),words:z.array(z.number().int().nonnegative()).optional(),version}),
-  z.object({ action: z.literal("remove"), ...credentials, id: z.string().min(1).max(80), operationId: z.string().uuid(), expectedCount: z.number().int().nonnegative(), version }),
+  z.object({ action: z.literal("remove"), ...credentials, id: z.string().min(1).max(80), operationId: z.string().uuid(), expectedCount: z.number().int().nonnegative(), keepChildren: z.boolean().optional(), version }),
   z.object({ action: z.literal("move"), ...credentials, id: z.string().min(1).max(80), parentId, version }),
   z.object({ action: z.literal("copy"), ...credentials, id: z.string().min(1).max(80), parentId, operationId: z.string().uuid(), version }),
   z.object({ action: z.literal("transfer"), ...credentials, id:z.string().uuid(), targetScope:z.enum(["public","private"]), targetParent:z.string().min(1).max(80), targetVersion:version, operationId:z.string().uuid(), mode:z.enum(["move","copy"]), version }),
@@ -30,7 +30,7 @@ export type CloudNode = {
   href?:string; savedGameId?:string; engineId?:EngineId;
   id: string; parentId: string | null; name: string; color?:CloudColor; identifier?:string;
   imageKey?: string; imageUrl?: string; imageKeys?:string[]; imageUrls?:string[]; isImage?: boolean; destination?: "board" | VariantId | "tactical" | "level" | "control" | "account" | "accounts" | "space" | "saved-game"; space?:CloudScope; control?:"rename"|"move"|"copy"|"remove"|"copy-il"|"view-photos"|"link"|"copy-text"; accountAction?:string; system?:boolean; note?: string; illustration?:string; variant?:VariantId; level?:number; createdBy?:number; canEdit?:boolean; canCopy?:boolean; sizeCount?:number; sizeCharacters?:number; sizeWords?:number;
-  copyOperation?: string; removedBy?: string; removedAt?: string;
+  copyOperation?: string; removedBy?: string; removedAt?: string; promotedBy?:string; promotedFrom?:string;
 };
 export type InputType = z.input<typeof schema>;
 export type OutputType = {

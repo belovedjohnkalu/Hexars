@@ -44,3 +44,5 @@
 .chatComposer input { flex:1; min-width:0; border:0; background:transparent; box-shadow:none; font-size:16px; }
 .chatComposer button { flex-shrink:0; border-radius:var(--radius-full); }
 .chatComposer p { margin:4px 12px 0; color:var(--error); font-size:12px; }
+
+.app[data-online="false"] { --back-bottom:calc(18px + env(safe-area-inset-bottom)); }

@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { ArrowUp,ImagePlus,X } from 'lucide-react';
 import { cloudWordLimit,wordCount,PICTURE_WORDS } from '../helpers/cloudWordLimits';
 import { cloudNames } from '../helpers/cloudNames';
+import { resumeCloudTyping } from '../helpers/resumeCloudTyping';
 import { focusCloudComposer } from '../helpers/cloudTyping';
 import { photoFileError,type CloudPhotoDraft } from '../helpers/cloudPhotos';
 import type { CloudScope,CloudNode } from '../endpoints/cloud_POST.schema';
@@ -23,6 +24,7 @@ export function CloudComposer({parentId,busy,disabled,onAdd,draft,onDraft,upload
  const totalWords=wordCount(form.values.name.trim()||(photos[0]?.file.name.replace(/\.[^.]+$/,'').trim()||''))+photos.length*PICTURE_WORDS,canChoosePictures=!disabled&&(limit===undefined||BigInt(totalWords+PICTURE_WORDS)<=limit),overLimit=limit!==undefined&&BigInt(totalWords)>limit;
  const fileInput=useRef<HTMLInputElement>(null),wordInput=useRef<HTMLInputElement>(null),pending=useRef<Submission|null>(null),composing=useRef(false),mounted=useRef(true),submitting=useRef(false);
  useEffect(()=>{mounted.current=true;return()=>{mounted.current=false;};},[]);
+ useEffect(()=>{const input=wordInput.current;if(!input||disabled)return;return resumeCloudTyping(input);},[parentId,disabled]);
  useEffect(()=>{if(disabled)return;const frame=requestAnimationFrame(()=>focusCloudComposer());return()=>cancelAnimationFrame(frame);},[parentId,disabled]);
  useEffect(()=>{onDraft({name:form.values.name,file:photos[0]?.file,photos,...(colors?{color}:{})});pending.current=null;},[form.values.name,photos,onDraft,color,colors]);
  useEffect(()=>{const urls=photos.map(p=>typeof URL.createObjectURL==='function'?URL.createObjectURL(p.file):'');setPreviews(urls);return()=>urls.forEach(url=>{if(url)URL.revokeObjectURL(url);});},[photos]);

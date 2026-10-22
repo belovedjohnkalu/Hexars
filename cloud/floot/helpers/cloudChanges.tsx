@@ -11,7 +11,9 @@ function applyAll(nodes:CloudNode[],input:Change,currentVersion:number,seeds:Clo
     const ids=new Set(group.map(n=>n.id));
     if(group.some(n=>n.parentId&&nodes.some(p=>p.id===n.parentId&&p.removedBy&&!ids.has(p.id))))
       return fail("Restore the parent cloud first.",409);
-    return nodes.map(n=>ids.has(n.id)?{...n,removedBy:undefined,removedAt:undefined}:n);
+    const promoted=nodes.filter(n=>n.promotedBy===input.operationId);
+    for(const child of promoted){const parent=group.find(n=>n.id===child.promotedFrom);if(!parent||child.parentId!==parent.parentId)return fail("A kept child moved. Move it back before undoing.",409);}
+    return nodes.map(n=>ids.has(n.id)?{...n,removedBy:undefined,removedAt:undefined}:n.promotedBy===input.operationId?{...n,parentId:n.promotedFrom!,promotedBy:undefined,promotedFrom:undefined}:n);
   }
   if(input.action==="copy"&&nodes.some(n=>n.copyOperation===input.operationId))return nodes;
   const node=nodes.find(n=>n.id===input.id);
@@ -37,9 +39,12 @@ function applyAll(nodes:CloudNode[],input:Change,currentVersion:number,seeds:Clo
     if(input.parentId&&ids.has(input.parentId))return fail("Choose a cloud outside this branch.",400);
     if(input.action==="move")return node.parentId===input.parentId?nodes:nodes.map(n=>n.id===input.id?{...n,parentId:input.parentId}:n);
     const mapping=new Map([...ids].map(id=>[id,id===input.id?input.operationId:randomUUID()]));
-    return [...nodes,...nodes.filter(n=>ids.has(n.id)).map(n=>({...n,id:mapping.get(n.id)!,parentId:n.id===input.id?input.parentId:mapping.get(n.parentId!)!,copyOperation:input.operationId}))];
+    return [...nodes,...nodes.filter(n=>ids.has(n.id)).map(n=>({...n,id:mapping.get(n.id)!,parentId:n.id===input.id?input.parentId:mapping.get(n.parentId!)!,copyOperation:input.operationId,promotedBy:undefined,promotedFrom:undefined}))];
   }
   const removedAt=new Date().toISOString();
+  if(input.action==='remove'&&input.keepChildren){
+    return nodes.map(n=>n.id===input.id?{...n,removedBy:input.operationId,removedAt}:!n.removedBy&&n.parentId===input.id?{...n,parentId:node.parentId,promotedBy:input.operationId,promotedFrom:input.id}:n);
+  }
   return nodes.map(n=>ids.has(n.id)?{...n,removedBy:input.operationId,removedAt}:n);
 }
 function undo(nodes:CloudNode[]) {

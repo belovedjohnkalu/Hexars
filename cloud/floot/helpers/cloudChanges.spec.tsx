@@ -30,3 +30,18 @@ describe("Cloud correction and recovery",()=>{
     expect(()=>cloudChanges.apply(nodes,{...credentials,action:"restore",operationId:"child",version:0},0)).toThrowError(/parent/);
   });
 });
+
+describe('Delete while keeping children',()=>{
+ const op='123e4567-e89b-42d3-a456-426614174001';
+ const initial:CloudNode[]=[{id:'root',parentId:null,name:'Root'},{id:'a',parentId:'root',name:'A',identifier:'IL00'},{id:'b',parentId:'a',name:'B',identifier:'IL000'},{id:'c',parentId:'b',name:'C',identifier:'IL0000'},{id:'s',parentId:'root',name:'Sibling'}];
+ const request={action:'remove' as const,scope:'private' as const,workspaceId:'123e4567-e89b-42d3-a456-426614174000',accessToken:'a'.repeat(64),id:'a',expectedCount:2,operationId:op,keepChildren:true,version:0};
+ it('removes only the wrapper, promotes direct children and preserves descendants and identities',()=>{
+  const next=cloudChanges.apply(initial,request,0);
+  expect(next.filter(n=>n.removedBy).map(n=>n.id)).toEqual(['a']);expect(next[2].parentId).toBe('root');expect(next[3]).toEqual(initial[3]);expect(next[2].identifier).toBe('IL000');expect(initial[2].parentId).toBe('a');
+  expect(cloudChanges.apply(next,request,1)).toBe(next);
+  const restored=cloudChanges.apply(next,{action:'restore',scope:'private',workspaceId:request.workspaceId,accessToken:request.accessToken,operationId:op,version:1},1);
+  expect(restored[2].parentId).toBe('a');expect(restored.some(n=>n.removedBy||n.promotedBy)).toBeFalse();
+ });
+ it('rejects stale counts and versions before promoting anything',()=>{expect(()=>cloudChanges.apply(initial,{...request,expectedCount:1},0)).toThrowError(/changed/);expect(()=>cloudChanges.apply(initial,request,1)).toThrowError(/changed/);});
+ it('never silently moves back a child that was subsequently relocated',()=>{const next=cloudChanges.apply(initial,request,0).map(n=>n.id==='b'?{...n,parentId:'s'}:n);expect(()=>cloudChanges.apply(next,{action:'restore',scope:'private',workspaceId:request.workspaceId,accessToken:request.accessToken,operationId:op,version:2},2)).toThrowError(/moved/);});
+});

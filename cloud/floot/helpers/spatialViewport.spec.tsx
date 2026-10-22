@@ -37,3 +37,20 @@ describe('Occupied-content opening frame',()=>{
   v.rerender(<SpatialViewport {...props} contentBounds={{x:500,y:500,width:1000,height:1000}}>More words</SpatialViewport>);expect(world.style.transform).toBe(camera);cleanup();
  });
 });
+
+
+describe('Touch opening scale',()=>{
+ afterEach(cleanup);
+ it('keeps a minimum opening scale while permitting manual zoom out and cached views',()=>{
+  spyOnProperty(HTMLElement.prototype,'clientWidth','get').and.returnValue(390);spyOnProperty(HTMLElement.prototype,'clientHeight','get').and.returnValue(700);
+  const props={width:2000,height:2000,viewKey:'touch-'+crypto.randomUUID(),contentBounds:{x:0,y:0,width:1800,height:1800},minFitZoom:.8};
+  const v=render(<SpatialViewport {...props}>Words</SpatialViewport>),world=v.container.querySelector('[data-camera-zoom]') as HTMLElement;
+  expect(Number(world.dataset.cameraZoom)).toBe(.8);fireEvent.keyDown(v.getByRole('region'),{key:'-'});const zoom=Number(world.dataset.cameraZoom);expect(zoom).toBeLessThan(.8);
+  v.unmount();const next=render(<SpatialViewport {...props}>Words</SpatialViewport>);expect(Number((next.container.querySelector('[data-camera-zoom]') as HTMLElement).dataset.cameraZoom)).toBeCloseTo(zoom,8);
+ });
+ it('preserves an explicit initial zoom independently of the touch fit floor',()=>{
+  spyOnProperty(HTMLElement.prototype,'clientWidth','get').and.returnValue(390);spyOnProperty(HTMLElement.prototype,'clientHeight','get').and.returnValue(700);
+  const v=render(<SpatialViewport width={2000} height={2000} viewKey={'explicit-'+crypto.randomUUID()} minFitZoom={.8} initialZoom={.3}>Words</SpatialViewport>);
+  expect(Number((v.container.querySelector('[data-camera-zoom]') as HTMLElement).dataset.cameraZoom)).toBe(.3);
+ });
+});

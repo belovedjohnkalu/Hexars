@@ -205,3 +205,9 @@ Accounts reuses the existing organic canvas for a dev-only Signed in word with t
 
 ## Remember button — 0.37
 The existing shared Button owns Remember on both authentication forms. A quiet outlined glass pill makes the unselected state visibly actionable; the blue border/tint and check show selection. It retains the dark Inter theme, keyboard focus, reduced-motion handling and 44px touch target. Successful authentication lands on ION.
+
+## Visitor reliability and touch accuracy — 0.38
+Coarse-pointer word canvases reserve 56px boxes and begin at a minimum 0.8 fit scale, producing at least 44.8px opening targets. Relative font sizes, colors and pictures remain unchanged. Packing still prevents overlaps; large pages use panning. Desktop fitting, explicit zoom, saved camera positions and manual overview zoom stay unchanged. Offline chess puts its Back bubble in the reserved footer so it cannot cover Board Reset; online retains clearance above chat. No extra navigation or decorative elements are added.
+
+## Prompt refinements — 0.39
+Preserve the black, Inter, organic-canvas visual system. CloudActions owns deletion choices using its existing black dialog and pressed-state buttons: Everything inside / Keep children, then explicit Delete; Cancel remains Keep. No new route or menu. Empty word canvases invite “Add a word or picture”; financial Receive retains its truthful empty receipt state. Organic type sizes interpolate linearly between the readable minimum and a viewport-derived maximum. Exact character percentages retain sixteen decimal places as data; rendered geometry remains subject to browser pixel precision. Background typing restoration is opt-in through an already-focused composer and never opens a new visitor’s keyboard or takes focus through a dialog.

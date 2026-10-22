@@ -88,3 +88,38 @@ describe('Boards aligned collection',()=>{
   expect(next.items.find(n=>n.id==='new')?.gridSlot).toBe(6);
  });
 });
+
+
+describe('Coarse-pointer cloud targets',()=>{
+ const measure=(text:string,size:number)=>text.length*size*.54;
+ const nodes=Array.from({length:32},(_,i)=>({id:String(i),name:i===4?'A longer word cloud label':'Word '+i,percent:i%3*50,characters:i*7,...(i===7?{isImage:true}:{})}));
+ const assertPacked=(result:ReturnType<typeof cloudLayout>)=>{
+  for(const item of result.items){
+   expect(item.width).toBeGreaterThanOrEqual(56);expect(item.height).toBeGreaterThanOrEqual(56);
+   expect(item.x).toBeGreaterThanOrEqual(0);expect(item.x+item.width).toBeLessThanOrEqual(result.width);
+   for(const other of result.items.filter(n=>n.id!==item.id))expect(item.x<other.x+other.width&&item.x+item.width>other.x&&item.y<other.y+other.height&&item.y+item.height>other.y).toBeFalse();
+  }
+ };
+ it('packs larger touch targets without changing font or image proportions',()=>{
+  for(const width of [280,393,820]){
+   const standard=cloudLayout(nodes,width,600,measure,{organic:true,compact:width<600}),touch=cloudLayout(nodes,width,600,measure,{organic:true,compact:width<600,minTargetSize:56});
+   assertPacked(touch);
+   for(const item of touch.items){const original=standard.items.find(n=>n.id===item.id)!;expect(item.fontSize).toBe(original.fontSize);expect(item.pictureSize).toBe(original.pictureSize);expect(item.captionSize).toBe(original.captionSize);}
+  }
+ });
+ it('reserves minimum targets through retained layouts, insertions and edited labels',()=>{
+  const first=cloudLayout(nodes,393,600,measure,{organic:true,compact:true,minTargetSize:56});
+  const next=cloudLayout([...nodes.map(n=>n.id==='0'?{...n,name:'An expanded label'}:n),{id:'new',name:'New',percent:0}],393,600,measure,{organic:true,compact:true,minTargetSize:56,previous:first});
+  assertPacked(next);
+ });
+});
+
+describe('Page-relative linear word sizing',()=>{
+ it('maps the smallest word to the readable minimum and interpolates without a two-size exception',()=>{
+ const measure=(text:string,size:number)=>text.length*size*.54;
+ const layout=cloudLayout([0,25,50,75,100].map(percent=>({id:String(percent),name:'Word',percent})),393,600,measure,{organic:true,compact:true});
+ const size=(id:string)=>layout.items.find(n=>n.id===id)!.fontSize;
+ expect(size('0')).toBe(15);expect(size('100')).toBeGreaterThan(80);expect(size('50')).toBeCloseTo((size('0')+size('100'))/2,12);
+ const binary=cloudLayout([{id:'0',name:'Word',percent:0},{id:'100',name:'Word',percent:100}],393,600,measure,{organic:true,compact:true});expect(binary.items.find(n=>n.id==='100')!.fontSize).toBe(size('100'));
+ });
+});

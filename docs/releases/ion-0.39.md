@@ -1,0 +1,13 @@
+# ION 0.39 — Keep children and queued refinements
+
+Implemented the three original prompt branches formerly in Complete: empty word-space invitation, page-relative linear sizing, and resuming an interrupted typing session. The owner directly requested these moved prompts; no other draft branches were treated as work. Percentages use integer arithmetic retaining sixteen decimal places; browser geometry itself cannot have that visual precision.
+
+Delete now offers Keep children. Confirmation deletes only the selected wrapper, moves direct children to its parent, and preserves deeper descendants, photos, redirects, ownership and permanent ILs. The existing ten-second Undo restores the hierarchy. Stale versions, changed descendant counts, unauthorized public branches and a child subsequently moved elsewhere are rejected. Request retries retain their operation ID and choice. Existing promoted text/photos are preserved even when the shallower word allowance is lower; future edits remain subject to that allowance.
+
+Typing resumes only if interrupted while the composer was focused, preserving the draft/caret and avoiding modal focus theft. Mobile browsers may require another tap to reopen their keyboard; app code cannot override that OS policy. Receive’s empty financial state remains separate from the new word-space invitation.
+
+Verification: hosted TypeScript clean; twelve targeted suites passed, including actual deletion dialog submission, authorization, Undo, conflict, identifier, exact-percent, word-limit, packing and keyboard lifecycle checks. Preview browser deletion checks passed at 390px and 1280px with controlled request failure/retry; Library recovery also passed. These fixtures do not alter real account content. Physical mobile keyboard behavior was not verified.
+
+Published at https://ion.floot.app, checkpoint `31bfdbde-d274-4a80-a6e9-e38ffe147d4a`, successful job `7278b90a-0d76-4525-a9f4-cb37452dd11c`. The production visitor journey passed (navigation, legal move/deselect, reload persistence, Undo, failed-save recovery, missing page; zero uncaught application errors). Static UX audit retains the existing 32 Button-asChild/Form-provider detection findings, with no unresolved owner; it is not a passing audit.
+
+After publication, an optimistic version-49→50 Home update moved the three original prompt roots into the prescribed Completed node, restoring that empty archive because it had been removed. Original names, descendants, node IDs and permanent ILs are unchanged. Read-back confirmed all three parents and fixed labels. The database tool cannot emit the app’s realtime cloud event; the archive is visible on reload/reconnect. No other prompt, account, pricing or financial data was modified.
