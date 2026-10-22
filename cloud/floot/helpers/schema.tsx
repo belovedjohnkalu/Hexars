@@ -289,6 +289,7 @@ export interface Users {
   email: string;
   id: Generated<number>;
   role: Generated<UserRole>;
+  timeZone: string | null;
   updatedAt: Generated<Timestamp | null>;
 }
 

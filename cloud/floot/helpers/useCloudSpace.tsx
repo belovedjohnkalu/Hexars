@@ -28,7 +28,7 @@ export function useCloudSpace(accountId:number|null=null,authLoading=false,scope
   try{const next=scope+':'+(accountId||'guest');if(scopeKey.current!==next){scopeKey.current=next;current.current=blank(scope);setData(current.current);setReady(false);setLoading(true);}identity.current=credentials();
    if(scope==='private'&&!accountId){accept(blank(scope));setReady(true);setError('');return;}
    let connect=false;try{connect=scope==='private'&&!!accountId&&sessionStorage.getItem('ion.connect-space')==='yes';}catch{}
-   const value=await postCloud({action:'load',scope,account:!!accountId,...identity.current,connect},{signal});
+   const value=await postCloud({action:'load',scope,timeZone:Intl.DateTimeFormat().resolvedOptions().timeZone,account:!!accountId,...identity.current,connect},{signal});
    if(mounted.current&&!signal?.aborted){accept(value);if(connect)sessionStorage.removeItem('ion.connect-space');setReady(true);setError('');}
   }catch(e){if(mounted.current&&!signal?.aborted)setError(failureMessage(e));}finally{if(mounted.current&&!signal?.aborted)setLoading(false);}
  },[accountId,scope,accept]);

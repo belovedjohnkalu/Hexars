@@ -1,3 +1,5 @@
+import { accountTimeZone } from '../helpers/accountTimeZone';
+import { ensureScheduleCalendar } from '../helpers/ensureScheduleCalendar';
 import { signedInUserCount } from '../helpers/signedInUsers';
 import { visibleDevClouds } from '../helpers/devPromptWorkflow';
 import { featureClouds } from '../helpers/featureClouds';
@@ -41,7 +43,9 @@ export async function handle(request: Request) {
       context=await cloudContext(request,{...input,action:'load'});
     }
     if(!context.row)return new Response(JSON.stringify({nodes:context.seeds.map(n=>({...n,canEdit:false,canCopy:false})),version:0,scope:input.scope,canAdd:false,dev:false,owner:false} satisfies OutputType),{headers});
-    const row=context.row;
+    const timeZone=input.scope==='home'?await accountTimeZone(context.userId,input.action==='load'?input.timeZone:undefined):undefined;
+    if(input.scope==='home'&&input.action==='load')context={...context,row:await ensureScheduleCalendar(context.row.id,timeZone!,context.devNumber)};
+    const row=context.row!;
     let nodes = (Array.isArray(row.nodes) ? row.nodes : []) as unknown as CloudNode[];
     if(input.scope==='home')nodes=nodes.map(n=>n.parentId==='time-activity'?{...n,parentId:'time'}:n);
     let version = row.version;
@@ -130,7 +134,7 @@ export async function handle(request: Request) {
       const weight=(seeds:CloudNode[],stored:unknown,id:string)=>{const combined=[...new Map([...seeds,...(Array.isArray(stored)?stored as CloudNode[]:[])].map(n=>[n.id,n])).values()];return cloudTree.descendantCharacterWeights(combined).get(id)||0;};
       visible=visible.map(n=>({...n,...(n.id==='accounts'?{sizeCharacters:cloudTree.descendantCharacterWeights(accountNodes).get('accounts')||0}:n.id==='private'?{sizeCharacters:weight(cloudTree.forScope('private'),personal?.nodes,'private')}:n.id==='public'?{sizeCharacters:weight(cloudTree.forScope('public'),shared.find(s=>s.kind==='public')?.nodes,'public')}:n.id==='hexagonal-chess'?{sizeCharacters:weight(cloudTree.forScope('chess'),shared.find(s=>s.kind==='chess')?.nodes,'hexagonal-chess')}:{})}));
     }
-    return new Response(JSON.stringify({ nodes: visible, version, ...(context.isDev&&input.scope==='accounts'?{signedInUsers:await signedInUserCount()}:{}), workspaceId:row.id, account:input.scope==='private', scope:input.scope, canAdd:cloudPolicy.writable(input.scope,context.userId,context.owner), dev:context.isDev,owner:context.owner,userId:context.userId||undefined, undo: cloudChanges.undo(nodes.filter(n=>cloudPolicy.edit(input.scope,n,context.userId,context.owner))) } satisfies OutputType), { headers });
+    return new Response(JSON.stringify({ nodes: visible, version, ...(timeZone?{timeZone}:{}), ...(context.isDev&&input.scope==='accounts'?{signedInUsers:await signedInUserCount()}:{}), workspaceId:row.id, account:input.scope==='private', scope:input.scope, canAdd:cloudPolicy.writable(input.scope,context.userId,context.owner), dev:context.isDev,owner:context.owner,userId:context.userId||undefined, undo: cloudChanges.undo(nodes.filter(n=>cloudPolicy.edit(input.scope,n,context.userId,context.owner))) } satisfies OutputType), { headers });
   } catch (error) {
     const status = error instanceof Error && "status" in error && typeof error.status === "number" ? error.status : error instanceof SyntaxError || (error && typeof error === "object" && "issues" in error) ? 400 : 503;
     if (status === 503) console.error("ION space request failed", error instanceof Error ? error.message : "Unknown error");

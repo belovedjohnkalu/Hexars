@@ -11,7 +11,7 @@ const parentId = z.string().max(80).nullable();
 const name = z.string().trim().min(1, "Give this cloud a name.");
 const version = z.number().int().nonnegative();
 export const schema = z.discriminatedUnion("action", [
-  z.object({ action: z.literal("load"), connect: z.boolean().optional(), ...credentials }),
+  z.object({ action: z.literal("load"), connect: z.boolean().optional(), timeZone:z.string().max(100).optional(), ...credentials }),
   z.object({ action: z.literal("add"), ...credentials, id: z.string().uuid(), parentId, name, version, color:z.custom<CloudColor>(isCloudColor,"Choose a color from the wheel.").optional(), imageType: z.enum(["image/png", "image/jpeg", "image/webp", "image/gif"]).optional(), images:z.array(z.object({id:z.string().uuid(),contentType:z.enum(["image/png","image/jpeg","image/webp","image/gif"])})).optional() }),
   z.object({ action: z.literal("upload"), ...credentials, id: z.string().uuid(), fileId:z.string().uuid().optional(), contentType: z.enum(["image/png", "image/jpeg", "image/webp", "image/gif"]), sizeBytes: z.number().int().positive().max(cloudPhotoMaxBytes) }),
   z.object({ action: z.literal("rename"), ...credentials, id: z.string().min(1).max(80), name, color:z.custom<CloudColor>(isCloudColor,"Choose a color from the wheel.").optional(), version }),
@@ -29,13 +29,14 @@ export const schema = z.discriminatedUnion("action", [
 export type CloudNode = {
   lockedItem?:string;redirect?:CloudRedirect;wordRedirect?:{words:number[];target:CloudRedirect};shareId?:string;
   href?:string; savedGameId?:string; engineId?:EngineId;
+  calendarDate?:{year:number;month?:number;day?:number}; calendarStatus?:'past'|'current'|'future';
   id: string; parentId: string | null; name: string; color?:CloudColor; identifier?:string;
   imageKey?: string; imageUrl?: string; imageKeys?:string[]; imageUrls?:string[]; isImage?: boolean; destination?: "board" | VariantId | "tactical" | "level" | "control" | "account" | "accounts" | "space" | "saved-game"; space?:CloudScope; control?:"rename"|"move"|"copy"|"remove"|"copy-il"|"view-photos"|"link"|"copy-text"; accountAction?:string; system?:boolean; note?: string; illustration?:string; variant?:VariantId; level?:number; createdBy?:number; canEdit?:boolean; canCopy?:boolean; sizeCount?:number; sizeCharacters?:number; sizeWords?:number;
   copyOperation?: string; removedBy?: string; removedAt?: string; promotedBy?:string; promotedFrom?:string;
 };
 export type InputType = z.input<typeof schema>;
 export type OutputType = {
-  nodes: CloudNode[]; version: number; signedInUsers?:number; workspaceId?: string; account?: boolean; scope?:CloudScope; canAdd?:boolean; canManage?:boolean; dev?:boolean; owner?:boolean; userId?:number;
+  nodes: CloudNode[]; version: number; timeZone?:string; signedInUsers?:number; workspaceId?: string; account?: boolean; scope?:CloudScope; canAdd?:boolean; canManage?:boolean; dev?:boolean; owner?:boolean; userId?:number;
   undo?: { operationId: string; name: string; parentId: string | null; count: number; expiresAt?:number };
   upload?: { url: string; headers: Record<string, string> };
 };

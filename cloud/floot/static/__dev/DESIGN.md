@@ -221,3 +221,6 @@ The word's own label must never affect its font size or sibling fonts. Compute t
 
 ## Continuous sending and white hold — 0.42
 Sending should keep the keyboard session alive. Add does not take pointer focus from the active composer; the field stays enabled as a text input during pending requests and the mobile action key is Send. Draft edits and duplicate submissions remain guarded while saving. A stationary 300ms hold on the color spectrum selects white; moving more than 8px beforehand remains ordinary color adjustment. W is the equivalent when the slider is intentionally keyboard-focused. No extra button, route or overlay.
+
+## Schedule — 0.43
+Schedule is the existing owner-created Home branch IL0A1. Preserve its organic word canvas and existing year/month/day IDs. All date nodes use semantic green (#82f398) for past, white for current and red (#f38282) for future, at the node's year/month/day granularity in the viewer's account zone. Status is also available to assistive technology. No forms, date-picker UI, extra buttons or routes. The same green may appear on many dates; this computed semantic color intentionally overrides saved decorative shades and does not use the unique color wheel policy.
