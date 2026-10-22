@@ -26,3 +26,8 @@
 .content .field { margin:0; gap:4px; }
 
 .content h1 { touch-action:none; -webkit-tap-highlight-color:transparent; user-select:none; }
+
+.rememberButton.rememberButton { min-height:44px; padding:0 14px; font-size:14px; border-radius:999px; border-color:color-mix(in srgb,var(--foreground) 24%,transparent); background:color-mix(in srgb,var(--foreground) 6%,var(--background)); color:var(--foreground); }
+.rememberButton.rememberButton[aria-pressed="true"] { border-color:var(--word-blue); background:color-mix(in srgb,var(--word-blue) 16%,var(--background)); }
+.rememberCheck { opacity:0; }
+.rememberButton[aria-pressed="true"] .rememberCheck { opacity:1; }

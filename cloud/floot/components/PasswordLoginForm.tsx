@@ -52,7 +52,7 @@ export const PasswordLoginForm: React.FC<PasswordLoginFormProps> = ({
     try {
       const result = await postLogin(data);
       onLogin(result.user);
-      setTimeout(() => navigate("/"), 200);
+      navigate("/", { replace: true });
     } catch (err) {
       console.error("Login error:", err);
       setError(

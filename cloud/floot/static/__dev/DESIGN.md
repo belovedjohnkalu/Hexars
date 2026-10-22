@@ -202,3 +202,6 @@ Time exposes Added/Spent/Balance directly with stable ILs and tabular clock widt
 
 ## Dev counts and prompt privacy — 0.36
 Accounts reuses the existing organic canvas for a dev-only Signed in word with the live unique-account count. Its label is editable; the number is a transient server projection and never saved into shared text. Tabular numbers preserve visual stability. No additional navigation, font or surface. The To do prompt branch is visible to devs only, with the existing Complete/Completed word vocabulary.
+
+## Remember button — 0.37
+The existing shared Button owns Remember on both authentication forms. A quiet outlined glass pill makes the unselected state visibly actionable; the blue border/tint and check show selection. It retains the dark Inter theme, keyboard focus, reduced-motion handling and 44px touch target. Successful authentication lands on ION.
