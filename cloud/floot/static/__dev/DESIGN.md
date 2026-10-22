@@ -218,3 +218,6 @@ Keep Inter, black surfaces, blue chess pictures and the organic canvas. Sparse w
 
 ## Descendant-only typography and uninterrupted color — 0.41
 The word's own label must never affect its font size or sibling fonts. Compute the viewport-based type scale before measuring names; long names reserve more spatial room and wrap at the established eight-word boundaries. Picture captions follow descendant statistics, not their own labels. Keep the black Inter canvas and existing zoom/pan policy. Touch color gestures beside an active text field preserve that field's focus and selection; the slider remains keyboard-focusable when intentionally reached by keyboard.
+
+## Continuous sending and white hold — 0.42
+Sending should keep the keyboard session alive. Add does not take pointer focus from the active composer; the field stays enabled as a text input during pending requests and the mobile action key is Send. Draft edits and duplicate submissions remain guarded while saving. A stationary 300ms hold on the color spectrum selects white; moving more than 8px beforehand remains ordinary color adjustment. W is the equivalent when the slider is intentionally keyboard-focused. No extra button, route or overlay.

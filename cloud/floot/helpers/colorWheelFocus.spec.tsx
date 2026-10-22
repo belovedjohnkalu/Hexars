@@ -1,5 +1,5 @@
 import React,{useState} from 'react';
-import { render,fireEvent,cleanup } from '@testing-library/react';
+import { render,fireEvent,cleanup,act } from '@testing-library/react';
 import { CloudColorWheel } from '../components/CloudColorWheel';
 import { Input } from '../components/Input';
 import type { CloudColor } from './cloudColors';
@@ -22,4 +22,14 @@ describe('Color wheel typing focus',()=>{
   const first=mount(true);first.input.focus();const initial=first.view.getByTestId('color').textContent;pointer(first.root,'pointerdown',250);expect(first.view.getByTestId('color').textContent).toBe(initial);cleanup();
   const {view,input,root}=mount();input.focus();pointer(root,'pointerdown',50);pointer(root,'pointercancel',50);const value=view.getByTestId('color').textContent;pointer(root,'pointermove',250);expect(view.getByTestId('color').textContent).toBe(value);pointer(root,'pointerdown',250,2);pointer(root,'pointerup',250,2);expect(view.getByTestId('color').textContent).not.toBe(value);expect(document.activeElement).toBe(input);
  });
+ it('selects white on a stationary hold and keeps it after release or continued movement',async()=>{
+  const {view,input,root}=mount();input.focus();pointer(root,'pointerdown',60);pointer(root,'pointerup',60);
+  expect(view.getByTestId('color').textContent).not.toBe('white');
+  await act(async()=>{pointer(root,'pointerdown',90);await new Promise(resolve=>setTimeout(resolve,330));});
+  expect(view.getByTestId('color').textContent).toBe('white');pointer(root,'pointermove',240);pointer(root,'pointerup',240);expect(view.getByTestId('color').textContent).toBe('white');expect(document.activeElement).toBe(input);
+ });
+ it('offers white through W without taking focus from the slider',()=>{
+  const {view,thumb}=mount();thumb.focus();fireEvent.keyDown(thumb,{key:'ArrowRight'});fireEvent.keyDown(thumb,{key:'w'});expect(view.getByTestId('color').textContent).toBe('white');expect(document.activeElement).toBe(thumb);
+ });
+
 });
