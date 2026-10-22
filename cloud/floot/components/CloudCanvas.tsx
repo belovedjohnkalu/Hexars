@@ -1,3 +1,6 @@
+import { useAppearance,inversionCloudId } from '../helpers/useAppearance';
+import { usePictureTap } from '../helpers/usePictureTap';
+import { CloudPhotoViewer } from './CloudPhotoViewer';
 import { scheduleCalendar } from '../helpers/scheduleCalendar';
 import { cloudText } from '../helpers/cloudText';
 import { engineId as resolveEngineId, isEngineId } from '../helpers/chessEngines';
@@ -8,7 +11,7 @@ import { cloudTree } from '../helpers/cloudTree';
 import { colorValue } from '../helpers/cloudColors';
 import { cloudLayout,type CloudLayout } from '../helpers/cloudLayout';
 import { identifierFootprint } from '../helpers/cloudIdentifiers';
-import { cloudPhotoUrls } from '../helpers/cloudPhotos';
+import { cloudPhotoUrls,canViewCloudPhoto } from '../helpers/cloudPhotos';
 import { redirectURL,linkedLabelParts } from '../helpers/cloudLinks';
 import { cloudURL } from '../helpers/cloudRoutes';
 import { useCloudHold } from '../helpers/useCloudHold';
@@ -20,6 +23,7 @@ import styles from './CloudCanvas.module.css';
 const layoutCache=new Map<string,{key:string;viewportWidth:number;generation:number;layout:CloudLayout}>();
 type Props={tabularNumbers?:boolean;fitOnChange?:boolean;identity?:string;nodes:CloudNode[];scope?:CloudScope;parentId:string|null;onOpen:(event:MouseEvent<HTMLAnchorElement>,id:string,destination:string)=>void;opening:string|null;loading:boolean;addedId?:string|null;onPictureError?:()=>void;canEdit?:boolean;showIdentifiers?:boolean;onHighlight?:(node:CloudNode)=>void;onCommand?:(node:CloudNode)=>void;className?:string;onAction?:(node:CloudNode,action:'rename'|'remove'|'move'|'copy')=>void};
 export function CloudCanvas({tabularNumbers=false,fitOnChange=false,nodes,parentId,onOpen,opening,loading,addedId,onPictureError,onHighlight,onCommand,showIdentifiers=false,scope='chess',identity='guest',className=''}:Props){
+ const photos=usePictureTap(),appearance=useAppearance();
  const [coarsePointer,setCoarsePointer]=useState(()=>typeof matchMedia==='function'&&matchMedia('(pointer: coarse)').matches);
  useLayoutEffect(()=>{if(typeof matchMedia!=='function')return;const query=matchMedia('(pointer: coarse)'),update=()=>setCoarsePointer(query.matches);update();query.addEventListener('change',update);return()=>query.removeEventListener('change',update);},[]);
  const area=useRef<HTMLDivElement>(null),[size,setSize]=useState({width:360,height:480}),[fontReady,setFontReady]=useState(0),location=useLocation(),hold=useCloudHold(onHighlight);
@@ -58,15 +62,17 @@ export function CloudCanvas({tabularNumbers=false,fitOnChange=false,nodes,parent
  {siblings.map(node=>{const rect=rectangles.get(node.id);if(!rect)return null;const picture=node.isImage||cloudPhotoUrls(node).length>0,identifier=showIdentifiers?node.identifier:undefined;
   const label=identifier?<span className={styles.identifier} data-identifier={identifier} style={{width:identifierFootprint(identifier).width-6}}>{identifier}</span>:null;
   const content=picture?<><CloudPhoto node={node} size={rect.pictureSize??rect.width-24} onError={onPictureError}/><span className={styles.caption}><span className={styles.text}>{cloudText(node.name)}</span>{label}</span></>:<><span className={styles.text}>{cloudText(node.name)}</span>{label}</>;
-  const props={...hold.handlers(node),className:[styles.node,node.lockedItem?styles.locked:'',picture?styles.picture:'',opening&&opening!==node.id?styles.fading:'',node.id===addedId?styles.justAdded:''].join(' '),'data-node-id':node.id,'data-calendar-status':node.calendarStatus,'data-percent':node.percentExact,'data-descendants':node.count,'data-characters':node.characters,'data-holding':hold.holding===node.id,'aria-label':node.name,'aria-description':(identifier?identifier+'. ':'')+(node.calendarStatus?node.calendarStatus+' '+(node.calendarDate?.day?'date':node.calendarDate?.month?'month':'year')+'. ':'')+(node.lockedItem?'Purchase required.':node.destination?'Open '+node.name:node.count+' inside. Hold for Controls.'),style:{color:colorValue(node.color||cloudTree.seed.find(n=>n.id===node.id)?.color),'--node-x':rect.x+'px','--node-y':rect.y+'px',width:rect.width,minHeight:rect.height,fontSize:rect.fontSize,'--caption-size':(rect.captionSize??16)+'px'} as CSSProperties};
+  const props={...hold.handlers(node),className:[styles.node,node.lockedItem?styles.locked:'',picture?styles.picture:'',opening&&opening!==node.id?styles.fading:'',node.id===addedId?styles.justAdded:''].join(' '),'data-node-id':node.id,'aria-keyshortcuts':canViewCloudPhoto(node)&&!node.lockedItem?'Alt+Enter':undefined,'data-inversion-toggle':node.id===inversionCloudId?true:undefined,'aria-pressed':node.id===inversionCloudId?appearance.inverted:undefined,'data-calendar-status':node.calendarStatus,'data-percent':node.percentExact,'data-descendants':node.count,'data-characters':node.characters,'data-holding':hold.holding===node.id,'aria-label':node.name,'aria-description':(identifier?identifier+'. ':'')+(node.calendarStatus?node.calendarStatus+' '+(node.calendarDate?.day?'date':node.calendarDate?.month?'month':'year')+'. ':'')+(node.lockedItem?'Purchase required.':node.destination?'Open '+node.name:node.count+' inside. Hold for Controls.'),style:{color:node.id===inversionCloudId?(appearance.inverted?'var(--inversion-on)':'var(--inversion-off)'):colorValue(node.color||cloudTree.seed.find(n=>n.id===node.id)?.color),'--node-x':rect.x+'px','--node-y':rect.y+'px',width:rect.width,minHeight:rect.height,fontSize:rect.fontSize,'--caption-size':(rect.captionSize??16)+'px'} as CSSProperties};
+  const pictureClick=(e:MouseEvent<HTMLAnchorElement>,to:string)=>{return photos.click(e,node,()=>{if(/^https?:/.test(to))window.open(to,'_blank','noopener,noreferrer');else onOpen(e,node.id,to);});};
+  const keyDown=props.onKeyDown;props.onKeyDown=e=>{if(e.altKey&&e.key==='Enter'&&!node.lockedItem&&canViewCloudPhoto(node)){e.preventDefault();photos.show(node);}else keyDown(e);};
   if(node.wordRedirect&&!node.lockedItem){
    const own=destination({...node,wordRedirect:undefined});
    const words=<span className={styles.linkedLabel}>{linkedLabelParts({...node,name:cloudText(node.name)}).map((part,i)=>{if(!part.word)return <span key={i}>{part.text}</span>;const target=part.linked?redirectURL(node.wordRedirect!.target):own;return /^https?:/.test(target)?<a key={i} className={part.linked?styles.linkedWord:undefined} href={target} target="_blank" rel="noopener noreferrer">{part.text}</a>:<Link key={i} className={part.linked?styles.linkedWord:undefined} to={target} onClick={e=>onOpen(e,node.id,target)}>{part.text}</Link>;})}</span>;
-   return <span key={node.id} {...props} role="group">{picture&&<Link to={own} onClick={e=>onOpen(e,node.id,own)}><CloudPhoto node={node} size={rect.pictureSize??rect.width-24}/></Link>}{picture?<span className={styles.caption}>{words}{label}</span>:<>{words}{label}</>}</span>;
+   return <span key={node.id} {...props} role="group">{picture&&<Link to={own} onClick={e=>{if(!pictureClick(e,own))onOpen(e,node.id,own);}}><CloudPhoto node={node} size={rect.pictureSize??rect.width-24}/></Link>}{picture?<span className={styles.caption}>{words}{label}</span>:<>{words}{label}</>}</span>;
   }
-  const target=destination(node);if(/^https?:/.test(target))return <a key={node.id} {...props} href={target} target="_blank" rel="noopener noreferrer">{content}</a>;
-  return node.destination==='control'||node.destination==='account'?<Button key={node.id} variant="ghost" {...props} onClick={()=>onCommand?.(node)}>{content}</Button>:<Link key={node.id} {...props} to={destination(node)} onClick={e=>{if(node.destination==='level'&&!node.lockedItem)try{localStorage.setItem('ion.engine',node.engineId??'tactical');localStorage.setItem('ion.difficulty',String(node.level??3));}catch{}onOpen(e,node.id,destination(node));}}>{content}</Link>;
+  const target=destination(node);if(/^https?:/.test(target))return <a key={node.id} {...props} href={target} target="_blank" rel="noopener noreferrer" onClick={e=>{pictureClick(e,target);}}>{content}</a>;
+  return node.id===inversionCloudId||node.destination==='control'||node.destination==='account'?<Button key={node.id} variant="ghost" {...props} onClick={e=>{const command=()=>node.id===inversionCloudId?appearance.toggle():onCommand?.(node);if(!photos.click(e,node,command))command();}}>{content}</Button>:<Link key={node.id} {...props} to={destination(node)} onClick={e=>{if(pictureClick(e,target))return;if(node.destination==='level'&&!node.lockedItem)try{localStorage.setItem('ion.engine',node.engineId??'tactical');localStorage.setItem('ion.difficulty',String(node.level??3));}catch{}onOpen(e,node.id,destination(node));}}>{content}</Link>;
  })}
  {!siblings.length&&!loading&&<p className={styles.empty}>Add a word or picture</p>}
- </div></SpatialViewport></div>;
+ </div></SpatialViewport>{photos.viewing&&<CloudPhotoViewer node={photos.viewing} onClose={photos.close}/>}</div>;
 }

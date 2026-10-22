@@ -227,3 +227,7 @@ Schedule is the existing owner-created Home branch IL0A1. Preserve its organic w
 
 ### 0.44 — Personal Schedule
 Keep the existing organic calendar presentation and date colors. Schedule opens a personal authenticated space; use the standard stable sign-in gate for guests. Hide empty past periods without deleting their permanent identities. A saved note keeps its dated path visible. Dev accounts obey the same privacy boundary as everyone else; shared Home shows only the viewer's own Schedule weight. No new controls or visual chrome.
+
+### 0.45 — Pictures and appearance
+Pair Home destinations and Settings with companion brushed-silver/frosted-glass pictures, blue edge light on black, matching Controls. Preserve existing pictures and permanent IDs. My Space replaces Private in user-facing navigation; Safari replaces Public. Scope keys and access policy remain unchanged.
+Color Inversion is an optional reversible device preference; default remains black. The document-root filter covers boards, media, loading, split views and portal dialogs. Embedded page panes inherit the outer rendering effect and must not apply a second inversion. The toggle alone compensates its status color: --inversion-on #247638 (green against inverted white), --inversion-off #f38282 (red against default black). base.css owns these values; CloudCanvas references the tokens. Do not animate the whole-page color switch.

@@ -18,7 +18,7 @@
     "devasa",
     "wellisch"
   ],
-  "ui_version": "0.44",
+  "ui_version": "0.45",
   "routes": [
     "/",
     "/login",
@@ -30,7 +30,7 @@
     "/wellisch"
   ],
   "font_asset": "/_cdn/static/6e6c9250-599e-4bf4-a9ae-66ff948afb59-InterVariable.woff2",
-  "published_ui_version": "0.44",
+  "published_ui_version": "0.45",
   "release_status": "published",
   "favicon": "/_api/icon?v=2",
   "tactical_levels": [
@@ -100,8 +100,8 @@
     "wellisch_players": 3
   },
   "chess_favicon": "/_cdn/static/5212c476-8b1a-456c-8c0f-0186a23e999a.png",
-  "checkpoint_id": "2b2c5464-7b8b-4e46-9f9c-15c44b189fd0",
-  "publish_job_id": "7005fbdc-4090-4225-87ed-366a6c081dcc",
+  "checkpoint_id": "c18bf729-c5d8-457e-b94a-92eb19903097",
+  "publish_job_id": "efbedff6-1d09-4cd5-bdbd-687a42338c66",
   "time": {
     "unit": "microsecond",
     "earning": "eligible-active-use",

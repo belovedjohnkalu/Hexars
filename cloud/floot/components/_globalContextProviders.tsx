@@ -1,3 +1,4 @@
+import { AppearanceSync } from '../helpers/useAppearance';
 import { PageWorkspace } from './PageWorkspace';
 import { TimeProvider } from '../helpers/useTime';
 import { HistoryKeys } from './HistoryKeys';
@@ -29,6 +30,7 @@ export const GlobalContextProviders = ({
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider><TimeProvider><ThemeModeProvider>
+        <AppearanceSync />
         <ScrollToHashElement />
         <HistoryKeys />
         <TooltipProvider>
