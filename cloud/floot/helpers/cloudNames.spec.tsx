@@ -26,3 +26,11 @@ describe("Private cloud names",()=>{
     expect(long.split(" ").length).toBe(160);
   });
 });
+
+describe('Long names in every word space',()=>{
+ const long='An unrestricted name '.repeat(40).trim();
+ it('accepts full names for Home, Chess, Accounts, Public and Private on create and edit',()=>{
+ const credentials={workspaceId:'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',accessToken:'a'.repeat(64),version:0};
+ for(const scope of ['home','chess','accounts','public','private'] as const){expect(cloudNames.schema(scope).parse(long)).toBe(long);for(const action of ['add','rename'] as const)expect(schema.parse({...credentials,action,scope,id:'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb',parentId:'ion',name:long}).name).toBe(long);}
+ });
+});

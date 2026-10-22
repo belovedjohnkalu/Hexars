@@ -1,0 +1,15 @@
+# ION 0.40 — Longer words and comfortable framing
+
+Removed the 80-character cap from cloud labels in every scope, including Home, Chess and Accounts. The shared validator, creation/edit fields, default photo filename and obsolete character counter now agree. Public/Private depth-based word budgets, the 1,000-word picture policy and the general request-size guard are unchanged. Internal IDs, timezone and product keys keep their separate protocol bounds.
+
+Pictures now accept 20 MiB each (previously 3 MiB). A shared cloudPhotoMaxBytes constant drives picker validation, upload request/presign validation and stored-image verification. Existing file types, signature validation, scoped storage authorization, ordering, upload retry and cancellation remain.
+
+Word spaces open at natural scale or below, with a 28px inset, a gentler coarse-pointer fit floor and physically measured font ceiling. Organic placement uses a narrower spread and smaller gaps. Coarse targets reserve 72px world boxes, yielding 46.8px at the 0.65 opening floor; panning still reaches larger pages. Manual zoom and revisited cameras remain available. The layout version resets framing once for the release. The Home picture caption was checked to fit its reserved bounds; no unspecified lettering or brand-name change was invented.
+
+Prompt completion remains an explicit move of the original root into fixed IL0A01 after verified implementation/publication, retaining descendants and permanent identifiers. This request contained no new eligible queued prompt, and no stored content was moved or deleted during this release. “Add a new” and the specific intended lettering change were incomplete; clarification was requested while the independent work continued.
+
+Validation: clean hosted TypeScript; ten targeted suites passed for long names, picture allowances/signatures/server metadata, packing, complete labels, camera fitting, word budgets, deletion and dev workflow/privacy. Phone (390px) and desktop (1280px) preview browser checks saved a full 290-character label, accepted a 4 MiB picture in the composer, verified <=1× Home framing, caption fit and collision-free six-board previews. API responses for accounts/cloud writes were controlled fixtures; no real visitor content or large storage object was created. The new limit's presign/stored-file boundaries were tested independently. Static UX audit retains the same 32 known Button-asChild/Form-provider detection findings, zero unresolved owners; not counted as passed.
+
+Checkpoint: `dda6f7fd-fd58-4a49-b6e7-8bbe6691a189`. Publish job: `cb8f8f6d-d02d-46da-9d79-a7c2d378a272`.
+
+Publication succeeded at https://ion.floot.app. Both viewport fixtures also passed against the published bundle. The real anonymous production chess visitor journey passed: navigation, move/deselect, reload persistence, Undo, interrupted-move recovery and missing page; zero uncaught application errors. Fixtures tested long-name client submission and picture selection without writing customer account data or uploading large real objects.

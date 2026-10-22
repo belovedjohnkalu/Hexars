@@ -83,7 +83,7 @@ Use existing radius tokens, circular utility buttons, and a long pill composer. 
 ## Components
 Canonical owners: Button, Input, Form, Dialog, RadioGroup, DropdownMenu and InstallControl. The title is plain text. Holding a word for 300 ms opens the Controls cloud; deletion Undo remains a quiet footer action. CloudCanvas owns spatial navigation; CloudComposer owns creation and validation; useCloudSpace owns async state and retry. Loading uses the shared circular Spinner. Status announcements use a polite live region and failures remain visible above the composer. PageControls and PagedText make long content reachable without scrolling; global scrollbar tokens remain only as a platform fallback, not an app interaction.
 
-Links have visible focus, hover and pressed states. Disabled submit controls retain their footprint. Upload accepts PNG/JPEG/WebP/GIF up to 3 MB, shows an attachment preview, preserves drafts on error, and transfers file bytes directly to private storage. Native file-picker geometry is intentionally OS-owned.
+Links have visible focus, hover and pressed states. Disabled submit controls retain their footprint. Upload accepts PNG/JPEG/WebP/GIF up to 20 MB, shows an attachment preview, preserves drafts on error, and transfers file bytes directly to private storage. Native file-picker geometry is intentionally OS-owned.
 
 Motion: 190ms outgoing zoom and 460ms arrival, with eased placement changes. Reduced motion removes zoom and navigation delay. No ambient floating movement. Content uses familiar words: Add, Retry, Boards, Rules, Engines.
 
@@ -211,3 +211,7 @@ Coarse-pointer word canvases reserve 56px boxes and begin at a minimum 0.8 fit s
 
 ## Prompt refinements — 0.39
 Preserve the black, Inter, organic-canvas visual system. CloudActions owns deletion choices using its existing black dialog and pressed-state buttons: Everything inside / Keep children, then explicit Delete; Cancel remains Keep. No new route or menu. Empty word canvases invite “Add a word or picture”; financial Receive retains its truthful empty receipt state. Organic type sizes interpolate linearly between the readable minimum and a viewport-derived maximum. Exact character percentages retain sixteen decimal places as data; rendered geometry remains subject to browser pixel precision. Background typing restoration is opt-in through an already-focused composer and never opens a new visitor’s keyboard or takes focus through a dialog.
+
+
+## Comfortable opening frame — 0.40
+Keep Inter, black surfaces, blue chess pictures and the organic canvas. Sparse word pages no longer enlarge up to 3×: the shared word canvas caps default fit at natural scale and reserves 28px breathing room. Coarse-pointer pages use a gentler 0.65 opening floor with 72px target boxes (46.8px minimum at that floor); explicit/manual camera views remain intact. Typeface range is bounded by the actual viewport, rather than the virtual world's width, and the organic placement uses a tighter horizontal spread. Pictures accept up to 20 MiB apiece. Word labels and picture names have no 80-character cap in any scope; depth-based word budgets and the general request guard remain.

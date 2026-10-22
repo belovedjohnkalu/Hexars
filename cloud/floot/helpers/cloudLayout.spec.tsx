@@ -123,3 +123,8 @@ describe('Page-relative linear word sizing',()=>{
  const binary=cloudLayout([{id:'0',name:'Word',percent:0},{id:'100',name:'Word',percent:100}],393,600,measure,{organic:true,compact:true});expect(binary.items.find(n=>n.id==='100')!.fontSize).toBe(size('100'));
  });
 });
+
+describe('Compact opening typography',()=>{it('uses the actual screen cap rather than allowing a wide virtual world to inflate words',()=>{
+ const measure=(s:string,n:number)=>s.length*n*.54,items=[{id:'a',name:'Boards',percent:100},{id:'b',name:'Rules',percent:50},{id:'c',name:'Engines',percent:0}];
+ const r=cloudLayout(items,1200,650,measure,{organic:true,compact:true,maxFontSize:70,minTargetSize:72});expect(Math.max(...r.items.map(n=>n.fontSize))).toBe(70);for(const a of r.items){expect(a.height).toBeGreaterThanOrEqual(72);for(const b of r.items.filter(n=>n.id!==a.id))expect(a.x<b.x+b.width&&a.x+a.width>b.x&&a.y<b.y+b.height&&a.y+a.height>b.y).toBeFalse();}
+});});

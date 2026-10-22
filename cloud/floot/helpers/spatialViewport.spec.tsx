@@ -54,3 +54,18 @@ describe('Touch opening scale',()=>{
   expect(Number((v.container.querySelector('[data-camera-zoom]') as HTMLElement).dataset.cameraZoom)).toBe(.3);
  });
 });
+
+describe('Comfortable word-space opening',()=>{
+ afterEach(cleanup);
+ it('keeps sparse content at natural scale with breathing room and preserves manual zoom',()=>{
+ spyOnProperty(HTMLElement.prototype,'clientWidth','get').and.returnValue(390);spyOnProperty(HTMLElement.prototype,'clientHeight','get').and.returnValue(700);
+ const props={width:1000,height:1000,viewKey:'comfortable-'+crypto.randomUUID(),contentBounds:{x:200,y:200,width:180,height:160},maxFitZoom:1,fitPadding:28};
+ const v=render(<SpatialViewport {...props}>Word</SpatialViewport>),world=v.container.querySelector('[data-camera-zoom]') as HTMLElement;expect(Number(world.dataset.cameraZoom)).toBe(1);
+ fireEvent.keyDown(v.getByRole('region'),{key:'+'});expect(Number(world.dataset.cameraZoom)).toBeGreaterThan(1);
+ });
+ it('fits a normal page with a visible inset rather than cropping its edges',()=>{
+ spyOnProperty(HTMLElement.prototype,'clientWidth','get').and.returnValue(390);spyOnProperty(HTMLElement.prototype,'clientHeight','get').and.returnValue(700);
+ const v=render(<SpatialViewport width={1000} height={1000} viewKey={'inset-'+crypto.randomUUID()} contentBounds={{x:0,y:0,width:500,height:600}} maxFitZoom={1} fitPadding={28}>Words</SpatialViewport>);
+ expect(Number((v.container.querySelector('[data-camera-zoom]') as HTMLElement).dataset.cameraZoom)).toBeCloseTo(334/500,6);
+ });
+});

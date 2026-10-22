@@ -12,10 +12,10 @@ describe('Eight-word labels',()=>{
   const layout=cloudLayout(nodes,393,620,measure,{organic:true,compact:true});
   for(const a of layout.items){const n=nodes.find(n=>n.id===a.id)!;expect(a.height).toBeGreaterThan(cloudTextLines(n.name).length*(n.isImage?a.captionSize!:a.fontSize));for(const b of layout.items.filter(b=>b.id!==a.id))expect(a.x<b.x+b.width&&a.x+a.width>b.x&&a.y<b.y+b.height&&a.y+a.height>b.y).toBeFalse();}
  });
- it('responds even when an extra character leaves a branch at the minimum or maximum weight',()=>{
+ it('preserves the min/max scale when the relative percentages are unchanged',()=>{
   const measure=(s:string,f:number)=>s.length*f*.54;
   const a=cloudLayout([{id:'a',name:'A',percent:100,characters:100},{id:'b',name:'B',percent:0,characters:1}],393,600,measure,{organic:true});
   const b=cloudLayout([{id:'a',name:'A',percent:100,characters:101},{id:'b',name:'B',percent:0,characters:2}],393,600,measure,{organic:true});
-  expect(b.items[0].fontSize).toBeGreaterThan(a.items[0].fontSize);expect(b.items[1].fontSize).toBeGreaterThan(a.items[1].fontSize);
+  expect(b.items[0].fontSize).toBe(a.items[0].fontSize);expect(b.items[1].fontSize).toBe(a.items[1].fontSize);
  });
 });
