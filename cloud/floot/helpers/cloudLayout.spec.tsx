@@ -1,3 +1,4 @@
+import { cloudTree } from './cloudTree';
 import { cloudLayout } from "./cloudLayout";
 describe("Cloud layout", () => {
   const measure = (text: string, size: number) => text.length * size * .54;
@@ -128,3 +129,29 @@ describe('Compact opening typography',()=>{it('uses the actual screen cap rather
  const measure=(s:string,n:number)=>s.length*n*.54,items=[{id:'a',name:'Boards',percent:100},{id:'b',name:'Rules',percent:50},{id:'c',name:'Engines',percent:0}];
  const r=cloudLayout(items,1200,650,measure,{organic:true,compact:true,maxFontSize:70,minTargetSize:72});expect(Math.max(...r.items.map(n=>n.fontSize))).toBe(70);for(const a of r.items){expect(a.height).toBeGreaterThanOrEqual(72);for(const b of r.items.filter(n=>n.id!==a.id))expect(a.x<b.x+b.width&&a.x+a.width>b.x&&a.y<b.y+b.height&&a.y+a.height>b.y).toBeFalse();}
 });});
+
+
+describe('Names cannot affect font sizes',()=>{
+ const measure=(text:string,size:number)=>text.length*size*.54;
+ const source=[{id:'a',parentId:'root',name:'A'},{id:'b',parentId:'root',name:'B'},{id:'c',parentId:'root',name:'C'},{id:'x',parentId:'a',name:'four'},{id:'y',parentId:'b',name:'12345678'},{id:'z',parentId:'c',name:'1234567890123456'}];
+ const layout=(nodes:typeof source)=>cloudLayout(cloudTree.sizes(nodes,'root'),393,600,measure,{organic:true,compact:true,maxFontSize:70});
+ it('keeps every font unchanged when a cloud or sibling is renamed, even with a long label',()=>{
+  const before=layout(source),after=layout(source.map(n=>n.id==='b'?{...n,name:'A very long own name '.repeat(30)}:n));
+  for(const item of before.items)expect(after.items.find(n=>n.id===item.id)!.fontSize).toBe(item.fontSize);
+  expect(after.items.find(n=>n.id==='b')!.height).toBeGreaterThan(before.items.find(n=>n.id==='b')!.height);
+ });
+ it('treats empty leaves and equal descendant totals equally, regardless of name lengths',()=>{
+  const leaves=cloudLayout(cloudTree.sizes([{id:'a',parentId:'root',name:'A'},{id:'b',parentId:'root',name:'A longer leaf '.repeat(40)}],'root'),393,600,measure,{organic:true,compact:true,maxFontSize:70});
+  expect(leaves.items[0].fontSize).toBe(leaves.items[1].fontSize);
+ });
+ it('updates an intermediate cloud when characters are added deeper inside it',()=>{
+  const before=layout(source),after=layout([...source,{id:'deep',parentId:'y',name:'more'}]);
+  expect(after.items.find(n=>n.id==='b')!.fontSize).toBeGreaterThan(before.items.find(n=>n.id==='b')!.fontSize);
+  expect(cloudTree.sizes(source.map(n=>n.id==='b'?{...n,name:'A changed own name'}:n),'root').find(n=>n.id==='b')!.characters).toBe(8);
+ });
+ it('keeps image caption size unchanged by its own label and unrelated names',()=>{
+  const initial=[{id:'photo',name:'Photo',percent:50,characters:8,isImage:true},{id:'word',name:'Word',percent:50,characters:8}];
+  const a=cloudLayout(initial,393,600,measure,{organic:true,maxFontSize:70}),b=cloudLayout(initial.map(n=>({...n,name:n.name.repeat(100)})),393,600,measure,{organic:true,maxFontSize:70});
+  for(const node of a.items){const next=b.items.find(n=>n.id===node.id)!;expect(next.fontSize).toBe(node.fontSize);expect(next.captionSize).toBe(node.captionSize);}
+ });
+});

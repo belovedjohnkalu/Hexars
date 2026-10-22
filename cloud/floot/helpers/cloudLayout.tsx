@@ -9,7 +9,8 @@ export function cloudLayout(items:Item[],width:number,height:number,measure:(tex
   const overlaps=(rect:Rect)=>keys(rect).some(k=>(cells.get(k)||[]).some(r=>rect.x<r.x+r.width&&rect.x+rect.width>r.x&&rect.y<r.y+r.height&&rect.y+rect.height>r.y));
   const reserve=(rect:Rect)=>{for(const k of keys(rect))cells.set(k,[...(cells.get(k)||[]),rect]);};
   const minFont=narrow?15:17;
-  const pageFont=Math.max(minFont,Math.min(options.maxFontSize??Infinity,...items.filter(n=>!n.isImage&&!n.imageUrl).map(item=>{const lines=cloudTextLines(item.name),unit=Math.max(1,...lines.map(line=>measure(line,1)));return Math.min((width-48-identifierFootprint(item.identifier).width)/unit,(height-48)/(lines.length*1.18));}),Math.min(width,height)*.34));
+  // The type scale is fixed before measuring names. Names affect space, never font size.
+  const pageFont=Math.max(minFont,Math.min(options.maxFontSize??Infinity,Math.min(width,height)*.34));
   const measured=[...items].sort((a,b)=>b.percent-a.percent||items.indexOf(a)-items.indexOf(b)).map(item=>{
     const percent=Math.max(0,Math.min(100,item.percent));
     const identifier=identifierFootprint(item.identifier),fontSize=options.organic?minFont+(pageFont-minFont)*percent/100:(narrow?17:20)+item.percent/100*(narrow?13:18);
