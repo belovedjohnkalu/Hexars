@@ -1,3 +1,4 @@
+import { scheduleCalendar } from '../helpers/scheduleCalendar';
 import { accountTimeZone } from '../helpers/accountTimeZone';
 import { ensureScheduleCalendar } from '../helpers/ensureScheduleCalendar';
 import { signedInUserCount } from '../helpers/signedInUsers';
@@ -43,7 +44,7 @@ export async function handle(request: Request) {
       context=await cloudContext(request,{...input,action:'load'});
     }
     if(!context.row)return new Response(JSON.stringify({nodes:context.seeds.map(n=>({...n,canEdit:false,canCopy:false})),version:0,scope:input.scope,canAdd:false,dev:false,owner:false} satisfies OutputType),{headers});
-    const timeZone=input.scope==='home'?await accountTimeZone(context.userId,input.action==='load'?input.timeZone:undefined):undefined;
+    const timeZone=(input.scope==='home'||input.scope==='schedule')?await accountTimeZone(context.userId,input.action==='load'?input.timeZone:undefined):undefined;
     if(input.scope==='home'&&input.action==='load')context={...context,row:await ensureScheduleCalendar(context.row.id,timeZone!,context.devNumber)};
     const row=context.row!;
     let nodes = (Array.isArray(row.nodes) ? row.nodes : []) as unknown as CloudNode[];
@@ -51,6 +52,12 @@ export async function handle(request: Request) {
     let version = row.version;
     const combine=(stored:CloudNode[])=>input.scope==='accounts'?accountDeviceNodes(context.seeds,stored):[...new Map([...context.seeds,...stored].map(n=>[n.id,n])).values()];
     const all=combine(nodes).filter(n=>!n.removedBy);
+    if(input.scope==='home'&&input.action!=='load'&&input.action!=='upload'){
+      const dates=new Set(all.filter(n=>n.id===scheduleCalendar.root||n.calendarDate).map(n=>n.id));
+      if(('parentId' in input&&input.parentId&&dates.has(input.parentId))||('id' in input&&dates.has(input.id)&&input.action!=='rename'))cloudPolicy.fail('Open your private Schedule to add or change entries.',403);
+    }
+
+    if(input.scope==='schedule'&&input.action==='copy'&&context.seeds.some(n=>n.id===input.id))cloudPolicy.fail('Duplicate your own schedule entries, not the calendar.',403);
     if (input.action === "upload") {
       if(!cloudPolicy.writable(input.scope,context.userId,context.owner))cloudPolicy.fail("Sign in to add a picture.",401);
       const filename = "ion/" + row.id + "/" + context.userId + "/" + input.id + (input.fileId?"/"+input.fileId:"") + "." + extensions[input.contentType];
@@ -118,7 +125,7 @@ export async function handle(request: Request) {
       ?await cloudIdentifierStore(merged.filter(n=>!hubIds.has(n.id)),context.devNumber):undefined;
     // Signed picture URLs are refreshed on every read, and never stored as authority.
     let visible:CloudNode[] = await Promise.all(visibleDevClouds(merged,context.isDev).filter(n=>!n.removedBy&&!['time-balance','time-activity'].includes(n.id)&&(context.isDev||!['time-treasury','time-estimates'].includes(n.id))&&(context.scope!=='accounts'||n.id!=='account-remember'||context.seeds.some(seed=>seed.id==='account-remember'))).map(async node => {
-      const visibleNode={...node,...(['time-added','time-spent','time-remaining'].includes(node.id)?{parentId:'time'}:{}),...(node.id==='control-link'&&node.name==='Link'?{name:'Redirect'}:{}),identifier:functional?.[node.id]??(context.isDev?namespaceIdentifier(identifiers?.get(node.id)?.label,Number((input.scope==='private'&&node.id==='private'||input.scope==='accounts'&&context.seeds.some(s=>s.id===node.id))?context.devNumber:identifiers?.get(node.id)?.devNumber??context.devNumber)):undefined),createdBy:undefined,canEdit:cloudPolicy.edit(input.scope,node,context.userId,context.owner),canCopy:!!context.userId&&cloudPolicy.writable(input.scope,context.userId,context.owner)&&(context.owner||!cloudTree.roots.some(r=>r.id===node.id))};
+      const visibleNode={...node,...(['time-added','time-spent','time-remaining'].includes(node.id)?{parentId:'time'}:{}),...(node.id==='control-link'&&node.name==='Link'?{name:'Redirect'}:{}),identifier:functional?.[node.id]??(context.isDev?namespaceIdentifier(identifiers?.get(node.id)?.label,Number((input.scope==='private'&&node.id==='private'||input.scope==='accounts'&&context.seeds.some(s=>s.id===node.id))?context.devNumber:identifiers?.get(node.id)?.devNumber??context.devNumber)):undefined),createdBy:undefined,canEdit:cloudPolicy.edit(input.scope,node,context.userId,context.owner),canCopy:!(input.scope==='schedule'&&context.seeds.some(seed=>seed.id===node.id))&&!!context.userId&&cloudPolicy.writable(input.scope,context.userId,context.owner)&&(context.owner||!cloudTree.roots.some(r=>r.id===node.id))};
       const keys=node.imageKeys?.length?node.imageKeys:node.imageKey?[node.imageKey]:[];
       if(!keys.length)return visibleNode;
       const urls=await Promise.all(keys.map(async filename=>{const result=await getUrl({visibility:'private',filename,expiresInSeconds:3600});return result.ok?result.url:'';}));
@@ -133,6 +140,13 @@ export async function handle(request: Request) {
       const accountNodes=accountDeviceNodes(accountSeeds,Array.isArray(accountSaved?.nodes)?accountSaved.nodes as unknown as CloudNode[]:[]);
       const weight=(seeds:CloudNode[],stored:unknown,id:string)=>{const combined=[...new Map([...seeds,...(Array.isArray(stored)?stored as CloudNode[]:[])].map(n=>[n.id,n])).values()];return cloudTree.descendantCharacterWeights(combined).get(id)||0;};
       visible=visible.map(n=>({...n,...(n.id==='accounts'?{sizeCharacters:cloudTree.descendantCharacterWeights(accountNodes).get('accounts')||0}:n.id==='private'?{sizeCharacters:weight(cloudTree.forScope('private'),personal?.nodes,'private')}:n.id==='public'?{sizeCharacters:weight(cloudTree.forScope('public'),shared.find(s=>s.kind==='public')?.nodes,'public')}:n.id==='hexagonal-chess'?{sizeCharacters:weight(cloudTree.forScope('chess'),shared.find(s=>s.kind==='chess')?.nodes,'hexagonal-chess')}:{})}));
+    }
+    if(input.scope==='home'){
+      const own=context.userId?await db.selectFrom('ionScheduleAccounts').innerJoin('ionWorkspaces','ionScheduleAccounts.workspaceId','ionWorkspaces.id').select('nodes').where('userId','=',context.userId).executeTakeFirst():undefined;
+      const template=merged.filter(n=>!n.removedBy&&(n.id===scheduleCalendar.root||n.calendarDate));
+      const personal=scheduleCalendar.paint([...template,...(Array.isArray(own?.nodes)?own.nodes as unknown as CloudNode[]:[])],scheduleCalendar.today(new Date(),timeZone!));
+      const weight=cloudTree.descendantCharacterWeights(personal).get(scheduleCalendar.root)||0;
+      visible=visible.map(n=>n.id===scheduleCalendar.root?{...n,sizeCharacters:weight}:n);
     }
     return new Response(JSON.stringify({ nodes: visible, version, ...(timeZone?{timeZone}:{}), ...(context.isDev&&input.scope==='accounts'?{signedInUsers:await signedInUserCount()}:{}), workspaceId:row.id, account:input.scope==='private', scope:input.scope, canAdd:cloudPolicy.writable(input.scope,context.userId,context.owner), dev:context.isDev,owner:context.owner,userId:context.userId||undefined, undo: cloudChanges.undo(nodes.filter(n=>cloudPolicy.edit(input.scope,n,context.userId,context.owner))) } satisfies OutputType), { headers });
   } catch (error) {

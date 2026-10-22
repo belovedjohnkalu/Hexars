@@ -11,7 +11,7 @@ export const channels = {
   timeCatalog:'time:catalog',
   timeTreasury:'time:treasury',
   player:(id:number)=>'chess-player:'+id,
-  cloud:(scope:string,userId:number)=>scope==="private"?"cloud-user:"+userId:scope==="accounts"?"cloud-accounts:"+userId:scope==="chess"?"cloud:chess":scope==="home"?"cloud:home":"cloud:public",
+  cloud:(scope:string,userId:number)=>(scope==="private"||scope==="schedule")?"cloud-user:"+userId:scope==="accounts"?"cloud-accounts:"+userId:scope==="chess"?"cloud:chess":scope==="home"?"cloud:home":"cloud:public",
   room: (id: string | number) => "room:" + id,
   user: (userId: string) => "user:" + userId,
   // Presence channel — subscribers get a live roster (who's online). The reserved

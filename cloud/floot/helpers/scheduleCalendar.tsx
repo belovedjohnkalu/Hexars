@@ -20,7 +20,9 @@ function ensure(nodes:CloudNode[],throughYear:number,createId:()=>string,created
  return replacements.size||added.length?[...nodes.map(n=>replacements.get(n.id)||n),...added]:nodes;
 }
 function paint(nodes:CloudNode[],current:Day){
- const hidden=new Set(nodes.filter(n=>n.calendarDate&&n.calendarDate.year>current.year+4).map(n=>n.id));
+ const active=new Map(nodes.filter(n=>!n.removedBy).map(n=>[n.id,n])),hasEntries=new Set<string>();
+ for(const entry of active.values())if(!entry.calendarDate&&entry.id!==root){let parent=entry.parentId?active.get(entry.parentId):undefined;const seen=new Set<string>();while(parent&&!seen.has(parent.id)){seen.add(parent.id);if(parent.calendarDate)hasEntries.add(parent.id);parent=parent.parentId?active.get(parent.parentId):undefined;}}
+ const hidden=new Set(nodes.filter(n=>{const d=n.calendarDate;if(!d)return false;const past=d.day?key(d as Day)<key(current):d.month?d.year*12+d.month<current.year*12+current.month:d.year<current.year;return d.year>current.year+4||past&&!hasEntries.has(n.id);}).map(n=>n.id));
  let grew=true;while(grew){grew=false;for(const node of nodes)if(node.parentId&&hidden.has(node.parentId)&&!hidden.has(node.id)){hidden.add(node.id);grew=true;}}
  return nodes.filter(n=>!hidden.has(n.id)).map(n=>{const date=n.calendarDate;if(!date)return n;const a=date.day?key(date as Day):date.month?date.year*12+date.month:date.year,b=date.day?key(current):date.month?current.year*12+current.month:current.year;const status=a<b?'past':a>b?'future':'current';return {...n,color:status==='past'?'#82f398' as const:status==='future'?'#f38282' as const:'white' as const,calendarStatus:status as 'past'|'current'|'future'};});
 }

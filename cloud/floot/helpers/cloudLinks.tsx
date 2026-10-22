@@ -1,6 +1,6 @@
 import { z } from 'zod';
 export const redirectSchema=z.discriminatedUnion('kind',[
- z.object({kind:z.literal('cloud'),id:z.string().min(1).max(120),scope:z.enum(['home','public','private','chess','accounts'])}).strict(),
+ z.object({kind:z.literal('cloud'),id:z.string().min(1).max(120),scope:z.enum(['home','public','private','chess','accounts','schedule'])}).strict(),
  z.object({kind:z.literal('url'),url:z.string().trim().url().max(4096).refine(value=>{try{return ['https:','http:'].includes(new URL(value).protocol);}catch{return false;}},'Use an http or https address.')}).strict()
 ]);
 export type CloudRedirect=z.infer<typeof redirectSchema>;

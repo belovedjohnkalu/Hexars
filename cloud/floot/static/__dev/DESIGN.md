@@ -224,3 +224,6 @@ Sending should keep the keyboard session alive. Add does not take pointer focus 
 
 ## Schedule — 0.43
 Schedule is the existing owner-created Home branch IL0A1. Preserve its organic word canvas and existing year/month/day IDs. All date nodes use semantic green (#82f398) for past, white for current and red (#f38282) for future, at the node's year/month/day granularity in the viewer's account zone. Status is also available to assistive technology. No forms, date-picker UI, extra buttons or routes. The same green may appear on many dates; this computed semantic color intentionally overrides saved decorative shades and does not use the unique color wheel policy.
+
+### 0.44 — Personal Schedule
+Keep the existing organic calendar presentation and date colors. Schedule opens a personal authenticated space; use the standard stable sign-in gate for guests. Hide empty past periods without deleting their permanent identities. A saved note keeps its dated path visible. Dev accounts obey the same privacy boundary as everyone else; shared Home shows only the viewer's own Schedule weight. No new controls or visual chrome.

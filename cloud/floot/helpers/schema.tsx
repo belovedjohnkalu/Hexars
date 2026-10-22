@@ -138,6 +138,11 @@ export interface IonRememberedDevices {
   tokenHash: string;
 }
 
+export interface IonScheduleAccounts {
+  userId: number;
+  workspaceId: string;
+}
+
 export interface IonSharedSpaces {
   kind: string;
   ownerUserId: number;
@@ -308,6 +313,7 @@ export interface DB {
   ionMatchLobbies: IonMatchLobbies;
   ionOnlineAttempts: IonOnlineAttempts;
   ionRememberedDevices: IonRememberedDevices;
+  ionScheduleAccounts: IonScheduleAccounts;
   ionSharedSpaces: IonSharedSpaces;
   ionTimeAccounts: IonTimeAccounts;
   ionTimeConfig: IonTimeConfig;

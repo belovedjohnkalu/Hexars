@@ -1,3 +1,4 @@
+import { scheduleCalendar } from '../helpers/scheduleCalendar';
 import { cloudText } from '../helpers/cloudText';
 import { engineId as resolveEngineId, isEngineId } from '../helpers/chessEngines';
 import { useLayoutEffect,useMemo,useRef,useState,type CSSProperties,type MouseEvent } from 'react';
@@ -38,6 +39,7 @@ export function CloudCanvas({tabularNumbers=false,fitOnChange=false,nodes,parent
  if(bounds){bounds.width=Math.max(...layout.items.map(n=>n.x+n.width))-bounds.x;bounds.height=Math.max(...layout.items.map(n=>n.y+n.height))-bounds.y;}
  const rectangles=new Map(layout.items.map(n=>[n.id,n]));
  function destination(node:CloudNode){
+  if(scope==='home'&&(node.id===scheduleCalendar.root||node.calendarDate))return cloudURL(node.id,'schedule');
   if(node.lockedItem)return '/?'+new URLSearchParams({cloud:'time-product',space:'home',item:node.lockedItem,back:location.pathname+location.search});
   if(node.redirect)return redirectURL(node.redirect);
   if(node.href?.startsWith('/')&&!node.href.startsWith('//'))return node.href;
