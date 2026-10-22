@@ -372,3 +372,5 @@ Full signed-in price catalog, minimal purchase pages, direct Time totals, paragr
 - 0.36: investigated lower prices (approved cost divided by four valid signed-in accounts, unchanged formula/estimates); added the live dev Accounts population, server-protected IL0A0, empty IL0A00/IL0A01 prompt pages and Complete-only development workflow. Published and verified count/error recovery and anonymous API privacy; preserved existing ILs, owner editing and all financial data.
 
 - 0.37: sign-in/sign-up land on ION regardless of caller return link; Remember is a clear outlined toggle button on both forms, and optional device-remember failures no longer block successful sign-in.
+
+- 0.37.1: extended dev-only privacy to the entire ION Prompts root and every descendant, preserving content and permanent ILs.

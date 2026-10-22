@@ -1,6 +1,6 @@
 # Dev prompt workflow
 
-The configured Home owner is dev 0. All dev accounts can read IL0A0 (To do) and its descendants. Regular accounts and guests cannot receive them through the cloud API, including image URLs or redirect resolution. Shared Home mutations remain restricted to the configured owner.
+The configured Home owner is dev 0. All dev accounts can read the ION Prompts root (IL0A), IL0A0 (To do) and all their descendants. Regular accounts and guests cannot receive them through the cloud API, including image URLs or redirect resolution. Shared Home mutations remain restricted to the configured owner.
 
 | Page | Node ID | Purpose |
 | --- | --- | --- |

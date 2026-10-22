@@ -176,3 +176,6 @@ visibleDevClouds excludes the immutable IL0A0 root and every descendant for gues
 
 ## Authentication landing — 0.37
 Successful sign-in and account creation always replace the login route with ION (`/`), even when a prior page supplied `back`. Back/cancel links retain their prior destination. Remember is the same explicit outlined 44px toggle button on both forms, with aria-pressed and a checked blue state. A failed optional device-remember operation does not strand a successfully signed-in account on the form; ION's existing notice explains how to retry from Accounts. Authentication errors retain entered values and remain on the form.
+
+## Entire Prompts root privacy — 0.37.1
+The ION Prompts root (IL0A) and every descendant are dev-only, including To do and all completed branches. Filtering uses their immutable IDs, applies to guest/regular API responses and redirect target resolution, and occurs before image signing. Existing dev access, owner editing and ILs remain unchanged.
