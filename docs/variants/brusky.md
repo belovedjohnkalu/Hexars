@@ -57,3 +57,6 @@ Native fixtures independently cover:
   diagrams; pass-and-play, undo/review, saved games and engine games.
 
 The shared protocol exposes pointy orientation, full movement history and native legal-move deltas. Original three-variant hashes and saved states remain compatible. `npm run test:native`, protocol tests and CMake/CTest cover the module; the shared horizontal suite covers full random and Tactical games.
+
+
+Presentation clarification (0.48): the two immediately adjacent forward edge cells are movement destinations only and never captures. Preserve the historical exception: an unmoved pawn on its original starting cell can also capture the farther straight-ahead vertex cell between its two normal side captures. The rules paragraphs and teaching diagrams distinguish these cells explicitly; native move generation is unchanged.

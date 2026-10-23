@@ -111,6 +111,12 @@ export interface IonGameShares {
   tokenHash: string;
 }
 
+export interface IonHomePreferences {
+  hiddenIds: Generated<Json>;
+  updatedAt: Generated<Timestamp>;
+  userId: number;
+}
+
 export interface IonLobbyMembers {
   lobbyId: string;
   seat: number;
@@ -126,6 +132,24 @@ export interface IonMatchLobbies {
   id: string;
   status: Generated<IonLobbyStatus>;
   variant: string;
+}
+
+export interface IonNotificationDeliveries {
+  attempts: Generated<number>;
+  identityHash: string;
+  lastError: string | null;
+  leaseUntil: Timestamp | null;
+  notificationId: string;
+  sentAt: Timestamp | null;
+}
+
+export interface IonNotifications {
+  createdAt: Generated<Timestamp>;
+  id: string;
+  kind: string;
+  payload: Json;
+  sourceId: string;
+  userId: number;
 }
 
 export interface IonOnlineAttempts {
@@ -161,6 +185,14 @@ export interface IonPluginTokens {
   resource: string;
   revokedAt: Timestamp | null;
   scope: string;
+  userId: number;
+}
+
+export interface IonPushSubscriptions {
+  identityHash: string;
+  sessionId: string;
+  subscription: Json;
+  updatedAt: Generated<Timestamp>;
   userId: number;
 }
 
@@ -275,6 +307,11 @@ export interface IonTimeTransactions {
   toAccount: string;
 }
 
+export interface IonWorkspaceRefresh {
+  version: number;
+  workspaceId: string;
+}
+
 export interface IonWorkspaces {
   accessTokenHash: string;
   createdAt: Generated<Timestamp>;
@@ -340,12 +377,16 @@ export interface DB {
   ionDeviceAccounts: IonDeviceAccounts;
   ionGameMembers: IonGameMembers;
   ionGameShares: IonGameShares;
+  ionHomePreferences: IonHomePreferences;
   ionLobbyMembers: IonLobbyMembers;
   ionMatchLobbies: IonMatchLobbies;
+  ionNotificationDeliveries: IonNotificationDeliveries;
+  ionNotifications: IonNotifications;
   ionOnlineAttempts: IonOnlineAttempts;
   ionPluginClients: IonPluginClients;
   ionPluginCodes: IonPluginCodes;
   ionPluginTokens: IonPluginTokens;
+  ionPushSubscriptions: IonPushSubscriptions;
   ionRememberedDevices: IonRememberedDevices;
   ionScheduleAccounts: IonScheduleAccounts;
   ionSharedSpaces: IonSharedSpaces;
@@ -359,6 +400,7 @@ export interface DB {
   ionTimeProducts: IonTimeProducts;
   ionTimeQuotes: IonTimeQuotes;
   ionTimeTransactions: IonTimeTransactions;
+  ionWorkspaceRefresh: IonWorkspaceRefresh;
   ionWorkspaces: IonWorkspaces;
   loginAttempts: LoginAttempts;
   passwordResetCodes: PasswordResetCodes;

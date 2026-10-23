@@ -1,0 +1,20 @@
+import { db } from './db';
+import { sendPushNotifications } from '@floot/push';
+import { queueTask } from '@floot/queueTask';
+import { deliverIonNotification } from './deliverIonNotification';
+import { ionNotifications } from './ionNotifications';
+const sourceId='aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',notificationId='time-received:'+sourceId+':7';
+describe('Durable account-specific notification delivery',()=>{
+ let kind:string,shareAvailable:boolean,devices:unknown[],claimed:boolean,attempts:number,updates:Record<string,unknown>[],deleted:string[],conditions:Array<[string,string,unknown]>,inserts:Array<{table:string;value:unknown}>;
+ beforeEach(()=>{kind='time-received';shareAvailable=true;devices=[{identityHash:'fixture-hash',subscription:{apnsToken:'fixture-token',platform:'ios'}}];claimed=false;attempts=1;updates=[];deleted=[];conditions=[];inserts=[];
+  (sendPushNotifications as jasmine.Spy).and.resolveTo([{success:true,gone:false,statusCode:201}]);(queueTask as jasmine.Spy).and.resolveTo({});
+  const query=(table:string)=>{let patch:Record<string,unknown>={};const q={select:()=>q,selectAll:()=>q,innerJoin:()=>q,whereRef:()=>q,where:(key:unknown,op:string,value:unknown)=>{if(typeof key==='string')conditions.push([key,op,value]);return q;},set:(v:Record<string,unknown>)=>{patch=v;updates.push(v);return q;},values:(value:unknown)=>{inserts.push({table,value});return q;},onConflict:()=>q,returning:()=>q,
+   execute:async()=>table==='ionNotificationDeliveries as d'?devices:table==='ionPushSubscriptions as p'?devices:[],executeTakeFirst:async()=>table==='ionNotifications'?{kind,userId:7,sourceId,payload:{title:'Time received',body:'2m',tag:notificationId,data:{route:'/?cloud=time-receipt&space=home&receipt='+sourceId,userId:7}}}:table==='ionGameShares'?(shareAvailable?{id:sourceId}:undefined):Object.keys(patch).length&&!claimed?(claimed=true,{attempts}):undefined};return q;};
+  spyOn(db,'selectFrom').and.callFake(t=>query(String(t)) as never);spyOn(db,'updateTable').and.callFake(t=>query(String(t)) as never);spyOn(db,'deleteFrom').and.callFake(t=>{deleted.push(String(t));return query(String(t)) as never;});spyOn(db,'insertInto').and.callFake(t=>query(String(t)) as never);
+ });
+ it('delivers once to the event account and marks the device sent',async()=>{await deliverIonNotification({notificationId});expect(sendPushNotifications).toHaveBeenCalledTimes(1);expect(conditions).toContain(['p.userId','=',7]);expect(conditions.some(([k])=>k==='s.credentialExpiresAt')).toBeTrue();expect(updates.some(p=>p.sentAt instanceof Date)).toBeTrue();expect(queueTask).not.toHaveBeenCalled();await deliverIonNotification({notificationId});expect(sendPushNotifications).toHaveBeenCalledTimes(1);});
+ it('deletes a gone subscription instead of retrying it',async()=>{(sendPushNotifications as jasmine.Spy).and.resolveTo([{success:false,gone:true,statusCode:410}]);await deliverIonNotification({notificationId});expect(deleted).toContain('ionPushSubscriptions');expect(queueTask).not.toHaveBeenCalled();});
+ it('retries temporary failures with a bounded delayed job and stable event tag',async()=>{(sendPushNotifications as jasmine.Spy).and.rejectWith(new Error('Fixture outage'));await deliverIonNotification({notificationId});expect(queueTask).toHaveBeenCalledWith('deliverIonNotification',{notificationId},jasmine.objectContaining({delayMs:60000}));expect(updates.some(p=>p.lastError==='Delivery unavailable')).toBeTrue();(queueTask as jasmine.Spy).calls.reset();claimed=false;attempts=3;await deliverIonNotification({notificationId});expect(queueTask).not.toHaveBeenCalled();});
+ it('does not deliver a revoked or hidden received game',async()=>{kind='shared-game';shareAvailable=false;await deliverIonNotification({notificationId});expect(sendPushNotifications).not.toHaveBeenCalled();});
+ it('creates no history for people who had no active notification subscriptions at the event',async()=>{devices=[];await ionNotifications.record(db as never,{id:notificationId,userId:7,kind:'time-received',sourceId,payload:{title:'Time received',body:'2m',tag:notificationId,data:{route:'/',userId:7}}});expect(inserts.length).toBe(0);});
+});

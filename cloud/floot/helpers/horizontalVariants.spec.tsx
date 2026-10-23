@@ -17,6 +17,8 @@ describe('Brusky and De Vasa presentation',()=>{
    const paragraphs=cloudTree.seed.filter(n=>n.parentId===variant+'-rules'),valid=new Set(board.cells.map(c=>c.q+','+c.r));expect(paragraphs.length).toBe(23);
    for(const node of paragraphs){expect(node.isImage).toBeFalse();expect(node.note!.length).toBeGreaterThan(70);if(node.illustration==='setup')continue;const diagram=ruleIllustration(board,node.illustration!,variant);for(const p of diagram.pieces)expect(valid.has(p.q+','+p.r)).toBeTrue();for(const p of diagram.targets)expect(valid.has(p)).toBeTrue();}
    const captures=ruleIllustration(board,'initial-capture',variant);expect(captures.targets.size).toBe(variant==='brusky'?3:2);
+   const pawn=captures.pieces.find(p=>p.type==='pawn'&&p.player===0)!;for(const [q,r] of [[0,-1],[1,-1]])expect(captures.targets.has((pawn.q+q)+','+(pawn.r+r))).toBeFalse();
+   if(variant==='brusky'){expect(captures.targets.has((pawn.q+1)+','+(pawn.r-2))).toBeTrue();expect(captures.caption).toContain('Neither adjacent');expect(paragraphs.find(n=>n.illustration==='advance')?.note).toContain('cannot capture an enemy on either');}
    const blockers=ruleIllustration(board,'blocked',variant);expect(blockers.targets.size).toBe(variant==='brusky'?0:1);
   });
  }

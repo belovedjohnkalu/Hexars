@@ -1,3 +1,5 @@
+import { ionNotifications } from '../helpers/ionNotifications';
+import { chessVariants } from '../helpers/chessVariants';
 import { withOnlineResult } from '../helpers/onlineMatch';
 import { functionIdentifiers } from '../helpers/functionIdentifiers';
 import { savedFunctionClouds } from '../helpers/functionClouds';
@@ -47,7 +49,11 @@ export async function handle(request:Request){const headers={'Content-Type':'app
  if(input.recipientNickname&&!recipient)fail('No account has that player name. Check the spelling.',400);
  if(input.recipientEmail&&!recipient)fail('That email does not have an account yet. Share a link instead.',400);if(recipient?.id===user.id)fail('Choose another account.',400);
  const game=await db.selectFrom('hexchessGames').select('state').where('id','=',input.gameId).executeTakeFirstOrThrow(),variant=game.state&&typeof game.state==='object'&&!Array.isArray(game.state)?String(game.state.variant):'glinski';
- const token=randomBytes(32).toString('hex'),id=randomUUID();await db.insertInto('ionGameShares').values({id,gameId:input.gameId,senderId:user.id,recipientId:recipient?.id??null,tokenHash:createHash('sha256').update(token).digest('hex')}).execute();
- await Promise.all([publish(channels.player(user.id),{library:true}),...(recipient?[publish(channels.player(recipient.id),{library:true})]:[])]);
+ const token=randomBytes(32).toString('hex'),id=randomUUID();await db.transaction().execute(async tx=>{
+  await tx.insertInto('ionGameShares').values({id,gameId:input.gameId,senderId:user.id,recipientId:recipient?.id??null,tokenHash:createHash('sha256').update(token).digest('hex')}).execute();
+  if(recipient&&chessVariants.isId(variant)){const noticeId='shared-game:'+id+':'+recipient.id,route='/'+variant+'?'+new URLSearchParams({mode:'saved',game:input.gameId,shareId:id});await ionNotifications.record(tx,{id:noticeId,userId:recipient.id,kind:'shared-game',sourceId:id,payload:{title:'Game received',body:user.displayName+' shared a game',tag:noticeId,data:{route,userId:recipient.id}}});}
+ });
+ await Promise.allSettled([ionNotifications.dispatch(id)]);
+ await Promise.allSettled([publish(channels.player(user.id),{library:true}),...(recipient?[publish(channels.player(recipient.id),{library:true})]:[])]);
  return new Response(JSON.stringify({shareId:id,path:`/${variant}?mode=saved&share=${token}`,recipient:recipient?.displayName}),{headers});
  }catch(e){const status=e&&typeof e==='object'&&'status'in e?Number(e.status):e&&typeof e==='object'&&'issues'in e?400:503;if(status>=500)console.error('Library request',e instanceof Error?e.message:e);return new Response(JSON.stringify({error:status===503?'Couldn’t open your Library. Try again.':e instanceof Error?e.message:'Check the details.'}),{status,headers});}}

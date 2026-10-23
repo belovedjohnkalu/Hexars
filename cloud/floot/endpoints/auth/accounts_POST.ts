@@ -1,3 +1,4 @@
+import { getServerSessionOrThrow,NotAuthenticatedError } from '../../helpers/getSetServerSession';
 import { createHash,randomBytes } from "node:crypto";
 import { db } from "../../helpers/db";
 import { getServerUserSession } from "../../helpers/getServerUserSession";
@@ -21,9 +22,11 @@ export async function handle(request:Request){
   if(input.action==='forget'){await db.deleteFrom('ionDeviceAccounts').where('deviceHash','=',hash).where('userId','=',input.userId).execute();}
   if(input.action==='switch'){
    const account=accounts.find(a=>a.id===input.userId);if(!account)return new Response(JSON.stringify({error:'Sign in to that account again.'}),{status:401,headers});
+   let currentSession:string|undefined;try{currentSession=(await getServerSessionOrThrow(request)).id;}catch(e){if(!(e instanceof NotAuthenticatedError))throw e;}
    const sessionId=randomBytes(32).toString('hex');await db.transaction().execute(async tx=>{
     const previous=await tx.selectFrom('ionDeviceAccounts').innerJoin('sessions','sessions.id','ionDeviceAccounts.sessionId').select('ionDeviceAccounts.sessionId').where('deviceHash','=',hash).where('ionDeviceAccounts.userId','=',account.id).whereRef('sessions.userId','=','ionDeviceAccounts.userId').where('sessions.expiresAt','>',new Date()).forUpdate('ionDeviceAccounts').executeTakeFirst();
     if(!previous)throw new Error('Sign in to that account again.');
+    if(currentSession)await tx.deleteFrom('ionPushSubscriptions').where('sessionId','=',currentSession).execute();
     await tx.insertInto('sessions').values({id:sessionId,userId:account.id,createdAt:now,lastAccessed:now,expiresAt:new Date(Date.now()+SessionExpirationSeconds*1000)}).execute();
     await tx.updateTable('ionDeviceAccounts').set({sessionId}).where('deviceHash','=',hash).where('userId','=',account.id).execute();
     if(!await tx.selectFrom('ionDeviceAccounts').select('sessionId').where('sessionId','=',previous.sessionId).executeTakeFirst())await tx.deleteFrom('sessions').where('id','=',previous.sessionId).where('userId','=',account.id).execute();

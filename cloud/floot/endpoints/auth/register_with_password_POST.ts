@@ -1,6 +1,7 @@
 // adapt this to the database schema and helpers if necessary
 import { isNicknameTaken } from "../../helpers/nickname";
 import { sql } from "kysely";
+import { getServerSessionOrThrow,NotAuthenticatedError } from '../../helpers/getSetServerSession';
 import { db } from "../../helpers/db";
 import { schema } from "./register_with_password_POST.schema";
 import { randomBytes } from "crypto";
@@ -95,6 +96,7 @@ export async function handle(request: Request) {
     );
 
     // Set session cookie
+    try{const previous=await getServerSessionOrThrow(request);await db.deleteFrom('ionPushSubscriptions').where('sessionId','=',previous.id).execute();}catch(e){if(!(e instanceof NotAuthenticatedError))throw e;}
     await setServerSession(response, {
       id: sessionId,
       createdAt: now.getTime(),

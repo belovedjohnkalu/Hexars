@@ -27,6 +27,7 @@ export const schema = z.discriminatedUnion("action", [
   if (!result.success) for (const issue of result.error.issues) context.addIssue({ ...issue, path: ["name", ...issue.path] });
 });
 export type CloudNode = {
+  homeFeature?:boolean; canHide?:boolean; hiddenFeature?:boolean;
   lockedItem?:string;redirect?:CloudRedirect;wordRedirect?:{words:number[];target:CloudRedirect};shareId?:string;
   href?:string; savedGameId?:string; engineId?:EngineId;
   calendarDate?:{year:number;month?:number;day?:number}; calendarStatus?:'past'|'current'|'future';

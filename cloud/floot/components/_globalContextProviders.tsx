@@ -1,3 +1,4 @@
+import { NotificationProvider } from '../helpers/useNotifications';
 import { AppearanceSync } from '../helpers/useAppearance';
 import { PageWorkspace } from './PageWorkspace';
 import { TimeProvider } from '../helpers/useTime';
@@ -29,7 +30,7 @@ export const GlobalContextProviders = ({
   useEffect(()=>{const guard=(event:BeforeUnloadEvent)=>{if(cloudDrafts.hasPictures()){event.preventDefault();event.returnValue="";}};window.addEventListener("beforeunload",guard);return()=>window.removeEventListener("beforeunload",guard);},[]);
   return (
     <QueryClientProvider client={queryClient}>
-      <AuthProvider><TimeProvider><ThemeModeProvider>
+      <AuthProvider><NotificationProvider><TimeProvider><ThemeModeProvider>
         <AppearanceSync />
         <ScrollToHashElement />
         <HistoryKeys />
@@ -37,7 +38,7 @@ export const GlobalContextProviders = ({
           <PageWorkspace>{children}</PageWorkspace>
           <SonnerToaster />
         </TooltipProvider>
-      </ThemeModeProvider></TimeProvider></AuthProvider>
+      </ThemeModeProvider></TimeProvider></NotificationProvider></AuthProvider>
     </QueryClientProvider>
   );
 };

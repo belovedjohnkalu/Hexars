@@ -1,18 +1,19 @@
 # Dev prompt workflow
 
-The configured Home owner is dev 0. All dev accounts can read the ION Prompts root (IL0A), IL0A0 (To do) and all their descendants. Regular accounts and guests cannot receive them through the cloud API, including image URLs or redirect resolution. Shared Home mutations remain restricted to the configured owner.
+The configured Home owner is dev 0. All dev accounts can read Prompts (IL0A0), To do and descendants. Regular accounts and guests cannot receive this branch through cloud/redirect APIs, including its pictures. Shared Home mutations stay restricted to the configured owner. Labels never grant permissions.
+
+Current live structure, verified for the directly requested 0.48 batch:
 
 | Page | Node ID | Purpose |
 | --- | --- | --- |
-| IL0A0 | `8d489e18-161c-4c8b-a7a4-63cdfecc9394` | Existing To do branch; dev-only |
-| IL0A00 | `a6af91c2-fd49-49e9-a385-d911890368c9` | Prompts |
-| IL0A000 | `ef9da214-6a55-4861-a609-dee2726bb486` | Complete: ready to implement |
-| IL0A01 | `55b50ec5-26d5-428b-81f2-cae577e42828` | Completed prompts |
+| IL0A0 | `6208875d-c43c-4548-824f-9c0229fd16bc` | Prompts |
+| IL0A00 | `8d489e18-161c-4c8b-a7a4-63cdfecc9394` | To do |
+| IL0A01 | `df45ea97-524e-4c1c-b2f6-2a96529562e3` | Completed |
 
-At the start of queue work, read the latest owner Home workspace and its permanent identifiers through the authorized Floot database/cloud tools. Work only on prompts directly beneath a cloud whose current trimmed name is exactly `Complete`, within the current IL0A00 subtree. A prompt's descendants are its supporting context. Drafts elsewhere are not tasks. Take a bounded snapshot of eligible prompts; newly arriving prompts wait for the next pass. The current user's direct instructions always take precedence.
+The previous Prompts inbox `a6af91c2-fd49-49e9-a385-d911890368c9`, its Complete child `ef9da214-6a55-4861-a609-dee2726bb486`, and its Completed sibling `55b50ec5-26d5-428b-81f2-cae577e42828` are soft-deleted. Preserve these tombstones and their birth ILs; do not resurrect or renumber them.
 
-After a prompt is implemented, tested and published when applicable, move that prompt root to IL0A01 using the latest workspace version. Preserve its ID, descendants, text, images and permanent IL. A move must not rename or renumber it. Do not mark blocked or unverified work complete. Use optimistic concurrency/row locking and re-read on conflict; never replace a Home snapshot taken before the work. Publish the existing Home realtime invalidation after a successful move. The app stores and displays instructions; it does not run arbitrary submitted text as server code. Work is carried out during an active authorized development session, not by an unattended background agent.
+For queued work, read the latest owner Home workspace and identifiers through authorized tools. The standing ready filter remains a current, trimmed name exactly `Complete` inside the configured prompts inbox. If that structure is absent, it does not authorize execution of arbitrary drafts elsewhere. Direct user instructions take precedence: “Complete the Todo lists” explicitly authorized the bounded five-task snapshot documented in `docs/releases/ion-0.48.md` directly inside current To do. Newly arriving prompts wait for another pass.
 
-Existing sibling Completed at IL0A1 is preserved; this workflow uses the specifically requested IL0A01. New identifiers are allocated once, without recycling prior arrivals.
+After implementation, tests and publication when applicable, move each original task root into the current active Completed folder with the latest workspace version, preserving its ID, text, images, descendants and birth IL. Verify the task and destination are still live and unchanged; row-lock/version-check and re-read on conflict. Never replace a stale workspace snapshot. Administrative SQL changes queue `ion_workspace_refresh`; an authorized cloud load drains it through the existing scope-specific realtime channel. Verify delivery before declaring the archive complete. Do not archive blocked or unverified tasks.
 
-Completion includes the archive move: do not leave a completed prompt in IL0A00 or report the queue task finished before confirming its original root now belongs to IL0A01. A repeated instruction to preserve this workflow does not authorize unrelated draft prompts.
+The app stores prompts as data; it never runs arbitrary submitted text as code. Execution happens only during an authorized development session. Completion includes verifying the archive move, not just writing a completion note.

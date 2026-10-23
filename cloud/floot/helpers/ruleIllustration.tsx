@@ -44,12 +44,12 @@ export function ruleIllustration(board: GameView["board"], kind: string, variant
     if(kind==="advance"||kind==="double"){
       showPawn(kind==="double"?(variant==="brusky"?"c2":"c3"):"e4");
       for(const [q,r] of [[0,-1],[1,-1]])for(let n=1;n<=(kind==="double"?2:1);n++)add(origin.q+q*n,origin.r+r*n);
-      caption=kind==="double"?"On its first move, a pawn may take one or two empty cells along either single forward axis.":"Two forward choices; occupied paths are blocked.";
+      caption=kind==="double"?"On its first move, a pawn may take one or two empty cells along either single forward axis.":"Two adjacent forward cells: empty-cell moves only, never captures.";
     }else if(kind==="capture"||kind==="initial-capture"){
       showPawn(kind==="initial-capture"?(variant==="brusky"?"c2":"c3"):"g5");
       const directions=[[-1,-1],[2,-1],...(kind==="initial-capture"&&variant==="brusky"?[[1,-2]]:[])];
       for(const [q,r]of directions){add(origin.q+q,origin.r+r);if(valid.has(key({q:origin.q+q,r:origin.r+r})))pieces.push({q:origin.q+q,r:origin.r+r,type:"knight",player:1});}
-      caption=kind==="initial-capture"&&variant==="brusky"?"An unmoved starting pawn has a third straight-forward capture.":"Side captures land on enemies, on the pawn’s cell color.";
+      caption=kind==="initial-capture"&&variant==="brusky"?"An unmoved starting pawn can capture on this farther straight-ahead vertex cell. Neither adjacent forward movement cell permits a capture.":"Side captures land on enemies, on the pawn’s cell color.";
     }else if(kind==="blocked"){
       put("g5","pawn",0);put("h6","pawn",1);if(variant==="devasa")mark("g6");
       caption=variant==="brusky"?"The enemy on h6 blocks both forward advances of g5.":"The enemy on h6 leaves g5–g6 available.";

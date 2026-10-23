@@ -1,3 +1,5 @@
+import { drainCloudRefresh } from '../helpers/drainCloudRefresh';
+import { homeFeatures } from '../helpers/homeFeatures';
 import { scheduleCalendar } from '../helpers/scheduleCalendar';
 import { accountTimeZone } from '../helpers/accountTimeZone';
 import { ensureScheduleCalendar } from '../helpers/ensureScheduleCalendar';
@@ -148,6 +150,8 @@ export async function handle(request: Request) {
       const weight=cloudTree.descendantCharacterWeights(personal).get(scheduleCalendar.root)||0;
       visible=visible.map(n=>n.id===scheduleCalendar.root?{...n,sizeCharacters:weight}:n);
     }
+    if(input.scope==='home'){const prefs=context.userId?await db.selectFrom('ionHomePreferences').select('hiddenIds').where('userId','=',context.userId).executeTakeFirst():undefined;visible=homeFeatures(visible,Array.isArray(prefs?.hiddenIds)?prefs.hiddenIds.filter((s):s is string=>typeof s==='string'):[],!!context.userId);}
+    if(input.action==='load')await drainCloudRefresh(row.id,version,input.scope,context.userId||0);
     return new Response(JSON.stringify({ nodes: visible, version, ...(timeZone?{timeZone}:{}), ...(context.isDev&&input.scope==='accounts'?{signedInUsers:await signedInUserCount()}:{}), workspaceId:row.id, account:input.scope==='private', scope:input.scope, canAdd:cloudPolicy.writable(input.scope,context.userId,context.owner), dev:context.isDev,owner:context.owner,userId:context.userId||undefined, undo: cloudChanges.undo(nodes.filter(n=>cloudPolicy.edit(input.scope,n,context.userId,context.owner))) } satisfies OutputType), { headers });
   } catch (error) {
     const status = error instanceof Error && "status" in error && typeof error.status === "number" ? error.status : error instanceof SyntaxError || (error && typeof error === "object" && "issues" in error) ? 400 : 503;

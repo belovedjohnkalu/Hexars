@@ -1,3 +1,4 @@
+import { ionNotifications } from '../helpers/ionNotifications';
 import { publish } from '@floot/realtime';
 import { schema } from './time_POST.schema';
 import { optionalGameUser } from '../helpers/gameAccess';
@@ -20,6 +21,7 @@ export async function handle(request:Request){try{
   if(input.action==='confirm')await Promise.allSettled([publish(channels.timeTreasury,{changed:true})]);
   if(input.action==='approve')await Promise.allSettled([publish(channels.timeCatalog,{changed:true})]);
  }
+ if(input.action==='confirm'&&result.receipt)await Promise.allSettled([ionNotifications.dispatch(result.receipt.id)]);
  const response=new Response(JSON.stringify(result),{headers});
  if(input.action==='earning'&&(!session.credentialExpiresAt||session.credentialExpiresAt-Date.now()<43200000))await setServerSession(response,{id:session.id,createdAt:session.createdAt,lastAccessed:session.lastAccessed.getTime()});
  return response;

@@ -1,3 +1,5 @@
+import { ionNotifications } from './ionNotifications';
+import { timeFormat } from './timeMath';
 import { functionIdentifiers } from './functionIdentifiers';
 import { receiptClouds } from './functionClouds';
 import { randomUUID } from 'node:crypto';
@@ -124,6 +126,10 @@ export async function timeOperations(input:Exclude<TimeInput,{action:'snapshot'}
    }
    await timeLedger.ensureWallet(tx,userId);
    const id=await timeLedger.post(tx,{id:randomUUID(),actor:userId,key,kind:quote.kind,from,to,amount:quote.amountUs,metadata:{quoteId:quote.id,...(quote.productId?{productId:quote.productId,buyers:quote.buyers,creationCostUs:calculation.creationCostUs,directUs:calculation.directUs,freeUs:calculation.freeUs,costVersion:calculation.costVersion}:{}),...(quote.recipientId?{recipientId:quote.recipientId}:{})}});
+   if((quote.kind==='transfer'||quote.kind==='payout')&&quote.recipientId){
+    const amount=timeFormat(quote.amountUs,true),route='/?'+new URLSearchParams({cloud:'time-receipt',space:'home',receipt:id});
+    for(const [target,kind,title] of [[userId,'time-sent','Time sent'],[quote.recipientId,'time-received','Time received']] as const){const noticeId=kind+':'+id+':'+target;await ionNotifications.record(tx,{id:noticeId,userId:target,kind,sourceId:id,payload:{title,body:amount,tag:noticeId,data:{route,userId:target}}});}
+   }
    if(quote.kind==='purchase')await tx.insertInto('ionTimeEntitlements').values({userId,productId:quote.productId!,transactionId:id}).onConflict(c=>c.columns(['userId','productId']).doUpdateSet({transactionId:id})).execute();
    await tx.updateTable('ionTimeQuotes').set({usedTransactionId:id}).where('id','=',quote.id).execute();return id;
   });return{receipt:await timeLedger.receipt(db,transactionId,userId),snapshot:await timeLedger.snapshot(userId)};

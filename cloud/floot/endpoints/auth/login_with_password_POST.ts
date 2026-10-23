@@ -1,4 +1,5 @@
 // adapt this to your database schema
+import { getServerSessionOrThrow,NotAuthenticatedError } from '../../helpers/getSetServerSession';
 import { db } from "../../helpers/db";
 import { sql } from "kysely";
 import { schema } from "./login_with_password_POST.schema";
@@ -257,6 +258,7 @@ export async function handle(request: Request) {
       }
     );
 
+    try{const previous=await getServerSessionOrThrow(request);await db.deleteFrom('ionPushSubscriptions').where('sessionId','=',previous.id).execute();}catch(e){if(!(e instanceof NotAuthenticatedError))throw e;}
     // Set session cookie
     await setServerSession(response, {
       id: result.sessionId,
