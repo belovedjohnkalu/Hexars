@@ -34,3 +34,5 @@ Validation:
 - Floot's publish scanner again lists seven external ChatGPT MCP/OAuth entry points as not called by frontend components. They remain intentionally externally consumed routes, verified in 0.47; they are not pending Todo tasks or unused placeholders.
 
 Migration: cloud/migrations/048-home-features-notifications.sql. Artwork provenance: cloud/assets/ion-0.48-artwork.json. Production DB remains Floot-managed; no hosting/database migration occurred.
+
+Follow-up: Hidden is now omitted from Home responses until this account has an available hidden feature. Restoring the last feature removes the recovery entry and returns its view to Home. Stale, missing and entitlement-filtered IDs do not make an empty Hidden entry visible. This is presentation-only: stored contents, preferences and permanent ILs are preserved. Focused homeFeatures/featureAuthority/cloudControls suites and TypeScript pass.
