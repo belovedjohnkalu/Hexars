@@ -251,3 +251,6 @@ Each published paid feature receives an equal allocation of total creation work;
 
 ### Random word color — 0.50
 IL04A12 (Random Color Picker) is a device preference using the existing CloudCanvas toggle, green when on and red when off. useRandomWordColor owns persistence and same-window/cross-tab updates. CloudComposer chooses one readable spectrum color per new draft and after each successful submission; manual wheel changes, including hold-for-white, override that draft. Failed saves retain the same color and submission identity. Existing words are never recolored. cloudColors owns spectrum generation and sibling RGB uniqueness. No new buttons, routes or focus transfers.
+
+### Variant-first setup — 0.51
+Choose a variant before an engine. Standalone Engines/difficulty entry redirects to Boards; the selected variant opens in Pass and Play, ignoring remembered engines. The board's Engines action carries its variant as return context; selecting a level starts that engine in that variant. Saved-game, online, explicit redirects and purchase gates retain their routes and authority. No new functional clouds or ILs.

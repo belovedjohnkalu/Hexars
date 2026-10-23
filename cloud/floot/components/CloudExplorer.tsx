@@ -55,6 +55,7 @@ function CloudExplorerBody(){
  const draftKey=scope+':'+(userId||'guest')+':'+id,onDraft=useCallback((draft:{name:string;file?:File;photos?:CloudPhotoDraft[];color?:CloudColor})=>cloudDrafts.set(draftKey,draft),[draftKey]);
  const label=current?.name||(privateLocked?(scope==='schedule'?'Schedule':'Journal'):missing?'Not found':history.error?'Unavailable':'Opening…'),scopeRoot=scope==='chess'?'hexagonal-chess':scope==='home'?'ion':scope==='schedule'?scheduleCalendar.root:scope;
  const returnTo=chessVariants.isId(params.get('return'))?params.get('return'):null,context=returnTo?'&return='+returnTo+'&mode='+(params.get('mode')==='friend'?'friend':'engine')+'&level='+encodeURIComponent(params.get('level')??'3')+'&engine='+(resolveEngineId(params.get('engine')))+'&saved='+encodeURIComponent(params.get('saved')||''):'';
+ useEffect(()=>{if(scope==='chess'&&(id==='engines'||isEngineId(id))&&!returnTo)navigate(cloudURL('boards','chess'),{replace:true});},[scope,id,returnTo,navigate]);
  const parentId=current?.parentId;
  const parent=parentId?cloudURL(parentId,scope)+context:'/',homeURL=id===scopeRoot?'/':cloudURL(scopeRoot,scope),homeLabel=id===scopeRoot?'Open ION':'Open '+(scope==='chess'?'Hexagonal Chess':scope==='accounts'?'Accounts':scope==='home'?'ION':scope==='schedule'?'Schedule':scope==='private'?'Journal':'Safari');
  const savedBack=gameSessions.fromHash('#'+(params.get('saved')||''));

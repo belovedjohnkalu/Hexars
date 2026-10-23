@@ -6,7 +6,7 @@ import { usePictureTap } from '../helpers/usePictureTap';
 import { CloudPhotoViewer } from './CloudPhotoViewer';
 import { scheduleCalendar } from '../helpers/scheduleCalendar';
 import { cloudText } from '../helpers/cloudText';
-import { engineId as resolveEngineId, isEngineId } from '../helpers/chessEngines';
+import { engineId as resolveEngineId } from '../helpers/chessEngines';
 import { useLayoutEffect,useMemo,useRef,useState,type CSSProperties,type MouseEvent } from 'react';
 import { Link,useLocation } from 'react-router-dom';
 import { chessVariants } from '../helpers/chessVariants';
@@ -56,8 +56,9 @@ export function CloudCanvas({tabularNumbers=false,fitOnChange=false,nodes,parent
   if(node.id==='hexagonal-chess')return cloudURL('hexagonal-chess','chess');
   if(node.id==='public'||node.id==='private')return cloudURL(node.id,node.id);
   const query=new URLSearchParams(location.search),back=query.get('return'),context=back?'&return='+encodeURIComponent(back)+'&mode='+(query.get('mode')==='friend'?'friend':'engine')+'&level='+encodeURIComponent(query.get('level')??'3')+'&engine='+(resolveEngineId(query.get('engine')))+'&saved='+encodeURIComponent(query.get('saved')||''):'';
+  if((node.id==='engines'||node.destination==='level')&&!chessVariants.isId(back))return cloudURL('boards','chess');
   if(node.destination==='level'){const level=node.level??3,engine=node.engineId??'tactical';return chessVariants.isId(back)?'/'+back+'?mode=engine&engine='+engine+'&level='+level:'/?cloud=boards&engine='+engine+'&level='+level;}
-  if(chessVariants.isId(node.destination)){let mode='friend',level='3',engine='universal';try{const chosen=localStorage.getItem('ion.engine');if(isEngineId(chosen)){mode='engine';engine=chosen;level=localStorage.getItem('ion.difficulty')||'3';}}catch{}if(query.has('engine')){mode='engine';engine=resolveEngineId(query.get('engine'));level=query.get('level')||'3';}return '/'+node.destination+'?mode='+mode+(mode==='engine'?'&engine='+engine+'&level='+level:'');}
+  if(chessVariants.isId(node.destination))return '/'+node.destination+'?mode=friend';
   return cloudURL(node.id,scope)+context;
  }
  return <div ref={area} className={styles.viewport+' '+(tabularNumbers?styles.tabular+' ':'')+className}><SpatialViewport minFitZoom={coarsePointer?0.65:undefined} maxFitZoom={1} fitPadding={28} width={layout.width} height={layout.height} viewKey={layoutKey+':'+layout.generation} ready={!!fontReady&&!loading} refitKey={size.width+':'+size.height+(fitOnChange?':'+siblings.map(n=>tabularNumbers?n.name.replace(/\d/g,'0'):n.name).join('|'):'')} contentBounds={bounds}>
