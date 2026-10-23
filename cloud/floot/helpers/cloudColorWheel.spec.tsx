@@ -35,3 +35,20 @@ describe('Color wheel entry visibility',()=>{
   fireEvent.focus(input);const original=view.getByRole('slider').getAttribute('aria-valuetext');fireEvent.keyDown(view.getByRole('slider'),{key:'ArrowRight'});const chosen=view.getByRole('slider').getAttribute('aria-valuetext');expect(chosen).not.toBe(original);fireEvent.blur(input,{relatedTarget:document.body});expect(view.queryByRole('slider')).toBeNull();expect(input.value).toBe('Keep me');fireEvent.focus(input);expect(view.getByRole('slider').getAttribute('aria-valuetext')).toBe(chosen);
  });
 });
+
+describe('Random word color',()=>{
+ let originalEvent:typeof Event;
+ beforeEach(()=>{originalEvent=globalThis.Event;globalThis.Event=window.Event;localStorage.removeItem('ion.word-color.random');});
+ afterEach(()=>{cleanup();localStorage.removeItem('ion.word-color.random');globalThis.Event=originalEvent;});
+ it('keeps a manual override for the current entry, retries it unchanged and randomizes the next entry',async()=>{
+  localStorage.setItem('ion.word-color.random','true');
+  const add=jasmine.createSpy('add').and.resolveTo(false),view=render(<CloudComposer colors scope="chess" parentId="boards" busy={false} disabled={false} draft={{name:'First'}} onDraft={()=>{}} onAdd={add}/>);
+  const input=view.getByLabelText('Add a word or a picture name');fireEvent.focus(input);
+  fireEvent.keyDown(view.getByRole('slider'),{key:'w'});
+  const form=view.getByRole('form');await act(async()=>{fireEvent.submit(form);});
+  const first=add.calls.mostRecent().args[0];expect(first.color).toBe('white');
+  add.and.resolveTo(true);await act(async()=>{fireEvent.submit(form);});expect(add.calls.mostRecent().args[0]).toEqual(first);
+  fireEvent.change(input,{target:{value:'Second'}});await act(async()=>{fireEvent.submit(form);});
+  expect(colorHex(add.calls.mostRecent().args[0].color)).not.toBe(colorHex('white'));
+ });
+});

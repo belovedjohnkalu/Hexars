@@ -31,3 +31,8 @@ export function unusedColor(preferred:CloudColor,used:readonly (CloudColor|undef
  // A cloud has at most 1,024 children; even a clipped corner has >4,000 shades.
  throw new Error('Couldn’t choose a new color. Try another shade.');
 }
+
+// Pick from the same readable spectrum as the manual wheel; avoid sibling colors.
+export function randomWordColor(used:readonly (CloudColor|undefined)[],random:()=>number=Math.random):CloudColor{
+ return unusedColor(spectrumColor(random()*360),used);
+}
