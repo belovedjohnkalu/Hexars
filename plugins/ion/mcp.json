@@ -1,0 +1,9 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/mcp.schema.json",
+  "mcpServers": {
+    "ion": {
+      "type": "streamable-http",
+      "url": "https://ion-chatgpt.9khv8m59km.workers.dev/mcp"
+    }
+  }
+}

@@ -235,3 +235,11 @@ Color Inversion is an optional reversible device preference; default remains bla
 ### 0.46 — Theme chrome and quieter loading
 Schedule future years/months/days are orange #ffad5c; past green #82f398 and current white remain. My Space's journal picture replaces the vault, retaining its identity and shared silver/glass styling.
 Inversion now gives html/body actual white backgrounds and a light color-scheme for browser chrome detection, while filtering each top-level rendered app/portal surface once. Embedded page panes keep their unfiltered base so the outer page supplies the only inversion. AppHead follows the appearance preference with theme-color and color-scheme metadata; installed-web-app status style is default rather than forced black. Default app appearance stays black. No extra controls or transition spectacle. Photo decoding is asynchronous, within existing reserved frames.
+
+
+## ION plugin and journal — 0.47
+Journal (IL03) and Hexagonal Chess (IL01) use the same brushed-silver, fine blue edge-light and black-background icon family as Safari and Schedule. Journal shows an open notebook and a pen; Chess shows a silver king inside a silver hexagon. These studio-style icons follow the user’s later request for matched styling, replacing the initially requested literal journal photograph. Journal’s already-renamed live label is also reflected in its private scope and navigation. Asset provenance lives in cloud/assets/ion-0.47-artwork.json.
+
+The ChatGPT connection uses a focused black consent surface, Inter, the ION mark, readable text, shared Input/Button controls and reduced-motion support. It clearly identifies the signed-in account, requested read/save permissions, Cancel and Connect. Normal Home remains uncluttered; installation/disconnection lives at /chatgpt. Only an explicit successful account consent redirects back to the registered ChatGPT callback. Secrets are never requested in chat.
+
+Schedule joins Time estimates and Prices as feature:schedule. Unpriced or unaffordable Schedule paths stay hidden for non-devs; affordable unpurchased paths have the canonical purchase line/gate. Purchase is enforced by backend context and plugin tools, with free dev access. Existing Schedule entries, scaffolding, timezones, calendar colors and immutable identifiers remain.

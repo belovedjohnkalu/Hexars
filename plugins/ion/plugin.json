@@ -1,0 +1,8 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+  "name": "ion",
+  "version": "0.47.0",
+  "description": "Read your private ION journal and save words you ask to keep. Access your purchased Schedule with the same account.",
+  "homepage": "https://ion.floot.app/chatgpt",
+  "repository": "https://github.com/belovedjohnkalu/Hexars"
+}

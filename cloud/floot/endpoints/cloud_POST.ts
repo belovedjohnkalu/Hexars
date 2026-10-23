@@ -131,7 +131,7 @@ export async function handle(request: Request) {
       const urls=await Promise.all(keys.map(async filename=>{const result=await getUrl({visibility:'private',filename,expiresInSeconds:3600});return result.ok?result.url:'';}));
       return {...visibleNode,isImage:true,imageKey:undefined,imageKeys:undefined,imageUrl:urls[0],imageUrls:urls};
     }));
-    if(input.scope==='chess'){const market=await timeLedger.catalog(context.userId);visible=featureClouds(visible,market.products,market.dev);}
+    if(input.scope==='chess'||input.scope==='home'){const market=await timeLedger.catalog(context.userId);visible=featureClouds(visible,market.products,market.dev);}
     if(input.scope==='home'){
       const shared=await db.selectFrom('ionSharedSpaces').innerJoin('ionWorkspaces','ionSharedSpaces.workspaceId','ionWorkspaces.id').select(['kind','nodes']).where('kind','in',['public','chess']).execute();
       const personal=context.userId?await db.selectFrom('ionCloudAccounts').innerJoin('ionWorkspaces','ionCloudAccounts.workspaceId','ionWorkspaces.id').select('nodes').where('userId','=',context.userId).executeTakeFirst():undefined;

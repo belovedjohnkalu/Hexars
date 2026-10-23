@@ -1,7 +1,11 @@
 # ION
 
 ION is live on **Floot** at https://ion.floot.app. Its main navigation is a
-pannable, zoomable cloud of words and pictures. Open **Hexagonal Chess**, then
+pannable, zoomable cloud of words and pictures.
+
+ION now has an OAuth-protected **ChatGPT plugin** for reading and saving words in your private **Journal**, plus your purchased **Schedule**. [Install and connect ION](https://ion.floot.app/chatgpt). The portable package is in [plugins/ion](plugins/ion), with [deployment notes](docs/integrations/chatgpt.md). Schedule uses the Time estimate-and-purchase system; devs can set its estimate under Wallet → Estimates → Schedule. The website and database remain on Floot.
+
+Open **Hexagonal Chess**, then
 **Boards** to choose Gliński, McCooey, Shafran, Brusky, De Vasa or Wellisch, **Engines** to select Tactical, Positional, Defensive, Materialist, Unconventional or Universal, or **Rules**
 for separate rule paragraphs. Rule lists are words; illustrations appear inside each paragraph, and long text uses fitted pages without scrolling.
 

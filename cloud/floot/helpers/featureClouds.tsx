@@ -1,3 +1,4 @@
+import { scheduleCalendar } from './scheduleCalendar';
 import type { CloudNode } from '../endpoints/cloud_POST.schema';
 import type { TimeProduct } from '../endpoints/time_POST.schema';
 import { chessVariants } from './chessVariants';
@@ -9,7 +10,7 @@ export function featureClouds(nodes:CloudNode[],products:TimeProduct[],dev=false
   const known=memo.get(node.id);if(known)return known;if(visiting.has(node.id))return{show:false};visiting.add(node.id);
   const parent=node.parentId?byId.get(node.parentId):undefined,above=parent?inspect(parent):{show:true,item:undefined};
   const variant=node.variant??(chessVariants.isId(node.destination)?node.destination:chessVariants.all.find(v=>node.id===v.id+'-board'||node.id===v.id+'-rules')?.id);
-  const engine=node.engineId??(node.destination==='level'?'tactical':isEngineId(node.id)?node.id:undefined),item=variant&&variant!=='glinski'?'variant:'+variant:engine&&engine!=='universal'?'engine:'+engine:above.item,product=item?catalog.get(item):undefined;
+  const engine=node.engineId??(node.destination==='level'?'tactical':isEngineId(node.id)?node.id:undefined),item=node.id===scheduleCalendar.root||node.calendarDate?'feature:schedule':variant&&variant!=='glinski'?'variant:'+variant:engine&&engine!=='universal'?'engine:'+engine:above.item,product=item?catalog.get(item):undefined;
   const result={show:above.show&&(!item||!!product&&(product.owned||!!product.affordable)),item};memo.set(node.id,result);visiting.delete(node.id);return result;
  };
  const visible=nodes.flatMap(node=>{const state=inspect(node);const locked=state.item&&!catalog.get(state.item)?.owned?state.item:undefined;return state.show?[{...node,...(locked?{note:undefined,illustration:undefined}:{}),lockedItem:locked}]:[];});

@@ -1,3 +1,4 @@
+import { timeAccess } from './timeAccess';
 import { scheduleWorkspace } from './scheduleWorkspace';
 import { scheduleCalendar } from './scheduleCalendar';
 import { ensureScheduleCalendar } from './ensureScheduleCalendar';
@@ -18,6 +19,7 @@ export async function cloudContext(request:Request,input:InputType){
  const namespace=namespaceUser?await db.selectFrom('ionDevAccounts').select('devNumber').where('userId','=',namespaceUser).executeTakeFirst():undefined,devNumber=Number(namespace?.devNumber??0);
  if(scope==='schedule'){
   if(!userId)cloudPolicy.fail('Sign in to open Schedule.',401);
+  await timeAccess.feature(userId,'feature:schedule');
   const home=config.find(c=>c.kind==='home');if(!home)throw new Error('Schedule unavailable');
   const zone=await accountTimeZone(userId,input.action==='load'?input.timeZone:undefined);
   const template=await ensureScheduleCalendar(home.workspaceId,zone,Number(namespace?.devNumber??0));
@@ -25,7 +27,7 @@ export async function cloudContext(request:Request,input:InputType){
   return {row:await scheduleWorkspace(userId!),userId,owner:false,isDev,devNumber:Number(dev?.devNumber??0),scope,seeds};
  }
  if(scope==='accounts'){const seeds=await accountClouds(request,userId,isDev);if(input.action!=='load'&&!owner)cloudPolicy.fail('Only dev accounts can change Accounts.',userId?403:401);return {row:userId?await accountWorkspace(userId):null,userId,owner,isDev,devNumber,scope,seeds};}
- if(scope==='private'){if(!userId)cloudPolicy.fail('Sign in to open My Space.',401);const row=await cloudWorkspace(request,input);return {row,userId,owner,isDev,devNumber,scope,seeds:cloudTree.forScope(scope)};}
+ if(scope==='private'){if(!userId)cloudPolicy.fail('Sign in to open Journal.',401);const row=await cloudWorkspace(request,input);return {row,userId,owner,isDev,devNumber,scope,seeds:cloudTree.forScope(scope)};}
  const id=config.find(c=>c.kind===scope)?.workspaceId;if(!id)throw new Error('Space unavailable');
  if(input.action!=='load'&&!cloudPolicy.writable(scope,userId,owner))cloudPolicy.fail((scope==='chess'||scope==='home')?'Only dev accounts can change this space.':'Sign in to add to Safari.',userId?403:401);
  const row=await db.selectFrom('ionWorkspaces').selectAll().where('id','=',id!).executeTakeFirstOrThrow();return {row,userId,owner,isDev,devNumber,scope,seeds:cloudTree.forScope(scope)};

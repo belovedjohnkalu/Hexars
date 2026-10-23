@@ -1,0 +1,4 @@
+import { z } from 'zod';
+export const schema=z.record(z.string());
+export type InputType=z.infer<typeof schema>;
+export type OutputType={name:string;scopes:string[]};

@@ -7,12 +7,12 @@ import { systemClouds } from "./systemClouds";
 import { horizontalRuleClouds } from "./horizontalRules";
 import { wellischRuleClouds } from "./wellischRules";
 import type { CloudNode,CloudScope } from "../endpoints/cloud_POST.schema";
-const roots:CloudNode[]=[{"id": "hexagonal-chess", "parentId": null, "name": "Hexagonal Chess", "imageUrl": "/_cdn/static/5212c476-8b1a-456c-8c0f-0186a23e999a.png", "color": "blue"}, {"id": "public", "parentId": null, "name": "Safari", "color": "mint", "imageUrl":"/_cdn/static/73459c8d-8ae5-49db-a0c2-9d5b354c82a4.png"}, {"id": "private", "parentId": null, "name": "My Space", "color": "lavender", "imageUrl":"/_cdn/static/a21f0535-6595-41f3-83f4-ed936855d1ba.png"}];
+const roots:CloudNode[]=[{"id": "hexagonal-chess", "parentId": null, "name": "Hexagonal Chess", "imageUrl": "/_cdn/static/3442c0e1-790d-4488-b21c-66d0553dfd23.png", "color": "blue"}, {"id": "public", "parentId": null, "name": "Safari", "color": "mint", "imageUrl":"/_cdn/static/73459c8d-8ae5-49db-a0c2-9d5b354c82a4.png"}, {"id": "private", "parentId": null, "name": "Journal", "color": "lavender", "imageUrl":"/_cdn/static/358b7227-6900-4d34-9670-740e52d2062a.png"}];
 roots.forEach((n,i)=>{n.parentId='ion';n.destination='space';n.space=(['chess','public','private'] as const)[i];});
 roots.push(...systemClouds.filter(n=>n.parentId==='ion'));
 const homeSeed=[systemClouds[0],...roots,...systemClouds.filter(n=>n.parentId==='controls'),...functionClouds.filter(n=>n.parentId==='time'&&!['time-balance','time-activity'].includes(n.id)).map(n=>({...n,color:({ 'time-activity':'mint','time-send':'cyan','time-receive':'lavender','time-earn':'amber','time-prices':'blue','time-treasury':'amber','time-estimates':'lavender','time-added':'mint','time-spent':'coral','time-remaining':'amber'} as const)[n.id as 'time-activity'],href:'/?cloud='+n.id+'&space=home'}))];
 const seed:CloudNode[]=[
-{"id": "hexagonal-chess", "parentId": null, "name": "Hexagonal Chess", "imageUrl": "/_cdn/static/5212c476-8b1a-456c-8c0f-0186a23e999a.png", "color": "blue"},
+{"id": "hexagonal-chess", "parentId": null, "name": "Hexagonal Chess", "imageUrl": "/_cdn/static/3442c0e1-790d-4488-b21c-66d0553dfd23.png", "color": "blue"},
 {"id": "engines", "parentId": "hexagonal-chess", "name": "Engines", "color": "coral"},
 {"id": "tactical", "parentId": "engines", "name": "Tactical", "color": "blue"},
 {"id": "boards", "parentId": "hexagonal-chess", "name": "Boards", "color": "cyan"},

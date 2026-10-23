@@ -1,0 +1,11 @@
+{
+  "name": "ion",
+  "plugins": [
+    {
+      "name": "ion",
+      "source": { "source": "local", "path": "./plugins/ion" },
+      "policy": { "installation": "AVAILABLE", "authentication": "ON_INSTALL" },
+      "category": "Productivity"
+    }
+  ]
+}

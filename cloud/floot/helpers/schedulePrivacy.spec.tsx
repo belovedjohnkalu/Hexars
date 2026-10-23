@@ -2,6 +2,7 @@ import { cloudPolicy } from './cloudPolicy';
 import { scheduleWorkspace } from './scheduleWorkspace';
 import { scheduleCalendar } from './scheduleCalendar';
 import { db } from './db';
+import { timeLedger } from './timeLedger';
 describe('Personal schedule privacy',()=>{
  it('never gives dev ownership a bypass to another account entry or date scaffolding',()=>{
  const entry={id:'entry',parentId:'date',name:'Private',createdBy:7},date={id:'date',parentId:scheduleCalendar.root,name:'1',calendarDate:{year:2026,month:10,day:1}};
@@ -18,6 +19,7 @@ describe('Personal schedule privacy',()=>{
 describe('Authenticated schedule context isolation',()=>{
  it('ignores a stolen workspace ID for both regular and dev accounts',async()=>{
   process.env.JWT_SECRET='schedule-test-only-not-a-production-key';
+  spyOn(timeLedger,'catalog').and.resolveTo({dev:false,products:[{id:'feature:schedule',owned:true}]} as never);
   const {cloudContext}=await import('./cloudContext'),{SignJWT}=await import('jose');
   let uid=7;const conditions:Array<{table:string;args:unknown[]}>=[];
   const query=(table:string)=>{const q={select:()=>q,selectAll:()=>q,innerJoin:()=>q,forUpdate:()=>q,limit:()=>q,set:()=>q,where:(...args:unknown[])=>{conditions.push({table,args});return q;},

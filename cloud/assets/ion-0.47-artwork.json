@@ -1,0 +1,45 @@
+{
+  "style": "Brushed silver, charcoal/frosted inset, thin cool-blue edge light on pure black",
+  "references": [
+    "/_cdn/static/d9c5c4ce-1b8d-4d81-b8b2-0a3f4cf06716.png",
+    "/_cdn/static/73459c8d-8ae5-49db-a0c2-9d5b354c82a4.png"
+  ],
+  "journal": {
+    "hosted": "/_cdn/static/358b7227-6900-4d34-9670-740e52d2062a.png",
+    "nodeId": "private",
+    "identifier": "IL03",
+    "description": "Open journal with a pen, matched icon family",
+    "dimensions": [
+      1024,
+      1024
+    ],
+    "kind": "generated studio-style icon"
+  },
+  "chess": {
+    "hosted": "/_cdn/static/3442c0e1-790d-4488-b21c-66d0553dfd23.png",
+    "nodeId": "hexagonal-chess",
+    "identifier": "IL01",
+    "description": "Silver king in silver hexagon, matched icon family",
+    "dimensions": [
+      1024,
+      1024
+    ],
+    "kind": "generated studio-style icon"
+  },
+  "supersededPhoto": {
+    "kind": "real photograph",
+    "description": "Open notebook with handwritten notes and a pen on its pages",
+    "source": "https://www.pexels.com/photo/open-notebook-with-handwritten-notes-and-pen-34079281/",
+    "license": "https://www.pexels.com/license/",
+    "original": "https://images.pexels.com/photos/34079281/pexels-photo-34079281.jpeg?auto=compress&cs=tinysrgb&w=1200",
+    "hosted": "/_cdn/static/cc440111-523e-4ca3-9aca-6b14a1e27cda-ion-open-journal-real-photo.jpg",
+    "bytes": 193069,
+    "dimensions": [
+      1200,
+      904
+    ],
+    "generated": false,
+    "nodeId": "private"
+  },
+  "note": "The final icons follow the user\u2019s subsequent request to match the styling of the other ION icons. The earlier licensed photograph is retained here as provenance only."
+}

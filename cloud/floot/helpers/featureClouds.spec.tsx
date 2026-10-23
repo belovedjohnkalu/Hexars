@@ -26,3 +26,6 @@ describe('Variant discovery across canonical navigation',()=>{
   const owned=featureClouds(roots,[product('variant:mccooey',false,true)]);expect(owned.length).toBe(3);expect(owned.every(n=>!n.lockedItem)).toBeTrue();expect(owned[2].note).toBe('Private paid rule');expect(featureClouds(roots,[],true).length).toBe(3);
  });
 });
+
+import { scheduleCalendar } from './scheduleCalendar';
+describe('Schedule purchase discovery',()=>{const nodes=[{id:'ion',parentId:null,name:'ION'},{id:scheduleCalendar.root,parentId:'ion',name:'Schedule'},{id:'year',parentId:scheduleCalendar.root,name:'2027',calendarDate:{year:2027}}];it('hides an unpriced or unaffordable Schedule and its dates',()=>{expect(featureClouds(nodes,[]).map(n=>n.id)).toEqual(['ion']);});it('shows an affordable Schedule with the same purchase gate as other features',()=>{const product={id:'feature:schedule',owned:false,affordable:true} as TimeProduct;const visible=featureClouds(nodes,[product]);expect(visible.find(n=>n.id===scheduleCalendar.root)?.lockedItem).toBe('feature:schedule');product.owned=true;expect(featureClouds(nodes,[product]).every(n=>!n.lockedItem)).toBeTrue();expect(featureClouds(nodes,[],true).length).toBe(nodes.length);});});

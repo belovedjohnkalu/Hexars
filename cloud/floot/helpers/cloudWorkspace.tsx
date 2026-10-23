@@ -8,10 +8,14 @@ const fail=(s:string,status:number):never=>{throw Object.assign(new Error(s),{st
 export async function cloudWorkspace(request:Request,input:InputType){
  let userId:number;
  try{userId=(await getServerUserSession(request)).user.id;}catch{return fail("Sign in again to save your words.",401);}
+ return accountPrivateWorkspace(userId,input);
+}
+// Only call after server-side session or OAuth verification; never a client user ID.
+export async function accountPrivateWorkspace(userId:number,input?:InputType){
  return db.transaction().execute(async tx=>{
   await tx.selectFrom("users").select("id").where("id","=",userId).forUpdate().executeTakeFirstOrThrow();
   let link=await tx.selectFrom("ionCloudAccounts").selectAll().where("userId","=",userId).executeTakeFirst();
-  let source=input.action==="load"&&input.connect?await tx.selectFrom("ionWorkspaces").selectAll().where("id","=",input.workspaceId).where("accessTokenHash","=",hash(input.accessToken)).forUpdate().executeTakeFirst():undefined;
+  let source=input?.action==="load"&&input.connect?await tx.selectFrom("ionWorkspaces").selectAll().where("id","=",input.workspaceId).where("accessTokenHash","=",hash(input.accessToken)).forUpdate().executeTakeFirst():undefined;
   if(source?.ownerId!==null&&source?.ownerId!==userId)source=undefined;
   if(!link){
    const row=source||await tx.insertInto("ionWorkspaces").values({id:randomUUID(),accessTokenHash:hash(randomBytes(32).toString("hex")),nodes:[],ownerId:userId}).returningAll().executeTakeFirstOrThrow();

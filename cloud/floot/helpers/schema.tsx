@@ -133,6 +133,37 @@ export interface IonOnlineAttempts {
   userId: number;
 }
 
+export interface IonPluginClients {
+  createdAt: Generated<Timestamp>;
+  id: string;
+  name: string;
+  redirectUris: Json;
+}
+
+export interface IonPluginCodes {
+  challenge: string;
+  clientId: string;
+  consumedAt: Timestamp | null;
+  expiresAt: Timestamp;
+  hash: string;
+  redirectUri: string;
+  resource: string;
+  scope: string;
+  userId: number;
+}
+
+export interface IonPluginTokens {
+  clientId: string;
+  expiresAt: Timestamp;
+  hash: string;
+  refreshExpiresAt: Timestamp;
+  refreshHash: string;
+  resource: string;
+  revokedAt: Timestamp | null;
+  scope: string;
+  userId: number;
+}
+
 export interface IonRememberedDevices {
   expiresAt: Timestamp;
   tokenHash: string;
@@ -312,6 +343,9 @@ export interface DB {
   ionLobbyMembers: IonLobbyMembers;
   ionMatchLobbies: IonMatchLobbies;
   ionOnlineAttempts: IonOnlineAttempts;
+  ionPluginClients: IonPluginClients;
+  ionPluginCodes: IonPluginCodes;
+  ionPluginTokens: IonPluginTokens;
   ionRememberedDevices: IonRememberedDevices;
   ionScheduleAccounts: IonScheduleAccounts;
   ionSharedSpaces: IonSharedSpaces;
