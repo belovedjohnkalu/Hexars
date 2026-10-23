@@ -43,6 +43,7 @@ export async function getServerUserSession(request: Request) {
       "users.avatarUrl",
     ])
     .where("sessions.id", "=", session.id)
+    .where("sessions.expiresAt", ">", new Date())
     .limit(1)
     .execute();
 

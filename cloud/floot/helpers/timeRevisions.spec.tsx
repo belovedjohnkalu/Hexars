@@ -12,15 +12,10 @@ describe('Published estimate revisions',()=>{
   const tx:any={getExecutor:()=>executor,selectFrom:(table:string)=>{const chain:any={selectAll:()=>chain,select:()=>chain,where:()=>chain,forUpdate:()=>chain,orderBy:()=>chain,execute:async()=>products,executeTakeFirstOrThrow:async()=>table==='ionTimeConfig'?{freeProposalId:'free'}:table==='ionTimeCostProposals'?proposal:products[0]};return chain;},updateTable:(table:string)=>{const chain:any={set:(value:any)=>{updates.push({table,value});return chain;},where:()=>chain,execute:async()=>[]};return chain;}};
   spyOn(db,'transaction').and.returnValue({execute:async(fn:any)=>fn(tx)} as any);
  });
- it('updates an already-published feature and records its previous cost',async()=>{
-  await timeOperations({action:'approve',proposalId:id},1,'session');
-  expect(updates.length).toBe(1);expect(updates[0].value.directUs).toBe('200');expect(updates[0].value.proposalId).toBe(id);expect(audits.length).toBe(1);
-  expect(updates.every(x=>x.table==='ionTimeProducts')).toBeTrue();
- });
- it('reallocates a revised free-work pool to all published products',async()=>{
-  proposal={...proposal,productId:'free-work',durationUs:'13'};
-  await timeOperations({action:'approve',proposalId:id},1,'session');
-  expect(updates.filter(x=>x.table==='ionTimeProducts').map(x=>x.value.freeUs)).toEqual(['6','7']);expect(audits.length).toBe(3);
+ it('retains historical estimates but rejects obsolete per-product publication commands',async()=>{
+  await expectAsync(timeOperations({action:'approve',proposalId:id},1,'session')).toBeRejected();
+  await expectAsync(timeOperations({action:'propose',productId:'engine:tactical',durationUs:'200',basis:'Old model',requestId:id},1,'session')).toBeRejected();
+  expect(updates.length).toBe(0);expect(audits.length).toBe(0);
  });
  it('freezes each new quote from one catalog snapshot without re-reading changed costs',async()=>{
   spyOn(timeLedger,'catalog').and.resolveTo({buyers:10,pricingReady:true,products:[{id:'engine:tactical',name:'Tactical',published:true,owned:false,priceUs:'12',directUs:'100',freeUs:'15',proposalId:'old'}]} as any);

@@ -14,6 +14,7 @@ export const schema = z.discriminatedUnion("action", [
   z.object({ action: z.literal("load"), connect: z.boolean().optional(), timeZone:z.string().max(100).optional(), ...credentials }),
   z.object({ action: z.literal("add"), ...credentials, id: z.string().uuid(), parentId, name, version, color:z.custom<CloudColor>(isCloudColor,"Choose a color from the wheel.").optional(), imageType: z.enum(["image/png", "image/jpeg", "image/webp", "image/gif"]).optional(), images:z.array(z.object({id:z.string().uuid(),contentType:z.enum(["image/png","image/jpeg","image/webp","image/gif"])})).optional() }),
   z.object({ action: z.literal("upload"), ...credentials, id: z.string().uuid(), fileId:z.string().uuid().optional(), contentType: z.enum(["image/png", "image/jpeg", "image/webp", "image/gif"]), sizeBytes: z.number().int().positive().max(cloudPhotoMaxBytes) }),
+  z.object({action:z.literal('update'),...credentials,id:z.string().min(1).max(100),name,color:z.custom<CloudColor>(isCloudColor).optional(),note:z.string().nullable().optional(),photoMode:z.enum(['keep','replace','remove']).default('keep'),assetId:z.string().uuid().optional(),images:z.array(z.object({id:z.string().uuid(),contentType:z.enum(['image/png','image/jpeg','image/webp','image/gif'])})).optional(),version}),
   z.object({ action: z.literal("rename"), ...credentials, id: z.string().min(1).max(80), name, color:z.custom<CloudColor>(isCloudColor,"Choose a color from the wheel.").optional(), version }),
   z.object({action:z.literal('link'),...credentials,id:z.string().min(1).max(80),target:redirectSchema.nullable(),words:z.array(z.number().int().nonnegative()).optional(),version}),
   z.object({ action: z.literal("remove"), ...credentials, id: z.string().min(1).max(80), operationId: z.string().uuid(), expectedCount: z.number().int().nonnegative(), keepChildren: z.boolean().optional(), version }),
@@ -27,6 +28,7 @@ export const schema = z.discriminatedUnion("action", [
   if (!result.success) for (const issue of result.error.issues) context.addIssue({ ...issue, path: ["name", ...issue.path] });
 });
 export type CloudNode = {
+  author?:{name:string}; contentEdits?:Array<'name'|'color'|'note'|'images'>;
   homeFeature?:boolean; canHide?:boolean; hiddenFeature?:boolean;
   lockedItem?:string;redirect?:CloudRedirect;wordRedirect?:{words:number[];target:CloudRedirect};shareId?:string;
   href?:string; savedGameId?:string; engineId?:EngineId;

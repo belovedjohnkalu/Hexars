@@ -8,16 +8,16 @@ export const gameActionNames={variants:'Variants',rules:'Rules',engines:'Engines
 const products=[{id:'feature:schedule',name:'Schedule'},...chessVariants.all.filter(v=>v.id!=='glinski').map(v=>({id:'variant:'+v.id,name:v.name})),...chessEngines.filter(e=>e.id!=='universal').map(e=>({id:'engine:'+e.id,name:e.name}))];
 // Stable functional identities. Names/amounts may change; identifiers never do.
 export const functionClouds:CloudNode[]=[
- ...['balance','activity','send','receive','earn','prices','treasury','estimates'].map(id=>node('time-'+id,'time',id[0].toUpperCase()+id.slice(1))),
+ ...['balance','activity','send','receive','earn','prices','treasury','estimates'].map(id=>node('time-'+id,'time',id==='estimates'?'Work':id[0].toUpperCase()+id.slice(1))),
  node('time-balance-value','time-balance','Balance'),node('time-earned','time-balance','Earned'),node('time-earned-value','time-earned','Earned'),
  node('time-added','time','Added'),node('time-spent','time','Spent'),node('time-remaining','time','Balance'),node('time-name','time-receive','Player name'),
  node('time-status','time-earn','Earning'),node('time-earning-rule','time-earn','How it works'),node('time-principles','time-earn','Principles'),
- ...timePrinciples.filter(p=>p.id!=='time-earning-rule').map(p=>node(p.id,'time-principles',p.name)),
+ ...timePrinciples.filter(p=>p.id!=='time-earning-rule').map(p=>({...node(p.id,'time-principles',p.name),note:p.note})),
  ...products.map(p=>node('time-price-'+p.id,'time-prices',p.name)),
  ...products.flatMap(p=>[node('time-price-value-'+p.id,'time-price-'+p.id,'Price'),node('time-purchase-'+p.id,'time-price-'+p.id,'Purchase')]),
  ...earningParagraphs.map(p=>node(p.id,'time-earning-rule',p.name)),
  node('time-treasury-value','time-treasury','Treasury balance'),node('time-treasury-activity','time-treasury','Activity'),node('time-payout','time-treasury','Pay out'),
- node('time-free-work','time-estimates','Free work'),...products.map(p=>node('time-cost-'+p.id,'time-estimates',p.name)),
+ ...['time-work-total','time-work-sessions','time-work-baseline','time-work-start'].map((id,i)=>node(id,'time-estimates',['Total','Sessions','Earlier work','Start'][i])),
  ...chessVariants.all.flatMap(v=>Object.entries(gameActionNames).map(([id,name])=>node('game-'+v.id+'-'+id,v.id+'-board',name)))
 ];
 export function receiptClouds(receipt:{id:string;direction:string}){

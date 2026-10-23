@@ -7,6 +7,7 @@ import type { CloudScope } from '../endpoints/cloud_POST.schema';
 export async function drainCloudRefresh(workspaceId:string,version:number,scope:CloudScope,userId:number){
  try{const pending=await db.selectFrom('ionWorkspaceRefresh').select('version').where('workspaceId','=',workspaceId).where('version','<=',version).executeTakeFirst();if(!pending)return;
  await publish(channels.cloud(scope,userId),{version:pending.version,workspaceId});
+ if(scope==='home')await publish(channels.timeCatalog,{changed:true});
  await db.deleteFrom('ionWorkspaceRefresh').where('workspaceId','=',workspaceId).where('version','<=',pending.version).execute();
  }catch{console.error('Workspace refresh delayed');}
 }

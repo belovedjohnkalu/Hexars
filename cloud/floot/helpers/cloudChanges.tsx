@@ -1,9 +1,9 @@
 import { unusedColor,colorHex } from "./cloudColors";
 import { randomUUID } from "node:crypto";
 import type { CloudNode, InputType } from "../endpoints/cloud_POST.schema";
-type Change = Extract<InputType, {action:"rename"|"remove"|"restore"|"move"|"copy"|"link"}>;
+type Change = Extract<InputType, {action:"update"|"rename"|"remove"|"restore"|"move"|"copy"|"link"}>;
 const fail=(message:string,status:number):never=>{throw Object.assign(new Error(message),{status});};
-function applyAll(nodes:CloudNode[],input:Change,currentVersion:number,seeds:CloudNode[]=[]) {
+function applyAll(nodes:CloudNode[],input:Change,currentVersion:number,seeds:CloudNode[]=[],verifiedImages:string[]=[]) {
   if(input.action==="restore") {
     const group=nodes.filter(n=>n.removedBy===input.operationId);
     if(!group.length)return nodes; // A lost response can be retried safely.
@@ -25,11 +25,15 @@ function applyAll(nodes:CloudNode[],input:Change,currentVersion:number,seeds:Clo
     if(words&&(!words.length||words.some(n=>n>=count)))return fail('Choose words from this cloud.',400);
     return nodes.map(n=>n.id===input.id?{...n,redirect:input.target&&!words?input.target:undefined,wordRedirect:input.target&&words?{words,target:input.target}:undefined}:n);
   }
+  if(input.action==='update'){
+    if(input.version!==currentVersion)return fail('Your space changed. Try again.',409);
+    return nodes.map(n=>n.id===input.id?{...n,name:input.name,...(input.color?{color:input.color}:{}),...(input.note!==undefined?{note:input.note??undefined}:{}),...(n.name!==input.name?{wordRedirect:undefined}:{}),...(input.photoMode!=='keep'?{imageKey:undefined,imageUrl:undefined,imageUrls:undefined,imageKeys:input.photoMode==='replace'?verifiedImages:undefined,isImage:input.photoMode==='replace'}:{}),contentEdits:[...new Set([...(n.contentEdits||[]),'name' as const,...(input.color?['color' as const]:[]),...(input.note!==undefined?['note' as const]:[]),...(input.photoMode!=='keep'?['images' as const]:[])])]}:n);
+  }
   if(input.action==="rename"&&node.name===input.name&&(!input.color||node.color===input.color))return nodes;
   if(input.action==="move"&&node.parentId===input.parentId)return nodes;
   if(input.action==="copy"&&nodes.some(n=>n.id===input.operationId))return fail("Choose a new copy operation.",409);
   if(input.version!==currentVersion)return fail("Your space changed. Try again.",409);
-  if(input.action==="rename")return nodes.map(n=>n.id===input.id?{...n,name:input.name,...(n.name!==input.name?{wordRedirect:undefined}:{}),...(input.color&&colorHex(input.color)!==colorHex(n.color)?{color:unusedColor(input.color,nodes.filter(other=>other.id!==n.id&&!other.removedBy&&other.parentId===n.parentId).map(other=>other.color))}:{})}:n);
+  if(input.action==="rename")return nodes.map(n=>n.id===input.id?{...n,name:input.name,contentEdits:[...new Set([...(n.contentEdits||[]),'name' as const,...(input.color?['color' as const]:[])])],...(n.name!==input.name?{wordRedirect:undefined}:{}),...(input.color&&colorHex(input.color)!==colorHex(n.color)?{color:unusedColor(input.color,nodes.filter(other=>other.id!==n.id&&!other.removedBy&&other.parentId===n.parentId).map(other=>other.color))}:{})}:n);
   const ids=new Set([input.id]);
   let grew=true;
   while(grew){grew=false;for(const n of nodes)if(!n.removedBy&&n.parentId&&ids.has(n.parentId)&&!ids.has(n.id)){ids.add(n.id);grew=true;}}
@@ -55,10 +59,10 @@ function undo(nodes:CloudNode[]) {
   const root=group.find(n=>!n.parentId||!ids.has(n.parentId))||latest;
   return {operationId:latest.removedBy,name:root.name,parentId:root.parentId,count:group.length,expiresAt};
 }
-function apply(stored:CloudNode[],input:Change,currentVersion:number,seeds:CloudNode[]=[]){
- if(!seeds.length)return applyAll(stored,input,currentVersion);
+function apply(stored:CloudNode[],input:Change,currentVersion:number,seeds:CloudNode[]=[],verifiedImages:string[]=[]){
+ if(!seeds.length)return applyAll(stored,input,currentVersion,[],verifiedImages);
  const defaults=new Map(seeds.map(n=>[n.id,n])),merged=[...new Map([...seeds,...stored].map(n=>[n.id,n])).values()];
- const next=applyAll(merged,input,currentVersion,seeds);if(next===merged)return stored;
+ const next=applyAll(merged,input,currentVersion,seeds,verifiedImages);if(next===merged)return stored;
  // Persist only custom records and deliberate overrides; untouched defaults keep evolving.
  return next.filter(n=>!defaults.has(n.id)||JSON.stringify(n)!==JSON.stringify(defaults.get(n.id)));
 }

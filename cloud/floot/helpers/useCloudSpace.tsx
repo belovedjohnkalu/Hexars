@@ -7,7 +7,7 @@ type Credentials={workspaceId:string;accessToken:string};
 import type { CloudColor } from "./cloudColors";
 import {mapPhotos,type CloudPhotoDraft,type PhotoType} from './cloudPhotos';
 type NewNode={id:string;photos?:CloudPhotoDraft[];name:string;parentId:string|null;file?:File;uploaded?:boolean;color?:CloudColor};
-type Change=Extract<InputType,{action:'rename'|'remove'|'restore'|'move'|'copy'|'transfer'|'link'}>;
+type Change=Extract<InputType,{action:'update'|'rename'|'remove'|'restore'|'move'|'copy'|'transfer'|'link'}>;
 const blank=(scope:CloudScope):OutputType=>({nodes:cloudTree.forScope(scope).map(({note,...node})=>node),version:0,scope,canAdd:false});
 const failureMessage=(e:unknown)=>e instanceof Error&&!(e instanceof TypeError)&&!(e instanceof SyntaxError)?e.message:'Couldn’t save. Check your connection and try again.';
 function credentials():Credentials{
@@ -54,6 +54,13 @@ export function useCloudSpace(accountId:number|null=null,authLoading=false,scope
  }
  const matches=scopeKey.current===scope+':'+(accountId||'guest'),visibleData=matches?data:blank(scope);
  return {...visibleData,undo:matches&&data.undo&&(!data.undo.expiresAt||data.undo.expiresAt>undoClock)?data.undo:undefined,loading:!matches||loading,ready:matches&&ready,busy,error,phase,add:(node:NewNode)=>mutate(node,'add'),rename:(id:string,name:string,color?:CloudColor)=>mutate({action:'rename',id,name,color},'change'),remove:(id:string,expectedCount:number,operationId:string,keepChildren=false)=>mutate({action:'remove',id,expectedCount,operationId,keepChildren},'change'),restore:(operationId:string)=>mutate({action:'restore',operationId},'change'),
+  edit:async(id:string,name:string,color:CloudColor|undefined,note:string|undefined,photoMode:'keep'|'replace'|'remove',photos:CloudPhotoDraft[])=>{
+   if(!identity.current||locked.current)return false;
+   const assetId=crypto.randomUUID();
+   try{if(photoMode==='replace')await mapPhotos(photos,async photo=>{const contentType=photo.file.type as PhotoType,prepared=await postCloud({action:'upload',scope,...identity.current!,id:assetId,fileId:photo.id,contentType,sizeBytes:photo.file.size});if(!prepared.upload)throw new Error('Couldn’t prepare the picture.');const result=await fetch(prepared.upload.url,{method:'PUT',headers:prepared.upload.headers,body:photo.file});if(!result.ok)throw new Error('Couldn’t upload the picture.');});
+    return mutate({action:'update',id,name,color,...(note!==undefined?{note}:{}),photoMode,...(photoMode==='replace'?{assetId,images:photos.map(p=>({id:p.id,contentType:p.file.type as PhotoType}))}:{})},'change');
+   }catch(e){setError(failureMessage(e));return false;}
+  },
   link:(id:string,target:import('./cloudLinks').CloudRedirect|null,words?:number[])=>mutate({action:'link',id,target,words},'change'),
   relocate:(id:string,parentId:string|null,copy:boolean,operationId:string)=>mutate({action:copy?'copy':'move',id,parentId,operationId},'change'),
   transfer:(id:string,targetScope:'public'|'private',targetParent:string,targetVersion:number,copy:boolean,operationId:string)=>mutate({action:'transfer',id,targetScope,targetParent,targetVersion,mode:copy?'copy':'move',operationId},'change'),

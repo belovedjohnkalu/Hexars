@@ -2,3 +2,9 @@
 .selection { position:absolute; top:4px; left:10%; right:10%; text-align:center; margin:0; color:var(--muted-foreground); font-size:16px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; pointer-events:none; z-index:1; }
 .empty { position:absolute; inset:0; display:grid; place-items:center; margin:0; color:var(--muted-foreground); font-size:21px; pointer-events:none; }
 .error { position:absolute; bottom:8px; left:8px; right:8px; padding:8px 12px; border-radius:var(--radius); background:var(--surface); color:var(--error); font-size:14px; text-align:center; }
+
+.selection { white-space:normal; overflow:clip; }
+.selection > span { display:block; }
+.author { margin-top:4px; font-size:14px; color:var(--foreground); opacity:.75; }
+
+.selectionName { white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }

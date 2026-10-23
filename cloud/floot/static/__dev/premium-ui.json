@@ -16,7 +16,9 @@
   "ownership": {
     "Form": "Form, Input, Button",
     "Scrollbar": "base.css",
-    "CRUD": "CloudActions"
+    "CRUD": "CloudActions",
+    "Date": "native",
+    "Textarea": "Textarea with disableResize"
   },
   "evidence": {
     "crudFullFlow": "../../../../tests/e2e/ion-refinements.live.cjs",

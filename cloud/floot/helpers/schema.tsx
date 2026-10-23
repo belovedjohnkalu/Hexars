@@ -307,6 +307,34 @@ export interface IonTimeTransactions {
   toAccount: string;
 }
 
+export interface IonWorkConfig {
+  baselineUs: Int8;
+  basis: string;
+  id: Generated<boolean>;
+  updatedAt: Generated<Timestamp>;
+  updatedBy: number | null;
+}
+
+export interface IonWorkRevisions {
+  actorId: number;
+  afterValue: Json;
+  beforeValue: Json;
+  createdAt: Generated<Timestamp>;
+  id: string;
+  sessionId: string | null;
+}
+
+export interface IonWorkSessions {
+  createdAt: Generated<Timestamp>;
+  description: string;
+  devUserId: number;
+  endedAt: Timestamp | null;
+  id: string;
+  source: string;
+  startedAt: Timestamp;
+  updatedAt: Generated<Timestamp>;
+}
+
 export interface IonWorkspaceRefresh {
   version: number;
   workspaceId: string;
@@ -400,6 +428,9 @@ export interface DB {
   ionTimeProducts: IonTimeProducts;
   ionTimeQuotes: IonTimeQuotes;
   ionTimeTransactions: IonTimeTransactions;
+  ionWorkConfig: IonWorkConfig;
+  ionWorkRevisions: IonWorkRevisions;
+  ionWorkSessions: IonWorkSessions;
   ionWorkspaceRefresh: IonWorkspaceRefresh;
   ionWorkspaces: IonWorkspaces;
   loginAttempts: LoginAttempts;

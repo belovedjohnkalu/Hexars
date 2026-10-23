@@ -1,3 +1,4 @@
+import { attachCloudAuthors } from '../helpers/cloudAuthors';
 import { drainCloudRefresh } from '../helpers/drainCloudRefresh';
 import { homeFeatures } from '../helpers/homeFeatures';
 import { scheduleCalendar } from '../helpers/scheduleCalendar';
@@ -59,7 +60,7 @@ export async function handle(request: Request) {
       if(('parentId' in input&&input.parentId&&dates.has(input.parentId))||('id' in input&&dates.has(input.id)&&input.action!=='rename'))cloudPolicy.fail('Open your private Schedule to add or change entries.',403);
     }
 
-    if(input.scope==='schedule'&&input.action==='copy'&&context.seeds.some(n=>n.id===input.id))cloudPolicy.fail('Duplicate your own schedule entries, not the calendar.',403);
+    if(input.scope==='schedule'&&!context.isDev&&input.action==='copy'&&context.seeds.some(n=>n.id===input.id))cloudPolicy.fail('Duplicate your own schedule entries, not the calendar.',403);
     if (input.action === "upload") {
       if(!cloudPolicy.writable(input.scope,context.userId,context.owner))cloudPolicy.fail("Sign in to add a picture.",401);
       const filename = "ion/" + row.id + "/" + context.userId + "/" + input.id + (input.fileId?"/"+input.fileId:"") + "." + extensions[input.contentType];
@@ -95,7 +96,7 @@ export async function handle(request: Request) {
         version = updated.version;
       }
     }
-    if(input.action==="link"||input.action==="rename"||input.action==="remove"||input.action==="restore"||input.action==="move"||input.action==="copy"){
+    if(input.action==='update'||input.action==="link"||input.action==="rename"||input.action==="remove"||input.action==="restore"||input.action==="move"||input.action==="copy"){
       if(input.action==='restore'){
         if(!cloudPolicy.writable(input.scope,context.userId,context.owner)||nodes.filter(n=>n.removedBy===input.operationId).some(n=>!cloudPolicy.edit(input.scope,{...n,removedBy:undefined},context.userId,context.owner)))cloudPolicy.fail('You cannot restore this branch.');
       }else if(input.action!=='copy')cloudPolicy.assert(input.scope,all,input.id,context.userId,context.owner,input.action==='remove'||input.action==='move');
@@ -108,7 +109,15 @@ export async function handle(request: Request) {
         const available=[...new Map([...target.seeds,...saved].map(n=>[n.id,n])).values()];
         if(!visibleDevClouds(available,target.isDev).some(n=>n.id===(input.target as {id:string}).id&&!n.removedBy))cloudPolicy.fail('Choose an available cloud.',400);
       }
-      let next=cloudChanges.apply(nodes,input,row.version,context.seeds);
+      let verifiedImages:string[]=[];
+      if(input.action==='update'){
+        if(input.note!==undefined&&!context.isDev)cloudPolicy.fail('Only dev accounts can change page text.');
+        if(input.photoMode==='replace'){
+          if(!input.assetId||!input.images?.length)cloudPolicy.fail('Choose a picture.',400);
+          verifiedImages=await mapPhotos(input.images!,image=>validateCloudPhoto('ion/'+row.id+'/'+context.userId+'/'+input.assetId+'/'+image.id+'.'+extensions[image.contentType],image.contentType));
+        }
+      }
+      let next=cloudChanges.apply(nodes,input,row.version,context.seeds,verifiedImages);
       if(input.action==='copy')next=next.map(n=>n.copyOperation===input.operationId?{...n,createdBy:context.userId!}:n);
       if(next!==nodes){
         assertCloudWordLimits([...context.seeds,...nodes],[...context.seeds,...next],input.scope);
@@ -125,8 +134,11 @@ export async function handle(request: Request) {
     const hubIds=new Set(functionClouds.filter(n=>n.parentId==='time').map(n=>n.id)),functional=context.isDev&&input.scope==='home'?await functionIdentifiers(context.userId!):undefined;
     const identifiers=context.isDev||(['public','chess','home'].includes(input.scope)&&input.action!=='load')
       ?await cloudIdentifierStore(merged.filter(n=>!hubIds.has(n.id)),context.devNumber):undefined;
+    const readable=visibleDevClouds(merged,context.isDev),authorIds=[...new Set(readable.filter(n=>!n.removedBy&&n.createdBy).map(n=>n.createdBy!))];
+    const authors=authorIds.length?await db.selectFrom('users').select(['id','displayName']).where('id','in',authorIds).execute():[];
+    const withAuthors=attachCloudAuthors(readable,new Map(authors.map(u=>[u.id,u.displayName])));
     // Signed picture URLs are refreshed on every read, and never stored as authority.
-    let visible:CloudNode[] = await Promise.all(visibleDevClouds(merged,context.isDev).filter(n=>!n.removedBy&&!['time-balance','time-activity'].includes(n.id)&&(context.isDev||!['time-treasury','time-estimates'].includes(n.id))&&(context.scope!=='accounts'||n.id!=='account-remember'||context.seeds.some(seed=>seed.id==='account-remember'))).map(async node => {
+    let visible:CloudNode[] = await Promise.all(withAuthors.filter(n=>!n.removedBy&&!['time-balance','time-activity'].includes(n.id)&&(context.isDev||!['time-treasury','time-estimates'].includes(n.id))&&(context.scope!=='accounts'||n.id!=='account-remember'||context.seeds.some(seed=>seed.id==='account-remember'))).map(async node => {
       const visibleNode={...node,...(['time-added','time-spent','time-remaining'].includes(node.id)?{parentId:'time'}:{}),...(node.id==='control-link'&&node.name==='Link'?{name:'Redirect'}:{}),identifier:functional?.[node.id]??(context.isDev?namespaceIdentifier(identifiers?.get(node.id)?.label,Number((input.scope==='private'&&node.id==='private'||input.scope==='accounts'&&context.seeds.some(s=>s.id===node.id))?context.devNumber:identifiers?.get(node.id)?.devNumber??context.devNumber)):undefined),createdBy:undefined,canEdit:cloudPolicy.edit(input.scope,node,context.userId,context.owner),canCopy:!(input.scope==='schedule'&&context.seeds.some(seed=>seed.id===node.id))&&!!context.userId&&cloudPolicy.writable(input.scope,context.userId,context.owner)&&(context.owner||!cloudTree.roots.some(r=>r.id===node.id))};
       const keys=node.imageKeys?.length?node.imageKeys:node.imageKey?[node.imageKey]:[];
       if(!keys.length)return visibleNode;

@@ -28,3 +28,5 @@
 .sheet[data-compact=true] .actions { margin-top:6px; }
 
 .scopes button { white-space:normal; }
+
+.resize-none { resize:none; min-height:120px; max-height:180px; }

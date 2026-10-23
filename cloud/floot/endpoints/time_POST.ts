@@ -14,6 +14,7 @@ export async function handle(request:Request){try{
  const text=await request.text();if(text.length>12000)timeFail('Request too large.',413);const input=schema.parse(JSON.parse(text));
  if(input.action==='snapshot'){const user=await optionalGameUser(request);return new Response(JSON.stringify({snapshot:await timeLedger.snapshot(user?.id??null)}),{headers});}
  const {user,session}=await getServerUserSession(request),result=await timeOperations(input,user.id,session.id);
+ if(input.action==='work'&&input.operation!=='list')await Promise.allSettled([publish(channels.timeCatalog,{changed:true})]);
  if(input.action==='confirm'||input.action==='approve'||input.action==='earning'&&result.earning&&result.earning.creditedUs!=='0'){
   const ids=new Set([user.id]);if(input.action==='confirm'){const q=await db.selectFrom('ionTimeQuotes').select('recipientId').where('id','=',input.quoteId).where('actorId','=',user.id).executeTakeFirst();if(q?.recipientId)ids.add(q.recipientId);}
   // Committed ledger operations never fail merely because realtime is offline.

@@ -4,9 +4,9 @@ import { scheduleCalendar } from './scheduleCalendar';
 import { db } from './db';
 import { timeLedger } from './timeLedger';
 describe('Personal schedule privacy',()=>{
- it('never gives dev ownership a bypass to another account entry or date scaffolding',()=>{
+ it('keeps private entries account-bound while allowing dev edits to their own calendar scaffold',()=>{
  const entry={id:'entry',parentId:'date',name:'Private',createdBy:7},date={id:'date',parentId:scheduleCalendar.root,name:'1',calendarDate:{year:2026,month:10,day:1}};
- expect(cloudPolicy.edit('schedule',entry,7,false)).toBeTrue();expect(cloudPolicy.edit('schedule',entry,8,true)).toBeFalse();expect(cloudPolicy.edit('schedule',entry,null,true)).toBeFalse();expect(cloudPolicy.edit('schedule',date,7,true)).toBeFalse();
+ expect(cloudPolicy.edit('schedule',entry,7,false)).toBeTrue();expect(cloudPolicy.edit('schedule',entry,8,true)).toBeFalse();expect(cloudPolicy.edit('schedule',entry,null,true)).toBeFalse();expect(cloudPolicy.edit('schedule',date,7,true)).toBeTrue();
  });
  it('selects a workspace by authenticated user ID, independent of dev flags or client credentials',async()=>{
  const conditions:unknown[][]=[],expected={id:'own-workspace',ownerId:7,nodes:[],version:0};
@@ -31,7 +31,7 @@ describe('Authenticated schedule context isolation',()=>{
   for(const id of [7,8]){uid=id;const token=await new SignJWT({id:'test-session',createdAt:Date.now(),lastAccessed:Date.now()}).setProtectedHeader({alg:'HS256'}).setExpirationTime('1h').sign(new TextEncoder().encode(process.env.JWT_SECRET));
    const request=new Request('https://example.invalid/_api/cloud',{headers:{cookie:'floot_built_app_session='+token}});
    const result=await cloudContext(request,{action:'load',scope:'schedule',workspaceId:'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',accessToken:'0'.repeat(64)});
-   expect(result.row!.id).toBe('private-'+id);expect(result.owner).toBeFalse();expect(result.isDev).toBe(id===8);expect(JSON.stringify(result.row!.nodes)).not.toContain('note-'+(id===7?8:7));
+   expect(result.row!.id).toBe('private-'+id);expect(result.owner).toBe(id===8);expect(result.isDev).toBe(id===8);expect(JSON.stringify(result.row!.nodes)).not.toContain('note-'+(id===7?8:7));
   }
   expect(conditions.filter(n=>n.table==='ionScheduleAccounts').map(n=>n.args)).toEqual([['userId','=',7],['userId','=',8]]);
  });

@@ -1,3 +1,4 @@
+import { workSessions } from './workSessions';
 import { ionNotifications } from './ionNotifications';
 import { timeFormat } from './timeMath';
 import { functionIdentifiers } from './functionIdentifiers';
@@ -10,6 +11,7 @@ import { timeAmount,timeCredit,timeFreeAllocation,timePrice } from './timeMath';
 import type { TimeInput,TimeQuote,TimeResult } from '../endpoints/time_POST.schema';
 const when=(d:Date|string)=>new Date(d).toISOString();
 export async function timeOperations(input:Exclude<TimeInput,{action:'snapshot'}>,userId:number,sessionId:string):Promise<TimeResult>{
+ if(input.action==='work')return {work:await workSessions(input,userId)};
  if(input.action==='receipt')return{receipt:await timeLedger.receipt(db,input.id,userId)};
  if(input.action==='activity'){
   if(input.treasury&&!(await timeLedger.roles(userId)).dev)timeFail('Dev accounts only.',403);
@@ -30,41 +32,7 @@ export async function timeOperations(input:Exclude<TimeInput,{action:'snapshot'}
    db.selectFrom('ionTimeAccounts').select('balanceUs').where('id','=','treasury').executeTakeFirstOrThrow()
   ]);return{administration:{proposals:proposals.map(p=>({...p,createdAt:when(p.createdAt)})),freeCostUs:config?.durationUs??null,freeProposalId:config?.freeProposalId??null,treasuryUs:treasury.balanceUs}};
  }
- if(input.action==='propose'){
-  if(!(await timeLedger.roles(userId)).dev)timeFail('Only dev accounts can submit estimates.',403);
-  timeAmount(input.durationUs,true);
-  if(input.productId!=='free-work'&&!await db.selectFrom('ionTimeProducts').select('id').where('id','=',input.productId).executeTakeFirst())timeFail('Choose a feature.');
-  const old=await db.selectFrom('ionTimeCostProposals').selectAll().where('id','=',input.requestId).executeTakeFirst();
-  if(old){if(old.authorId!==userId||old.productId!==input.productId||old.durationUs!==input.durationUs||old.basis!==input.basis)timeFail('This request was already used.',409);return{ok:true};}
-  await db.insertInto('ionTimeCostProposals').values({id:input.requestId,productId:input.productId,durationUs:input.durationUs,basis:input.basis,authorId:userId}).execute();return{ok:true};
- }
- if(input.action==='approve'){
-  if(!(await timeLedger.roles(userId)).owner)timeFail('Only ION’s owner can publish costs.',403);
-  await db.transaction().execute(async tx=>{
-   const config=await tx.selectFrom('ionTimeConfig').selectAll().where('id','=',true).forUpdate().executeTakeFirstOrThrow();
-   const proposal=await tx.selectFrom('ionTimeCostProposals').selectAll().where('id','=',input.proposalId).executeTakeFirstOrThrow();
-   if(proposal.productId==='free-work'){
-    if(config.freeProposalId===proposal.id)return;
-    const products=await tx.selectFrom('ionTimeProducts').selectAll().orderBy('id').forUpdate().execute();
-    const allocated=timeFreeAllocation(proposal.durationUs,products.map(p=>p.id));
-    for(const product of products.filter(p=>p.publishedAt)){
-     const after={...product,freeUs:allocated.get(product.id)!};
-     await sql`insert into ion_time_cost_revisions(id,product_id,proposal_id,actor_id,before_cost,after_cost) values(${randomUUID()}::uuid,${product.id},${proposal.id}::uuid,${userId},${JSON.stringify(product)}::jsonb,${JSON.stringify(after)}::jsonb)`.execute(tx);
-     await tx.updateTable('ionTimeProducts').set({freeUs:after.freeUs}).where('id','=',product.id).execute();
-    }
-    await sql`insert into ion_time_cost_revisions(id,product_id,proposal_id,actor_id,before_cost,after_cost) values(${randomUUID()}::uuid,'free-work',${proposal.id}::uuid,${userId},${JSON.stringify({proposalId:config.freeProposalId})}::jsonb,${JSON.stringify({proposalId:proposal.id,durationUs:proposal.durationUs})}::jsonb)`.execute(tx);
-    await tx.updateTable('ionTimeConfig').set({freeProposalId:proposal.id}).where('id','=',true).execute();return;
-   }
-   const product=await tx.selectFrom('ionTimeProducts').selectAll().where('id','=',proposal.productId).forUpdate().executeTakeFirstOrThrow();
-   if(product.proposalId===proposal.id)return;
-   if(!config.freeProposalId)timeFail('Approve the free-work estimate first.');
-   const free=await tx.selectFrom('ionTimeCostProposals').select('durationUs').where('id','=',config.freeProposalId).executeTakeFirstOrThrow(),all=await tx.selectFrom('ionTimeProducts').select('id').execute();
-   const allocated=timeFreeAllocation(free.durationUs,all.map(p=>p.id));
-   const after={directUs:proposal.durationUs,freeUs:allocated.get(product.id)!,proposalId:proposal.id,approvedBy:userId,publishedAt:new Date()};
-   await sql`insert into ion_time_cost_revisions(id,product_id,proposal_id,actor_id,before_cost,after_cost) values(${randomUUID()}::uuid,${product.id},${proposal.id}::uuid,${userId},${JSON.stringify(product)}::jsonb,${JSON.stringify(after)}::jsonb)`.execute(tx);
-   await tx.updateTable('ionTimeProducts').set(after).where('id','=',product.id).execute();
-  });return{ok:true};
- }
+ if(input.action==='propose'||input.action==='approve')timeFail('Use Work sessions or Earlier work to update the shared total.',409);
  if(input.action==='earning')return db.transaction().execute(async tx=>{
   await sql`select pg_advisory_xact_lock(hashtextextended(${`time-earning:${userId}`},0))`.execute(tx);
   const old=await tx.selectFrom('ionTimeEarning').selectAll().where('userId','=',userId).forUpdate().executeTakeFirst(),now=new Date(),idleUntil=new Date(now.getTime()+Math.max(0,180000-input.idleAgeMs));
@@ -90,7 +58,7 @@ export async function timeOperations(input:Exclude<TimeInput,{action:'snapshot'}
    if(product.priceUs===null||market.buyers<1)timeFail('Sign in again to see a price.',401);
    quote={id,kind:'purchase',amountUs:product.priceUs,productId:product.id,productName:product.name,buyers:market.buyers,expiresAt:expiresAt.toISOString()};
    const source=product;
-  await db.insertInto('ionTimeQuotes').values({id,actorId:userId,kind:'purchase',productId:quote.productId!,amountUs:quote.amountUs,buyers:quote.buyers!,expiresAt,calculation:{creationCostUs:(BigInt(source.directUs!)+BigInt(source.freeUs!)).toString(),directUs:source.directUs,freeUs:source.freeUs,costVersion:source.proposalId}}).execute();return{quote};
+  await db.insertInto('ionTimeQuotes').values({id,actorId:userId,kind:'purchase',productId:quote.productId!,amountUs:quote.amountUs,buyers:quote.buyers!,expiresAt,calculation:{creationCostUs:(BigInt(source.directUs!)+BigInt(source.freeUs!)).toString(),directUs:source.directUs,freeUs:source.freeUs,costVersion:source.costVersion??source.proposalId,...(source.pricingModel?{pricingModel:source.pricingModel,totalWorkUs:source.totalWorkUs,paidFeatures:source.paidFeatures}:{})}}).execute();return{quote};
   }else{
    if(input.kind==='payout'&&!(await timeLedger.roles(userId)).owner)timeFail('Only ION’s owner can make payouts.',403);
    if(!input.playerName||!input.amountUs)timeFail('Enter a player name and amount.');timeAmount(input.amountUs);
@@ -125,7 +93,7 @@ export async function timeOperations(input:Exclude<TimeInput,{action:'snapshot'}
     const target=await tx.selectFrom('ionTimeAccounts').select('id').where('id','=',to).where(sql<boolean>`closed_at is null`).executeTakeFirst();if(!target)timeFail('This player cannot receive Time.',409);
    }
    await timeLedger.ensureWallet(tx,userId);
-   const id=await timeLedger.post(tx,{id:randomUUID(),actor:userId,key,kind:quote.kind,from,to,amount:quote.amountUs,metadata:{quoteId:quote.id,...(quote.productId?{productId:quote.productId,buyers:quote.buyers,creationCostUs:calculation.creationCostUs,directUs:calculation.directUs,freeUs:calculation.freeUs,costVersion:calculation.costVersion}:{}),...(quote.recipientId?{recipientId:quote.recipientId}:{})}});
+   const id=await timeLedger.post(tx,{id:randomUUID(),actor:userId,key,kind:quote.kind,from,to,amount:quote.amountUs,metadata:{quoteId:quote.id,...(quote.productId?{productId:quote.productId,buyers:quote.buyers,creationCostUs:calculation.creationCostUs,directUs:calculation.directUs,freeUs:calculation.freeUs,costVersion:calculation.costVersion,...(calculation.pricingModel?{pricingModel:calculation.pricingModel,totalWorkUs:calculation.totalWorkUs,paidFeatures:calculation.paidFeatures}:{})}:{}),...(quote.recipientId?{recipientId:quote.recipientId}:{})}});
    if((quote.kind==='transfer'||quote.kind==='payout')&&quote.recipientId){
     const amount=timeFormat(quote.amountUs,true),route='/?'+new URLSearchParams({cloud:'time-receipt',space:'home',receipt:id});
     for(const [target,kind,title] of [[userId,'time-sent','Time sent'],[quote.recipientId,'time-received','Time received']] as const){const noticeId=kind+':'+id+':'+target;await ionNotifications.record(tx,{id:noticeId,userId:target,kind,sourceId:id,payload:{title,body:amount,tag:noticeId,data:{route,userId:target}}});}

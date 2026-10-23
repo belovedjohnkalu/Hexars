@@ -86,7 +86,7 @@ export async function setServerSession(
     .setExpirationTime(expires)
     .sign(encoder.encode(secret));
 
-  await db.updateTable('sessions').set({credentialExpiresAt:sql`greatest(credential_expires_at,${new Date(expires*1000)})`}).where('id','=',session.id).execute();
+  await db.updateTable('sessions').set({credentialExpiresAt:sql`greatest(credential_expires_at,${new Date(expires*1000)})`,expiresAt:new Date(Date.now()+SessionExpirationSeconds*1000)}).where('id','=',session.id).execute();
   const cookieValue = [
     `${CookieName}=${token}`,
     "HttpOnly",
