@@ -17,7 +17,7 @@ function credentials():Credentials{
 }
 export function useCloudSpace(accountId:number|null=null,authLoading=false,scope:CloudScope='private'){
  const [data,setData]=useState<OutputType>(()=>blank(scope)),[loading,setLoading]=useState(true),[ready,setReady]=useState(false),[busy,setBusy]=useState(false),[error,setError]=useState(''),[phase,setPhase]=useState<'idle'|'uploading'|'saving'>('idle');
- const identity=useRef<Credentials|null>(null),current=useRef(data),scopeKey=useRef(''),mounted=useRef(true),locked=useRef(false),uploadController=useRef<AbortController|null>(null);
+ const identity=useRef<Credentials|null>(null),current=useRef(data),scopeKey=useRef(''),loadSequence=useRef(0),mounted=useRef(true),locked=useRef(false),uploadController=useRef<AbortController|null>(null);
  const accept=useCallback((value:OutputType)=>{if(value.scope&&scopeKey.current!==value.scope+':'+(value.userId||'guest'))return;if(value.version<current.current.version)return;current.current=value;if(mounted.current)setData(value);},[]);
  // Apply successful edits to every mounted view of this account and space.
  useEffect(()=>{const changed=(event:Event)=>{const value=(event as CustomEvent<OutputType>).detail;if(value.scope===scope&&(value.userId||null)===accountId)accept(value);};window.addEventListener('ion.cloud-saved',changed);return()=>window.removeEventListener('ion.cloud-saved',changed);},[scope,accountId,accept]);
@@ -25,12 +25,13 @@ export function useCloudSpace(accountId:number|null=null,authLoading=false,scope
  const [undoClock,setUndoClock]=useState(Date.now());
  useEffect(()=>{const deadline=data.undo?.expiresAt;if(!deadline)return;setUndoClock(Date.now());const t=setTimeout(()=>setUndoClock(Date.now()),Math.max(0,deadline-Date.now())+10);return()=>clearTimeout(t);},[data.undo?.operationId,data.undo?.expiresAt]);
  const load=useCallback(async(signal?:AbortSignal)=>{
-  try{const next=scope+':'+(accountId||'guest');if(scopeKey.current!==next){scopeKey.current=next;current.current=blank(scope);setData(current.current);setReady(false);setLoading(true);}identity.current=credentials();
+  const next=scope+':'+(accountId||'guest'),sequence=++loadSequence.current,active=()=>mounted.current&&!signal?.aborted&&scopeKey.current===next&&sequence===loadSequence.current;
+  try{if(scopeKey.current!==next){scopeKey.current=next;current.current=blank(scope);setData(current.current);setReady(false);setLoading(true);}identity.current=credentials();
    if((scope==='private'||scope==='schedule')&&!accountId){accept(blank(scope));setReady(true);setError('');return;}
    let connect=false;try{connect=scope==='private'&&!!accountId&&sessionStorage.getItem('ion.connect-space')==='yes';}catch{}
    const value=await postCloud({action:'load',scope,timeZone:Intl.DateTimeFormat().resolvedOptions().timeZone,account:!!accountId,...identity.current,connect},{signal});
-   if(mounted.current&&!signal?.aborted){accept(value);if(connect)sessionStorage.removeItem('ion.connect-space');setReady(true);setError('');}
-  }catch(e){if(mounted.current&&!signal?.aborted)setError(failureMessage(e));}finally{if(mounted.current&&!signal?.aborted)setLoading(false);}
+   if(active()){accept(value);if(connect)sessionStorage.removeItem('ion.connect-space');setReady(true);setError('');}
+  }catch(e){if(active())setError(failureMessage(e));}finally{if(active())setLoading(false);}
  },[accountId,scope,accept]);
  useEffect(()=>{mounted.current=true;if(authLoading)return;const controller=new AbortController();void load(controller.signal);const refresh=()=>{if(document.visibilityState==='visible'&&!locked.current)void load(controller.signal);};window.addEventListener('focus',refresh);window.addEventListener('online',refresh);document.addEventListener('visibilitychange',refresh);return()=>{mounted.current=false;controller.abort();window.removeEventListener('focus',refresh);window.removeEventListener('online',refresh);document.removeEventListener('visibilitychange',refresh);};},[load,authLoading]);
  useEffect(()=>{if(authLoading||((scope==='private'||scope==='accounts'||scope==='schedule')&&!accountId))return;const client=new RealtimeClient();let timer:ReturnType<typeof setTimeout>|undefined;const refresh=()=>{clearTimeout(timer);timer=setTimeout(()=>{if(locked.current)refresh();else void load();},250);};const subscriptions=(scope==='home'?[channels.cloud('home',0),channels.cloud('public',0),channels.cloud('chess',0),...(accountId?[channels.cloud('private',accountId)]:[])]:[channels.cloud(scope,accountId||0),...(scope==='schedule'?[channels.cloud('home',0)]:[]),...(scope==='accounts'&&data.dev?[channels.timeCatalog]:[]),...(scope==='chess'?[channels.timeCatalog,...(accountId?[channels.time(accountId)]:[])]:[])]).map(channel=>client.subscribe(channel,refresh));const off=()=>subscriptions.forEach(unsubscribe=>unsubscribe()),again=client.onReconnect(refresh);void client.connect();return()=>{clearTimeout(timer);off();again();client.close();};},[scope,accountId,authLoading,load,data.dev]);

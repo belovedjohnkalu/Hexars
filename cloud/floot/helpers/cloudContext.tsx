@@ -13,7 +13,7 @@ import type { InputType } from "../endpoints/cloud_POST.schema";
 export async function cloudContext(request:Request,input:InputType){
  let userId:number|null=null;try{userId=(await getServerUserSession(request)).user.id;}catch(e){if(!(e instanceof NotAuthenticatedError))throw e;}
  const config=await db.selectFrom('ionSharedSpaces').selectAll().execute(),dev=userId?await db.selectFrom('ionDevAccounts').select(['userId','devNumber']).where('userId','=',userId).executeTakeFirst():undefined,scope=input.scope||"private",isDev=!!dev;
- const shared=config.find(c=>c.kind===scope),owner=isDev&&(!shared||shared.ownerUserId===userId);
+ const shared=config.find(c=>c.kind===scope),owner=isDev&&(scope==='public'||!shared||shared.ownerUserId===userId);
  const namespaceUser=scope==='private'||scope==='accounts'?userId:shared?.ownerUserId;
  const namespace=namespaceUser?await db.selectFrom('ionDevAccounts').select('devNumber').where('userId','=',namespaceUser).executeTakeFirst():undefined,devNumber=Number(namespace?.devNumber??0);
  if(scope==='schedule'){

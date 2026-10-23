@@ -1,3 +1,4 @@
+import { cloudTransferNodes } from './cloudTransferNodes';
 import { assertCloudWordLimits } from './cloudWordLimits';
 import { assertCloudCapacity } from "./cloudCapacity";
 import { cloudIdentifierStore } from "./cloudIdentifierStore";
@@ -30,7 +31,7 @@ export async function cloudTransfer(request:Request,raw:Extract<InputType,{actio
   if(existing.some(n=>n.id===input.operationId))cloudPolicy.fail('Choose a new transfer.',409);
   const ids=transferNodeIds(group,input.id,input.operationId,input.mode==='copy',randomUUID);
   if(existing.some(n=>[...ids.values()].includes(n.id)))cloudPolicy.fail('This cloud is already in the destination.',409);
-  const added=group.map(n=>({...n,id:ids.get(n.id)!,parentId:n.id===input.id?input.targetParent:ids.get(n.parentId!)!,createdBy:uid,canEdit:undefined,copyOperation:input.operationId}));
+  const added=cloudTransferNodes(group,ids,input.id,input.targetParent,input.operationId,uid,input.mode==='copy');
   assertCloudWordLimits([...cloudTree.forScope(input.targetScope),...existing],[...cloudTree.forScope(input.targetScope),...existing,...added],input.targetScope);
   assertCloudCapacity([...cloudTree.forScope(input.targetScope),...existing],[...cloudTree.forScope(input.targetScope),...existing,...added]);
   await tx.updateTable('ionWorkspaces').set({nodes:[...existing,...added] as unknown as Json,version:b.version+1,updatedAt:new Date()}).where('id','=',b.id).execute();

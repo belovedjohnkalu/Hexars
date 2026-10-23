@@ -5,6 +5,7 @@ const key='ion.appearance.inverted',event='ion-appearance';
 let memory=false,unsaved=false;
 function read(){if(typeof window==='undefined')return false;if(unsaved)return memory;try{return localStorage.getItem(key)==='true';}catch{return memory;}}
 function subscribe(update:()=>void){window.addEventListener(event,update);window.addEventListener('storage',update);return()=>{window.removeEventListener(event,update);window.removeEventListener('storage',update);};}
+export function appearanceChrome(inverted:boolean){return {themeColor:inverted?'#ffffff':'#000000',colorScheme:inverted?'light':'dark',statusBarStyle:'default'};}
 export function applyAppearance(active:boolean){document.documentElement.dataset.ionInverted=String(active);document.documentElement.dataset.ionAppearancePane=String(isPagePane());}
 export function toggleAppearance(){memory=!read();try{localStorage.setItem(key,String(memory));unsaved=false;}catch{unsaved=true;}applyAppearance(memory);window.dispatchEvent(new window.Event(event));}
 export function useAppearance(){const inverted=useSyncExternalStore(subscribe,read,()=>false);return {inverted,toggle:toggleAppearance};}

@@ -43,3 +43,19 @@ describe("Cloud refresh concurrency", () => {
     expect(hook.result.current.nodes.some(n=>n.name==="Saved thought")).toBeTrue();
   });
 });
+
+
+describe('Cloud account-switch continuity',()=>{
+ afterEach(cleanup);
+ it('ignores a previous account read completing during the next account load',async()=>{
+  spyOn(RealtimeClient.prototype,'connect').and.resolveTo();
+  let count=0,finishOld:((value:Response)=>void)|undefined,finishNew:((value:Response)=>void)|undefined;
+  const payload=(userId:number,name:string)=>new Response(JSON.stringify({scope:'private',userId,version:0,nodes:[{id:'private',parentId:null,name:'My Space'},{id:'word',parentId:'private',name}]}),{status:200});
+  spyOn(globalThis,'fetch').and.callFake(async()=>{count++;if(count===1)return payload(7,'Account one');return new Promise<Response>(resolve=>{if(count===2)finishOld=resolve;else finishNew=resolve;});});
+  const hook=renderHook(({uid})=>useCloudSpace(uid,false,'private'),{initialProps:{uid:7}});await waitFor(()=>{if(!hook.result.current.ready)throw new Error('Not ready');});
+  let old:Promise<void>;act(()=>{old=hook.result.current.retry();});await waitFor(()=>{if(!finishOld)throw new Error('Old read not started');});hook.rerender({uid:8});await waitFor(()=>{if(!finishNew)throw new Error('New read not started');});
+  await act(async()=>{finishOld!(new Response(JSON.stringify({error:'Previous account error'}),{status:503}));await old!;});
+  expect(hook.result.current.loading).toBeTrue();expect(hook.result.current.ready).toBeFalse();expect(hook.result.current.error).toBe('');expect(hook.result.current.nodes.some(n=>n.name==='Account one')).toBeFalse();
+  await act(async()=>finishNew!(payload(8,'Account two')));await waitFor(()=>{if(!hook.result.current.ready)throw new Error('Not ready');});expect(hook.result.current.nodes.some(n=>n.name==='Account two')).toBeTrue();hook.unmount();
+ });
+});
