@@ -4,12 +4,12 @@ import { CloudColorWheel } from '../components/CloudColorWheel';
 import { Input } from '../components/Input';
 import type { CloudColor } from './cloudColors';
 function Example({disabled=false}:{disabled?:boolean}){const [color,setColor]=useState<CloudColor>('white');return <form noValidate><Input aria-label="Word" defaultValue="A draft"/><CloudColorWheel value={color} onChange={setColor} disabled={disabled}/><output data-testid="color">{color}</output></form>;}
-function pointer(element:Element,type:string,x:number,id=1){const event=new window.MouseEvent(type,{bubbles:true,cancelable:true,clientX:x,button:0});Object.defineProperties(event,{pointerId:{value:id},pointerType:{value:'touch'}});fireEvent(element,event);}
+function pointer(element:Element,type:string,x:number,id=1){const event=new window.MouseEvent(type,{bubbles:true,cancelable:true,clientX:x,clientY:150,button:0});Object.defineProperties(event,{pointerId:{value:id},pointerType:{value:'touch'}});fireEvent(element,event);}
 describe('Color wheel typing focus',()=>{
  const originalEvent=globalThis.Event,originalCustomEvent=globalThis.CustomEvent;
  beforeEach(()=>{globalThis.Event=window.Event;globalThis.CustomEvent=window.CustomEvent;});
  afterEach(()=>{cleanup();globalThis.Event=originalEvent;globalThis.CustomEvent=originalCustomEvent;});
- function mount(disabled=false){const view=render(<Example disabled={disabled}/>),input=view.getByLabelText('Word') as HTMLInputElement,thumb=view.getByRole('slider',{name:'Word color'}),root=view.container.querySelector('[data-color-wheel] > [data-orientation]') as HTMLElement;root.getBoundingClientRect=()=>({x:0,y:0,left:0,top:0,right:300,bottom:44,width:300,height:44,toJSON:()=>({})});let captured=false;root.setPointerCapture=()=>{captured=true;};root.hasPointerCapture=()=>captured;root.releasePointerCapture=()=>{captured=false;};return {view,input,thumb,root};}
+ function mount(disabled=false){const view=render(<Example disabled={disabled}/>),input=view.getByLabelText('Word') as HTMLInputElement,thumb=view.getByRole('slider',{name:'Word color'}),root=view.container.querySelector('[data-color-wheel]') as HTMLElement;root.getBoundingClientRect=()=>({x:0,y:0,left:0,top:0,right:300,bottom:300,width:300,height:300,toJSON:()=>({})});let captured=false;root.setPointerCapture=()=>{captured=true;};root.hasPointerCapture=()=>captured;root.releasePointerCapture=()=>{captured=false;};return {view,input,thumb,root};}
  it('changes color without blurring the active draft or moving its selection',()=>{
   const {view,input,root}=mount(),blur=jasmine.createSpy('blur');input.addEventListener('blur',blur);input.focus();input.setSelectionRange(2,5);const initial=view.getByTestId('color').textContent;
   pointer(root,'pointerdown',60);pointer(root,'pointermove',250);pointer(root,'pointerup',250);
@@ -28,6 +28,7 @@ describe('Color wheel typing focus',()=>{
   await act(async()=>{pointer(root,'pointerdown',90);await new Promise(resolve=>setTimeout(resolve,330));});
   expect(view.getByTestId('color').textContent).toBe('white');pointer(root,'pointermove',240);pointer(root,'pointerup',240);expect(view.getByTestId('color').textContent).toBe('white');expect(document.activeElement).toBe(input);
  });
+ it('ignores a second pointer during a drag',()=>{const {view,root}=mount();pointer(root,'pointerdown',60);const before=view.getByTestId('color').textContent;pointer(root,'pointerdown',250,2);pointer(root,'pointermove',250,2);expect(view.getByTestId('color').textContent).toBe(before);pointer(root,'pointerup',60);});
  it('offers white through W without taking focus from the slider',()=>{
   const {view,thumb}=mount();thumb.focus();fireEvent.keyDown(thumb,{key:'ArrowRight'});fireEvent.keyDown(thumb,{key:'w'});expect(view.getByTestId('color').textContent).toBe('white');expect(document.activeElement).toBe(thumb);
  });

@@ -263,3 +263,6 @@ How it works retains its three permanent paragraph IDs, presented as Earning, Sp
 
 ### Expanded word colors — 0.55
 CloudColorWheel reuses two canonical Slider spectrum rails: Word color (hue) and Color softness (rich to soft/neutral). The palette checks WCAG 4.5:1 text contrast on black and the RGB-inverted color on white. New sibling shades preserve those checks; legacy saved colors remain unchanged. Gradients sample the same palette used for selection. Both rails retain touch input focus, keyboard control, disabled states and hold/W for white. Random entry colors now sample hue and softness. No new page or identifiers.
+
+### Unified color wheel — 0.56
+CloudColorWheel now owns one circular two-dimensional control: angle sets hue and radius sets richness/softness, using the same contrast-safe palette as 0.55. It replaces the two Slider rails rather than adding another picker. One focus stop supports Left/Right hue, Up/Down softness, Home/End rich/soft, W/300ms hold white. Pointer capture tracks one gesture, cancels on lost capture/disable/unmount, and prevents active composer/edit-field focus transfer. Canvas colors sample the actual selection function; the marker has a two-tone rim. CSS size is 112px and the shared Back bubble remains clear. Existing IDs, saved colors, random mode and retry/manual override behavior remain.

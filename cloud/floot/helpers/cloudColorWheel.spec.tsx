@@ -7,7 +7,7 @@ describe('Gradient color control',()=>{
  afterEach(cleanup);
  it('exposes one named keyboard slider instead of a preset list',()=>{
   const change=jasmine.createSpy('color'),view=render(<CloudColorWheel value="blue" onChange={change} usedColors={['blue']}/>);
-  const slider=view.getByRole('slider',{name:'Word color'});expect(view.queryAllByRole('radio').length).toBe(0);expect(slider.getAttribute('aria-valuetext')).toBe('Blue');
+  const slider=view.getByRole('slider',{name:'Word color'});expect(view.queryAllByRole('radio').length).toBe(0);expect(slider.getAttribute('aria-valuetext')).toContain('Blue');expect(view.queryAllByRole('slider').length).toBe(1);
   fireEvent.keyDown(slider,{key:'ArrowRight'});expect(change).toHaveBeenCalled();expect(colorHex(change.calls.mostRecent().args[0])).not.toBe(colorHex('blue'));
  });
  it('disables selection during a save',()=>{const change=jasmine.createSpy('color'),view=render(<CloudColorWheel value="blue" onChange={change} disabled/>);fireEvent.keyDown(view.getByRole('slider',{name:'Word color'}),{key:'ArrowRight'});expect(change).not.toHaveBeenCalled();});

@@ -243,3 +243,6 @@ Journal (IL03) and Hexagonal Chess (IL01) use the same brushed-silver, fine blue
 The ChatGPT connection uses a focused black consent surface, Inter, the ION mark, readable text, shared Input/Button controls and reduced-motion support. It clearly identifies the signed-in account, requested read/save permissions, Cancel and Connect. Normal Home remains uncluttered; installation/disconnection lives at /chatgpt. Only an explicit successful account consent redirects back to the registered ChatGPT callback. Secrets are never requested in chat.
 
 Schedule joins Time estimates and Prices as feature:schedule. Unpriced or unaffordable Schedule paths stay hidden for non-devs; affordable unpurchased paths have the canonical purchase line/gate. Purchase is enforced by backend context and plugin tools, with free dev access. Existing Schedule entries, scaffolding, timezones, calendar colors and immutable identifiers remain.
+
+### 0.56 — One color wheel
+A single 112px circular palette replaces the two hue/softness rails. Angle selects hue; distance from the center selects richness. The palette renders actual contrast-safe colors, with a small two-tone selection ring. It appears only during entry and preserves the keyboard. No extra labels, buttons or routes; keyboard instructions remain available to assistive technology.
