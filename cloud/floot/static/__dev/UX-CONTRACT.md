@@ -266,3 +266,6 @@ CloudColorWheel reuses two canonical Slider spectrum rails: Word color (hue) and
 
 ### Unified color wheel — 0.56
 CloudColorWheel now owns one circular two-dimensional control: angle sets hue and radius sets richness/softness, using the same contrast-safe palette as 0.55. It replaces the two Slider rails rather than adding another picker. One focus stop supports Left/Right hue, Up/Down softness, Home/End rich/soft, W/300ms hold white. Pointer capture tracks one gesture, cancels on lost capture/disable/unmount, and prevents active composer/edit-field focus transfer. Canvas colors sample the actual selection function; the marker has a two-tone rim. CSS size is 112px and the shared Back bubble remains clear. Existing IDs, saved colors, random mode and retry/manual override behavior remain.
+
+### Horizontal color field — 0.57
+The single color picker is now a 72px-high rounded horizontal box. X selects hue; the middle band is soft and both outer horizontal edges are rich. One pointer gesture controls both dimensions. The marker keeps its selected upper/lower half and remembers hue through neutral selections. Contrast, random selection, keyboard operation, typing focus, hold/W white and permanent identities remain unchanged.

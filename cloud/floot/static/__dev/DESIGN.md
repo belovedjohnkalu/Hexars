@@ -246,3 +246,6 @@ Schedule joins Time estimates and Prices as feature:schedule. Unpriced or unaffo
 
 ### 0.56 — One color wheel
 A single 112px circular palette replaces the two hue/softness rails. Angle selects hue; distance from the center selects richness. The palette renders actual contrast-safe colors, with a small two-tone selection ring. It appears only during entry and preserves the keyboard. No extra labels, buttons or routes; keyboard instructions remain available to assistive technology.
+
+### 0.57 — Horizontal color box
+The user's updated direction replaces the circle with one wide, rounded 72px color field above entry. Hue progresses horizontally; a soft central band blends outward into richer shades. Preserve the small contrasting marker, keyboard access and existing glass input.
