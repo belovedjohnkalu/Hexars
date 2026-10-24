@@ -3,7 +3,7 @@ import { identifierFootprint } from "./cloudIdentifiers";
 type Item={id:string;name:string;identifier?:string;imageUrl?:string;isImage?:boolean;percent:number;characters?:number};
 export type Rect={x:number;y:number;width:number;height:number};
 export type CloudLayout={width:number;height:number;items:Array<Rect&{id:string;fontSize:number;pictureSize?:number;captionSize?:number;gridSlot?:number}>};
-export function cloudLayout(items:Item[],width:number,height:number,measure:(text:string,size:number)=>number,options:{organic?:boolean;square?:boolean;boardGrid?:boolean;columns?:number;compact?:boolean;minTargetSize?:number;maxFontSize?:number;previous?:CloudLayout}={}){
+export function cloudLayout(items:Item[],width:number,height:number,measure:(text:string,size:number)=>number,options:{anchors?:Record<string,{x:number;y:number}>;organic?:boolean;square?:boolean;boardGrid?:boolean;columns?:number;compact?:boolean;minTargetSize?:number;maxFontSize?:number;previous?:CloudLayout}={}){
   const previous=options.previous,narrow=options.compact??width<600,gap=options.organic?(narrow?4:6):narrow?16:24,cells=new Map<string,Rect[]>(),result:CloudLayout['items']=[];
   function keys(rect:Rect){const list:string[]=[];for(let x=Math.floor(rect.x/128);x<=Math.floor((rect.x+rect.width)/128);x++)for(let y=Math.floor(rect.y/128);y<=Math.floor((rect.y+rect.height)/128);y++)list.push(x+","+y);return list;}
   const overlaps=(rect:Rect)=>keys(rect).some(k=>(cells.get(k)||[]).some(r=>rect.x<r.x+r.width&&rect.x+rect.width>r.x&&rect.y<r.y+r.height&&rect.y+rect.height>r.y));
@@ -44,7 +44,7 @@ export function cloudLayout(items:Item[],width:number,height:number,measure:(tex
   }
   for(const item of pending){
     const {width:w,height:h}=item,old=previous?.items.find(n=>n.id===item.id);
-    const centerX=old?old.x+old.width/2:previous?width/2:0,centerY=old?old.y+old.height/2:previous?previous.height/2:0;
+    const anchor=options.anchors?.[item.id],centerX=old?old.x+old.width/2:previous?width/2:(anchor?.x??0)*width,centerY=old?old.y+old.height/2:previous?previous.height/2:(anchor?.y??0)*Math.min(width,height);
     let chosen:Rect|null=null;
     for(let attempt=0;attempt<12000;attempt++){
       const angle=attempt*2.399963,radius=(options.organic?6:10)*Math.sqrt(attempt),x=centerX+Math.cos(angle)*radius*(options.organic?1.05:options.square?1:narrow?.85:1.65)-w/2,y=centerY+Math.sin(angle)*radius-h/2,index=result.length;

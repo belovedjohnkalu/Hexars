@@ -1,3 +1,4 @@
+import { chessNavigationNodes,chessNavigationAnchors } from '../helpers/chessNavigation';
 import { useRandomWordColor,randomColorCloudId } from '../helpers/useRandomWordColor';
 import { notificationsId } from '../helpers/notificationRoutes';
 import { useNotifications } from '../helpers/useNotifications';
@@ -31,14 +32,15 @@ export function CloudCanvas({tabularNumbers=false,fitOnChange=false,nodes,parent
  useLayoutEffect(()=>{if(typeof matchMedia!=='function')return;const query=matchMedia('(pointer: coarse)'),update=()=>setCoarsePointer(query.matches);update();query.addEventListener('change',update);return()=>query.removeEventListener('change',update);},[]);
  const area=useRef<HTMLDivElement>(null),[size,setSize]=useState({width:360,height:480}),[fontReady,setFontReady]=useState(0),location=useLocation(),hold=useCloudHold(onHighlight);
  useLayoutEffect(()=>{const el=area.current;if(!el)return;const measure=()=>setSize(old=>({width:Math.max(240,el.clientWidth),height:el.closest('[data-keyboard="true"]')?old.height:Math.max(160,el.clientHeight)}));measure();const observer=new ResizeObserver(measure);observer.observe(el);let alive=true;void document.fonts.ready.then(()=>{if(alive)setFontReady(1);});return()=>{alive=false;observer.disconnect();};},[]);
- const siblings=useMemo(()=>cloudTree.sizes(nodes,parentId).map(n=>n.note?{...n,isImage:false,imageUrl:undefined,imageUrls:undefined}:n),[nodes,parentId]);
- const boardGrid=false,square=scope==='chess'&&(parentId==='boards'||parentId==='rules'||!!parentId?.endsWith('-rules')),lastLayout=useRef<{key:string;viewportWidth:number;generation:number;layout:CloudLayout}|null>(null),layoutKey=identity+':'+scope+':'+(parentId||'root')+':organic-v10'+(coarsePointer?':touch':'');
+ const returnVariant=new URLSearchParams(location.search).get('return');
+ const siblings=useMemo(()=>cloudTree.sizes(chessNavigationNodes(nodes,scope,returnVariant),parentId).map(n=>n.note?{...n,isImage:false,imageUrl:undefined,imageUrls:undefined}:n),[nodes,parentId,scope,returnVariant]);
+ const boardGrid=false,square=scope==='chess'&&(parentId==='boards'||parentId==='rules'||!!parentId?.endsWith('-rules')),lastLayout=useRef<{key:string;viewportWidth:number;generation:number;layout:CloudLayout}|null>(null),layoutKey=identity+':'+scope+':'+(parentId||'root')+(scope==='chess'?':organic-v12':':organic-v10')+(coarsePointer?':touch':'');
  const layout=useMemo(()=>{
   const context=document.createElement('canvas').getContext('2d');
   const saved=lastLayout.current?.key===layoutKey?lastLayout.current:layoutCache.get(layoutKey),old=saved?.viewportWidth===size.width?saved.layout:undefined;
   const removed=old?.items.some(item=>!siblings.some(n=>n.id===item.id)),previous=removed?undefined:old;
   const width=Math.max(previous?.width||0,size.width,Math.min(2600,Math.sqrt(siblings.length)*140));
-  const packed=cloudLayout(siblings.map(n=>({...n,identifier:showIdentifiers?n.identifier:undefined,name:n.name})),width,size.height,(text,font)=>{if(!context)return text.length*font*.54;context.font='500 '+font+'px Inter, sans-serif';return context.measureText(tabularNumbers?text.replace(/\d/g,'0'):text).width;},{organic:true,square:true,boardGrid,columns:parentId==='boards'||parentId==='rules'||siblings.length<=6?2:Math.max(2,Math.ceil(Math.sqrt(siblings.length)*.8)),compact:size.width<600,minTargetSize:coarsePointer?72:undefined,maxFontSize:Math.min(100,Math.min(size.width,size.height)*.18),previous});
+  const packed=cloudLayout(siblings.map(n=>({...n,identifier:showIdentifiers?n.identifier:undefined,name:n.name})),width,size.height,(text,font)=>{if(!context)return text.length*font*.54;context.font='500 '+font+'px Inter, sans-serif';return context.measureText(tabularNumbers?text.replace(/\d/g,'0'):text).width;},{anchors:scope==='chess'&&parentId==='hexagonal-chess'?chessNavigationAnchors:undefined,organic:true,square:true,boardGrid,columns:parentId==='boards'||parentId==='rules'||siblings.length<=6?2:Math.max(2,Math.ceil(Math.sqrt(siblings.length)*.8)),compact:size.width<600,minTargetSize:coarsePointer?72:undefined,maxFontSize:Math.min(100,Math.min(size.width,size.height)*.18),previous});
   return {...packed,generation:(saved?.generation||0)+(removed?1:0)};
  },[siblings,size,fontReady,scope,square,boardGrid,layoutKey,showIdentifiers,parentId,tabularNumbers,coarsePointer]);
  useLayoutEffect(()=>{if(!fontReady||loading)return;lastLayout.current={key:layoutKey,viewportWidth:size.width,generation:layout.generation,layout};layoutCache.delete(layoutKey);layoutCache.set(layoutKey,lastLayout.current);if(layoutCache.size>128)layoutCache.delete(layoutCache.keys().next().value!);},[layout,size.width,fontReady,loading,layoutKey]);
@@ -77,6 +79,6 @@ export function CloudCanvas({tabularNumbers=false,fitOnChange=false,nodes,parent
   const target=destination(node);if(/^https?:/.test(target))return <a key={node.id} {...props} href={target} target="_blank" rel="noopener noreferrer" onClick={e=>{pictureClick(e,target);}}>{content}</a>;
   return node.id===randomColorCloudId||node.id===notificationsId||node.id===inversionCloudId||node.destination==='control'||node.destination==='account'?<Button key={node.id} variant="ghost" {...props} onClick={e=>{const command=()=>node.id===randomColorCloudId?randomColors.toggle():node.id===notificationsId?void notifications.toggle():node.id===inversionCloudId?appearance.toggle():onCommand?.(node);if(!photos.click(e,node,command))command();}}>{content}</Button>:<Link key={node.id} {...props} to={destination(node)} onClick={e=>{if(pictureClick(e,target))return;if(node.destination==='level'&&!node.lockedItem)try{localStorage.setItem('ion.engine',node.engineId??'tactical');localStorage.setItem('ion.difficulty',String(node.level??3));}catch{}onOpen(e,node.id,destination(node));}}>{content}</Link>;
  })}
- {!siblings.length&&!loading&&<p className={styles.empty}>Add a word or picture</p>}
+ {!siblings.length&&!loading&&<p className={styles.empty}>Nothing here yet</p>}
  </div></SpatialViewport>{photos.viewing&&<CloudPhotoViewer node={photos.viewing} onClose={photos.close}/>}</div>;
 }

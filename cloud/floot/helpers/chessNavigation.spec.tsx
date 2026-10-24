@@ -1,0 +1,10 @@
+import { chessNavigationNodes,chessSections,chessNavigationAnchors } from './chessNavigation';
+import { cloudLayout } from './cloudLayout';
+import type { CloudNode } from '../endpoints/cloud_POST.schema';
+describe('Chess navigation',()=>{
+ it('gives the three entry points an organic spread without overlaps or changing font weights',()=>{const layout=cloudLayout([{id:chessSections.play,name:'Play',percent:0},{id:chessSections.learn,name:'Learn',percent:100},{id:'chess-history',name:'Library',percent:99}],390,650,(s,f)=>s.length*f*.54,{organic:true,anchors:chessNavigationAnchors,minTargetSize:72,maxFontSize:70});const rs=layout.items;expect(Math.max(...rs.map(r=>r.x+r.width/2))-Math.min(...rs.map(r=>r.x+r.width/2))).toBeGreaterThan(75);for(let i=0;i<rs.length;i++)for(let j=i+1;j<rs.length;j++){const a=rs[i],b=rs[j];expect(a.x<b.x+b.width&&a.x+a.width>b.x&&a.y<b.y+b.height&&a.y+a.height>b.y).toBeFalse();}expect(rs.find(r=>r.id===chessSections.play)?.fontSize).toBeLessThan(rs.find(r=>r.id===chessSections.learn)!.fontSize);});
+ const nodes:CloudNode[]=[{id:'engines',name:'Engines',parentId:chessSections.play},{id:'tactical',name:'Tactical',parentId:'engines'},{id:'level',name:'Easy',parentId:'tactical'},{id:'online',name:'Online',parentId:chessSections.play},{id:'boards',name:'Variants',parentId:chessSections.play},{id:'custom',name:'My addition',parentId:chessSections.play}];
+ it('puts variants before online and keeps custom additions without exposing an engine-first path',()=>{const visible=chessNavigationNodes(nodes,'chess',null);expect(visible.map(n=>n.id)).toEqual(['boards','online','custom']);expect(nodes.length).toBe(6);});
+ it('preserves engine choices and permanent identities after choosing a variant',()=>{const visible=chessNavigationNodes(nodes,'chess','wellisch');expect(visible.find(n=>n.id==='level')).toBe(nodes[2]);expect(visible.length).toBe(nodes.length);});
+ it('rejects a fake variant context and leaves other spaces alone',()=>{expect(chessNavigationNodes(nodes,'chess','unknown').some(n=>n.id==='engines')).toBeFalse();expect(chessNavigationNodes(nodes,'private',null)).toBe(nodes);});
+});

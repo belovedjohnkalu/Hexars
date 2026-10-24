@@ -1,0 +1,11 @@
+# ION 0.53 — A clearer Hexagonal Chess space
+
+Hexagonal Chess now opens into Play, Learn and Library. Play holds Variants and Online; Learn holds Rules and Challenges; Library holds History, Shared Games and Notes. Existing copied reference material and the custom Gliński note/position move into Notes. The live variant picker has one entry for each of the six variants. No node, text, image, game or permanent identifier is deleted.
+
+Engines remain available from the selected variant's board. Outside a valid variant context their stored catalog branch is omitted from the canvas; server access and purchase checks still apply. Custom saved-rule variant containers now carry the matching variant tag, so copies follow the same purchase visibility as authoritative rules. Online offers Matchmaking or 4-digit code, with explicit variant/Random selection before finding a game. Opening the menus alone never joins a queue.
+
+The three main words start in a loose triangle through optional anchors in the shared collision-free layout. Their font sizes still depend only on descendant characters. Placement remains organic and keyboard order starts with Play. Other spaces keep their existing camera keys. Empty collections say Nothing here yet.
+
+The inspected shared-data update is recorded in cloud/data/ion-0.53-navigation.sql; it guards workspace version 24 and preserves existing records and IDs. It has already been applied as version 25; do not rerun it over later edits. No schema or personal workspace migration was required.
+
+Validation: hosted TypeScript clean; chessNavigation, cloudLayout, cloudScopes and featureClouds suites pass. Public production-bundle phone/desktop checks cover the three entry points, unique accessible board entry, visited Back, Rules, Online menus without queue creation, no overlaps and no document scrolling. Variant-first fixtures also pass on both viewports with mocked dev catalog and remembered engine. Static premium audit reports the existing 38 reviewed canonical-control findings. Existing hosting checker reports four polling warnings in unchanged Time/accounts/online recovery helpers; no blanket-clean hosting claim. Physical iOS keyboard behavior was not part of this change.
