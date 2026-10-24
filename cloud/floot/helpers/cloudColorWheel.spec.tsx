@@ -10,7 +10,7 @@ describe('Gradient color control',()=>{
   const slider=view.getByRole('slider',{name:'Word color'});expect(view.queryAllByRole('radio').length).toBe(0);expect(slider.getAttribute('aria-valuetext')).toBe('Blue');
   fireEvent.keyDown(slider,{key:'ArrowRight'});expect(change).toHaveBeenCalled();expect(colorHex(change.calls.mostRecent().args[0])).not.toBe(colorHex('blue'));
  });
- it('disables selection during a save',()=>{const change=jasmine.createSpy('color'),view=render(<CloudColorWheel value="blue" onChange={change} disabled/>);fireEvent.keyDown(view.getByRole('slider'),{key:'ArrowRight'});expect(change).not.toHaveBeenCalled();});
+ it('disables selection during a save',()=>{const change=jasmine.createSpy('color'),view=render(<CloudColorWheel value="blue" onChange={change} disabled/>);fireEvent.keyDown(view.getByRole('slider',{name:'Word color'}),{key:'ArrowRight'});expect(change).not.toHaveBeenCalled();});
  it('retains a failed colored draft and advances to a new shade after success',async()=>{
   const add=jasmine.createSpy('add').and.resolveTo(false),draft=()=>{};
   const view=render(<CloudComposer scope="chess" colors parentId="boards" busy={false} disabled={false} draft={{name:'New',color:'blue'}} onDraft={draft} onAdd={add} usedColors={['blue']}/>);
@@ -28,11 +28,11 @@ describe('Color wheel entry visibility',()=>{
  afterEach(()=>{cleanup();globalThis.Event=originalEvent;});
  it('is hidden until word entry starts and stays available when focus moves into the picker',()=>{
   const view=render(<CloudComposer colors parentId="private" busy={false} disabled={false} draft={{name:''}} onDraft={()=>{}} onAdd={async()=>true}/>),input=view.getByLabelText('Add a word or a picture name');
-  expect(view.queryByRole('slider')).toBeNull();fireEvent.focus(input);const slider=view.getByRole('slider',{name:'Word color'});expect(slider).toBeTruthy();fireEvent.blur(input,{relatedTarget:slider});expect(view.queryByRole('slider')).toBeTruthy();fireEvent.blur(slider,{relatedTarget:document.body});expect(view.queryByRole('slider')).toBeNull();
+  expect(view.queryByRole('slider',{name:'Word color'})).toBeNull();fireEvent.focus(input);const slider=view.getByRole('slider',{name:'Word color'});expect(slider).toBeTruthy();fireEvent.blur(input,{relatedTarget:slider});expect(view.queryByRole('slider',{name:'Word color'})).toBeTruthy();fireEvent.blur(slider,{relatedTarget:document.body});expect(view.queryByRole('slider',{name:'Word color'})).toBeNull();
  });
  it('keeps the draft and chosen color when entry is dismissed',()=>{
   const view=render(<CloudComposer colors parentId="public" scope="public" busy={false} disabled={false} draft={{name:'Keep me',color:'blue'}} onDraft={()=>{}} onAdd={async()=>false}/>),input=view.getByLabelText('Add a word or a picture name') as HTMLInputElement;
-  fireEvent.focus(input);const original=view.getByRole('slider').getAttribute('aria-valuetext');fireEvent.keyDown(view.getByRole('slider'),{key:'ArrowRight'});const chosen=view.getByRole('slider').getAttribute('aria-valuetext');expect(chosen).not.toBe(original);fireEvent.blur(input,{relatedTarget:document.body});expect(view.queryByRole('slider')).toBeNull();expect(input.value).toBe('Keep me');fireEvent.focus(input);expect(view.getByRole('slider').getAttribute('aria-valuetext')).toBe(chosen);
+  fireEvent.focus(input);const original=view.getByRole('slider',{name:'Word color'}).getAttribute('aria-valuetext');fireEvent.keyDown(view.getByRole('slider',{name:'Word color'}),{key:'ArrowRight'});const chosen=view.getByRole('slider',{name:'Word color'}).getAttribute('aria-valuetext');expect(chosen).not.toBe(original);fireEvent.blur(input,{relatedTarget:document.body});expect(view.queryByRole('slider',{name:'Word color'})).toBeNull();expect(input.value).toBe('Keep me');fireEvent.focus(input);expect(view.getByRole('slider',{name:'Word color'}).getAttribute('aria-valuetext')).toBe(chosen);
  });
 });
 
@@ -44,7 +44,7 @@ describe('Random word color',()=>{
   localStorage.setItem('ion.word-color.random','true');
   const add=jasmine.createSpy('add').and.resolveTo(false),view=render(<CloudComposer colors scope="chess" parentId="boards" busy={false} disabled={false} draft={{name:'First'}} onDraft={()=>{}} onAdd={add}/>);
   const input=view.getByLabelText('Add a word or a picture name');fireEvent.focus(input);
-  fireEvent.keyDown(view.getByRole('slider'),{key:'w'});
+  fireEvent.keyDown(view.getByRole('slider',{name:'Word color'}),{key:'w'});
   const form=view.getByRole('form');await act(async()=>{fireEvent.submit(form);});
   const first=add.calls.mostRecent().args[0];expect(first.color).toBe('white');
   add.and.resolveTo(true);await act(async()=>{fireEvent.submit(form);});expect(add.calls.mostRecent().args[0]).toEqual(first);

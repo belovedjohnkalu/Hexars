@@ -1,2 +1,3 @@
-.wheel { width:100%; height:44px; padding:0 12px; touch-action:none; }
+.wheel { width:100%; height:88px; padding:0 12px; touch-action:none; }
 .spectrum.spectrum { width:100%; min-width:0; height:44px; }
+.wheel { -webkit-tap-highlight-color:transparent; }

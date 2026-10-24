@@ -260,3 +260,6 @@ Hexagonal Chess has Play, Learn and Library. Play holds Variants and Online. Lea
 
 ### Earn reading — 0.54
 How it works retains its three permanent paragraph IDs, presented as Earning, Spending and Prices. Each opens its full unchanged paragraph through the canonical PagedText reader. FunctionClouds supplies the text for dev editing; saved text/title overrides remain authoritative. The reader restarts on topic change, reflows/paginates on resize, and reserves space above the floating Back control. No scrolling, new identifiers, tiny auto-shrunk prose or clipped paragraph clouds.
+
+### Expanded word colors — 0.55
+CloudColorWheel reuses two canonical Slider spectrum rails: Word color (hue) and Color softness (rich to soft/neutral). The palette checks WCAG 4.5:1 text contrast on black and the RGB-inverted color on white. New sibling shades preserve those checks; legacy saved colors remain unchanged. Gradients sample the same palette used for selection. Both rails retain touch input focus, keyboard control, disabled states and hold/W for white. Random entry colors now sample hue and softness. No new page or identifiers.
