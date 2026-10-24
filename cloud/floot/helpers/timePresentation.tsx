@@ -2,7 +2,7 @@ import type {CloudNode} from '../endpoints/cloud_POST.schema';
 import type {TimeSnapshot,TimeProduct} from '../endpoints/time_POST.schema';
 import {timeClock} from './timeMath';
 import {timePrinciples} from './timePrinciples';
-export const earningParagraphs=(timePrinciples.find(p=>p.id==='time-earning-rule')?.note||'').split(/\n\s*\n/).filter(Boolean).map((name,i)=>({id:'time-earning-paragraph-'+i,name}));
+export const earningParagraphs=(timePrinciples.find(p=>p.id==='time-earning-rule')?.note||'').split(/\n\s*\n/).filter(Boolean).map((note,i)=>({id:'time-earning-paragraph-'+i,name:['Earning','Spending','Prices'][i]||'More',note}));
 export const visiblePriceProducts=(snapshot:TimeSnapshot|null)=>snapshot?.userId||snapshot?.dev?snapshot?.products||[]:[];
 export function canPurchase(product:TimeProduct|undefined,snapshot:TimeSnapshot|null){return !!snapshot?.userId&&!snapshot.dev&&!!product&&!product.owned&&!!product.affordable&&product.published&&snapshot.pricingReady;}
 export function timeHubNodes(nodes:CloudNode[],snapshot:TimeSnapshot|null,totals:{addedUs:string;spentUs:string;balanceUs:string}){

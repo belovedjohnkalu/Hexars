@@ -1,0 +1,5 @@
+# ION 0.54 — Earn text fitting
+
+Earn → How it works keeps its three original paragraph identities, now labeled Earning, Spending and Prices. Each opens the unchanged complete text in the canonical PagedText reader. Dev title/text overrides remain supported. Topic changes start on the first page and resize reflows the reading pages; no paragraph is rendered as an oversized copy-only cloud. The reader reserves space above the floating Back control.
+
+Verified: hosted TypeScript clean; timePresentation and timeHub suites pass, including exact full-text preservation and stable registered paragraph IDs. Read-only live browser checks at 320×568, 390×844 with inversion, 844×390 and 1280×900 cover all three topics, every page, rendered line bounds, matching complete source text, visited Back, no scrolling and no overlap with Back. Static premium audit retains 38 existing reviewed canonical-control findings; hosting checker still reports four pre-existing polling warnings in unchanged files. No saved cloud content, IDs, pricing formula or wallet entries changed; implementation time uses the existing timestamped-work record.

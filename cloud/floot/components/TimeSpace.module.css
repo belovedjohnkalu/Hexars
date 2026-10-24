@@ -15,7 +15,7 @@
 .receipt { display:flex; flex-direction:column; gap:14px; margin:20px 0; text-align:center; }
 .center .value,.value { color:var(--word-amber); font:500 clamp(26px,7vw,44px)/1.25 var(--font-family-base); overflow-wrap:anywhere; }
 .actions { display:flex; justify-content:center; gap:12px; flex-wrap:wrap; }
-.article { height:100%; max-width:640px; padding:16px 24px; margin:auto; }
+.article { height:100%; min-width:0; max-width:640px; padding:16px 24px 96px; margin:auto; box-sizing:border-box; }
 .basis { height:120px; min-height:70px; }
 .dialog { top:calc(var(--ion-visual-top,0px) + var(--ion-visual-height,100dvh)/2); max-height:calc(var(--ion-visual-height,100dvh) - 32px); }
 @media(max-height:520px) { .field { gap:4px; } .form { gap:8px; } .field input { min-height:40px; } .footer { min-height:36px; padding-bottom:6px; } .header { padding-top:4px; } .center { padding:8px 20px; gap:8px; } }

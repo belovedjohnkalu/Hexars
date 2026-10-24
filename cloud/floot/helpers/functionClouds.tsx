@@ -15,7 +15,7 @@ export const functionClouds:CloudNode[]=[
  ...timePrinciples.filter(p=>p.id!=='time-earning-rule').map(p=>({...node(p.id,'time-principles',p.name),note:p.note})),
  ...products.map(p=>node('time-price-'+p.id,'time-prices',p.name)),
  ...products.flatMap(p=>[node('time-price-value-'+p.id,'time-price-'+p.id,'Price'),node('time-purchase-'+p.id,'time-price-'+p.id,'Purchase')]),
- ...earningParagraphs.map(p=>node(p.id,'time-earning-rule',p.name)),
+ ...earningParagraphs.map(p=>({...node(p.id,'time-earning-rule',p.name),note:p.note})),
  node('time-treasury-value','time-treasury','Treasury balance'),node('time-treasury-activity','time-treasury','Activity'),node('time-payout','time-treasury','Pay out'),
  ...['time-work-total','time-work-sessions','time-work-baseline','time-work-start'].map((id,i)=>node(id,'time-estimates',['Total','Sessions','Earlier work','Start'][i])),
  ...chessVariants.all.flatMap(v=>Object.entries(gameActionNames).map(([id,name])=>node('game-'+v.id+'-'+id,v.id+'-board',name)))
