@@ -5,5 +5,3 @@
 .bubble svg { width:27px; height:27px; stroke-width:2; }
 @media(max-height:420px) { .bubble.bubble { left:22px; bottom:var(--back-bottom,74px); width:48px; height:48px; min-width:48px; } }
 @media(prefers-reduced-motion:reduce) { .bubble.bubble { transition:none; } }
-/* Keep the Back bubble clear of both color rails while entry is active. */
-:global(footer:has([data-color-wheel])) ~ .bubble.bubble { bottom:calc(166px + env(safe-area-inset-bottom)); }

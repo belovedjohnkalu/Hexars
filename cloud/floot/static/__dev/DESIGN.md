@@ -249,3 +249,6 @@ A single 112px circular palette replaces the two hue/softness rails. Angle selec
 
 ### 0.57 — Horizontal color box
 The user's updated direction replaces the circle with one wide, rounded 72px color field above entry. Hue progresses horizontally; a soft central band blends outward into richer shades. Preserve the small contrasting marker, keyboard access and existing glass input.
+
+### 0.58 — Restore the original
+Return to one slim horizontal pastel spectrum in the existing 44px touch area. Remove the circular/rectangular two-dimensional surfaces and extra softness dimension. Preserve the original marker, white hold and input focus behavior. This supersedes 0.55–0.57 picker styling.

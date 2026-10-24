@@ -1,10 +1,9 @@
-import { readableWordColor,randomWordColor,colorHex,colorValue,colorHue,isCloudColor,spectrumColor,unusedColor,type CloudColor } from './cloudColors';
+import { randomWordColor,colorHex,colorValue,colorHue,isCloudColor,spectrumColor,unusedColor,type CloudColor } from './cloudColors';
 import { cloudChanges } from './cloudChanges';
 import { cloudPolicy } from './cloudPolicy';
 import { schema,type CloudNode } from '../endpoints/cloud_POST.schema';
 describe('Continuous cloud colors',()=>{
- it('randomizes over the readable spectrum and avoids an existing shade',()=>{expect(randomWordColor([],()=>0)).toBe(spectrumColor(0,0));expect(randomWordColor([spectrumColor(180)],()=>.5)).not.toBe(spectrumColor(180));});
- it('offers vivid, muted and neutral shades with readable contrast in both themes',()=>{const colors=new Set<string>();for(let hue=0;hue<360;hue+=3)for(let tone=0;tone<=1;tone+=.1){const color=spectrumColor(hue,tone);colors.add(color);expect(readableWordColor(color)).toBeTrue();}expect(colors.size).toBeGreaterThan(1000);expect(spectrumColor(40,0)).not.toBe(spectrumColor(40,1));});
+ it('randomizes over the readable spectrum and avoids an existing shade',()=>{expect(randomWordColor([],()=>0)).toBe(spectrumColor(0));expect(randomWordColor([spectrumColor(180)],()=>.5)).not.toBe(spectrumColor(180));});
  const credentials={workspaceId:'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',accessToken:'a'.repeat(64)};
  it('preserves every legacy color and safely accepts only full RGB values',()=>{
   expect(colorValue('blue')).toBe('#7bb3ff');expect(colorValue('white')).toBe('#f5f5f7');expect(colorValue('#A1B2C3')).toBe('#a1b2c3');

@@ -269,3 +269,6 @@ CloudColorWheel now owns one circular two-dimensional control: angle sets hue an
 
 ### Horizontal color field — 0.57
 The single color picker is now a 72px-high rounded horizontal box. X selects hue; the middle band is soft and both outer horizontal edges are rich. One pointer gesture controls both dimensions. The marker keeps its selected upper/lower half and remembers hue through neutral selections. Contrast, random selection, keyboard operation, typing focus, hold/W white and permanent identities remain unchanged.
+
+### Original horizontal picker restored — 0.58
+The user's revert restores the single horizontal Slider gradient, original pastel hue range, 44px entry control, and original Back position from 0.54. Hold/W white, touch typing focus and random/manual retry behavior are retained. Circle/box geometry and extra shade controls are removed. Existing saved hex colors and IDs are not changed. This supersedes the picker directions in 0.55–0.57.
