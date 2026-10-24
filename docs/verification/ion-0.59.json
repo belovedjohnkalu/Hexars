@@ -1,0 +1,65 @@
+{
+  "release": "0.59",
+  "typecheck": "clean",
+  "newCheckersSuites": {
+    "passed": 4,
+    "failed": 0
+  },
+  "fullRegression": {
+    "specFiles": 91,
+    "passed": 90,
+    "failedFiles": 1,
+    "preExistingFailures": [
+      "organicLayout: legacy two-level contrast",
+      "organicLayout: retained deletion centers"
+    ]
+  },
+  "simulation": {
+    "randomGames": 60,
+    "randomTurns": 6917,
+    "computerGames": 2,
+    "computerTurns": 104,
+    "allTerminated": true
+  },
+  "api": {
+    "gameChecks": 40,
+    "onlineLibraryChecks": 24,
+    "purchaseDenials": 4
+  },
+  "browser": {
+    "viewports": [
+      [
+        320,
+        844
+      ],
+      [
+        390,
+        844
+      ],
+      [
+        1280,
+        900
+      ]
+    ],
+    "captureRoutes": true,
+    "returnToOrigin": true,
+    "undo": true,
+    "reloadPersistence": true,
+    "pageErrors": 0,
+    "onlineTwoDevices": {
+      "room": true,
+      "realtimeMove": true,
+      "chat": true,
+      "mutualDraw": true
+    },
+    "glinskiSmoke": true
+  },
+  "premiumAudit": {
+    "unchangedFindings": 38
+  },
+  "sources": [
+    "https://www.mindsports.nl/index.php/arena/hexdame/72-rules",
+    "https://www.kruzno.com/hexcheckers.html",
+    "https://wcdf.net/rules/rules_of_checkers_english.pdf"
+  ]
+}

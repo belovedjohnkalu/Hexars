@@ -8,8 +8,11 @@ const order=new Map(['hexagonal-chess',chessSections.play,chessSections.learn,'c
 export function chessNavigationNodes(nodes:CloudNode[],scope:CloudScope,returnVariant:string|null):CloudNode[]{
  if(scope!=='chess')return nodes;
  const hidden=new Set<string>();
+ if(!chessVariants.isCheckers(returnVariant)){hidden.add('checkers-computer');hidden.add('checkers-online');}
  if(!chessVariants.isId(returnVariant)){
-  hidden.add('engines');let changed=true;
+  hidden.add('engines');
+ }
+ {let changed=true;
   while(changed){changed=false;for(const n of nodes)if(n.parentId&&hidden.has(n.parentId)&&!hidden.has(n.id)){hidden.add(n.id);changed=true;}}
  }
  return nodes.filter(n=>!hidden.has(n.id)).sort((a,b)=>(order.get(a.id)??1000)-(order.get(b.id)??1000));

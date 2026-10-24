@@ -22,6 +22,16 @@ export function ruleIllustration(board: GameView["board"], kind: string, variant
   };
   const put = (notation: string, type: PieceName, player: number) => pieces.push({...cell(notation),type,player});
   const mark = (notation: string) => { const h = cell(notation); add(h.q,h.r); };
+  if(variant==='hexdame'||variant==='kruzno'){
+    const checker:PieceName=kind==='king'?'draughts-king':'man';origin=kind==='promotion'?{q:0,r:3}:kind==='border'?{q:5,r:-2}:{q:0,r:0};pieces.push({...origin,type:checker,player:0});
+    if(kind==='advance')for(const[q,r]of variant==='hexdame'?edges.slice(0,3):edges)add(q,r);
+    if(kind==='capture'){pieces.push({q:0,r:1,type:'man',player:1});add(0,2);}
+    if(kind==='king')for(const[q,r]of edges)for(let n=1;n<=8;n++)add(q*n,r*n);
+    if(kind==='promotion')add(0,4);
+    if(kind==='border'){add(4,-2);add(4,-1);}
+    caption=kind==='king'?'A crowned checker can slide along all six edge lines.':kind==='capture'?'Jump the enemy into the empty cell beyond. Complete the required chain.':kind==='promotion'?'Crown only if the full turn ends on a far-edge cell.':kind==='border'?'Leave the shaded outer ring through an available inward cell.':'Highlighted cells show empty-cell steps.';
+    return {targets,pieces,caption};
+  }
   if(variant==='wellisch'){
     if(kind==='rook'||kind==='queen')for(const [q,r] of edges)for(let n=1;n<=10;n++){if(!valid.has(key({q:q*n,r:r*n})))break;add(q*n,r*n);}
     if(kind==='knight'||kind==='queen')for(const [q,r]of corners)add(q,r);

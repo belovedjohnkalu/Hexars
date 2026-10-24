@@ -11,8 +11,11 @@ import { schema,type Lobby } from './online_POST.schema';
 function fail(message:string,status=400):never{throw Object.assign(new Error(message),{status});}
 export async function handle(request:Request){const headers={'Content-Type':'application/json','Cache-Control':'no-store'};try{
  const user=await onlineUser(request),input=schema.parse(await request.json());
+ const notifyPrevious=new Set<number>();
  const result=await db.transaction().execute(async tx=>{
-  const available=await timeAccess.variants(user.id,tx);
+  const owned=await timeAccess.variants(user.id,tx),family=(input.action==='find'||input.action==='create')?(input.variant!=='random'?(chessVariants.isCheckers(input.variant)?'checkers':'chess'):input.family):undefined;
+  const available=owned.filter(v=>family==='checkers'?chessVariants.isCheckers(v):!chessVariants.isCheckers(v));
+  if((input.action==='find'||input.action==='create')&&input.variant==='random'&&!available.length)fail('Unlock a variant in this family to play.',402);
   if((input.action==='find'||input.action==='create')&&input.variant!=='random')await timeAccess.assert(user.id,input.variant,undefined,tx);
   // One short lock serializes joining, code allocation and matchmaking. Native
   // setup has no search, and all seats/game creation commit atomically.
@@ -32,10 +35,14 @@ export async function handle(request:Request){const headers={'Content-Type':'app
    }
   }else{
    const existing=await tx.selectFrom('ionMatchLobbies').innerJoin('ionLobbyMembers','ionLobbyMembers.lobbyId','ionMatchLobbies.id').selectAll('ionMatchLobbies').where('ionLobbyMembers.userId','=',user.id).where('status','=','waiting').executeTakeFirst();
-   if(existing)lobby=existing;
-   else if(input.action==='join'){
+   if(existing){
+    const compatible=input.action==='join'?existing.code===input.code:(input.action==='create'?existing.code!==null:existing.code===null)&&(input.variant==='random'?available.includes(existing.variant):existing.variant===input.variant);
+    if(compatible)lobby=existing;
+    else{const oldMembers=await tx.selectFrom('ionLobbyMembers').select('userId').where('lobbyId','=',existing.id).execute();oldMembers.forEach(m=>notifyPrevious.add(m.userId));await tx.deleteFrom('ionLobbyMembers').where('lobbyId','=',existing.id).where('userId','=',user.id).execute();if(existing.hostUserId===user.id)await tx.updateTable('ionMatchLobbies').set({status:'cancelled'}).where('id','=',existing.id).execute();}
+   }
+   if(!lobby&&input.action==='join'){
     lobby=await tx.selectFrom('ionMatchLobbies').selectAll().where('code','=',input.code).where('status','=','waiting').executeTakeFirst();if(!lobby)fail('No open room with that code.',404);
-   }else if(input.action==='find'){
+   }else if(!lobby&&input.action==='find'){
     let query=tx.selectFrom('ionMatchLobbies').selectAll().where('code','is',null).where('status','=','waiting').where('hostUserId','!=',user.id).where('variant','in',available).orderBy('createdAt');
     if(input.variant!=='random')query=query.where('variant','=',input.variant);
     lobby=await query.executeTakeFirst();
@@ -61,7 +68,7 @@ export async function handle(request:Request){const headers={'Content-Type':'app
    await tx.insertInto('ionGameMembers').values(members.map(m=>({gameId,userId:m.userId,seat:m.seat}))).execute();
    lobby=await tx.updateTable('ionMatchLobbies').set({status:'playing',gameId}).where('id','=',lobby.id).returningAll().executeTakeFirstOrThrow();
   }
-  return {lobby:{id:lobby.id,code:lobby.code,variant:lobby.variant,status:input.action==='cancel'?'cancelled':lobby.status,gameId:lobby.gameId,players:members.map(m=>({seat:m.seat,name:m.name})),needed} as Lobby,notify:[...new Set([user.id,lobby.hostUserId,...members.map(m=>m.userId)])]};
+  return {lobby:{id:lobby.id,code:lobby.code,variant:lobby.variant,status:input.action==='cancel'?'cancelled':lobby.status,gameId:lobby.gameId,players:members.map(m=>({seat:m.seat,name:m.name})),needed} as Lobby,notify:[...new Set([...notifyPrevious,user.id,lobby.hostUserId,...members.map(m=>m.userId)])]};
  });
  if(input.action!=='get')await Promise.all(result.notify.map(id=>publish(channels.player(id),{lobbyId:result.lobby.id})));
  return new Response(JSON.stringify(result.lobby),{headers});

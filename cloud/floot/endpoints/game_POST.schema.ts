@@ -2,7 +2,7 @@ import { engineIds, type EngineId } from '../helpers/chessEngines';
 import { z } from "zod";
 import superjson from "superjson";
 
-export const variantSchema = z.enum(["glinski", "mccooey", "shafran", "brusky", "devasa", "wellisch"]);
+export const variantSchema = z.enum(["glinski", "mccooey", "shafran", "brusky", "devasa", "wellisch", "hexdame", "kruzno"]);
 export type VariantId = z.infer<typeof variantSchema>;
 
 const hex = z
@@ -12,6 +12,7 @@ const move = z
   .object({
     from: hex,
     to: hex,
+    path: z.array(hex).min(2).max(33).optional(),
     promotion: z.enum(["queen", "rook", "bishop", "knight"]).optional(),
     pass: z.literal(true).optional(),
   })
@@ -40,8 +41,10 @@ export const schema = z.discriminatedUnion("action", [
 ]);
 export type InputType = z.infer<typeof schema>;
 export type Hex = { q: number; r: number };
-export type PieceName = "pawn" | "knight" | "bishop" | "rook" | "queen" | "king";
+export type PieceName = "pawn" | "knight" | "bishop" | "rook" | "queen" | "king" | "man" | "draughts-king";
 export type ChessMove = {
+  path?: Hex[];
+  captures?: Hex[];
   from: Hex;
   to: Hex;
   promotion?: "queen" | "rook" | "bishop" | "knight";
@@ -67,12 +70,12 @@ export type GameView = {
     orientation?: "flat"|"pointy";
     players: number[];
     cells: Array<
-      Hex & { colour: number; notation: string; piece: { type: PieceName; player: number; armyOrigin?: number } | null }
+      Hex & { restricted?:boolean; colour: number; notation: string; piece: { type: PieceName; player: number; armyOrigin?: number } | null }
     >;
   };
   legalMoves: ChessMove[];
   result: {
-    status: "ongoing" | "checkmate" | "stalemate" | "draw";
+    status: "ongoing" | "checkmate" | "stalemate" | "draw" | "win";
     reason: string;
     winner: number;
     scores: number[];
@@ -80,6 +83,7 @@ export type GameView = {
 };
 export type SearchDiagnostics = { nodes: number; depth: number; timeMs: number; score: number; randomized?:boolean };
 export type MoveRecord = {
+  path?:Hex[];
   ply: number;
   player: number;
   notation: string;

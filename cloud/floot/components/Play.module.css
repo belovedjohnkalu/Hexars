@@ -46,3 +46,8 @@
 .chatComposer p { margin:4px 12px 0; color:var(--error); font-size:12px; }
 
 .app[data-online="false"] { --back-bottom:calc(18px + env(safe-area-inset-bottom)); }
+
+/* Checkers keeps concession actions readable, including dev identifiers. */
+.status[data-checkers=true] { height:auto; min-height:44px; flex-wrap:wrap; row-gap:0; }
+.status[data-checkers=true] button:has(.identifier) { flex-direction:column; gap:0; line-height:1.1; padding-block:4px; }
+.status[data-checkers=true] .identifier { font:400 9px/11px var(--font-family-base); color:var(--muted-foreground); letter-spacing:0; }

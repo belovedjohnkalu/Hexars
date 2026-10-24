@@ -95,7 +95,7 @@ export function CloudBoard({
       className={`${styles.board} ${className || ""}`}
       role={preview ? "img" : "group"}
       aria-hidden={preview || undefined}
-      aria-label={`${chessVariants.name(game.variant)} hexagonal chessboard`}
+      aria-label={`${chessVariants.label(game.variant)} board`}
     >
       <title>Select a piece to see its moves. Swipe horizontally for history. Swipe downward or press F to flip the board; against an engine, this switches your side before the first move and rotates the view afterward.</title>
       <g
@@ -144,12 +144,13 @@ export function CloudBoard({
                   ? "last-move"
                   : null;
           const name = cell.piece
-            ? `${cell.piece.player === 0 ? "White" : cell.piece.player === 2 ? "Gold" : "Black"} ${cell.piece.type}${cell.piece.type==='pawn'&&cell.piece.armyOrigin!==undefined?`, originally ${['White','Black','Gold'][cell.piece.armyOrigin]}`:''}`
+            ? `${cell.piece.player === 0 ? "White" : cell.piece.player === 2 ? "Gold" : "Black"} ${cell.piece.type==='draughts-king'?'king':cell.piece.type}${cell.piece.type==='pawn'&&cell.piece.armyOrigin!==undefined?`, originally ${['White','Black','Gold'][cell.piece.armyOrigin]}`:''}`
             : "Empty cell";
           return (
             <g
               key={cell.notation}
               data-cell={cell.notation}
+              data-border={cell.restricted||undefined}
               role={preview ? undefined : "button"}
               tabIndex={preview ? undefined : focused === cell.notation ? 0 : -1}
               aria-label={`${name} on ${cell.notation}${target ? (capture ? ", legal destination, capture" : ", legal destination") : ""}${givesCheck ? ", gives check" : ""}${checked ? ", king in danger" : ""}${last ? ", last move" : ""}`}
@@ -199,7 +200,7 @@ export function CloudBoard({
                 pointerEvents="none"
                 className={styles.hex}
                 points={points}
-                fill={colours[cell.colour]}
+                fill={cell.restricted?"var(--board-light)":colours[cell.colour]}
                 stroke="#060e1b"
                 strokeWidth={0.7}
               />

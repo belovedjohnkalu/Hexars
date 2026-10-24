@@ -252,3 +252,7 @@ The user's updated direction replaces the circle with one wide, rounded 72px col
 
 ### 0.58 — Restore the original
 Return to one slim horizontal pastel spectrum in the existing 44px touch area. Remove the circular/rectangular two-dimensional surfaces and extra softness dimension. Preserve the original marker, white hold and input focus behavior. This supersedes 0.55–0.57 picker styling.
+
+
+## Checkers — 0.59
+HexDame and Kruzno’s Checkers open from the existing Checkers branch (IL01A0). Each starting position is rendered with the same flat blue CloudBoard and simple contrasting disks; HexDame kings show a double disk and small crown. Kruzno’s restricted outer ring uses the existing darker board token. Capture paths use the existing bright inset hexagons one landing at a time. The moving piece follows each selected landing without committing a partial turn. Computer difficulty, Pass and Play, Rules, Online and Library retain the shared Play journey, dialogs, loading, motion, visited Back and Time gating. Chess’s six native engines remain separate; checkers uses a dedicated cloud computer. No new theme tokens, scrolling surfaces or alternate authentication system.

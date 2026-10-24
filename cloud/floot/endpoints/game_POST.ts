@@ -1,3 +1,4 @@
+import {isCheckers} from '../helpers/checkersRules';
 import { onlineMatchState,withOnlineResult,decideOnlineMatch } from '../helpers/onlineMatch';
 import { timeAccess } from '../helpers/timeAccess';
 import { engineId as resolveEngineId } from '../helpers/chessEngines';
@@ -44,6 +45,7 @@ export async function handle(request: Request) {
     const input = schema.parse(superjson.parse(text));
     const user=await optionalGameUser(request);
     if (input.action === "new") {
+      if(isCheckers(input.variant)&&input.mode==='engine'&&input.engineId&&input.engineId!=='universal')throw new GameError('Choose Computer for checkers.',400);
       await timeAccess.assert(user?.id??null,input.variant,input.mode==='engine'?(input.engineId??'universal'):undefined);
       const native = await runNativeEngine({
         action: "new",
@@ -96,7 +98,8 @@ export async function handle(request: Request) {
     if(!row||(!member&&!capability)||(row.mode==='online'&&!member))throw new GameError('This saved game is not available to this account.',404);
     if(user&&capability&&row.mode!=='online'&&!member)await db.insertInto('ionGameMembers').values({gameId:row.id,userId:user.id,seat:null}).onConflict(oc=>oc.columns(['gameId','userId']).doNothing()).execute();
     if(input.action!=='forfeit'&&input.action!=='draw'){const state=row.state as {variant?:string};await timeAccess.assert(user?.id??null,state.variant||'glinski',row.mode==='engine'?resolveEngineId(row.engineId):undefined);}
-    if((input.action==='forfeit'||input.action==='draw')&&row.mode!=='online')throw new GameError('This action is only for online matches.',400);
+    const checkers=isCheckers((row.state as {variant?:string})?.variant);
+    if((input.action==='forfeit'||input.action==='draw')&&row.mode!=='online'&&!checkers)throw new GameError('This action is only for online matches.',400);
     let onlineState=onlineMatchState(row.onlineState);
     if(row.mode==='online'){
       if(onlineState.result&&input.action!=='get'&&input.action!=='review')throw new GameError('This match has ended.',409);
@@ -146,6 +149,11 @@ export async function handle(request: Request) {
       lastSearch = null;
     }
 
+    if(checkers&&row.mode!=='online'&&(input.action==='forfeit'||input.action==='draw')){
+      if(input.action==='draw'&&row.mode!=='two_players')throw new GameError('A draw needs both players’ agreement.',400);
+      const prior=await runNativeEngine({action:'inspect',origin:request.url,state:nextState});if(prior.game.result.status!=='ongoing')throw new GameError('Game has ended',400);
+      nextState={...(nextState as object),...(input.action==='draw'?{agreed:true}:{resigned:row.mode==='engine'?row.humanPlayer:activePlayer(row.state)})} as Json;
+    }
     const native = await runNativeEngine({
       action: input.action === "move" ? "move" : input.action === "engine" ? "search" : "inspect",
       origin: request.url,
@@ -156,7 +164,7 @@ export async function handle(request: Request) {
       signal: request.signal,
     });
 
-    if(input.action==='forfeit'||input.action==='draw')onlineState=decideOnlineMatch(native.game,onlineState,member!.seat!,input.action);
+    if(row.mode==='online'&&(input.action==='forfeit'||input.action==='draw'))onlineState=decideOnlineMatch(native.game,onlineState,member!.seat!,input.action);
     if(row.mode==='online'&&input.action==='move')onlineState={};
 
     if (input.action === "move" || input.action === "engine") {
@@ -182,7 +190,8 @@ export async function handle(request: Request) {
         player: before.activePlayer,
         from: selected.from,
         to: selected.to,
-        notation: selected.pass ? "Pass" :
+        ...(selected.path?{path:selected.path}:{}),
+        notation: selected.path?selected.path.map(h=>before.board.cells.find(c=>c.q===h.q&&c.r===h.r)?.notation||'?').join(capture?'×':'–')+(native.game.board.cells.find(c=>c.q===selected.to.q&&c.r===selected.to.r)?.piece?.type==='draughts-king'&&before.board.cells.find(c=>c.q===selected.from.q&&c.r===selected.from.r)?.piece?.type==='man'?'=K':''):selected.pass ? "Pass" :
           from +
           (capture ? "×" : "–") +
           to +

@@ -19,7 +19,7 @@ import { gameSessions } from '../helpers/gameSessions';
 import { useTitleRefresh } from '../helpers/useTitleRefresh';
 import { useCloudHoldGuard } from '../helpers/useCloudHold';
 import styles from './SavedGame.module.css';
-export function savedReturn(value:string|null){return value&&/^\/(?:\?|(?:glinski|mccooey|shafran|brusky|devasa|wellisch)\?)/.test(value)&&!value.startsWith('//')?value:'/?cloud=chess-history';}
+export function savedReturn(value:string|null){return value&&/^\/(?:\?|(?:glinski|mccooey|shafran|brusky|devasa|wellisch|hexdame|kruzno)\?)/.test(value)&&!value.startsWith('//')?value:'/?cloud=chess-history';}
 export function SavedGame({variant}:{variant:VariantId}){
  useCloudHoldGuard();const location=useLocation(),navigate=useNavigate(),params=new URLSearchParams(location.search),linked=gameSessions.fromHash(),gameId=params.get('game')||linked?.gameId,shareId=params.get('shareId')||undefined,token=params.get('share')||undefined,rawPly=params.get('ply'),ply=rawPly!==null&&/^\d+$/.test(rawPly)?Number(rawPly):undefined,panel=params.get('panel');
  const titleRefresh=useTitleRefresh(),[face,setFace]=useState(0),[copy,setCopy]=useState(''),heading=useRef<HTMLHeadingElement>(null),area=useRef<HTMLElement>(null),[size,setSize]=useState({width:393,height:650}),gesture=useRef<{x:number;y:number}|null>(null);
@@ -29,7 +29,7 @@ export function SavedGame({variant}:{variant:VariantId}){
  useEffect(()=>{const el=area.current;if(!el)return;const resize=()=>setSize({width:el.clientWidth,height:el.clientHeight});resize();const observer=new ResizeObserver(resize);observer.observe(el);return()=>observer.disconnect();},[]);
  const rootParams=new URLSearchParams(params);rootParams.delete('panel');const rootURL='/'+(data?.game.variant||variant)+'?'+rootParams+location.hash;
  const panelURL=(name:string)=>{const q=new URLSearchParams(params);q.set('panel',name);return '/'+(data?.game.variant||variant)+'?'+q+location.hash;};
- const back=panel?rootURL:savedReturn(params.get('back')),label=panel==='notations'?'Notations':panel==='opponents'?(data?.game.variant==='wellisch'?'Opponents':'Opponent'):chessVariants.name(data?.game.variant||variant)+'’s Variant';
+ const back=panel?rootURL:savedReturn(params.get('back')),label=panel==='notations'?'Notations':panel==='opponents'?(data?.game.variant==='wellisch'?'Opponents':'Opponent'):chessVariants.label(data?.game.variant||variant);
  const notations=data?.moves.map((move,i)=>`${i+1}. ${move.notation}`).join('\n')||'';
  const nodes=useMemo<CloudNode[]>(()=>{if(!data)return[];if(panel==='notations')return[{id:'notation-copy',parentId:'saved-panel',name:'Copy',color:'cyan',destination:'control',control:'copy'},...data.moves.map((m,i)=>{const q=new URLSearchParams(rootParams);q.set('ply',String(m.ply));q.set('back',panelURL('notations'));return{id:'notation-'+i,parentId:'saved-panel',name:(i+1)+'. '+m.notation,color:(["white","lavender","mint"] as const)[i%3],href:'/'+data.game.variant+'?'+q+location.hash};})];if(panel==='opponents'){
   const seats=data.game.board.players.filter(seat=>data.mode==='two_players'||data.humanPlayer===null||seat!==data.humanPlayer);

@@ -1,0 +1,5 @@
+import {checkersStepView,pathPrefix} from './checkersInteraction';
+import {checkersView,type CheckersState} from './checkersRules';
+describe('Checkers capture route interaction',()=>{
+ it('offers each legal next landing and keeps authority unchanged until the final jump',()=>{const s:CheckersState={variant:'hexdame',activePlayer:0,ply:0,history:[],borderDue:[],quietPly:0,pieces:[{q:0,r:0,player:0,type:'man'},{q:1,r:0,player:1,type:'man'},{q:1,r:1,player:1,type:'man'},{q:0,r:1,player:1,type:'man'}]},g=checkersView(s),m=g.legalMoves.find(m=>m.to.q===0&&m.to.r===0)!,path=m.path!.slice(0,2),view=checkersStepView(g,path);expect(pathPrefix(m,path)).toBeTrue();expect(view.activePlayer).toBe(g.activePlayer);expect(view.ply).toBe(0);expect(view.board.cells.find(c=>c.q===path[1].q&&c.r===path[1].r)?.piece?.player).toBe(0);expect(view.legalMoves.every(next=>next.from.q===path[1].q&&next.from.r===path[1].r)).toBeTrue();expect(g.board.cells.find(c=>c.q===0&&c.r===0)?.piece?.player).toBe(0);expect(pathPrefix(m,[{q:4,r:0}])).toBeFalse();});
+});

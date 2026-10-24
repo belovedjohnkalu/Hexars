@@ -58,6 +58,7 @@ export function CloudCanvas({tabularNumbers=false,fitOnChange=false,nodes,parent
   if(node.id==='hexagonal-chess')return cloudURL('hexagonal-chess','chess');
   if(node.id==='public'||node.id==='private')return cloudURL(node.id,node.id);
   const query=new URLSearchParams(location.search),back=query.get('return'),context=back?'&return='+encodeURIComponent(back)+'&mode='+(query.get('mode')==='friend'?'friend':'engine')+'&level='+encodeURIComponent(query.get('level')??'3')+'&engine='+(resolveEngineId(query.get('engine')))+'&saved='+encodeURIComponent(query.get('saved')||''):'';
+  if(node.id==='checkers-computer'&&!chessVariants.isCheckers(back))return cloudURL('e28bff47-f4b4-45f3-abef-8c8d2e63cd4e','chess');
   if((node.id==='engines'||node.destination==='level')&&!chessVariants.isId(back))return cloudURL('boards','chess');
   if(node.destination==='level'){const level=node.level??3,engine=node.engineId??'tactical';return chessVariants.isId(back)?'/'+back+'?mode=engine&engine='+engine+'&level='+level:'/?cloud=boards&engine='+engine+'&level='+level;}
   if(chessVariants.isId(node.destination))return '/'+node.destination+'?mode=friend';

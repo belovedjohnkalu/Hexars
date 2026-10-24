@@ -182,7 +182,7 @@ export function useCloudGame(variant: VariantId, defaultMode: "engine" | "two_pl
       version: session.version,
     };
     if (action === "move" && move) {
-      const legal = session.game.legalMoves.find(candidate => candidate.from.q === move.from.q && candidate.from.r === move.from.r && candidate.to.q === move.to.q && candidate.to.r === move.to.r && candidate.promotion === move.promotion);
+      const legal = session.game.legalMoves.find(candidate => candidate.from.q === move.from.q && candidate.from.r === move.from.r && candidate.to.q === move.to.q && candidate.to.r === move.to.r && candidate.promotion === move.promotion&&(!move.path||JSON.stringify(candidate.path)===JSON.stringify(move.path)));
       setPendingMove(legal?.changes?.length ? legal : null);
     }
     return action === "move" && move
@@ -216,7 +216,7 @@ export function useCloudGame(variant: VariantId, defaultMode: "engine" | "two_pl
     },
     play: (move: ChessMove) => withSession("move", move),
     undo: () => withSession("undo"),
-    onlineAction:(action:'forfeit'|'draw')=>{const session=current.current;return session&&session.mode==='online'?perform({action,gameId:session.gameId,accessToken:session.accessToken,version:session.version}):Promise.resolve(false);},
+    onlineAction:(action:'forfeit'|'draw')=>{const session=current.current;return session&&(session.mode==='online'||session.game.variant==='hexdame'||session.game.variant==='kruzno')?perform({action,gameId:session.gameId,accessToken:session.accessToken,version:session.version}):Promise.resolve(false);},
     refresh: () => {
       engineKey.current = "";
       return perform(

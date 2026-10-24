@@ -9,7 +9,7 @@ describe("Shafran presentation", () => {
   for (let q=-4;q<=4;q++) for (let r=Math.max(-5,-5-q);r<=Math.min(4,4-q);r++) cells.push({q,r,notation:String.fromCharCode(101+q)+(r+q+6),colour:((q-r)%3+3)%3,piece:null});
   const board: GameView["board"] = {variant:"shafran",stage:"playable",players:[0,1],cells};
   it("adds a real variant destination and keeps engine return navigation typed", () => {
-    expect(chessVariants.all.map(v=>v.cells)).toEqual([91,91,70,84,81,91]);
+    expect(chessVariants.all.filter(v=>!chessVariants.isCheckers(v.id)).map(v=>v.cells)).toEqual([91,91,70,84,81,91]);
     expect(chessVariants.isId("shafran")).toBeTrue();
     expect(chessVariants.isId("unknown")).toBeFalse();
     expect(chessVariants.name("shafran")).toBe("Shafran");

@@ -1,8 +1,8 @@
 import { z } from 'zod';
 import { variantSchema,type VariantId } from './game_POST.schema';
 export const schema=z.discriminatedUnion('action',[
- z.object({action:z.literal('find'),variant:variantSchema.or(z.literal('random'))}).strict(),
- z.object({action:z.literal('create'),variant:variantSchema.or(z.literal('random'))}).strict(),
+ z.object({action:z.literal('find'),variant:variantSchema.or(z.literal('random')),family:z.enum(['chess','checkers']).optional()}).strict(),
+ z.object({action:z.literal('create'),variant:variantSchema.or(z.literal('random')),family:z.enum(['chess','checkers']).optional()}).strict(),
  z.object({action:z.literal('join'),code:z.string().regex(/^\d{4}$/,'Enter four digits.')}).strict(),
  z.object({action:z.literal('get'),id:z.string().uuid()}).strict(),
  z.object({action:z.literal('cancel'),id:z.string().uuid()}).strict()

@@ -11,6 +11,7 @@ export function ChessPiece({ type, player, onBoard = false, className, direction
       width={onBoard ? 48 : undefined} height={onBoard ? 54 : undefined} className={className}
       aria-hidden="true" focusable="false" data-piece-shape={type}>
       <g fill={fill} stroke={edge} strokeWidth={1.8} strokeLinejoin="round" strokeLinecap="round">
+        {(type==='man'||type==='draughts-king')&&<><ellipse cx={0} cy={5} rx={18} ry={15}/><ellipse cx={0} cy={2} rx={18} ry={15}/><ellipse cx={0} cy={2} rx={12.5} ry={10.5} fill="none" strokeWidth={1.2}/>{type==='draughts-king'&&<><ellipse cx={0} cy={-4} rx={18} ry={15}/><path d="M-9-8-5-3 0-10 5-3 9-8 7 3 H-7 Z" fill={edge} stroke="none"/></>}</>}
         {type === "pawn" && <>
           <circle cx={0} cy={-14} r={7} />
           <path d="M-5-6 H5 C4 3 7 10 11 14 L13 19 H-13 L-11 14 C-7 10-4 3-5-6 Z" />

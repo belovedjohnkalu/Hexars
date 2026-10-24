@@ -1,3 +1,5 @@
+import { isCheckers } from './checkersRules';
+import { runCheckers } from './checkersRuntime';
 import { nativeEngineAsset } from './nativeEngineAssets';
 import type { EngineId } from './chessEngines';
 import { chessVariants } from "./chessVariants";
@@ -62,6 +64,8 @@ async function executable(origin: string, engineId?: EngineId, signal?: AbortSig
 }
 
 export async function runNativeEngine(options: Options): Promise<NativeResult> {
+  const variant=options.variant??(options.state&&typeof options.state==='object'&&!Array.isArray(options.state)?options.state.variant:undefined);
+  if(isCheckers(variant))return runCheckers(options);
   const filename = await executable(options.origin,options.engineId,options.signal);
   if (options.signal?.aborted) throw new Error("Game request cancelled");
   return await new Promise((resolve, reject) => {
