@@ -5,7 +5,7 @@ export function useTimeEarning(userId:number|null,onCredit:()=>void){
  useEffect(()=>{
   if(!userId){setStatus('signed-out');return;}
   const leaseId=crypto.randomUUID();let alive=true,claimed=false,elsewhere=false,sequence=0,lastInteraction=performance.now(),queue=Promise.resolve();
-  const eligible=()=>document.visibilityState==='visible'&&document.hasFocus()&&performance.now()-lastInteraction<180000;
+  const eligible=()=>document.documentElement.dataset.ionScreenActive!=='false'&&document.visibilityState==='visible'&&document.hasFocus()&&performance.now()-lastInteraction<180000;
   const run=(operation:'claim'|'heartbeat'|'stop')=>{queue=queue.then(async()=>{
    if(!alive&&operation!=='stop')return;
    const age=Math.min(86400000,Math.max(0,Math.floor(performance.now()-lastInteraction)));
@@ -19,8 +19,8 @@ export function useTimeEarning(userId:number|null,onCredit:()=>void){
   const focus=()=>{elsewhere=false;lastInteraction=performance.now();visibility();};
   const tick=()=>{if(eligible()){if(claimed)run('heartbeat');else if(!elsewhere)run('claim');}else{setStatus('paused');if(claimed)run('stop');}};
   const timer=setInterval(tick,15000);visibility();
-  for(const type of ['pointerdown','keydown'])window.addEventListener(type,activity,{passive:true});document.addEventListener('visibilitychange',visibility);window.addEventListener('focus',focus);window.addEventListener('blur',visibility);window.addEventListener('online',visibility);window.addEventListener('pagehide',visibility);
-  return()=>{alive=false;clearInterval(timer);for(const type of ['pointerdown','keydown'])window.removeEventListener(type,activity);document.removeEventListener('visibilitychange',visibility);window.removeEventListener('focus',focus);window.removeEventListener('blur',visibility);window.removeEventListener('online',visibility);window.removeEventListener('pagehide',visibility);if(claimed)run('stop');};
+  for(const type of ['pointerdown','keydown'])window.addEventListener(type,activity,{passive:true});document.addEventListener('visibilitychange',visibility);window.addEventListener('focus',focus);window.addEventListener('blur',visibility);window.addEventListener('online',visibility);window.addEventListener('pagehide',visibility);window.addEventListener('ion.screen-visibility',visibility);
+  return()=>{alive=false;clearInterval(timer);for(const type of ['pointerdown','keydown'])window.removeEventListener(type,activity);document.removeEventListener('visibilitychange',visibility);window.removeEventListener('focus',focus);window.removeEventListener('blur',visibility);window.removeEventListener('online',visibility);window.removeEventListener('pagehide',visibility);window.removeEventListener('ion.screen-visibility',visibility);if(claimed)run('stop');};
  },[userId,onCredit]);
  return status;
 }

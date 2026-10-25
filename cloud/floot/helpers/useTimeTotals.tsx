@@ -11,6 +11,6 @@ export function useTimeTotals(snapshot:TimeSnapshot|null,status:string){
  const [clock,setClock]=useState(()=>performance.now()),baseline=useRef({at:snapshot?.observedAt,received:performance.now()});
  if(baseline.current.at!==snapshot?.observedAt)baseline.current={at:snapshot?.observedAt,received:performance.now()};
  useEffect(()=>{if(status!=='earning')return;const timer=setInterval(()=>setClock(performance.now()),1000);return()=>clearInterval(timer);},[status]);
- const pending=pendingTime(snapshot,clock-baseline.current.received,status==='earning'&&document.visibilityState==='visible'&&document.hasFocus());
+ const pending=pendingTime(snapshot,clock-baseline.current.received,status==='earning'&&document.documentElement.dataset.ionScreenActive!=='false'&&document.visibilityState==='visible'&&document.hasFocus());
  return{addedUs:(BigInt(snapshot?.addedUs||snapshot?.earnedUs||'0')+pending).toString(),spentUs:snapshot?.spentUs||'0',balanceUs:(BigInt(snapshot?.balanceUs||'0')+pending).toString()};
 }

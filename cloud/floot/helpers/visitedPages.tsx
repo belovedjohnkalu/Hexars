@@ -1,7 +1,8 @@
+import {isPagePane} from './pageWorkspace';
 // Track only same-app visits. Never infer a forward destination from the browser's
 // total history length: that could send someone to another website.
 const pages=new Map<number,string>(),entryKeys=new Map<number,string>(),returns=new Map<number,number>(),listeners=new Set<()=>void>();
-const storageKey='ion.visited-pages.v2';
+const storageKey='ion.visited-pages.v2'+(typeof window!=='undefined'&&isPagePane()?'.'+window.name:'');
 let version=0,currentIndex:number|undefined,restored=false;
 function localVisit(path:string){try{const url=new URL(path,'https://ion.floot.app');return path.startsWith('/')&&url.origin==='https://ion.floot.app'&&url.pathname+url.search+url.hash===path;}catch{return false;}}
 function restore(){

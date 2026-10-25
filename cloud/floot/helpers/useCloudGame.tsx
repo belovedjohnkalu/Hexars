@@ -38,6 +38,7 @@ export function useCloudGame(variant: VariantId, defaultMode: "engine" | "two_pl
       const url = new URL(window.location.href);
       url.hash = new URLSearchParams({ game: result.gameId, key: result.accessToken }).toString();
       window.history.replaceState(window.history.state, "", url);
+      window.dispatchEvent(new window.Event("ion.page-location"));
     }
   }, []);
 

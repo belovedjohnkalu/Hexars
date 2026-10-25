@@ -1,53 +1,129 @@
 import {useEffect,useRef,useState,type ReactNode,type CSSProperties} from 'react';
+import {useLocation,useNavigate} from 'react-router-dom';
+import {focusManager} from '@tanstack/react-query';
+import {useAuth} from '../helpers/useAuth';
 import {desktopTyping,focusCloudComposer} from '../helpers/cloudTyping';
+import {isCloudColor} from '../helpers/cloudColors';
 import {cloudDrafts} from '../helpers/cloudDrafts';
-import {isPagePane,pageKey,pageLayout} from '../helpers/pageWorkspace';
+import {isControlsPage} from '../helpers/visitedPages';
+import {isPagePane,pageKey,pageKeyTarget,pageGeometry,pageScreenIds,splitPage,removePage,movePage,adjacentPage,pageFocusEdges,type PageDirection,type PageTile} from '../helpers/pageWorkspace';
+import {requestPageAction,validPageAction,pageKeyboardAction,type PageAction} from '../helpers/pageWorkspaceEvents';
+import {createTileState,readTileState,safeTileURL,tileLabel,visitTile,stepTile,nearestRhombus,type OpenTile,type TileState,type TileScreen} from '../helpers/pageTiles';
 import {LoadingScreen} from './LoadingScreen';
+import {PageTiles} from './PageTiles';
+import {CloudContentViewer} from './CloudContentViewer';
+import type {CloudNode} from '../endpoints/cloud_POST.schema';
+import {TitleScreenMenu} from './TitleScreenMenu';
 import styles from './PageWorkspace.module.css';
-type View={id:number;url:string};
+type Menu={onHold?:()=>void;onOpen?:()=>void};
+type Drag={id:number;dx:number;dy:number;target?:number;direction?:PageDirection;preview?:PageTile};
+function ownURL(){return location.pathname+location.search+location.hash;}
+function setScreenActive(active:boolean){if(document.documentElement.dataset.ionScreenActive===String(active))return;document.documentElement.dataset.ionScreenActive=String(active);focusManager.setFocused(active&&document.visibilityState==='visible');window.dispatchEvent(new window.Event('ion.screen-visibility'));}
 export function PageWorkspace({children}:{children:ReactNode}){
- const embedded=isPagePane(),[views,setViews]=useState<View[]>([{id:0,url:''}]),[size,setSize]=useState({width:0,height:0}),[loaded,setLoaded]=useState<number[]>([]),[notice,setNotice]=useState(''),host=useRef<HTMLDivElement>(null),frames=useRef(new Map<number,HTMLIFrameElement>()),active=useRef(0),current=useRef(views),closing=useRef(false);current.current=views;
+ const embedded=isPagePane(),route=useLocation(),navigate=useNavigate(),{authState}=useAuth(),identity=authState.type==='loading'?null:authState.type==='authenticated'?String(authState.user.id):'guest';
+ const[state,setState]=useState<TileState>(()=>createTileState(ownURL())),[size,setSize]=useState({width:0,height:0}),[loaded,setLoaded]=useState<number[]>([]),[notice,setNotice]=useState(''),[overview,setOverview]=useState(false),[menu,setMenu]=useState<Menu|null>(null),[titleContent,setTitleContent]=useState<CloudNode|null>(null),[screenInfo,setScreenInfo]=useState<{screens:TileScreen[];current:number}>({screens:[],current:0}),[drag,setDrag]=useState<Drag|null>(null);
+ const host=useRef<HTMLDivElement>(null),frames=useRef(new Map<number,HTMLIFrameElement>()),frameSources=useRef(new Map<number,string>()),current=useRef(state),account=useRef<string|null>(null),expectedURL=useRef<string|null>(null),closing=useRef<{id:number;kind:'close'|'refresh';performId:number;remaining:number[];nonce:string;timer:ReturnType<typeof setTimeout>}|null>(null),actions=useRef<(action:PageAction,source?:number)=>void>(()=>{}),choose=useRef<(id:number,trail?:boolean)=>void>(()=>{}),makeTile=useRef<()=>void>(()=>{});current.current=state;
+ const live=state.tiles.find(t=>t.id===state.current)!,layout=pageGeometry(live.tree,size.width,size.height),split=live.screens.length>1;
+ function commit(next:TileState){current.current=next;setState(next);if(account.current)try{sessionStorage.setItem('ion.tiles.v1.'+account.current,JSON.stringify(next));}catch{/* In-memory tiles still work with restricted storage. */}}
+ useEffect(()=>{if(embedded||identity===null||account.current===identity)return;const previous=account.current;if(previous)try{sessionStorage.removeItem('ion.tiles.v1.'+previous);}catch{}account.current=identity;frameSources.current.clear();let raw:string|null=null;try{raw=sessionStorage.getItem('ion.tiles.v1.'+identity);}catch{}commit(readTileState(raw,safeTileURL(ownURL())||'/'));setLoaded([]);setMenu(null);setOverview(false);setDrag(null);},[identity,embedded]);
+ useEffect(()=>{if(embedded&&identity!==null)window.parent.postMessage({type:'ion.page-account',identity},location.origin);},[identity,embedded]);
  useEffect(()=>{if(embedded)return;const el=host.current;if(!el)return;const measure=()=>setSize({width:el.clientWidth,height:el.clientHeight}),observer=new ResizeObserver(measure);observer.observe(el);measure();return()=>observer.disconnect();},[embedded]);
- useEffect(()=>{if(!notice)return;const timer=setTimeout(()=>setNotice(''),3500);return()=>clearTimeout(timer);},[notice]);
+ useEffect(()=>{setMenu(null);setTitleContent(null);},[route.key]);
+ useEffect(()=>{const update=()=>focusManager.setFocused(document.documentElement.dataset.ionScreenActive!=='false'&&document.visibilityState==='visible');document.addEventListener('visibilitychange',update);return()=>document.removeEventListener('visibilitychange',update);},[]);
+ useEffect(()=>{if(!notice)return;const t=setTimeout(()=>setNotice(''),4000);return()=>clearTimeout(t);},[notice]);
+ // Root navigation becomes a revisitable tile. Within a split, each screen
+ // instead navigates independently and keeps its neighboring screens intact.
+ useEffect(()=>{
+  if(embedded||!account.current)return;const url=safeTileURL(ownURL());if(!url||isControlsPage(url))return;const s=current.current,t=s.tiles.find(t=>t.id===s.current)!,primary=t.screens.find(v=>v.id===t.primary)!;
+  if(expectedURL.current===url){expectedURL.current=null;return;}if(primary.url===url)return;
+  if(t.screens.length>1){commit({...s,tiles:s.tiles.map(tile=>tile.id===t.id?{...tile,screens:tile.screens.map(v=>v.id===t.primary?{...v,url,label:tileLabel(document.title)}:v)}:tile)});return;}
+  const existing=s.tiles.find(tile=>tile.screens.length===1&&tile.screens[0].url===url);if(existing){commit(visitTile(s,existing.id));return;}
+  const id=s.nextId,newTile:OpenTile={id,primary:id,focus:id,tree:{screen:id},screens:[{id,url,label:tileLabel(document.title)}]};commit(visitTile({...s,nextId:id+1,tiles:[...s.tiles,newTile]},id));
+ },[route.pathname,route.search,route.hash,identity,embedded]);
+ useEffect(()=>{
+  const update=()=>{const url=safeTileURL(ownURL()),label=tileLabel(document.title);if(!url||isControlsPage(url))return;if(embedded){window.parent.postMessage({type:'ion.page-metadata',url,label},location.origin);return;}const s=current.current,t=s.tiles.find(t=>t.id===s.current)!,v=t.screens.find(v=>v.id===t.primary)!;if((v.url!==url&&v.url.split('#')[0]===url.split('#')[0])||v.url===url&&v.label!==label)commit({...s,tiles:s.tiles.map(tile=>tile.id===t.id?{...tile,screens:tile.screens.map(screen=>screen.id===v.id?{...screen,url,label}:screen)}:tile)});};
+  window.addEventListener('ion.page-location',update);window.addEventListener('hashchange',update);const observer=new MutationObserver(update);if(document.head)observer.observe(document.head,{subtree:true,childList:true,characterData:true});update();return()=>{observer.disconnect();window.removeEventListener('ion.page-location',update);window.removeEventListener('hashchange',update);};
+ },[route.pathname,route.search,route.hash,embedded,identity]);
+ useEffect(()=>{
+  const showMenu=(event:Event)=>setMenu((event as CustomEvent<Menu>).detail||{}),showContent=(event:Event)=>setTitleContent((event as CustomEvent<CloudNode>).detail);window.addEventListener('ion.title-menu',showMenu);window.addEventListener('ion.title-content',showContent);
+  return()=>{window.removeEventListener('ion.title-menu',showMenu);window.removeEventListener('ion.title-content',showContent);};
+ },[]);
  useEffect(()=>{
   if(embedded){
-   const key=(event:KeyboardEvent)=>{const step=pageKey(event);if(!step||!desktopTyping())return;event.preventDefault();event.stopPropagation();window.parent.postMessage({type:'ion.page-key',step},location.origin);};
-   const message=(event:MessageEvent)=>{if(event.origin!==location.origin||event.source!==window.parent||event.data?.type!=='ion.page-close-check')return;window.parent.postMessage({type:'ion.page-close-result',allowed:!cloudDrafts.hasPictures()},location.origin);};
+   const key=(event:KeyboardEvent)=>{if(!desktopTyping()||!pageKeyTarget(event))return;const step=pageKey(event),action=pageKeyboardAction(event,screenInfo.screens.length>1);if(!step&&!action)return;if(step===-1&&screenInfo.screens.length<2)return;event.preventDefault();event.stopPropagation();window.parent.postMessage(step?{type:'ion.page-key',step}:{type:'ion.page-action',...action},location.origin);};
+   const message=(event:MessageEvent)=>{if(event.origin!==location.origin||event.source!==window.parent)return;const data=event.data;
+    if(data?.type==='ion.page-close-check'&&typeof data.nonce==='string'){const form=document.querySelector<HTMLFormElement>('[data-cloud-draft]'),key=form?.dataset.cloudDraft,input=form?.querySelector<HTMLInputElement>('[data-cloud-input]');window.parent.postMessage({type:'ion.page-close-result',allowed:!cloudDrafts.hasPictures(),nonce:data.nonce,...(key&&input?{draft:{key,name:input.value,color:cloudDrafts.get(key).color}}:{})},location.origin);}
+    if(data?.type==='ion.page-refresh')window.location.reload();
+    if(data?.type==='ion.page-state'&&Array.isArray(data.screens)){setScreenInfo({screens:data.screens,current:data.current});setScreenActive(data.visible===true);}
+    if(data?.type==='ion.page-focus-request'){window.focus();if(!focusCloudComposer())document.querySelector<HTMLElement>('[data-ion-title]')?.focus({preventScroll:true});}
+   };
    const focus=()=>window.parent.postMessage({type:'ion.page-focus'},location.origin);
-   window.addEventListener('keydown',key,true);window.addEventListener('message',message);window.addEventListener('pointerdown',focus,{passive:true});window.addEventListener('focus',focus);
+   window.addEventListener('keydown',key,true);window.addEventListener('message',message);window.addEventListener('pointerdown',focus,{passive:true});window.addEventListener('focus',focus);window.parent.postMessage({type:'ion.page-ready'},location.origin);
    return()=>{window.removeEventListener('keydown',key,true);window.removeEventListener('message',message);window.removeEventListener('pointerdown',focus);window.removeEventListener('focus',focus);};
   }
-  let closeTimer:ReturnType<typeof setTimeout>|undefined;
-  function remove(){clearTimeout(closeTimer);setLoaded(old=>old.filter(id=>id!==current.current.at(-1)?.id));setViews(old=>old.slice(0,-1));active.current=0;closing.current=false;requestAnimationFrame(()=>{if(!focusCloudComposer())host.current?.querySelector<HTMLElement>('[data-ion-primary]')?.focus({preventScroll:true});});}
-  function change(step:number,source=0){
-   if(!desktopTyping()||closing.current||document.querySelector('[role="dialog"],[role="alertdialog"]'))return;
-   const list=current.current;
-   if(step<0){if(list.length===1)return;const last=list[list.length-1];closing.current=true;const frame=frames.current.get(last.id);if(frame?.contentWindow){frame.contentWindow.postMessage({type:'ion.page-close-check'},location.origin);closeTimer=setTimeout(()=>{closing.current=false;setNotice('This view is still loading. Try again.');},1500);}else remove();return;}
-   if(!host.current)return;
-   const next=pageLayout(list.length+1,host.current.clientWidth,host.current.clientHeight);
-   if(next.tiles.some(t=>t.width<210||t.height<190)){setNotice('No more room for another view.');return;}
-   let url=window.location.href;try{url=frames.current.get(source)?.contentWindow?.location.href||url;}catch{}
-   // Every view stays on this app; external redirects keep their own tab.
-   if(new URL(url).origin!==location.origin)return;
-   setViews(old=>[...old,{id:old.length,url}]);setNotice('');
+  function tile(){const s=current.current;return s.tiles.find(t=>t.id===s.current)!;}
+  function updateTile(next:OpenTile){const s=current.current;commit({...s,tiles:s.tiles.map(t=>t.id===next.id?next:t)});}
+  function focus(id:number){const t=tile();if(!t.screens.some(v=>v.id===id))return;if(t.focus!==id)updateTile({...t,focus:id});requestAnimationFrame(()=>{if(id===tile().primary){window.focus();if(!focusCloudComposer())host.current?.querySelector<HTMLElement>('[data-ion-title]')?.focus({preventScroll:true});}else frames.current.get(id)?.contentWindow?.postMessage({type:'ion.page-focus-request'},location.origin);});}
+  function activate(id:number,trail=true){const s=current.current,target=s.tiles.find(t=>t.id===id);if(!target)return;const next=trail?visitTile(s,id):s;commit(next);setOverview(false);setMenu(null);const url=target.screens.find(v=>v.id===target.primary)!.url;expectedURL.current=url;navigate(url);requestAnimationFrame(()=>focus(target.focus));}
+  choose.current=activate;
+  makeTile.current=()=>{const s=current.current,id=s.nextId,newTile:OpenTile={id,primary:id,focus:id,tree:{screen:id},screens:[{id,url:'/',label:'ION'}]};commit(visitTile({...s,nextId:id+1,tiles:[...s.tiles,newTile]},id));setOverview(false);expectedURL.current='/';navigate('/');};
+  function close(id:number){const s=current.current,t=tile();if(!t.screens.some(v=>v.id===id))return;const tree=removePage(t.tree,id);
+   if(!tree){const remaining=s.tiles.filter(v=>v.id!==t.id);if(!remaining.length){frameSources.current.clear();setLoaded([]);setMenu(null);setDrag(null);const reset=createTileState('/');commit(reset);expectedURL.current='/';navigate('/',{replace:true});return;}const candidate=stepTile(s,-1),selected=remaining.find(v=>v.id===candidate.current)||remaining[remaining.length-1],trail=s.trail.filter(v=>v!==t.id);commit({...s,tiles:remaining,current:selected.id,trail:[...trail,selected.id],cursor:trail.length});activate(selected.id,false);return;}
+   const screens=t.screens.filter(v=>v.id!==id),primary=t.primary===id?screens[0].id:t.primary,focused=t.focus===id?primary:t.focus;updateTile({...t,tree,screens,primary,focus:focused});setLoaded(old=>old.filter(v=>v!==id));if(t.primary===id){const url=screens.find(v=>v.id===primary)!.url;expectedURL.current=url;navigate(url,{replace:true});}requestAnimationFrame(()=>focus(focused));
   }
-  const key=(event:KeyboardEvent)=>{const step=pageKey(event);if(!step||!desktopTyping())return;if(step<0&&current.current.length===1)return;event.preventDefault();event.stopPropagation();change(step,active.current);};
-  const message=(event:MessageEvent)=>{
-   if(event.origin!==location.origin)return;const entry=[...frames.current].find(([,frame])=>frame.contentWindow===event.source);if(!entry)return;
-   if(event.data?.type==='ion.page-focus')active.current=entry[0];
-   if(event.data?.type==='ion.page-key'&&(event.data.step===1||event.data.step===-1)){active.current=entry[0];change(event.data.step,entry[0]);}
-   if(event.data?.type==='ion.page-close-result'&&closing.current&&entry[0]===current.current.at(-1)?.id){clearTimeout(closeTimer);if(event.data.allowed===true)remove();else{closing.current=false;setNotice('Save or remove pictures in the last view first.');}}
+  function finish(id:number,kind:'close'|'refresh'){if(kind==='close'){close(id);return;}if(id===tile().primary){try{if(account.current)sessionStorage.setItem('ion.tiles.v1.'+account.current,JSON.stringify(current.current));}catch{}window.location.reload();}else frames.current.get(id)?.contentWindow?.postMessage({type:'ion.page-refresh'},location.origin);}
+  function askFrame(id:number,performId:number,kind:'close'|'refresh',remaining:number[]=[]){const frame=frames.current.get(id);if(!frame?.contentWindow){setNotice('This screen is still opening. Try again.');return;}const nonce=crypto.randomUUID(),timer=setTimeout(()=>{closing.current=null;setNotice('This screen isn’t responding. Try again.');},1800);closing.current={id,kind,performId,remaining,nonce,timer};frame.contentWindow.postMessage({type:'ion.page-close-check',nonce},location.origin);}
+  function check(id:number,kind:'close'|'refresh'){if(closing.current)return;const performId=id;if(id===tile().primary){if(cloudDrafts.hasPictures()){setNotice('Save or remove picture drafts first.');return;}
+   if(kind==='refresh'){const others=current.current.tiles.flatMap(t=>t.screens.filter(v=>v.id!==t.primary).map(v=>v.id));if(others.length){askFrame(others[0],performId,kind,others.slice(1));return;}}
+   const survivor=kind==='close'&&tile().screens.find(v=>v.id!==id);if(survivor){askFrame(survivor.id,performId,kind);return;}finish(id,kind);return;}askFrame(id,performId,kind);
+  }
+  function splitAt(source:number,direction?:PageDirection){const t=tile(),el=host.current;if(!el||!t.screens.some(v=>v.id===source))return;const geometry=pageGeometry(t.tree,el.clientWidth,el.clientHeight).tiles,sourceRect=geometry.find(v=>v.id===source)!;const side=direction||(t.screens.length===1&&desktopTyping()||sourceRect.width>=sourceRect.height?'right':'down'),id=current.current.nextId,tree=splitPage(t.tree,source,id,side),newGeometry=pageGeometry(tree,el.clientWidth,el.clientHeight);
+   if(newGeometry.tiles.some(v=>v.width<145||v.height<155)){setNotice('No more room. Open a new tile instead.');return;}const sourceView=t.screens.find(v=>v.id===source)!;commit({...current.current,nextId:id+1,tiles:current.current.tiles.map(v=>v.id===t.id?{...t,tree,focus:id,screens:[...t.screens,{id,url:sourceView.url,label:sourceView.label}]}:v)});setNotice('');
+  }
+  function move(source:number,target:number,direction:PageDirection){const t=tile();if(source===target)return;updateTile({...t,tree:movePage(t.tree,source,target,direction),focus:source});}
+  function action(a:PageAction,source=tile().focus){const t=tile();if(!t.screens.some(v=>v.id===source))return;
+   if(a.action==='split')splitAt(source,a.direction);
+   else if(a.action==='close'||a.action==='refresh')check(source,a.action);
+   else if(a.action==='tiles'){setMenu(null);setOverview(true);}
+   else if(a.action==='move')move(source,a.target,a.direction);
+   else if(a.action==='focus')focus(adjacentPage(pageGeometry(t.tree,host.current?.clientWidth||0,host.current?.clientHeight||0).tiles,source,a.direction));
+   else if(a.action==='tile-step'){const next=stepTile(current.current,a.step);if(next!==current.current){commit(next);activate(next.current,false);}}
+   else if(a.action==='tile-direction'){const id=nearestRhombus(current.current.tiles,t.id,a.direction);if(id!==t.id)activate(id);}
+   else if(a.action==='drag'){
+    if(a.phase==='cancel'){setDrag(null);return;}const el=host.current;if(!el)return;const geometry=pageGeometry(t.tree,el.clientWidth,el.clientHeight).tiles,rect=geometry.find(v=>v.id===source)!,x=a.startX+a.dx+(source===t.primary?0:rect.x+10),y=a.startY+a.dy+(source===t.primary?0:rect.y+10),target=geometry.find(v=>v.id!==source&&x>=v.x&&x<=v.x+v.width&&y>=v.y&&y<=v.y+v.height);let direction:PageDirection|undefined,preview:PageTile|undefined;
+    if(target){const nx=(x-target.x)/target.width,ny=(y-target.y)/target.height,edges=[{d:'left' as const,n:nx},{d:'right' as const,n:1-nx},{d:'up' as const,n:ny},{d:'down' as const,n:1-ny}].sort((a,b)=>a.n-b.n);direction=edges[0].d;preview={...target,...(direction==='left'?{width:target.width/2}:direction==='right'?{x:target.x+target.width/2,width:target.width/2}:direction==='up'?{height:target.height/2}:{y:target.y+target.height/2,height:target.height/2})};}
+    if(a.phase==='end'){setDrag(null);if(target&&direction)move(source,target.id,direction);}else setDrag({id:source,dx:a.dx,dy:a.dy,target:target?.id,direction,preview});
+   }
+  }
+  actions.current=action;
+  const custom=(event:Event)=>{const a=(event as CustomEvent).detail;if(validPageAction(a))action(a,tile().primary);};
+  const key=(event:KeyboardEvent)=>{if(!desktopTyping()||!pageKeyTarget(event))return;const step=pageKey(event),a=pageKeyboardAction(event,tile().screens.length>1);if(!step&&!a||step<0&&tile().screens.length<2)return;event.preventDefault();event.stopPropagation();if(step>0)splitAt(tile().focus);else if(step<0)check(tile().screens.at(-1)!.id,'close');else if(a)action(a);};
+  const message=(event:MessageEvent)=>{if(event.origin!==location.origin)return;const entry=[...frames.current].find(([,frame])=>frame.contentWindow===event.source);if(!entry)return;const id=entry[0],data=event.data,t=tile();if(data?.type==='ion.page-account'&&typeof data.identity==='string'&&/^(?:guest|[0-9]+)$/.test(data.identity)&&account.current&&data.identity!==account.current){try{sessionStorage.removeItem('ion.tiles.v1.'+account.current);}catch{}window.location.replace('/');return;}
+   if(data?.type==='ion.page-metadata'&&typeof data.url==='string'&&typeof data.label==='string'&&data.label.length<=16384){const url=safeTileURL(data.url);if(!url||isControlsPage(url))return;const s=current.current,old=s.tiles.flatMap(v=>v.screens).find(v=>v.id===id);if(old&&(old.url!==url||old.label!==tileLabel(data.label)))commit({...s,tiles:s.tiles.map(v=>({...v,screens:v.screens.map(screen=>screen.id===id?{...screen,url,label:tileLabel(data.label)}:screen)}))});}
+   if(data?.type==='ion.page-ready'){setLoaded(old=>old.includes(id)?old:[...old,id]);const owner=current.current.tiles.find(v=>v.screens.some(screen=>screen.id===id));entry[1].contentWindow?.postMessage({type:'ion.page-state',screens:owner?.screens||[],current:id,visible:owner?.id===t.id&&id===t.focus&&!overview},location.origin);}
+   if(data?.type==='ion.page-focus'&&t.screens.some(v=>v.id===id)&&t.focus!==id)updateTile({...t,focus:id});
+   if(data?.type==='ion.page-action'&&validPageAction(data)&&t.screens.some(v=>v.id===id))action(data,id);
+   if(data?.type==='ion.page-key'&&t.screens.some(v=>v.id===id)&&desktopTyping()){if(data.step===1)splitAt(id);else if(data.step===-1&&t.screens.length>1)check(t.screens.at(-1)!.id,'close');}
+   const pending=closing.current;if(data?.type==='ion.page-close-result'&&pending&&id===pending.id&&data.nonce===pending.nonce){clearTimeout(pending.timer);closing.current=null;if(data.allowed===true){if(pending.remaining.length){askFrame(pending.remaining[0],pending.performId,pending.kind,pending.remaining.slice(1));return;}if(pending.kind==='close'&&pending.performId===tile().primary&&typeof data.draft?.key==='string'&&typeof data.draft?.name==='string')cloudDrafts.set(data.draft.key,{...cloudDrafts.get(data.draft.key),name:data.draft.name,...(isCloudColor(data.draft.color)?{color:data.draft.color}:{} )});finish(pending.performId,pending.kind);}else setNotice('Save or remove picture drafts first.');}
   };
-  window.addEventListener('keydown',key,true);window.addEventListener('message',message);
-  return()=>{clearTimeout(closeTimer);window.removeEventListener('keydown',key,true);window.removeEventListener('message',message);};
- },[embedded]);
- if(embedded)return <>{children}</>;
- const layout=pageLayout(views.length,size.width,size.height),split=views.length>1;
- const geometry=(id:number):CSSProperties=>{const tile=layout.tiles.find(t=>t.id===id)!;return split?{left:tile.x+10,top:tile.y+10,width:Math.max(0,tile.width-20),height:Math.max(0,tile.height-20)}:{inset:0};};
- return <div ref={host} className={styles.workspace} data-page-count={views.length} data-split={split} role="group" aria-label="Page views" aria-keyshortcuts="ArrowUp ArrowDown">
- <div data-ion-primary className={styles.primary} style={geometry(0)} tabIndex={-1} onPointerDownCapture={()=>{active.current=0;}}>{children}</div>
- {views.slice(1).map(view=><div key={view.id} className={styles.pane} style={geometry(view.id)}><iframe ref={node=>{if(node)frames.current.set(view.id,node);else frames.current.delete(view.id);}} name={'ion-page-'+view.id} src={view.url} title={'Page view '+(view.id+1)} allow="clipboard-write; fullscreen" className={styles.frame} onLoad={()=>{setLoaded(old=>old.includes(view.id)?old:[...old,view.id]);}} aria-busy={!loaded.includes(view.id)}/>{!loaded.includes(view.id)&&<LoadingScreen label="Opening view"/>}</div>)}
- {split&&<svg className={styles.dividers} width="100%" height="100%" aria-hidden="true">{layout.dividers.map(line=><line key={line.id} {...line} id={undefined}/>)}</svg>}
- <span className={styles.status} role="status">{notice}</span>
+  window.addEventListener('ion.page-action',custom);window.addEventListener('keydown',key,true);window.addEventListener('message',message);
+  return()=>{window.removeEventListener('ion.page-action',custom);window.removeEventListener('keydown',key,true);window.removeEventListener('message',message);if(closing.current){clearTimeout(closing.current.timer);closing.current=null;}};
+ },[embedded,navigate,screenInfo.screens.length,overview]);
+ useEffect(()=>{
+  if(embedded)return;setScreenInfo({screens:live.screens,current:live.primary});setScreenActive(live.focus===live.primary&&!overview);
+  for(const t of state.tiles)for(const v of t.screens)if(v.id!==t.primary)frames.current.get(v.id)?.contentWindow?.postMessage({type:'ion.page-state',screens:t.screens,current:v.id,visible:t.id===live.id&&v.id===live.focus&&!overview},location.origin);
+ },[state,overview,embedded]);
+ const contentViewer=titleContent&&<CloudContentViewer node={titleContent} onClose={()=>setTitleContent(null)}/>;
+ const localMenu=menu&&<TitleScreenMenu {...screenInfo} current={screenInfo.current} onCloudControls={menu.onHold} onOpen={menu.onOpen} onClose={()=>setMenu(null)}/>;
+ if(embedded)return <>{children}{localMenu}{contentViewer}</>;
+ const geometry=(rect:PageTile):CSSProperties=>{const moving=drag?.id===rect.id;return{...(split?{left:rect.x+10,top:rect.y+10,width:Math.max(0,rect.width-20),height:Math.max(0,rect.height-20)}:{inset:0}),...(moving?{transform:`translate(${drag.dx}px,${drag.dy}px)`,zIndex:4,opacity:.72}:{} )};};
+ const focused=layout.tiles.find(t=>t.id===live.focus),edges=focused&&split?pageFocusEdges(focused,size.width,size.height):[];
+ return <div ref={host} className={styles.workspace} data-page-count={live.screens.length} data-tile-count={state.tiles.length} data-active-screen={live.focus} data-split={split} role="group" aria-label="Page views" aria-keyshortcuts="ArrowUp ArrowDown ArrowLeft ArrowRight Control+ArrowUp Control+ArrowDown Control+ArrowLeft Control+ArrowRight">
+ <div key={live.primary} data-ion-primary data-screen-id={live.primary} className={styles.primary} style={geometry(layout.tiles.find(t=>t.id===live.primary)!)} tabIndex={-1} onFocusCapture={()=>{const s=current.current,t=s.tiles.find(v=>v.id===s.current)!;if(t.focus!==t.primary)commit({...s,tiles:s.tiles.map(v=>v.id===t.id?{...v,focus:t.primary}:v)});}} onPointerDownCapture={()=>{const s=current.current,t=s.tiles.find(v=>v.id===s.current)!;if(t.focus!==t.primary)commit({...s,tiles:s.tiles.map(v=>v.id===t.id?{...v,focus:t.primary}:v)});}}>{children}</div>
+ {state.tiles.flatMap(t=>t.screens.filter(v=>v.id!==t.primary).map(view=>{const active=t.id===live.id,rect=active?layout.tiles.find(v=>v.id===view.id):undefined;return <div key={view.id} hidden={!active} className={styles.pane} data-screen-id={view.id} style={rect?geometry(rect):{display:'none'}}><iframe ref={node=>{if(node)frames.current.set(view.id,node);else frames.current.delete(view.id);}} name={'ion-page-'+view.id} src={frameSources.current.get(view.id)||(()=>{frameSources.current.set(view.id,view.url);return view.url;})()} title={'Screen '+view.id+' · '+view.label} allow="clipboard-write; fullscreen" className={styles.frame} onLoad={()=>{setLoaded(old=>old.includes(view.id)?old:[...old,view.id]);}} aria-busy={!loaded.includes(view.id)}/>{!loaded.includes(view.id)&&<LoadingScreen label="Opening screen"/>}</div>;}))}
+ {split&&<svg className={styles.dividers} width="100%" height="100%" aria-hidden="true">{layout.dividers.map(line=><line key={line.id} {...line} id={undefined}/>)}{edges.map(line=><line className={styles.focusEdge} key={line.id} {...line} id={undefined}/>)}</svg>}
+ {drag?.preview&&<div className={styles.snap} style={{left:drag.preview.x+12,top:drag.preview.y+12,width:drag.preview.width-24,height:drag.preview.height-24}}/>}
+ <span className={styles.status} role="status">{notice}</span>{localMenu}{contentViewer}
+ {overview&&<PageTiles tiles={state.tiles} current={state.current} onChoose={id=>choose.current(id)} onClose={()=>setOverview(false)} onNew={()=>makeTile.current()}/>}
  </div>;
 }

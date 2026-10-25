@@ -1,0 +1,46 @@
+{
+  "passed": true,
+  "checks": [
+    "Composer swipes revisit previous and next tiles",
+    "Upward entry swipe opens the rhombus overview with current glow",
+    "Single title tap shows cloud content without droplets",
+    "Title menu makes side-by-side screens without nested workspaces",
+    "Left/right screen focus keeps independent drafts",
+    "Move screen snaps an existing view while retaining its draft",
+    "Sustained title drag previews and snaps to the target edge",
+    "Closing the primary screen promotes the survivor and retains its draft",
+    "Double title tap refreshes and restores the workspace",
+    "Downward title swipe adds a screen above on touch-sized screens",
+    "Tiles fits a phone without document scrolling",
+    "Desktop ArrowUp starts left/right for guests too",
+    "Real touch events open Tiles from entry without native scrolling",
+    "Real touch events split from the title",
+    "Control-arrow navigation follows spatial rhombus neighbors"
+  ],
+  "errors": [],
+  "release": "0.61",
+  "scope": "IL0A0093",
+  "jasmine": {
+    "files": 100,
+    "passed": 100,
+    "targetedRerunsAfterRefinements": true
+  },
+  "typescript": "clean",
+  "premium": {
+    "existingReviewedFindings": 38,
+    "unresolved": 0,
+    "newFindingCategories": 0
+  },
+  "nativeStoreBuild": false,
+  "emulatedTouch": true,
+  "hardwareIPhoneTest": false,
+  "archive": {
+    "node": "acf760e3-b9d3-4e3a-9c0c-d10d030fcf4f",
+    "to": "df45ea97-524e-4c1c-b2f6-2a96529562e3",
+    "scopeNodes": 36,
+    "ilPreserved": true,
+    "otherTodoBranches": "unchanged"
+  },
+  "qa": "Disposable account retired, private test content removed, and every earning transaction reversed through the append-only ledger procedure.",
+  "publishJob": "0f352e19-572f-4f31-8a5b-087891eabe2b"
+}

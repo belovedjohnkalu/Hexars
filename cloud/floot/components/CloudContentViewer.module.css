@@ -1,0 +1,10 @@
+.viewer.viewer { position:fixed; inset:0; transform:none; width:100%; max-width:none; height:100dvh; max-height:none; border:0; border-radius:0; padding:calc(24px + env(safe-area-inset-top)) 24px calc(24px + env(safe-area-inset-bottom)); display:flex; flex-direction:column; gap:20px; background:var(--background); }
+.title { font-size:17px; font-weight:500; color:var(--muted-foreground); padding-right:48px; margin:0; }
+.content { width:min(650px,100%); flex:1; min-height:0; margin:auto; }
+.diagram { height:min(28dvh,220px); display:grid; place-items:center; }
+.diagram svg { max-height:100%; width:auto; }
+.sr { position:absolute; width:1px; height:1px; padding:0; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; }
+@media(max-height:480px) { .viewer.viewer { padding:16px 24px; gap:8px; } .diagram { height:100px; } }
+
+.picture.picture { flex-shrink:0; width:min(280px,100%); height:min(34dvh,280px); padding:0; margin-inline:auto; background:transparent; }
+.picture > span { width:100% !important; height:100% !important; }
