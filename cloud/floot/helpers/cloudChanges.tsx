@@ -27,7 +27,7 @@ function applyAll(nodes:CloudNode[],input:Change,currentVersion:number,seeds:Clo
   }
   if(input.action==='update'){
     if(input.version!==currentVersion)return fail('Your cloud changed. Try again.',409);
-    return nodes.map(n=>n.id===input.id?{...n,name:input.name,...(input.color?{color:input.color}:{}),...(input.note!==undefined?{note:input.note??undefined}:{}),...(n.name!==input.name?{wordRedirect:undefined}:{}),...(input.photoMode!=='keep'?{imageKey:undefined,imageUrl:undefined,imageUrls:undefined,imageKeys:input.photoMode==='replace'?verifiedImages:undefined,isImage:input.photoMode==='replace'}:{}),contentEdits:[...new Set([...(n.contentEdits||[]),'name' as const,...(input.color?['color' as const]:[]),...(input.note!==undefined?['note' as const]:[]),...(input.photoMode!=='keep'?['images' as const]:[])])]}:n);
+    return nodes.map(n=>n.id===input.id?{...n,name:input.name,...(input.color?{color:input.color}:{}),...(input.note!==undefined?{note:input.note??undefined}:{}),...(n.name!==input.name?{wordRedirect:undefined}:{}),...(input.photoMode!=='keep'?{imageKey:undefined,imageUrl:undefined,imageUrls:undefined,imageKeys:input.photoMode==='replace'?verifiedImages:undefined,isImage:input.photoMode==='replace',mediaTypes:input.photoMode==='replace'?input.images?.map(i=>i.contentType):undefined}:{}),contentEdits:[...new Set([...(n.contentEdits||[]),'name' as const,...(input.color?['color' as const]:[]),...(input.note!==undefined?['note' as const]:[]),...(input.photoMode!=='keep'?['images' as const]:[])])]}:n);
   }
   if(input.action==="rename"&&node.name===input.name&&(!input.color||node.color===input.color))return nodes;
   if(input.action==="move"&&node.parentId===input.parentId)return nodes;

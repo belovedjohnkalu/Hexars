@@ -1,3 +1,4 @@
+import {cacheRead} from '../helpers/cacheRead';
 import { z } from 'zod';
 const amount=z.string().regex(/^(0|[1-9]\d{0,17})$/),uuid=z.string().uuid();
 export const schema=z.discriminatedUnion('action',[
@@ -20,5 +21,7 @@ export type TimeQuote={id:string;kind:'purchase'|'transfer'|'payout';amountUs:st
 export type TimeAdministration={proposals:Array<{id:string;productId:string;durationUs:string;basis:string;author:string;createdAt:string}>;freeCostUs:string|null;freeProposalId?:string|null;treasuryUs:string;};
 export type WorkSession={id:string;description:string;source:'manual'|'agent';startedAt:string;endedAt:string|null;updatedAt:string;by:string;durationUs:string;canEdit:boolean};
 export type WorkState={totalWorkUs:string;baselineUs:string;recordedUs:string;basis:string;updatedAt:string;sessions:WorkSession[];active:WorkSession|null;next:string|null;identifiers?:Record<string,string>};
-export type TimeResult={work?:WorkState;snapshot?:TimeSnapshot;quote?:TimeQuote;receipt?:TimeReceipt;activity?:TimeReceipt[];next?:{at:string;id:string}|null;administration?:TimeAdministration;earning?:{active:boolean;elsewhere:boolean;creditedUs:string};ok?:boolean};
-export async function postTime(input:TimeInput,signal?:AbortSignal):Promise<TimeResult>{const response=await fetch('/_api/time',{method:'POST',credentials:'include',headers:{'Content-Type':'application/json'},body:JSON.stringify(schema.parse(input)),signal});const data=await response.json().catch(()=>null);if(!response.ok||!data)throw Object.assign(new Error(data?.error||'Couldn’t reach Time. Try again.'),{status:response.status,code:data?.code});return data;}
+export type TimeResult={offline?:boolean;work?:WorkState;snapshot?:TimeSnapshot;quote?:TimeQuote;receipt?:TimeReceipt;activity?:TimeReceipt[];next?:{at:string;id:string}|null;administration?:TimeAdministration;earning?:{active:boolean;elsewhere:boolean;creditedUs:string};ok?:boolean};
+async function fetchTime(input:TimeInput,signal?:AbortSignal):Promise<TimeResult>{const response=await fetch('/_api/time',{method:'POST',credentials:'include',headers:{'Content-Type':'application/json'},body:JSON.stringify(schema.parse(input)),signal});const data=await response.json().catch(()=>null);if(!response.ok||!data)throw Object.assign(new Error(data?.error||'Couldn’t reach Time. Try again.'),{status:response.status,code:data?.code});return data;}
+
+export async function postTime(input:TimeInput,signal?:AbortSignal):Promise<TimeResult>{const read=['snapshot','activity','receipt','administration'].includes(input.action)||input.action==='work'&&input.operation==='list';return read?cacheRead('time:'+JSON.stringify(input),()=>fetchTime(input,signal)):fetchTime(input,signal);}

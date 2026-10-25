@@ -1,0 +1,63 @@
+{
+  "passed": true,
+  "release": "0.62",
+  "scope": "IL0A009",
+  "checks": [
+    "Queued writes are bound to the actual signed-in account",
+    "Media publishing permits the next entry and shows its pending state",
+    "A validated video uploads, survives reload, and opens native playback",
+    "A recording retains its format and opens native audio controls",
+    "Opening a cloud preserves the input, keyboard focus and current tile",
+    "A previously opened cloud and its content remain readable offline",
+    "Split screens start on the same page, navigate independently and close by X",
+    "Tiles are manual, with New and no redundant Done button",
+    "Activity contains Added, Spent and Balance with dev identifiers",
+    "Kruzno gives the human the officially first-moving Black side",
+    "Phone-sized cloud and media content fit without document scrolling",
+    "No uncaught browser errors",
+    "Editing has Name and Media without a separate Text tab",
+    "Move resolves an authorized IL and preserves attached media",
+    "A failed cloud exposes its failure and retries without duplication",
+    "A dev can edit a generated Time cloud without changing its transaction",
+    "Downward board swipe gives the first move to Computer before play",
+    "Extended controls and gameplay have no uncaught browser errors",
+    "Phone tile hold reveals a red Delete cloud, closes only that tile and returns to the retained page",
+    "Generated Time page headings have editable presentation and permanent ILs",
+    "A long media caption wraps as complete words with correct letter spacing on a phone",
+    "Final phone view has no uncaught browser errors"
+  ],
+  "errors": [],
+  "jasmine": {
+    "files": 105,
+    "passed": 105,
+    "targetedRerunsAfterRefinements": true
+  },
+  "typescript": "clean",
+  "premium": {
+    "existingReviewedFindings": 38,
+    "unresolved": 0,
+    "newFindingCategories": 0
+  },
+  "nativeStoreBuild": false,
+  "emulatedTouch": true,
+  "hardwareIPhoneTest": false,
+  "publishJob": "06a912de-6c49-470b-a280-42cb695e5070",
+  "archive": {
+    "node": "eee68e81-a3dd-4e63-b400-60e040927223",
+    "destination": "df45ea97-524e-4c1c-b2f6-2a96529562e3",
+    "nodes": 63,
+    "activeNodes": 60,
+    "preservedTombstones": 3,
+    "guard": "Exact full-branch comparison under a row lock, with a version-checked update."
+  },
+  "offline": "Thirty-day received-data cache; cold offline app startup is browser-controlled. Media cache completes after loading pictures or finishing playback.",
+  "qa": "Disposable159 retired; own records cleared;4 private files deleted;16 earn entries reversed individually through append-only corrections; wallet closed at zero.",
+  "workSession": {
+    "id": "f4000062-0000-4000-8000-000000000001",
+    "source": "agent",
+    "startedAt": "2026-10-25T06:09:04.627Z",
+    "endedAt": "2026-10-25T07:31:10.632Z",
+    "durationSeconds": "4926.005",
+    "verifiedHumanLabor": false
+  }
+}

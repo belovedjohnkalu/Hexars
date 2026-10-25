@@ -34,3 +34,6 @@
 .wordCounter { flex-shrink:0; max-width:36%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; color:var(--muted-foreground); font:400 11px/1.2 var(--font-family-base); font-variant-numeric:tabular-nums; padding-inline:6px; }
 .wordCounter[data-over-limit=true] { color:var(--error); }
 .input.input { padding-left:12px; }
+
+@media(pointer:coarse){.wrap{padding-bottom:max(12px,env(safe-area-inset-bottom,0px));}}
+.extras{position:relative;bottom:auto;margin-bottom:4px;}

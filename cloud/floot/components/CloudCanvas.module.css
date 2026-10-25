@@ -37,3 +37,9 @@
 .tabular .node { font-variant-numeric:tabular-nums; }
 
 .locked .text { text-decoration-line:line-through; text-decoration-thickness:2px; text-decoration-color:currentColor; }
+
+/* Caption spacing must use its own type size, not its parent cloud's em. */
+.picture .caption,.picture .caption .text,.picture .caption .linkedLabel { letter-spacing:-.02em; }
+
+.delivery{display:inline-flex;align-items:center;justify-content:center;align-self:center;font:600 15px/1 var(--font-family);width:22px;height:22px;border:1px solid currentColor;border-radius:50%;margin:4px;opacity:.7;}
+.node .identifier{white-space:normal;word-break:break-all;}

@@ -1,3 +1,5 @@
+import {deviceData} from './deviceData';
+import {transientFailure} from './cacheRead';
 import React, {
   createContext,
   useContext,
@@ -52,19 +54,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const { data, error, status, refetch } = useQuery({
     queryKey: AUTH_QUERY_KEY,
-    queryFn: async () => {
-      const result = await getSession();
-      if ("error" in result) {
-        throw new Error(result.error);
-      }
-      return result.user;
+    queryFn: async ({signal}) => {
+      try{const result=await getSession({}, {signal});if(signal.aborted)throw new DOMException('Cancelled','AbortError');if('error'in result)throw Object.assign(new Error(result.error),{status:401});
+       const previous=deviceData.identity();if(previous&&previous!=='guest'&&previous!==String(result.user.id))void deviceData.clear(previous);deviceData.setIdentity(result.user.id);if(result.expiresAt)void deviceData.session({user:result.user,expiresAt:result.expiresAt});void deviceData.prune();return result.user;
+      }catch(error){if(signal.aborted)throw error;if(transientFailure(error)){const cached=await deviceData.session();if(cached){deviceData.setIdentity(cached.user.id);return cached.user;}}deviceData.setIdentity(null);if(error&&typeof error==='object'&&'status'in error&&[401,403].includes(Number(error.status))){const cached=await deviceData.session();if(cached)void deviceData.clear(String(cached.user.id));void deviceData.session(null);}throw error;}
     },
     retry: 1,
     enabled: true,
     staleTime: Infinity,
   });
 
-  useEffect(()=>{const expired=()=>{void queryClient.invalidateQueries({queryKey:AUTH_QUERY_KEY});};window.addEventListener("ion.session-expired",expired);return()=>window.removeEventListener("ion.session-expired",expired);},[queryClient]);
+  useEffect(()=>{const expired=()=>{void queryClient.invalidateQueries({queryKey:AUTH_QUERY_KEY});};const unsubscribe=deviceData.subscribe(key=>{if(key==='auth:identity')expired();});window.addEventListener("ion.session-expired",expired);window.addEventListener("online",expired);return()=>{unsubscribe();window.removeEventListener("ion.session-expired",expired);window.removeEventListener("online",expired);};},[queryClient]);
 
   const authState: AuthState =
     status === "pending"
@@ -81,6 +81,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const logout = useCallback(async () => {
     await postLogout();
+    const old=deviceData.identity();if(old&&old!=='guest')await deviceData.clear(old);await deviceData.session(null);deviceData.setIdentity(null);
     try{localStorage.removeItem("ion.private-space.v1");}catch{}
     try{sessionStorage.removeItem("ion.word-drafts.v1");}catch{}
     window.location.assign("/");
@@ -92,7 +93,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   // and update the data linked to AUTH_QUERY_KEY.
   const onLogin = useCallback(
     (user: User) => {
-      queryClient.setQueryData(AUTH_QUERY_KEY, user);
+      const old=deviceData.identity();if(old&&old!=='guest'&&old!==String(user.id))void deviceData.clear(old);deviceData.setIdentity(user.id);void deviceData.session(null);void queryClient.cancelQueries({queryKey:AUTH_QUERY_KEY});queryClient.setQueryData(AUTH_QUERY_KEY,user);void queryClient.invalidateQueries({queryKey:AUTH_QUERY_KEY});
     },
     [queryClient]
   );

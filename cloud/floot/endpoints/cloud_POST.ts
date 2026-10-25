@@ -31,7 +31,7 @@ import { cloudChanges } from "../helpers/cloudChanges";
 import { schema, type CloudNode, type OutputType } from "./cloud_POST.schema";
 import type { Json } from "../helpers/schema";
 const headers = { "Content-Type": "application/json", "Cache-Control": "private, no-store" };
-const extensions: Record<string, string> = { "image/png": "png", "image/jpeg": "jpg", "image/webp": "webp", "image/gif": "gif" };
+const extensions: Record<string, string> = { "image/png": "png", "image/jpeg": "jpg", "image/webp": "webp", "image/gif": "gif", "video/mp4":"mp4","video/quicktime":"mov","video/webm":"webm","audio/mpeg":"mp3","audio/mp4":"m4a","audio/x-m4a":"m4a","audio/ogg":"ogg","audio/wav":"wav","audio/x-wav":"wav","audio/webm":"webm" };
 class CloudError extends Error {
   constructor(message: string, readonly status: number) { super(message); }
 }
@@ -51,7 +51,6 @@ export async function handle(request: Request) {
     if(input.scope==='home'&&input.action==='load')context={...context,row:await ensureScheduleCalendar(context.row.id,timeZone!,context.devNumber)};
     const row=context.row!;
     let nodes = (Array.isArray(row.nodes) ? row.nodes : []) as unknown as CloudNode[];
-    if(input.scope==='home')nodes=nodes.map(n=>n.parentId==='time-activity'?{...n,parentId:'time'}:n);
     let version = row.version;
     const combine=(stored:CloudNode[])=>input.scope==='accounts'?accountDeviceNodes(context.seeds,stored):[...new Map([...context.seeds,...stored].map(n=>[n.id,n])).values()];
     const all=combine(nodes).filter(n=>!n.removedBy);
@@ -81,11 +80,11 @@ export async function handle(request: Request) {
         const node: CloudNode = { id: input.id, parentId: input.parentId, name: input.name,createdBy:context.userId!,color:unusedColor(input.color||'white',all.filter(n=>n.parentId===input.parentId).map(n=>n.color)) };
         if (input.imageType) {
           const filename = "ion/" + row.id + "/" + context.userId + "/" + input.id + "." + extensions[input.imageType];
-          node.imageKey = await validateCloudPhoto(filename,input.imageType);
+          node.imageKey = await validateCloudPhoto(filename,input.imageType);node.mediaTypes=[input.imageType];
         }
         if(input.images?.length){
           const keys=await mapPhotos(input.images,image=>validateCloudPhoto("ion/"+row.id+"/"+context.userId+"/"+input.id+"/"+image.id+"."+extensions[image.contentType],image.contentType));
-          node.imageKeys=keys;
+          node.imageKeys=keys;node.mediaTypes=input.images.map(i=>i.contentType);
         }
         assertCloudWordLimits(all,[...all,node],input.scope);
         assertCloudCapacity([...context.seeds,...nodes],[...context.seeds,...nodes,node]);
@@ -131,15 +130,15 @@ export async function handle(request: Request) {
     const merged=combine(nodes);
     // Keep removed rows in the registry. Allocation is serialized across devices;
     // labels are never recycled or exposed in another account's Private space.
-    const hubIds=new Set(functionClouds.filter(n=>n.parentId==='time').map(n=>n.id)),functional=context.isDev&&input.scope==='home'?await functionIdentifiers(context.userId!):undefined;
+    const hubIds=new Set(functionClouds.filter(n=>n.parentId==='time').map(n=>n.id)),functional=context.isDev&&(input.scope==='home'||!!input.functionalId)?await functionIdentifiers(context.userId!,input.functionalId?context.seeds.filter(n=>n.id.startsWith('time-tx-')||n.id.startsWith('work-session-')):[]):undefined;
     const identifiers=context.isDev||input.scope==='public'||(['chess','home'].includes(input.scope)&&input.action!=='load')
       ?await cloudIdentifierStore(merged.filter(n=>!hubIds.has(n.id)),context.devNumber):undefined;
     const readable=visibleDevClouds(merged,context.isDev),authorIds=[...new Set(readable.filter(n=>!n.removedBy&&n.createdBy).map(n=>n.createdBy!))];
     const authors=authorIds.length?await db.selectFrom('users').select(['id','displayName']).where('id','in',authorIds).execute():[];
     const withAuthors=attachCloudAuthors(readable,new Map(authors.map(u=>[u.id,u.displayName])));
     // Signed picture URLs are refreshed on every read, and never stored as authority.
-    let visible:CloudNode[] = await Promise.all(withAuthors.filter(n=>!n.removedBy&&!['time-balance','time-activity'].includes(n.id)&&(context.isDev||!['time-treasury','time-estimates'].includes(n.id))&&(context.scope!=='accounts'||n.id!=='account-remember'||context.seeds.some(seed=>seed.id==='account-remember'))).map(async node => {
-      const visibleNode={...node,...(['time-added','time-spent','time-remaining'].includes(node.id)?{parentId:'time'}:{}),...(node.id==='control-link'&&node.name==='Link'?{name:'Redirect'}:{}),identifier:functional?.[node.id]??(context.isDev||input.scope==='public'?namespaceIdentifier(identifiers?.get(node.id)?.label,Number((input.scope==='private'&&node.id==='private'||input.scope==='accounts'&&context.seeds.some(s=>s.id===node.id))?context.devNumber:identifiers?.get(node.id)?.devNumber??context.devNumber)):undefined),createdBy:undefined,canEdit:cloudPolicy.edit(input.scope,node,context.userId,context.owner),canCopy:!(input.scope==='schedule'&&context.seeds.some(seed=>seed.id===node.id))&&!!context.userId&&cloudPolicy.writable(input.scope,context.userId,context.owner)&&(context.owner||!cloudTree.roots.some(r=>r.id===node.id))};
+    let visible:CloudNode[] = await Promise.all(withAuthors.filter(n=>!n.removedBy&&n.id!=='time-balance'&&(context.isDev||!['time-treasury','time-estimates'].includes(n.id))&&(context.scope!=='accounts'||n.id!=='account-remember'||context.seeds.some(seed=>seed.id==='account-remember'))).map(async node => {
+      const visibleNode={...node,...(['time-added','time-spent','time-remaining'].includes(node.id)?{parentId:'time-activity'}:{}),...(node.id==='control-link'&&node.name==='Link'?{name:'Redirect'}:{}),identifier:functional?.[node.id]??(context.isDev||input.scope==='public'?namespaceIdentifier(identifiers?.get(node.id)?.label,Number((input.scope==='private'&&node.id==='private'||input.scope==='accounts'&&context.seeds.some(s=>s.id===node.id))?context.devNumber:identifiers?.get(node.id)?.devNumber??context.devNumber)):undefined),createdBy:undefined,canEdit:cloudPolicy.edit(input.scope,node,context.userId,context.owner),canCopy:!(input.scope==='schedule'&&context.seeds.some(seed=>seed.id===node.id))&&!!context.userId&&cloudPolicy.writable(input.scope,context.userId,context.owner)&&(context.owner||!cloudTree.roots.some(r=>r.id===node.id))};
       const keys=node.imageKeys?.length?node.imageKeys:node.imageKey?[node.imageKey]:[];
       if(!keys.length)return visibleNode;
       const urls=await Promise.all(keys.map(async filename=>{const result=await getUrl({visibility:'private',filename,expiresInSeconds:3600});return result.ok?result.url:'';}));

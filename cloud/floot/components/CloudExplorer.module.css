@@ -39,3 +39,5 @@
 .title,.title * { -webkit-user-select:none; user-select:none; -webkit-touch-callout:none; -webkit-tap-highlight-color:transparent; }
 
 .bottom > form { flex:1; min-width:0; }
+.app:has([data-composer-expanded=true]){--back-bottom:calc(164px + env(safe-area-inset-bottom));}
+.error>span{min-width:0;overflow-wrap:anywhere;}

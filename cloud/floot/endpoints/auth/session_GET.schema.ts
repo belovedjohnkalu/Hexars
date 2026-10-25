@@ -8,6 +8,7 @@ export const schema = z.object({});
 export type OutputType =
   | {
       user: User;
+      expiresAt?:number;
     }
   | {
       error: string;
@@ -25,5 +26,5 @@ export const getSession = async (
       ...(init?.headers ?? {}),
     },
   });
-  return superjson.parse<OutputType>(await result.text());
+  const value=superjson.parse<OutputType>(await result.text());if(!result.ok)throw Object.assign(new Error('error'in value?value.error:'Session check failed'),{status:result.status});return value;
 };

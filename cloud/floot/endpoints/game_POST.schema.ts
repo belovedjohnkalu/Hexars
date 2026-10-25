@@ -1,3 +1,4 @@
+import {cacheRead} from '../helpers/cacheRead';
 import { engineIds, type EngineId } from '../helpers/chessEngines';
 import { z } from "zod";
 import superjson from "superjson";
@@ -93,6 +94,7 @@ export type MoveRecord = {
   engine: boolean;
 };
 export type OutputType = {
+  offline?:boolean;
   gameId: string;
   accessToken: string;
   version: number;
@@ -109,7 +111,7 @@ export type OutputType = {
   lastSearch: SearchDiagnostics | null;
 };
 
-export async function postGame(body: InputType, init?: RequestInit): Promise<OutputType> {
+async function fetchGame(body: InputType, init?: RequestInit): Promise<OutputType> {
   const response = await fetch("/_api/game", {
     ...init,
     method: "POST",
@@ -123,3 +125,5 @@ export async function postGame(body: InputType, init?: RequestInit): Promise<Out
     });
   return value;
 }
+
+export async function postGame(body:InputType,init?:RequestInit):Promise<OutputType>{return body.action==='get'||body.action==='review'?cacheRead('game:'+body.gameId+':'+body.action+(body.action==='review'?':'+body.ply:''),()=>fetchGame(body,init)):fetchGame(body,init);}

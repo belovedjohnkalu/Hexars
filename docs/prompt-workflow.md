@@ -1,6 +1,6 @@
 # Dev prompt workflow
 
-The configured Home owner is dev 0. All dev accounts can read Prompts (IL0A0), To do and descendants. Regular accounts and guests cannot receive this branch through cloud/redirect APIs, including its pictures. Shared Home mutations stay restricted to the configured owner. Labels never grant permissions.
+The configured Home owner is dev 0. All dev accounts can read Prompts (IL0A0), To do and descendants. Regular accounts and guests cannot receive this branch through cloud/redirect APIs, including its pictures. Shared Home mutations stay restricted to registered dev accounts; personal data remains scoped to its account. Labels never grant permissions.
 
 Current live structure, verified for the directly requested 0.48 batch:
 

@@ -21,3 +21,12 @@
 @media(forced-colors:active) { .tile polygon,.tile line { stroke:CanvasText; fill:Canvas; } .tile[data-current=true] polygon { stroke:Highlight; } }
 
 .tile[data-current=true] polygon { filter:drop-shadow(0 0 3px color-mix(in srgb,var(--foreground) 50%,transparent)); }
+.title{text-align:center;padding:0 70px;font-size:28px;}
+.hidden{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);}
+.new.new{position:absolute;right:20px;top:calc(65px + env(safe-area-inset-top));font-size:24px;gap:6px;padding:8px;color:var(--foreground);z-index:2;}
+.delete.delete{position:absolute;right:24px;bottom:calc(28px + env(safe-area-inset-bottom));font-size:28px;color:var(--error);z-index:2;}
+.tile[data-selected=true] polygon{stroke:var(--error);stroke-width:3;}
+
+.wordTitle{background:none;color:inherit;border:0;font:inherit;user-select:none;-webkit-user-select:none;}.new small,.delete small{font-size:10px;opacity:.5;display:block;}
+
+.title{outline:none;}.wordTitle:focus{outline:none;}.wordTitle:focus-visible{box-shadow:0 0 0 2px var(--primary);border-radius:8px;}

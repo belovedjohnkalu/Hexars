@@ -13,6 +13,7 @@ export async function handle(request: Request) {
     // Create response with user data
     const response = new Response(
       superjson.stringify({
+        expiresAt:Math.floor(Date.now()/1000)*1000+86400000,
         user: {
           id: user.id,
           email: user.email,

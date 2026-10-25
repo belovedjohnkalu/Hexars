@@ -3,7 +3,7 @@ export type TileScreen={id:number;url:string;label:string};
 export type OpenTile={id:number;primary:number;focus:number;screens:TileScreen[];tree:PageTree};
 export type TileState={tiles:OpenTile[];current:number;trail:number[];cursor:number;nextId:number};
 export function safeTileURL(value:string){try{const u=new URL(value,location.origin);return value.startsWith('/')&&!value.startsWith('//')&&u.origin===location.origin&&!/\/(?:login|register|auth)(?:\/|$)/.test(u.pathname)?u.pathname+u.search+u.hash:null;}catch{return null;}}
-export function tileLabel(value:string){return value.replace(/\s*[·|]\s*(?:ION|Hexagonal Chess).*$/,'').trim()||'ION';}
+export function tileLabel(value:string){return value.replace(/\s*[·|]\s*(?:ION|Hexagons).*$/,'').trim()||'ION';}
 export function createTileState(url:string):TileState{return{tiles:[{id:0,primary:0,focus:0,screens:[{id:0,url:safeTileURL(url)||'/',label:'ION'}],tree:{screen:0}}],current:0,trail:[0],cursor:0,nextId:1};}
 export function visitTile(state:TileState,id:number):TileState{
  if(state.current===id||!state.tiles.some(t=>t.id===id))return state;

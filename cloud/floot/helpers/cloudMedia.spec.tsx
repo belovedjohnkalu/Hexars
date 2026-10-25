@@ -1,0 +1,9 @@
+import {mediaWordCost,mediaMaxBytes,imageSignature,photoFileError,cloudMediaWords} from './cloudPhotos';
+import {assertCloudWordLimits} from './cloudWordLimits';
+import {schema} from '../endpoints/cloud_POST.schema';
+describe('Cloud multimedia',()=>{
+ it('counts the stated word-equivalent without changing text size metrics',()=>{expect(mediaWordCost('video/mp4')).toBe(1000000);expect(mediaWordCost('audio/mpeg')).toBe(500000);expect(mediaWordCost('image/png')).toBe(1000);expect(cloudMediaWords({id:'a',parentId:'root',name:'Clip',imageKeys:['a','b'],mediaTypes:['video/mp4','audio/mpeg']})).toBe(1500000);});
+ it('validates signatures instead of trusting filenames or MIME labels',()=>{expect(imageSignature(new TextEncoder().encode('xxxxftypisom0000'),'video/mp4')).toBeTrue();expect(imageSignature(new TextEncoder().encode('<html>bad file!'),'video/mp4')).toBeFalse();expect(imageSignature(new Uint8Array([73,68,51,0]),'audio/mpeg')).toBeTrue();expect(imageSignature(new TextEncoder().encode('RIFFxxxxWAVE'),'audio/wav')).toBeTrue();});
+ it('keeps format-specific upload limits and rejects an oversized recording',()=>{expect(mediaMaxBytes('image/png')).toBe(20*1024*1024);expect(mediaMaxBytes('video/mp4')).toBe(200*1024*1024);const input={action:'upload',workspaceId:'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',accessToken:'0'.repeat(64),id:'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb',contentType:'audio/mpeg',sizeBytes:101*1024*1024};expect(schema.safeParse(input).success).toBeFalse();expect(photoFileError(new File(['content'],'clip.html',{type:'text/html'}))).toContain('Choose');});
+ it('enforces media allowance after moving into a shallower cloud',()=>{const root={id:'public',parentId:null,name:'Safari'},clip={id:'clip',parentId:'public',name:'Video',imageKeys:['key'],mediaTypes:['video/mp4'] as const};expect(()=>assertCloudWordLimits([root],[root,{...clip,mediaTypes:[...clip.mediaTypes]}],'public')).toThrow();});
+});

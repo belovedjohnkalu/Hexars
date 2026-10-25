@@ -17,7 +17,7 @@ describe('Gradient color control',()=>{
   const form=view.getByRole('form',{name:'Add to this cloud'});
   await act(async()=>{fireEvent.submit(form);});const first=add.calls.mostRecent().args[0];expect(colorHex(first.color)).not.toBe(colorHex('blue'));
   add.and.resolveTo(true);await act(async()=>{fireEvent.submit(form);});expect(add.calls.mostRecent().args[0].id).toBe(first.id);
-  fireEvent.change(view.getByLabelText('Add a word or a picture name'),{target:{value:'Another'}});await act(async()=>{fireEvent.submit(form);});
+  fireEvent.change(view.getByLabelText('Add a word or name your file'),{target:{value:'Another'}});await act(async()=>{fireEvent.submit(form);});
   expect(colorHex(add.calls.mostRecent().args[0].color)).not.toBe(colorHex(first.color));
  });
 });
@@ -27,11 +27,11 @@ describe('Color wheel entry visibility',()=>{
  beforeEach(()=>{originalEvent=globalThis.Event;globalThis.Event=window.Event;});
  afterEach(()=>{cleanup();globalThis.Event=originalEvent;});
  it('is hidden until word entry starts and stays available when focus moves into the picker',()=>{
-  const view=render(<CloudComposer colors parentId="private" busy={false} disabled={false} draft={{name:''}} onDraft={()=>{}} onAdd={async()=>true}/>),input=view.getByLabelText('Add a word or a picture name');
+  const view=render(<CloudComposer colors parentId="private" busy={false} disabled={false} draft={{name:''}} onDraft={()=>{}} onAdd={async()=>true}/>),input=view.getByLabelText('Add a word or name your file');
   expect(view.queryByRole('slider')).toBeNull();fireEvent.focus(input);const slider=view.getByRole('slider',{name:'Word color'});expect(slider).toBeTruthy();fireEvent.blur(input,{relatedTarget:slider});expect(view.queryByRole('slider')).toBeTruthy();fireEvent.blur(slider,{relatedTarget:document.body});expect(view.queryByRole('slider')).toBeNull();
  });
  it('keeps the draft and chosen color when entry is dismissed',()=>{
-  const view=render(<CloudComposer colors parentId="public" scope="public" busy={false} disabled={false} draft={{name:'Keep me',color:'blue'}} onDraft={()=>{}} onAdd={async()=>false}/>),input=view.getByLabelText('Add a word or a picture name') as HTMLInputElement;
+  const view=render(<CloudComposer colors parentId="public" scope="public" busy={false} disabled={false} draft={{name:'Keep me',color:'blue'}} onDraft={()=>{}} onAdd={async()=>false}/>),input=view.getByLabelText('Add a word or name your file') as HTMLInputElement;
   fireEvent.focus(input);const original=view.getByRole('slider').getAttribute('aria-valuetext');fireEvent.keyDown(view.getByRole('slider'),{key:'ArrowRight'});const chosen=view.getByRole('slider').getAttribute('aria-valuetext');expect(chosen).not.toBe(original);fireEvent.blur(input,{relatedTarget:document.body});expect(view.queryByRole('slider')).toBeNull();expect(input.value).toBe('Keep me');fireEvent.focus(input);expect(view.getByRole('slider').getAttribute('aria-valuetext')).toBe(chosen);
  });
 });
@@ -43,7 +43,7 @@ describe('Random word color',()=>{
  it('keeps a manual override for the current entry, retries it unchanged and randomizes the next entry',async()=>{
   localStorage.setItem('ion.word-color.random','true');
   const add=jasmine.createSpy('add').and.resolveTo(false),view=render(<CloudComposer colors scope="chess" parentId="boards" busy={false} disabled={false} draft={{name:'First'}} onDraft={()=>{}} onAdd={add}/>);
-  const input=view.getByLabelText('Add a word or a picture name');fireEvent.focus(input);
+  const input=view.getByLabelText('Add a word or name your file');fireEvent.focus(input);
   fireEvent.keyDown(view.getByRole('slider'),{key:'w'});
   const form=view.getByRole('form');await act(async()=>{fireEvent.submit(form);});
   const first=add.calls.mostRecent().args[0];expect(first.color).toBe('white');

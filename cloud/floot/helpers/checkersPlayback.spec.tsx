@@ -1,0 +1,10 @@
+import {checkersPlayback,CHECKERS_STEP_MS,opponentTurn} from './checkersPlayback';
+import type {GameView,ChessMove} from '../endpoints/game_POST.schema';
+describe('Opponent capture playback',()=>{
+ const a={q:0,r:0},b={q:2,r:0},c={q:4,r:0},taken1={q:1,r:0},taken2={q:3,r:0},move:ChessMove={from:a,to:c,path:[a,b,c],captures:[taken1,taken2]};
+ const before={variant:'kruzno',stateId:'before',ply:1,activePlayer:1,board:{cells:[{...a,piece:{type:'pawn',player:1}},{...b,piece:null},{...c,piece:null},{...taken1,piece:{type:'pawn',player:0}},{...taken2,piece:{type:'pawn',player:0}}]},legalMoves:[move]} as unknown as GameView;
+ it('shows each landing in sequence and removes only the already captured Kruzno pieces',()=>{const after={...before,ply:2,stateId:'after'},frames=checkersPlayback(before,after,move);expect(frames.length).toBe(2);expect(frames[0].game.board.cells.find(x=>x.q===2)?.piece?.player).toBe(1);expect(frames[0].game.board.cells.find(x=>x.q===1)?.piece).toBeNull();expect(frames[0].game.board.cells.find(x=>x.q===3)?.piece).toBeTruthy();expect(frames[1].game).toBe(after);expect(CHECKERS_STEP_MS).toBeGreaterThan(200);});
+ it('does not replay old history, another variant or a multi-turn refresh as one move',()=>{expect(checkersPlayback(before,{...before,ply:8},move)).toEqual([]);expect(checkersPlayback(before,{...before,variant:'glinski',ply:2},move)).toEqual([]);});
+ it('animates computer and online opponents without replaying a human’s already shown capture path',()=>{expect(opponentTurn('engine',1,{engine:true,player:0})).toBeTrue();expect(opponentTurn('online',1,{engine:false,player:0})).toBeTrue();expect(opponentTurn('engine',1,{engine:false,player:1})).toBeFalse();expect(opponentTurn('two_players',0,{engine:false,player:1})).toBeFalse();});
+ it('keeps HexDame captured bodies until the full turn ends',()=>{const hex={...before,variant:'hexdame'} as GameView,frames=checkersPlayback(hex,{...hex,ply:2},move);expect(frames[0].game.board.cells.find(x=>x.q===1)?.piece).toBeTruthy();});
+});
