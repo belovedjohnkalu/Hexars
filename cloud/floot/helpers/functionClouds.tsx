@@ -7,7 +7,7 @@ const node=(id:string,parentId:string,name:string):CloudNode=>({id,parentId,name
 export const gameActionNames={variants:'Variants',rules:'Rules',engines:'Computer',friend:'Pass and Play',reset:'Board Reset',undo:'Undo',online:'Online',library:'Library',forfeit:'Forfeit',draw:'Draw'};
 const products=[{id:'feature:schedule',name:'Schedule'},...chessVariants.all.filter(v=>!isFreeVariant(v.id)).map(v=>({id:'variant:'+v.id,name:v.name}))];
 // Stable functional identities. Names/amounts may change; identifiers never do.
-export const functionClouds:CloudNode[]=[node('page-tiles','controls','Tiles'),node('page-tile-new','page-tiles','New'),node('page-tile-delete','page-tiles','Delete'),
+export const functionClouds:CloudNode[]=[node('page-tiles','controls','Tiles'),node('page-tile-new','page-tiles','New Tile'),node('page-tile-rename','page-tiles','Rename'),node('page-tile-delete','page-tiles','Delete'),
  ...['balance','activity','send','receive','earn','prices','treasury','estimates'].map(id=>node('time-'+id,'time',id==='estimates'?'Work':id[0].toUpperCase()+id.slice(1))),
  node('time-balance-value','time-balance','Balance'),node('time-earned','time-balance','Earned'),node('time-earned-value','time-earned','Earned'),
  node('time-added','time-activity','Added'),node('time-spent','time-activity','Spent'),node('time-remaining','time-activity','Balance'),node('time-name','time-receive','Player name'),

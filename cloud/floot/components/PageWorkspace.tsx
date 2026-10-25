@@ -1,4 +1,7 @@
-import {useEffect,useRef,useState,type ReactNode,type CSSProperties} from 'react';
+import {useCloudHoldGuard} from '../helpers/useCloudHold';
+import {createPortal} from 'react-dom';
+import {TileName} from './TileName';
+import {useEffect,useLayoutEffect,useRef,useState,type ReactNode,type CSSProperties} from 'react';
 import {useLocation,useNavigate} from 'react-router-dom';
 import {focusManager} from '@tanstack/react-query';
 import {useAuth} from '../helpers/useAuth';
@@ -8,7 +11,7 @@ import {cloudDrafts} from '../helpers/cloudDrafts';
 import {isControlsPage} from '../helpers/visitedPages';
 import {isPagePane,pageKey,pageKeyTarget,pageGeometry,pageScreenIds,splitPage,removePage,movePage,adjacentPage,pageFocusEdges,type PageDirection,type PageTile} from '../helpers/pageWorkspace';
 import {requestPageAction,validPageAction,pageKeyboardAction,type PageAction} from '../helpers/pageWorkspaceEvents';
-import {createTileState,readTileState,safeTileURL,tileLabel,visitTile,stepTile,nearestRhombus,type OpenTile,type TileState,type TileScreen} from '../helpers/pageTiles';
+import {createTileState,readTileState,safeTileURL,tileLabel,visitTile,stepTile,nearestRhombus,tileName,type OpenTile,type TileState,type TileScreen} from '../helpers/pageTiles';
 import {controlsURL} from '../helpers/cloudRoutes';
 import {LoadingScreen} from './LoadingScreen';
 import {PageTiles} from './PageTiles';
@@ -21,8 +24,9 @@ type Drag={id:number;dx:number;dy:number;target?:number;direction?:PageDirection
 function ownURL(){return location.pathname+location.search+location.hash;}
 function setScreenActive(active:boolean){if(document.documentElement.dataset.ionScreenActive===String(active))return;document.documentElement.dataset.ionScreenActive=String(active);focusManager.setFocused(active&&document.visibilityState==='visible');window.dispatchEvent(new window.Event('ion.screen-visibility'));}
 export function PageWorkspace({children}:{children:ReactNode}){
+ useCloudHoldGuard();
  const embedded=isPagePane(),route=useLocation(),navigate=useNavigate(),{authState}=useAuth(),identity=authState.type==='loading'?null:authState.type==='authenticated'?String(authState.user.id):'guest';
- const[state,setState]=useState<TileState>(()=>createTileState(ownURL())),[size,setSize]=useState({width:0,height:0}),[loaded,setLoaded]=useState<number[]>([]),[notice,setNotice]=useState(''),[overview,setOverview]=useState(false),[menu,setMenu]=useState<Menu|null>(null),[titleContent,setTitleContent]=useState<CloudNode|null>(null),[screenInfo,setScreenInfo]=useState<{screens:TileScreen[];current:number}>({screens:[],current:0}),[drag,setDrag]=useState<Drag|null>(null);
+ const[state,setState]=useState<TileState>(()=>createTileState(ownURL())),[size,setSize]=useState({width:0,height:0}),[loaded,setLoaded]=useState<number[]>([]),[notice,setNotice]=useState(''),[overview,setOverview]=useState(false),[tileSelection,setTileSelection]=useState<number|null>(null),[titleSlot,setTitleSlot]=useState<HTMLElement|null>(null),[inheritedTileName,setInheritedTileName]=useState('Tile 1'),[menu,setMenu]=useState<Menu|null>(null),[titleContent,setTitleContent]=useState<CloudNode|null>(null),[screenInfo,setScreenInfo]=useState<{screens:TileScreen[];current:number}>({screens:[],current:0}),[drag,setDrag]=useState<Drag|null>(null);
  const host=useRef<HTMLDivElement>(null),frames=useRef(new Map<number,HTMLIFrameElement>()),frameSources=useRef(new Map<number,string>()),current=useRef(state),account=useRef<string|null>(null),expectedURL=useRef<string|null>(null),closing=useRef<{id:number;kind:'close'|'refresh'|'tile-delete';performId:number;remaining:number[];nonce:string;timer:ReturnType<typeof setTimeout>}|null>(null),actions=useRef<(action:PageAction,source?:number)=>void>(()=>{}),choose=useRef<(id:number,trail?:boolean)=>void>(()=>{}),makeTile=useRef<()=>void>(()=>{}),deleteTile=useRef<(id:number)=>void>(()=>{});current.current=state;
  const live=state.tiles.find(t=>t.id===state.current)!,layout=pageGeometry(live.tree,size.width,size.height),split=live.screens.length>1;
  function commit(next:TileState){current.current=next;setState(next);if(account.current)try{sessionStorage.setItem('ion.tiles.v1.'+account.current,JSON.stringify(next));}catch{/* In-memory tiles still work with restricted storage. */}}
@@ -52,7 +56,7 @@ export function PageWorkspace({children}:{children:ReactNode}){
    const message=(event:MessageEvent)=>{if(event.origin!==location.origin||event.source!==window.parent)return;const data=event.data;
     if(data?.type==='ion.page-close-check'&&typeof data.nonce==='string'){const form=document.querySelector<HTMLFormElement>('[data-cloud-draft]'),key=form?.dataset.cloudDraft,input=form?.querySelector<HTMLInputElement>('[data-cloud-input]');window.parent.postMessage({type:'ion.page-close-result',allowed:!cloudDrafts.hasPictures(),nonce:data.nonce,...(key&&input?{draft:{key,name:input.value,color:cloudDrafts.get(key).color}}:{})},location.origin);}
     if(data?.type==='ion.page-refresh')window.location.reload();
-    if(data?.type==='ion.page-state'&&Array.isArray(data.screens)){setScreenInfo({screens:data.screens,current:data.current});setScreenActive(data.visible===true);}
+    if(data?.type==='ion.page-state'&&Array.isArray(data.screens)){if(typeof data.tileName==='string')setInheritedTileName(data.tileName);setScreenInfo({screens:data.screens,current:data.current});setScreenActive(data.visible===true);}
     if(data?.type==='ion.page-focus-request'){window.focus();if(!focusCloudComposer())document.querySelector<HTMLElement>('[data-ion-title]')?.focus({preventScroll:true});}
    };
    const focus=()=>window.parent.postMessage({type:'ion.page-focus'},location.origin);
@@ -81,9 +85,10 @@ export function PageWorkspace({children}:{children:ReactNode}){
   }
   function move(source:number,target:number,direction:PageDirection){const t=tile();if(source===target)return;updateTile({...t,tree:movePage(t.tree,source,target,direction),focus:source});}
   function action(a:PageAction,source=tile().focus){const t=tile();if(!t.screens.some(v=>v.id===source))return;
-   if(a.action==='split')splitAt(source,a.direction);
+   if(a.action==='new-tile')makeTile.current();else if(a.action==='tile-rename'){setTileSelection(t.id);setOverview(true);}
+   else if(a.action==='split')splitAt(source,a.direction);
    else if(a.action==='close'||a.action==='refresh')check(source,a.action);
-   else if(a.action==='tiles'){setMenu(null);setOverview(true);}
+   else if(a.action==='tiles'){setMenu(null);setTileSelection(null);setOverview(true);}
    else if(a.action==='move')move(source,a.target,a.direction);
    else if(a.action==='focus')focus(adjacentPage(pageGeometry(t.tree,host.current?.clientWidth||0,host.current?.clientHeight||0).tiles,source,a.direction));
    else if(a.action==='tile-step'){const next=stepTile(current.current,a.step);if(next!==current.current){commit(next);activate(next.current,false);}}
@@ -99,7 +104,7 @@ export function PageWorkspace({children}:{children:ReactNode}){
   const key=(event:KeyboardEvent)=>{if(!desktopTyping()||!pageKeyTarget(event))return;const step=pageKey(event),a=pageKeyboardAction(event,tile().screens.length>1);if(!step&&!a||step<0&&tile().screens.length<2)return;event.preventDefault();event.stopPropagation();if(step>0)splitAt(tile().focus);else if(step<0)check(tile().screens.at(-1)!.id,'close');else if(a)action(a);};
   const message=(event:MessageEvent)=>{if(event.origin!==location.origin)return;const entry=[...frames.current].find(([,frame])=>frame.contentWindow===event.source);if(!entry)return;const id=entry[0],data=event.data,t=tile();if(data?.type==='ion.page-account'&&typeof data.identity==='string'&&/^(?:guest|[0-9]+)$/.test(data.identity)&&account.current&&data.identity!==account.current){try{sessionStorage.removeItem('ion.tiles.v1.'+account.current);}catch{}window.location.replace('/');return;}
    if(data?.type==='ion.page-metadata'&&typeof data.url==='string'&&typeof data.label==='string'&&data.label.length<=16384){const url=safeTileURL(data.url);if(!url||isControlsPage(url))return;const s=current.current,old=s.tiles.flatMap(v=>v.screens).find(v=>v.id===id);if(old&&(old.url!==url||old.label!==tileLabel(data.label)))commit({...s,tiles:s.tiles.map(v=>({...v,screens:v.screens.map(screen=>screen.id===id?{...screen,url,label:tileLabel(data.label)}:screen)}))});}
-   if(data?.type==='ion.page-ready'){setLoaded(old=>old.includes(id)?old:[...old,id]);const owner=current.current.tiles.find(v=>v.screens.some(screen=>screen.id===id));entry[1].contentWindow?.postMessage({type:'ion.page-state',screens:owner?.screens||[],current:id,visible:owner?.id===t.id&&id===t.focus&&!overview},location.origin);}
+   if(data?.type==='ion.page-ready'){setLoaded(old=>old.includes(id)?old:[...old,id]);const owner=current.current.tiles.find(v=>v.screens.some(screen=>screen.id===id));entry[1].contentWindow?.postMessage({type:'ion.page-state',screens:owner?.screens||[],tileName:owner?tileName(owner):'Tile',current:id,visible:owner?.id===t.id&&id===t.focus&&!overview},location.origin);}
    if(data?.type==='ion.page-focus'&&t.screens.some(v=>v.id===id)&&t.focus!==id)updateTile({...t,focus:id});
    if(data?.type==='ion.page-action'&&validPageAction(data)&&t.screens.some(v=>v.id===id))action(data,id);
    if(data?.type==='ion.page-key'&&t.screens.some(v=>v.id===id)&&desktopTyping()){if(data.step===1)splitAt(id);else if(data.step===-1&&t.screens.length>1)check(t.screens.at(-1)!.id,'close');}
@@ -110,12 +115,14 @@ export function PageWorkspace({children}:{children:ReactNode}){
  },[embedded,navigate,screenInfo.screens.length,overview]);
  useEffect(()=>{
   if(embedded)return;setScreenInfo({screens:live.screens,current:live.primary});setScreenActive(live.focus===live.primary&&!overview);
-  for(const t of state.tiles)for(const v of t.screens)if(v.id!==t.primary)frames.current.get(v.id)?.contentWindow?.postMessage({type:'ion.page-state',screens:t.screens,current:v.id,visible:t.id===live.id&&v.id===live.focus&&!overview},location.origin);
+  for(const t of state.tiles)for(const v of t.screens)if(v.id!==t.primary)frames.current.get(v.id)?.contentWindow?.postMessage({type:'ion.page-state',screens:t.screens,tileName:tileName(t),current:v.id,visible:t.id===live.id&&v.id===live.focus&&!overview},location.origin);
  },[state,overview,embedded]);
+ useLayoutEffect(()=>{let slot:HTMLElement|null=null;const attach=()=>{const header=embedded?document.querySelector('header'):host.current?.querySelector('[data-ion-primary] header');if(!header||slot?.parentElement===header)return;slot?.remove();slot=document.createElement('div');slot.dataset.tileNameSlot='';slot.style.cssText='grid-column:1/-1;order:-1;width:100%;min-width:0;';header.prepend(slot);setTitleSlot(slot);};attach();const observer=new MutationObserver(attach);const root=embedded?document.body:host.current;if(root)observer.observe(root,{childList:true,subtree:true});return()=>{observer.disconnect();slot?.remove();};},[embedded,route.key]);
+ const tileTitle=titleSlot?createPortal(<TileName name={embedded?inheritedTileName:tileName(live)}/>,titleSlot):null;
  const contentViewer=titleContent&&<CloudContentViewer node={titleContent} onClose={()=>setTitleContent(null)}/>;
  const localMenu=menu&&<TitleScreenMenu {...screenInfo} current={screenInfo.current} onCloudControls={menu.onHold} onOpen={menu.onOpen} onClose={()=>setMenu(null)}/>;
- const closeScreen=screenInfo.screens.length>1&&<button type="button" className={styles.closeScreen} aria-label="Close screen" onClick={()=>requestPageAction({action:'close'})}>×</button>;
- if(embedded)return <>{children}{closeScreen}{localMenu}{contentViewer}</>;
+ const closeScreen=screenInfo.screens.length>1&&<button type="button" data-screen-close className={styles.closeScreen} aria-label="Close screen" onClick={()=>requestPageAction({action:'close'})}>×</button>;
+ if(embedded)return <>{children}{tileTitle}{closeScreen}{localMenu}{contentViewer}</>;
  const geometry=(rect:PageTile):CSSProperties=>{const moving=drag?.id===rect.id;return{...(split?{left:rect.x+10,top:rect.y+10,width:Math.max(0,rect.width-20),height:Math.max(0,rect.height-20)}:{inset:0}),...(moving?{transform:`translate(${drag.dx}px,${drag.dy}px)`,zIndex:4,opacity:.72}:{} )};};
  const focused=layout.tiles.find(t=>t.id===live.focus),edges=focused&&split?pageFocusEdges(focused,size.width,size.height):[];
  return <div ref={host} className={styles.workspace} data-page-count={live.screens.length} data-tile-count={state.tiles.length} data-active-screen={live.focus} data-split={split} role="group" aria-label="Page views" aria-keyshortcuts="ArrowUp ArrowDown ArrowLeft ArrowRight Control+ArrowUp Control+ArrowDown Control+ArrowLeft Control+ArrowRight">
@@ -123,7 +130,7 @@ export function PageWorkspace({children}:{children:ReactNode}){
  {state.tiles.flatMap(t=>t.screens.filter(v=>v.id!==t.primary).map(view=>{const active=t.id===live.id,rect=active?layout.tiles.find(v=>v.id===view.id):undefined;return <div key={view.id} hidden={!active} className={styles.pane} data-screen-id={view.id} style={rect?geometry(rect):{display:'none'}}><iframe ref={node=>{if(node)frames.current.set(view.id,node);else frames.current.delete(view.id);}} name={'ion-page-'+view.id} src={frameSources.current.get(view.id)||(()=>{frameSources.current.set(view.id,view.url);return view.url;})()} title={'Screen '+view.id+' · '+view.label} allow="clipboard-write; fullscreen" className={styles.frame} onLoad={()=>{setLoaded(old=>old.includes(view.id)?old:[...old,view.id]);}} aria-busy={!loaded.includes(view.id)}/>{!loaded.includes(view.id)&&<LoadingScreen label="Opening screen"/>}</div>;}))}
  {split&&<svg className={styles.dividers} width="100%" height="100%" aria-hidden="true">{layout.dividers.map(line=><line key={line.id} {...line} id={undefined}/>)}{edges.map(line=><line className={styles.focusEdge} key={line.id} {...line} id={undefined}/>)}</svg>}
  {drag?.preview&&<div className={styles.snap} style={{left:drag.preview.x+12,top:drag.preview.y+12,width:drag.preview.width-24,height:drag.preview.height-24}}/>}
- <span className={styles.status} role="status">{notice}</span>{localMenu}{contentViewer}
- {overview&&<PageTiles tiles={state.tiles} current={state.current} onChoose={id=>choose.current(id)} onClose={()=>setOverview(false)} onNew={()=>makeTile.current()} onDelete={id=>deleteTile.current(id)} onManage={node=>{setOverview(false);navigate(controlsURL(node,'home',ownURL()));}}/>}
+ <span className={styles.status} role="status">{notice}</span>{tileTitle}{localMenu}{contentViewer}
+ {overview&&<PageTiles tiles={state.tiles} current={state.current} onChoose={id=>choose.current(id)} onClose={()=>setOverview(false)} onNew={()=>makeTile.current()} initialSelection={tileSelection} onRename={(id,name,color)=>{const s=current.current;commit({...s,tiles:s.tiles.map(t=>t.id===id?{...t,name,...(color?{color}:{})}:t)});}} onDelete={id=>deleteTile.current(id)} onManage={node=>{setOverview(false);navigate(controlsURL(node,'home',ownURL()));}}/>}
  </div>;
 }

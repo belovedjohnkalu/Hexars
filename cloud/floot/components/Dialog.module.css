@@ -2,7 +2,7 @@
   .overlay {
     position: fixed;
     inset: 0;
-    background: #000000aa;
+    background: var(--overlay-background);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
     z-index: var(--z-overlay) !important;
@@ -15,20 +15,20 @@
   }
   .content {
     position: fixed !important;
-    top: 50%;
+    top: calc(var(--ion-visual-top,0px) + var(--ion-visual-height,100dvh) * .5);
     left: 50%;
     transform: translate(-50%, -50%);
     width: 32rem;
     max-width: 90vw;
-    max-height: min(85dvh, 760px);
+    max-height: min(calc(var(--ion-visual-height,100dvh) - 20px), 760px);
     overflow: clip;
-    background: #111113;
+    background: var(--popup);
     border: 1px solid var(--glass-border);
     backdrop-filter: blur(32px) saturate(140%);
     -webkit-backdrop-filter: blur(32px) saturate(140%);
     color: var(--popup-foreground);
     border-radius: var(--radius-md);
-    box-shadow: inset 0 1px 0 #ffffff1c, 0 24px 100px #00000090;
+    box-shadow: var(--shadow-lg);
     z-index: var(--z-overlay) !important;
     padding: var(--spacing-6);
   }

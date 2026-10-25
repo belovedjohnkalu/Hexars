@@ -1,0 +1,2 @@
+.name{border:0;background:transparent;color:var(--tile-label);font:500 12px/1.2 var(--font-family-base);letter-spacing:.025em;text-align:center;display:block;width:100%;min-height:24px;max-width:100%;padding:3px 0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;cursor:pointer;user-select:none;-webkit-user-select:none;-webkit-tap-highlight-color:transparent;}
+.name:hover{color:var(--foreground);}.name:focus-visible{outline:2px solid var(--rhombus-focus);outline-offset:1px;border-radius:6px;}

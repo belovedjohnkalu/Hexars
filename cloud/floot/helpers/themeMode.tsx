@@ -1,3 +1,4 @@
+import {setDarkAppearance,useAppearance} from './useAppearance';
 import React, {
   createContext,
   useContext,
@@ -27,9 +28,9 @@ function subscribeToThemeChange(listener: ThemeChangeListener) {
 
 function updateTheme(darkPreferred: boolean): void {
   if (darkPreferred) {
-    document.body.classList.add("dark");
+    setDarkAppearance(true);
   } else {
-    document.body.classList.remove("dark");
+    setDarkAppearance(false);
   }
 }
 
@@ -44,7 +45,7 @@ export function switchToDarkMode(): void {
     currentMediaQuery.onchange = null;
     currentMediaQuery = null;
   }
-  document.body.classList.add("dark");
+  setDarkAppearance(true);
   notifyThemeChange();
 }
 
@@ -57,7 +58,7 @@ export function switchToLightMode(): void {
     currentMediaQuery.onchange = null;
     currentMediaQuery = null;
   }
-  document.body.classList.remove("dark");
+  setDarkAppearance(false);
   notifyThemeChange();
 }
 
@@ -104,6 +105,7 @@ interface ThemeModeContextValue {
 const ThemeModeContext = createContext<ThemeModeContextValue | null>(null);
 
 export function ThemeModeProvider({ children }: { children: ReactNode }) {
+  const appearance=useAppearance();
   const [mode, setMode] = useState<ThemeMode>(() => getCurrentThemeMode());
 
   useEffect(() => {
@@ -114,6 +116,7 @@ export function ThemeModeProvider({ children }: { children: ReactNode }) {
     return unsubscribe;
   }, []);
 
+  useEffect(()=>{if(!currentMediaQuery)setMode(appearance.dark?'dark':'light');},[appearance.dark]);
   const value = useMemo(
     () => ({
       mode,

@@ -6,7 +6,7 @@ describe('Continuous cloud colors',()=>{
  it('randomizes over the readable spectrum and avoids an existing shade',()=>{expect(randomWordColor([],()=>0)).toBe(spectrumColor(0));expect(randomWordColor([spectrumColor(180)],()=>.5)).not.toBe(spectrumColor(180));});
  const credentials={workspaceId:'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',accessToken:'a'.repeat(64)};
  it('preserves every legacy color and safely accepts only full RGB values',()=>{
-  expect(colorValue('blue')).toBe('#7bb3ff');expect(colorValue('white')).toBe('#f5f5f7');expect(colorValue('#A1B2C3')).toBe('#a1b2c3');
+  expect(colorValue('blue')).toBe('var(--word-blue)');expect(colorValue('white')).toBe('var(--word-white)');expect(colorValue('#A1B2C3')).toMatch(/^light-dark\(/);expect(colorHex('#A1B2C3')).toBe('#a1b2c3');
   for(const value of ['url(https://example.com)','var(--unsafe)','#fff','#12345678','red','__proto__'])expect(isCloudColor(value)).toBeFalse();
   expect(isCloudColor('#012ABC')).toBeTrue();expect(colorHex()).toBe('#f5f5f7');
  });

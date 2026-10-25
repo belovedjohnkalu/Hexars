@@ -1,3 +1,4 @@
+import {saveSharedRootName} from '../helpers/saveSharedRootName';
 import { attachCloudAuthors } from '../helpers/cloudAuthors';
 import { drainCloudRefresh } from '../helpers/drainCloudRefresh';
 import { homeFeatures } from '../helpers/homeFeatures';
@@ -121,7 +122,7 @@ export async function handle(request: Request) {
       if(next!==nodes){
         assertCloudWordLimits([...context.seeds,...nodes],[...context.seeds,...next],input.scope);
         assertCloudCapacity([...context.seeds,...nodes],[...context.seeds,...next]);
-        const updated=await db.updateTable("ionWorkspaces").set({nodes:next as unknown as Json,version:row.version+1,updatedAt:new Date()}).where("id","=",row.id).where("version","=",row.version).returning("version").executeTakeFirst();
+        const updated=(input.action==='rename'||input.action==='update')&&(input.scope==='home'||input.scope==='chess')&&input.id==='hexagonal-chess'?await saveSharedRootName(row.id,row.version,next):await db.updateTable("ionWorkspaces").set({nodes:next as unknown as Json,version:row.version+1,updatedAt:new Date()}).where("id","=",row.id).where("version","=",row.version).returning("version").executeTakeFirst();
         if(!updated)throw new CloudError("Your cloud changed. Try again.",409);
         nodes=next;version=updated.version;
       }

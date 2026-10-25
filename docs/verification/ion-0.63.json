@@ -1,0 +1,88 @@
+{
+  "passed": true,
+  "release": "0.63",
+  "scope": "IL0A00A1 plus direct rhombus/theme/tile request",
+  "checks": [
+    "Fresh desktop opens in a real light theme without inversion",
+    "Clouds use three printed rhombus faces and descendant-based sizing",
+    "Typing expands the raised footer while Safari-style visit navigation sits beside inactive input",
+    "Hold opens Controls promptly; both edit tabs retain the color wheel and no additional text field",
+    "Leftward input swipe opens a new tile and shows its name above the page title",
+    "Tile hold offers Rename and Delete; the name survives reload",
+    "Both split screens share the tile name and have 44px square close controls",
+    "Registered dev can hold and edit the New Tile functional cloud through normal Controls",
+    "IL04A10 toggles persistent dark mode and matches browser chrome, then restores light",
+    "Phone cloud layout and both edit tabs fit without document scrolling",
+    "Phone home opens with a complete mosaic, varied picture sizes and complete image frames",
+    "Playable blue board retains large unskewed pieces and joined rhombus action clouds",
+    "All reviewed browser flows completed without uncaught errors",
+    "The Tiles assembly and its three controls have permanent ILs and dev edit rights; Journal retains its paired artwork",
+    "Holding the assembly, Rename or Delete opens the normal dev editor",
+    "Deleting a tile closes only its views and keeps its clouds",
+    "A simulated software-keyboard viewport keeps active input full width just above its upper edge",
+    "The media editor and color wheel remain inside a compact keyboard viewport",
+    "Saved-board actions and notations use rhombi and Back returns to the visited saved board",
+    "Additional phone, tile and saved-game checks completed without uncaught errors",
+    "Board Games rename projects atomically across shared Home and Chess while retaining owner placement, artwork and IL"
+  ],
+  "errors": [],
+  "jasmine": {
+    "files": 108,
+    "passed": 108,
+    "targetedRerunsAfterRefinements": true
+  },
+  "typescript": "clean",
+  "premium": {
+    "existingReviewedFindings": 38,
+    "unresolved": 0,
+    "newFindingCategories": 0
+  },
+  "publication": {
+    "url": "https://ion.floot.app",
+    "jobId": "d4ca358e-c079-4ac9-90b2-f4c8301a060f",
+    "runtimeCodeVersion": 1792964370796,
+    "nativeBuildRequested": false
+  },
+  "scopeArchive": {
+    "root": "d3764808-8f80-4cb3-9061-b6c820cd44ee",
+    "destination": "df45ea97-524e-4c1c-b2f6-2a96529562e3",
+    "nodes": 8,
+    "homeVersion": 352,
+    "birthLabel": "IL90A1",
+    "preservedContent": true,
+    "realtimeQueuePending": 0
+  },
+  "dataRepairs": {
+    "tileFunctionalEntriesRestored": [
+      "page-tiles",
+      "page-tile-new",
+      "page-tile-delete"
+    ],
+    "reason": "Explicit current request makes the assembly and New Tile/Rename/Delete functional clouds editable",
+    "unrelatedTombstonesChanged": false,
+    "boardGamesRenamePreservesPlacement": true
+  },
+  "qaCleanup": {
+    "userId": 160,
+    "liveSessions": 0,
+    "privateNodes": 0,
+    "devRoles": 0,
+    "walletBalanceUs": "0",
+    "walletClosed": true,
+    "earningReversals": 13,
+    "privateMediaFiles": 0,
+    "credentialsDeleted": true
+  },
+  "workSession": {
+    "id": "f68c8730-e5af-4166-aa15-7910d66ee160",
+    "source": "agent",
+    "startedAt": "2026-10-25T20:28:55.152Z",
+    "endedAt": "2026-10-25T21:46:24.266Z",
+    "elapsedSeconds": "4649.115",
+    "realtimeRefreshDrained": true
+  },
+  "limits": [
+    "Phone browser emulation and a simulated keyboard viewport; no physical iPhone claim",
+    "Existing four polling notices and seven external ChatGPT integration endpoints remain outside this UI release"
+  ]
+}

@@ -9,3 +9,5 @@
 .bubble[data-forward=true] .forward { flex-basis:52px; width:52px; opacity:1; transform:translateX(0); pointer-events:auto; }
 @media(max-height:420px) { .bubble { left:22px; bottom:var(--back-bottom,74px); width:48px; height:48px; } .bubble[data-forward=true] { width:96px; } .arrow.arrow { flex-basis:46px; width:46px; height:46px; min-width:46px; } .bubble[data-forward=true] .forward { flex-basis:46px; width:46px; } }
 @media(prefers-reduced-motion:reduce) { .bubble,.arrow.arrow,.forward { transition:none; } }
+
+.bubble.inline{position:relative;left:auto;bottom:auto;z-index:auto;flex-shrink:0;}

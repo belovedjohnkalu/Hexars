@@ -39,3 +39,7 @@
 .chosen { min-height:40px; margin:12px 0; font-size:17px; overflow-wrap:anywhere; }
 .chosen small { display:block; font-size:11px; color:var(--muted-foreground); }
 .sheet[data-compact=true] .description { display:none; }
+
+.sheet{max-height:calc(min(100dvh,var(--ion-visual-height,100dvh)) - 20px);padding:16px;}.sheet .scopes{margin:6px 0;}.sheet .actions{margin-top:8px;}.sheet .description{display:none;}.sheet .actions button{min-width:88px;}
+
+.mediaEditor{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:4px;align-items:center;}.mediaEditor p{grid-column:1/-1;grid-row:2;margin:2px 0;font-size:12px;}.mediaEditor button{white-space:normal;min-height:44px;}.sheet .error{margin:4px 0;font-size:13px;line-height:1.3;}

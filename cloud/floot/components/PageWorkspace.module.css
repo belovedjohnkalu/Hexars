@@ -1,8 +1,8 @@
 .workspace { position:fixed; inset:0; overflow:hidden; background:var(--background); }
 .primary,.pane { position:absolute; min-width:0; min-height:0; overflow:clip; outline:none; background:var(--background); transition:left 380ms var(--ease),top 380ms var(--ease),width 380ms var(--ease),height 380ms var(--ease); }
 .workspace[data-split=true] .primary,.pane { border-radius:var(--radius-md,24px); transform:translateZ(0); contain:layout paint; }
-.workspace[data-split=true] .primary > * { height:100% !important; top:0 !important; min-height:0 !important; }
-.frame { display:block; width:100%; height:100%; border:0; background:var(--background); color-scheme:dark; }
+.workspace[data-split=true] .primary > :not([data-screen-close]) { height:100% !important; top:0 !important; min-height:0 !important; }
+.frame { display:block; width:100%; height:100%; border:0; background:var(--background); color-scheme:inherit; }
 .pane { animation:arrive 380ms var(--ease) both; }
 .dividers { position:absolute; inset:0; pointer-events:none; overflow:visible; }
 .dividers line { stroke:var(--foreground); stroke-width:3; stroke-linecap:round; filter:drop-shadow(0 0 3px var(--foreground)) drop-shadow(0 0 8px color-mix(in srgb,var(--foreground) 35%,transparent)); transition:all 380ms var(--ease); }
@@ -14,4 +14,4 @@
 @media(prefers-reduced-motion:reduce) { .primary,.pane,.dividers line { transition:none; animation:none; } }
 @media(forced-colors:active) { .dividers line { stroke:CanvasText; filter:none; } }
 
-.closeScreen{position:absolute;right:1rem;top:calc(env(safe-area-inset-top,0px) + .65rem);z-index:48;border:0;border-radius:50%;width:44px;height:44px;background:var(--surface);color:var(--foreground);font:300 30px/1 var(--font-family-base);cursor:pointer;-webkit-tap-highlight-color:transparent;}
+.closeScreen{position:absolute;right:1rem;top:calc(env(safe-area-inset-top,0px) + 40px);z-index:48;border:0;border-radius:50%;width:44px;height:44px;background:var(--surface);color:var(--foreground);font:300 30px/1 var(--font-family-base);cursor:pointer;-webkit-tap-highlight-color:transparent;}

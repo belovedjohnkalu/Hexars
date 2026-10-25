@@ -4,7 +4,8 @@ export type CloudColor=typeof cloudColors[number]|`#${string}`;
 const legacy:Record<typeof cloudColors[number],string>={white:'#f5f5f7',blue:'#7bb3ff',cyan:'#70dce2',mint:'#a5dba7',amber:'#f5d17c',coral:'#ffa78b',rose:'#f6a4d5',lavender:'#c5a1ff'};
 export const isCloudColor=(value:unknown):value is CloudColor=>typeof value==='string'&&(/^[#][0-9a-f]{6}$/i.test(value)||Object.hasOwn(legacy,value));
 export const colorHex=(color?:CloudColor):string=>color&&/^[#][0-9a-f]{6}$/i.test(color)?color.toLowerCase():legacy[color as keyof typeof legacy]||legacy.white;
-export const colorValue=(color?:CloudColor)=>colorHex(color);
+export function accessibleCloudHex(hex:string,dark=false){const rgb=[1,3,5].map(i=>parseInt(hex.slice(i,i+2),16)),lum=(channels:number[])=>channels.map(v=>v/255).map(v=>v<=.04045?v/12.92:((v+.055)/1.055)**2.4).reduce((n,v,i)=>n+v*[.2126,.7152,.0722][i],0),background=dark?.008:.65,contrast=(l:number)=>dark?(l+.05)/(background+.05):(background+.05)/(l+.05);let current=rgb;for(let step=0;step<60&&contrast(lum(current))<4.6;step++)current=current.map(v=>dark?v+(255-v)*.08:v*.93);return '#'+current.map(v=>Math.round(v).toString(16).padStart(2,'0')).join('');}
+export const colorValue=(color?:CloudColor)=>color&&!color.startsWith('#')?'var(--word-'+color+')':!color?'var(--word-white)':'light-dark('+accessibleCloudHex(colorHex(color))+','+accessibleCloudHex(colorHex(color),true)+')';
 export const colorName=(color:CloudColor)=>color.startsWith('#')?color.toUpperCase():color[0].toUpperCase()+color.slice(1);
 const toHex=(rgb:number[]):CloudColor=>('#'+rgb.map(v=>Math.round(v).toString(16).padStart(2,'0')).join('')) as CloudColor;
 export function spectrumColor(hue:number):CloudColor{

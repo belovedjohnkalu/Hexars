@@ -41,3 +41,5 @@
 .bottom > form { flex:1; min-width:0; }
 .app:has([data-composer-expanded=true]){--back-bottom:calc(164px + env(safe-area-inset-bottom));}
 .error>span{min-width:0;overflow-wrap:anywhere;}
+
+.footer:has([data-composer-dock]){padding:0;}.bottom:has([data-composer-dock]){width:100%;max-width:none;}.app[data-keyboard=true] [data-composer-dock]{padding-bottom:8px;}

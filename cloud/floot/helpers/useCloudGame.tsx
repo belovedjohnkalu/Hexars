@@ -217,12 +217,12 @@ export function useCloudGame(variant: VariantId, defaultMode: "engine" | "two_pl
     openGame: (link: string) => {
       try {
         const saved = gameSessions.fromHash(new URL(link.trim()).hash);
-        if (!saved) throw new Error("Paste a saved Hexagons game link.");
+        if (!saved) throw new Error("Paste a saved game link.");
         engineKey.current = "";
         credentials.current = saved;
         return perform({ action: "get", ...saved });
       } catch {
-        setError("Paste a complete saved Hexagons game link.");
+        setError("Paste a complete saved game link.");
         return Promise.resolve(false);
       }
     },
