@@ -7,7 +7,7 @@ const order=new Map(['hexagonal-chess',chessSections.play,chessSections.learn,'c
 // authoritative response; omit its branch only from a context-free canvas.
 export function chessNavigationNodes(nodes:CloudNode[],scope:CloudScope,returnVariant:string|null):CloudNode[]{
  if(scope!=='chess')return nodes;
- const hidden=new Set<string>();
+ const hidden=new Set<string>(['tactical','positional','defensive','materialist','unconventional','universal']);
  if(!chessVariants.isCheckers(returnVariant)){hidden.add('checkers-computer');hidden.add('checkers-online');}
  if(!chessVariants.isId(returnVariant)){
   hidden.add('engines');
@@ -15,5 +15,5 @@ export function chessNavigationNodes(nodes:CloudNode[],scope:CloudScope,returnVa
  {let changed=true;
   while(changed){changed=false;for(const n of nodes)if(n.parentId&&hidden.has(n.parentId)&&!hidden.has(n.id)){hidden.add(n.id);changed=true;}}
  }
- return nodes.filter(n=>!hidden.has(n.id)).sort((a,b)=>(order.get(a.id)??1000)-(order.get(b.id)??1000));
+ return nodes.filter(n=>!hidden.has(n.id)).map(n=>n.id==='engines'?{...n,name:'Computer'}:n).sort((a,b)=>(order.get(a.id)??1000)-(order.get(b.id)??1000));
 }

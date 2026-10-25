@@ -1,3 +1,4 @@
+import {checkersRoot} from '../helpers/checkersClouds';
 import { chessNavigationNodes,chessNavigationAnchors } from '../helpers/chessNavigation';
 import { useRandomWordColor,randomColorCloudId } from '../helpers/useRandomWordColor';
 import { notificationsId } from '../helpers/notificationRoutes';
@@ -58,9 +59,9 @@ export function CloudCanvas({tabularNumbers=false,fitOnChange=false,nodes,parent
   if(node.id==='hexagonal-chess')return cloudURL('hexagonal-chess','chess');
   if(node.id==='public'||node.id==='private')return cloudURL(node.id,node.id);
   const query=new URLSearchParams(location.search),back=query.get('return'),context=back?'&return='+encodeURIComponent(back)+'&mode='+(query.get('mode')==='friend'?'friend':'engine')+'&level='+encodeURIComponent(query.get('level')??'3')+'&engine='+(resolveEngineId(query.get('engine')))+'&saved='+encodeURIComponent(query.get('saved')||''):'';
-  if(node.id==='checkers-computer'&&!chessVariants.isCheckers(back))return cloudURL('e28bff47-f4b4-45f3-abef-8c8d2e63cd4e','chess');
+  if(node.id==='checkers-computer'&&!chessVariants.isCheckers(back))return cloudURL(checkersRoot,'chess');
   if((node.id==='engines'||node.destination==='level')&&!chessVariants.isId(back))return cloudURL('boards','chess');
-  if(node.destination==='level'){const level=node.level??3,engine=node.engineId??'tactical';return chessVariants.isId(back)?'/'+back+'?mode=engine&engine='+engine+'&level='+level:'/?cloud=boards&engine='+engine+'&level='+level;}
+  if(node.destination==='level'){const level=node.level??3,engine='universal';return chessVariants.isId(back)?'/'+back+'?mode=engine&engine='+engine+'&level='+level:'/?cloud=boards&engine='+engine+'&level='+level;}
   if(chessVariants.isId(node.destination))return '/'+node.destination+'?mode=friend';
   return cloudURL(node.id,scope)+context;
  }
@@ -78,7 +79,7 @@ export function CloudCanvas({tabularNumbers=false,fitOnChange=false,nodes,parent
    return <span key={node.id} {...props} role="group">{picture&&<Link to={own} onClick={e=>{if(!pictureClick(e,own))onOpen(e,node.id,own);}}><CloudPhoto node={node} size={rect.pictureSize??rect.width-24}/></Link>}{picture?<span className={styles.caption}>{words}{label}</span>:<>{words}{label}</>}</span>;
   }
   const target=destination(node);if(/^https?:/.test(target))return <a key={node.id} {...props} href={target} target="_blank" rel="noopener noreferrer" onClick={e=>{pictureClick(e,target);}}>{content}</a>;
-  return node.id===randomColorCloudId||node.id===notificationsId||node.id===inversionCloudId||node.destination==='control'||node.destination==='account'?<Button key={node.id} variant="ghost" {...props} onClick={e=>{const command=()=>node.id===randomColorCloudId?randomColors.toggle():node.id===notificationsId?void notifications.toggle():node.id===inversionCloudId?appearance.toggle():onCommand?.(node);if(!photos.click(e,node,command))command();}}>{content}</Button>:<Link key={node.id} {...props} to={destination(node)} onClick={e=>{if(pictureClick(e,target))return;if(node.destination==='level'&&!node.lockedItem)try{localStorage.setItem('ion.engine',node.engineId??'tactical');localStorage.setItem('ion.difficulty',String(node.level??3));}catch{}onOpen(e,node.id,destination(node));}}>{content}</Link>;
+  return node.id===randomColorCloudId||node.id===notificationsId||node.id===inversionCloudId||node.destination==='control'||node.destination==='account'?<Button key={node.id} variant="ghost" {...props} onClick={e=>{const command=()=>node.id===randomColorCloudId?randomColors.toggle():node.id===notificationsId?void notifications.toggle():node.id===inversionCloudId?appearance.toggle():onCommand?.(node);if(!photos.click(e,node,command))command();}}>{content}</Button>:<Link key={node.id} {...props} to={destination(node)} onClick={e=>{if(pictureClick(e,target))return;if(node.destination==='level'&&!node.lockedItem)try{localStorage.setItem('ion.engine','universal');localStorage.setItem('ion.difficulty',String(node.level??3));}catch{}onOpen(e,node.id,destination(node));}}>{content}</Link>;
  })}
  {!siblings.length&&!loading&&<p className={styles.empty}>Nothing here yet</p>}
  </div></SpatialViewport>{photos.viewing&&<CloudPhotoViewer node={photos.viewing} onClose={photos.close}/>}</div>;

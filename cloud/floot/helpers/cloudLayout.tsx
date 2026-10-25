@@ -6,7 +6,7 @@ export type CloudLayout={width:number;height:number;items:Array<Rect&{id:string;
 export function cloudLayout(items:Item[],width:number,height:number,measure:(text:string,size:number)=>number,options:{anchors?:Record<string,{x:number;y:number}>;organic?:boolean;square?:boolean;boardGrid?:boolean;columns?:number;compact?:boolean;minTargetSize?:number;maxFontSize?:number;previous?:CloudLayout}={}){
   const previous=options.previous,narrow=options.compact??width<600,gap=options.organic?(narrow?4:6):narrow?16:24,cells=new Map<string,Rect[]>(),result:CloudLayout['items']=[];
   function keys(rect:Rect){const list:string[]=[];for(let x=Math.floor(rect.x/128);x<=Math.floor((rect.x+rect.width)/128);x++)for(let y=Math.floor(rect.y/128);y<=Math.floor((rect.y+rect.height)/128);y++)list.push(x+","+y);return list;}
-  const overlaps=(rect:Rect)=>keys(rect).some(k=>(cells.get(k)||[]).some(r=>rect.x<r.x+r.width&&rect.x+rect.width>r.x&&rect.y<r.y+r.height&&rect.y+rect.height>r.y));
+  const overlaps=(rect:Rect)=>keys(rect).some(k=>(cells.get(k)||[]).some(r=>rect.x<r.x+r.width-.01&&rect.x+rect.width>r.x+.01&&rect.y<r.y+r.height-.01&&rect.y+rect.height>r.y+.01));
   const reserve=(rect:Rect)=>{for(const k of keys(rect))cells.set(k,[...(cells.get(k)||[]),rect]);};
   const minFont=narrow?15:17;
   // The type scale is fixed before measuring names. Names affect space, never font size.

@@ -1,4 +1,3 @@
-import { chessEngines } from './chessEngines';
 import { tacticalLevels } from './tacticalLevels';
 import type { CloudNode } from '../endpoints/cloud_POST.schema';
 import { chessVariants } from './chessVariants';
@@ -17,12 +16,5 @@ export const chessJourney:CloudNode[]=[
  {id:'online-create-any',parentId:'online-create',name:'Random',color:'white',system:true,isImage:true,imageUrl:'/_cdn/static/edf791ca-fa79-4012-b741-55366beae7dc.png',href:'/?cloud=online-lobby&kind=create&variant=random'},
  {id:'online-random-any',parentId:'online-random',name:'Random',color:'white',system:true,isImage:true,imageUrl:'/_cdn/static/edf791ca-fa79-4012-b741-55366beae7dc.png',href:'/?cloud=online-lobby&kind=find&variant=random'},
  ...(['online-random','online-create'] as const).flatMap(parentId=>chessVariants.all.filter(v=>!chessVariants.isCheckers(v.id)).map((v,i)=>({id:parentId+'-'+v.id,parentId,name:v.name+'’s Variant',variant:v.id,isImage:true,color:(["cyan","lavender","rose","amber","mint","blue"] as const)[i],system:true,href:'/?cloud=online-lobby&kind='+(parentId==='online-create'?'create':'find')+'&variant='+v.id}))),
- {id:'positional',parentId:'engines',name:'Positional',color:'mint',system:true},
- ...['Pre-Beginner','Beginner','Easy','Medium','Hard','Expert'].map((name,i)=>({id:'positional-level-'+i,parentId:'positional',name,engineId:'positional' as const,destination:'level' as const,level:i,color:'mint' as const,system:true})),
- {id:'defensive',parentId:'engines',name:'Defensive',color:'lavender',system:true},
- ...tacticalLevels.map(l=>({id:'defensive-level-'+l.level,parentId:'defensive',name:l.name,engineId:'defensive' as const,destination:'level' as const,level:l.level,color:'lavender' as const,system:true})),
- ...chessEngines.filter(e=>e.id==='materialist'||e.id==='unconventional'||e.id==='universal').flatMap(engine=>[
-  {id:engine.id,parentId:'engines',name:engine.name,color:engine.color,system:true},
-  ...tacticalLevels.map(l=>({id:engine.id+'-level-'+l.level,parentId:engine.id,name:l.name,engineId:engine.id,destination:'level' as const,level:l.level,color:engine.color,system:true}))
- ])
+ ...tacticalLevels.map(l=>({id:'computer-level-'+l.level,parentId:'engines',name:l.name,engineId:'universal' as const,destination:'level' as const,level:l.level,color:'cyan' as const,system:true}))
 ];

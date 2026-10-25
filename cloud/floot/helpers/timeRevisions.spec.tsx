@@ -18,10 +18,10 @@ describe('Published estimate revisions',()=>{
   expect(updates.length).toBe(0);expect(audits.length).toBe(0);
  });
  it('freezes each new quote from one catalog snapshot without re-reading changed costs',async()=>{
-  spyOn(timeLedger,'catalog').and.resolveTo({buyers:10,pricingReady:true,products:[{id:'engine:tactical',name:'Tactical',published:true,owned:false,priceUs:'12',directUs:'100',freeUs:'15',proposalId:'old'}]} as any);
+  spyOn(timeLedger,'catalog').and.resolveTo({buyers:10,pricingReady:true,products:[{id:'variant:wellisch',name:'Wellisch',published:true,owned:false,priceUs:'12',directUs:'100',freeUs:'15',proposalId:'old'}]} as any);
   const values:any[]=[];spyOn(db,'insertInto').and.returnValue({values:(value:any)=>{values.push(value);return{execute:async()=>[]};}} as any);
   spyOn(db,'selectFrom').and.throwError('Do not read a second cost version');
-  const result=await timeOperations({action:'quote',kind:'purchase',productId:'engine:tactical'},1,'session');
+  const result=await timeOperations({action:'quote',kind:'purchase',productId:'variant:wellisch'},1,'session');
   expect(result.quote?.amountUs).toBe('12');expect(values[0].calculation.creationCostUs).toBe('115');expect(values[0].calculation.costVersion).toBe('old');expect(db.selectFrom).not.toHaveBeenCalled();
  });
  it('does not publish on behalf of an ordinary dev',async()=>{

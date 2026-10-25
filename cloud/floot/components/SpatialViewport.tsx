@@ -2,7 +2,7 @@ import { useLayoutEffect,useRef,useState,type ReactNode,type PointerEvent } from
 import styles from './SpatialViewport.module.css';
 export type ContentBounds={x:number;y:number;width:number;height:number};
 type View={zoom:number;x:number;y:number};const views=new Map<string,{view:View;refitKey?:string}>();
-export function SpatialViewport({children,width,height,viewKey,label='Word space',ready=true,initialZoom,minFitZoom,maxFitZoom=3,fitPadding=10,refitKey,contentBounds}:{children:ReactNode;width:number;height:number;viewKey:string;label?:string;ready?:boolean;initialZoom?:number;minFitZoom?:number;maxFitZoom?:number;fitPadding?:number;refitKey?:string;contentBounds?:ContentBounds}){
+export function SpatialViewport({children,width,height,viewKey,label='Cloud',ready=true,initialZoom,minFitZoom,maxFitZoom=3,fitPadding=10,refitKey,contentBounds}:{children:ReactNode;width:number;height:number;viewKey:string;label?:string;ready?:boolean;initialZoom?:number;minFitZoom?:number;maxFitZoom?:number;fitPadding?:number;refitKey?:string;contentBounds?:ContentBounds}){
  const fitKey=useRef(''),hasFit=useRef(false),lastRefit=useRef(refitKey);
  const viewport=useRef<HTMLDivElement>(null),world=useRef<HTMLDivElement>(null),[view,setView]=useState<View>({zoom:1,x:0,y:0}),current=useRef(view),fit=useRef(view),points=useRef(new Map<number,{x:number;y:number}>()),last=useRef<{x:number;y:number;distance?:number}|null>(null),origin=useRef<{x:number;y:number}|null>(null),moved=useRef(false),touched=useRef(false);
  const apply=(v:View)=>{current.current=v;setView(v);};

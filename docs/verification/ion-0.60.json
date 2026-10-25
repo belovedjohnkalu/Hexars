@@ -1,0 +1,51 @@
+{
+  "release": "0.60",
+  "todo": "unchanged; deferred by latest user instruction",
+  "typescript": "clean",
+  "jasmine": {
+    "files": 97,
+    "passed": 97,
+    "targetedRerunsAfterExpectationAlignment": true
+  },
+  "native": {
+    "assertions": 4989,
+    "randomGames": 12,
+    "computerGames": 4
+  },
+  "apiChecks": 13,
+  "browser": {
+    "checks": 13,
+    "pageErrors": 0,
+    "viewports": [
+      [
+        1280,
+        900
+      ],
+      [
+        320,
+        568
+      ],
+      [
+        844,
+        390
+      ]
+    ],
+    "backForward": true,
+    "copyILOrdinaryAccount": true,
+    "ILURL": true,
+    "search": true,
+    "redirectItemAndILFits": true,
+    "moveILs": true,
+    "guestFreeComputer": true
+  },
+  "pricing": {
+    "paidFeatures": 7,
+    "enginePrices": 0,
+    "hexdameFree": true,
+    "historicalLedgerPreserved": true
+  },
+  "premium": {
+    "existingFindings": 38,
+    "unresolved": 0
+  }
+}

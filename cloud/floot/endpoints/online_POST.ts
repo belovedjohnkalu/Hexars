@@ -15,7 +15,7 @@ export async function handle(request:Request){const headers={'Content-Type':'app
  const result=await db.transaction().execute(async tx=>{
   const owned=await timeAccess.variants(user.id,tx),family=(input.action==='find'||input.action==='create')?(input.variant!=='random'?(chessVariants.isCheckers(input.variant)?'checkers':'chess'):input.family):undefined;
   const available=owned.filter(v=>family==='checkers'?chessVariants.isCheckers(v):!chessVariants.isCheckers(v));
-  if((input.action==='find'||input.action==='create')&&input.variant==='random'&&!available.length)fail('Unlock a variant in this family to play.',402);
+  if((input.action==='find'||input.action==='create')&&input.variant==='random'&&!available.length)fail('Unlock a variant to play.',402);
   if((input.action==='find'||input.action==='create')&&input.variant!=='random')await timeAccess.assert(user.id,input.variant,undefined,tx);
   // One short lock serializes joining, code allocation and matchmaking. Native
   // setup has no search, and all seats/game creation commit atomically.

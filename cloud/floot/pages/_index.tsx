@@ -1,11 +1,13 @@
+import {ILNavigator} from '../components/ILNavigator';
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation,useNavigate } from "react-router-dom";
 import { CloudExplorer } from "../components/CloudExplorer";
 import { AppHead } from "../components/AppHead";
 import { HexLoading } from "../components/HexLoading";
 import { postGame } from "../endpoints/game_POST.schema";
 import { gameSessions } from "../helpers/gameSessions";
-export default function Home() {
+export default function Home(){const location=useLocation(),il=new URLSearchParams(location.search).get('il');return il!==null?<ILNavigator il={il}/>:<HomeContent/>;}
+function HomeContent() {
   const navigate=useNavigate();
   const [opening,setOpening]=useState(()=>!!gameSessions.fromHash()),[error,setError]=useState(false);
   useEffect(()=>{

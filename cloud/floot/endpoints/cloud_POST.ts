@@ -70,12 +70,12 @@ export async function handle(request: Request) {
     }
     if (input.action === "add") {
       if(!cloudPolicy.writable(input.scope,context.userId,context.owner))cloudPolicy.fail("You cannot add here.");
-      if(!input.parentId)cloudPolicy.fail("Choose a cloud inside this space.",400);
+      if(!input.parentId)cloudPolicy.fail("Choose a cloud inside this cloud.",400);
       // A retry of the same creation is safe even after another tab changes the version.
       const existing = nodes.find(n => n.id === input.id);
       if(existing?.removedBy)throw new CloudError("This item was removed. Edit its name to add it again.",409);
       if (!existing) {
-        if (input.version !== row.version) throw new CloudError("Your space changed in another tab. Try again.", 409);
+        if (input.version !== row.version) throw new CloudError("Your cloud changed in another tab. Try again.", 409);
           if (input.parentId !== null && !all.some(n => n.id === input.parentId && !n.destination))
           throw new CloudError("Choose an existing cloud.", 400);
         const node: CloudNode = { id: input.id, parentId: input.parentId, name: input.name,createdBy:context.userId!,color:unusedColor(input.color||'white',all.filter(n=>n.parentId===input.parentId).map(n=>n.color)) };
@@ -92,7 +92,7 @@ export async function handle(request: Request) {
         nodes = [...nodes, node];
         const updated = await db.updateTable("ionWorkspaces").set({ nodes: nodes as unknown as Json, version: row.version + 1, updatedAt: new Date() })
           .where("id", "=", row.id).where("version", "=", row.version).returning("version").executeTakeFirst();
-        if (!updated) throw new CloudError("Your space changed in another tab. Try again.", 409);
+        if (!updated) throw new CloudError("Your cloud changed in another tab. Try again.", 409);
         version = updated.version;
       }
     }
@@ -101,7 +101,7 @@ export async function handle(request: Request) {
         if(!cloudPolicy.writable(input.scope,context.userId,context.owner)||nodes.filter(n=>n.removedBy===input.operationId).some(n=>!cloudPolicy.edit(input.scope,{...n,removedBy:undefined},context.userId,context.owner)))cloudPolicy.fail('You cannot restore this branch.');
       }else if(input.action!=='copy')cloudPolicy.assert(input.scope,all,input.id,context.userId,context.owner,input.action==='remove'||input.action==='move');
       else if(!cloudPolicy.writable(input.scope,context.userId,context.owner))cloudPolicy.fail('You cannot copy here.');
-      if((input.action==='move'||input.action==='copy')&&!input.parentId)cloudPolicy.fail('Choose a cloud inside this space.',400);
+      if((input.action==='move'||input.action==='copy')&&!input.parentId)cloudPolicy.fail('Choose a cloud inside this cloud.',400);
       if(input.action==='link'&&input.target?.kind==='cloud'){
         if(input.target.scope===input.scope&&input.target.id===input.id)cloudPolicy.fail('Choose another cloud.',400);
         const target=await cloudContext(request,{action:'load',scope:input.target.scope,workspaceId:input.workspaceId,accessToken:input.accessToken});
@@ -123,7 +123,7 @@ export async function handle(request: Request) {
         assertCloudWordLimits([...context.seeds,...nodes],[...context.seeds,...next],input.scope);
         assertCloudCapacity([...context.seeds,...nodes],[...context.seeds,...next]);
         const updated=await db.updateTable("ionWorkspaces").set({nodes:next as unknown as Json,version:row.version+1,updatedAt:new Date()}).where("id","=",row.id).where("version","=",row.version).returning("version").executeTakeFirst();
-        if(!updated)throw new CloudError("Your space changed. Try again.",409);
+        if(!updated)throw new CloudError("Your cloud changed. Try again.",409);
         nodes=next;version=updated.version;
       }
     }
@@ -132,14 +132,14 @@ export async function handle(request: Request) {
     // Keep removed rows in the registry. Allocation is serialized across devices;
     // labels are never recycled or exposed in another account's Private space.
     const hubIds=new Set(functionClouds.filter(n=>n.parentId==='time').map(n=>n.id)),functional=context.isDev&&input.scope==='home'?await functionIdentifiers(context.userId!):undefined;
-    const identifiers=context.isDev||(['public','chess','home'].includes(input.scope)&&input.action!=='load')
+    const identifiers=context.isDev||input.scope==='public'||(['chess','home'].includes(input.scope)&&input.action!=='load')
       ?await cloudIdentifierStore(merged.filter(n=>!hubIds.has(n.id)),context.devNumber):undefined;
     const readable=visibleDevClouds(merged,context.isDev),authorIds=[...new Set(readable.filter(n=>!n.removedBy&&n.createdBy).map(n=>n.createdBy!))];
     const authors=authorIds.length?await db.selectFrom('users').select(['id','displayName']).where('id','in',authorIds).execute():[];
     const withAuthors=attachCloudAuthors(readable,new Map(authors.map(u=>[u.id,u.displayName])));
     // Signed picture URLs are refreshed on every read, and never stored as authority.
     let visible:CloudNode[] = await Promise.all(withAuthors.filter(n=>!n.removedBy&&!['time-balance','time-activity'].includes(n.id)&&(context.isDev||!['time-treasury','time-estimates'].includes(n.id))&&(context.scope!=='accounts'||n.id!=='account-remember'||context.seeds.some(seed=>seed.id==='account-remember'))).map(async node => {
-      const visibleNode={...node,...(['time-added','time-spent','time-remaining'].includes(node.id)?{parentId:'time'}:{}),...(node.id==='control-link'&&node.name==='Link'?{name:'Redirect'}:{}),identifier:functional?.[node.id]??(context.isDev?namespaceIdentifier(identifiers?.get(node.id)?.label,Number((input.scope==='private'&&node.id==='private'||input.scope==='accounts'&&context.seeds.some(s=>s.id===node.id))?context.devNumber:identifiers?.get(node.id)?.devNumber??context.devNumber)):undefined),createdBy:undefined,canEdit:cloudPolicy.edit(input.scope,node,context.userId,context.owner),canCopy:!(input.scope==='schedule'&&context.seeds.some(seed=>seed.id===node.id))&&!!context.userId&&cloudPolicy.writable(input.scope,context.userId,context.owner)&&(context.owner||!cloudTree.roots.some(r=>r.id===node.id))};
+      const visibleNode={...node,...(['time-added','time-spent','time-remaining'].includes(node.id)?{parentId:'time'}:{}),...(node.id==='control-link'&&node.name==='Link'?{name:'Redirect'}:{}),identifier:functional?.[node.id]??(context.isDev||input.scope==='public'?namespaceIdentifier(identifiers?.get(node.id)?.label,Number((input.scope==='private'&&node.id==='private'||input.scope==='accounts'&&context.seeds.some(s=>s.id===node.id))?context.devNumber:identifiers?.get(node.id)?.devNumber??context.devNumber)):undefined),createdBy:undefined,canEdit:cloudPolicy.edit(input.scope,node,context.userId,context.owner),canCopy:!(input.scope==='schedule'&&context.seeds.some(seed=>seed.id===node.id))&&!!context.userId&&cloudPolicy.writable(input.scope,context.userId,context.owner)&&(context.owner||!cloudTree.roots.some(r=>r.id===node.id))};
       const keys=node.imageKeys?.length?node.imageKeys:node.imageKey?[node.imageKey]:[];
       if(!keys.length)return visibleNode;
       const urls=await Promise.all(keys.map(async filename=>{const result=await getUrl({visibility:'private',filename,expiresInSeconds:3600});return result.ok?result.url:'';}));
@@ -168,6 +168,6 @@ export async function handle(request: Request) {
   } catch (error) {
     const status = error instanceof Error && "status" in error && typeof error.status === "number" ? error.status : error instanceof SyntaxError || (error && typeof error === "object" && "issues" in error) ? 400 : 503;
     if (status === 503) console.error("ION space request failed", error instanceof Error ? error.message : "Unknown error");
-    return new Response(JSON.stringify({ error: status === 503 ? "Couldn’t open your space. Try again." : error instanceof Error && "status" in error ? error.message : "Check your word or picture and try again." }), { status, headers });
+    return new Response(JSON.stringify({ error: status === 503 ? "Couldn’t open your cloud. Try again." : error instanceof Error && "status" in error ? error.message : "Check your word or picture and try again." }), { status, headers });
   }
 }

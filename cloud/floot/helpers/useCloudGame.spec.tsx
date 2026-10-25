@@ -43,7 +43,7 @@ describe("Saved game link changes",()=>{
     expect(result.current.pendingMove).toBeNull();expect(result.current.data?.game.stateId).toBe(a);expect(result.current.error).not.toBeNull();
   });
 
-  it("resets a linked Defensive game using its saved engine and level",async()=>{
+  it("resets a legacy saved game to Computer while preserving difficulty",async()=>{
     const initial={...game(a),mode:"engine",engineId:"defensive" as const,difficulty:4,engine:"Defensive 1.0.0"};
     const requests:Array<Record<string,unknown>>=[];
     link(a);spyOn(globalThis,"fetch").and.callFake(async(_url,init)=>{
@@ -53,7 +53,7 @@ describe("Saved game link changes",()=>{
     const {result}=renderHook(()=>useCloudGame("shafran","engine",3,"tactical"));
     await until(()=>result.current.data?.gameId===a);
     await act(async()=>{await result.current.newGame("engine",0,"shafran");});
-    expect(requests.find(r=>r.action==='new')).toEqual(jasmine.objectContaining({engineId:'defensive',difficulty:4}));
+    expect(requests.find(r=>r.action==='new')).toEqual(jasmine.objectContaining({engineId:'universal',difficulty:4}));
   });
 
 });

@@ -1,11 +1,11 @@
 import {earningParagraphs} from './timePresentation';
 import type { CloudNode } from '../endpoints/cloud_POST.schema';
 import { chessVariants } from './chessVariants';
-import { chessEngines } from './chessEngines';
+import {isFreeVariant} from './computerPolicy';
 import { timePrinciples } from './timePrinciples';
 const node=(id:string,parentId:string,name:string):CloudNode=>({id,parentId,name,system:true});
-export const gameActionNames={variants:'Variants',rules:'Rules',engines:'Engines',friend:'Pass and Play',reset:'Board Reset',undo:'Undo',online:'Online',library:'Library',forfeit:'Forfeit',draw:'Draw'};
-const products=[{id:'feature:schedule',name:'Schedule'},...chessVariants.all.filter(v=>v.id!=='glinski').map(v=>({id:'variant:'+v.id,name:v.name})),...chessEngines.filter(e=>e.id!=='universal').map(e=>({id:'engine:'+e.id,name:e.name}))];
+export const gameActionNames={variants:'Variants',rules:'Rules',engines:'Computer',friend:'Pass and Play',reset:'Board Reset',undo:'Undo',online:'Online',library:'Library',forfeit:'Forfeit',draw:'Draw'};
+const products=[{id:'feature:schedule',name:'Schedule'},...chessVariants.all.filter(v=>!isFreeVariant(v.id)).map(v=>({id:'variant:'+v.id,name:v.name}))];
 // Stable functional identities. Names/amounts may change; identifiers never do.
 export const functionClouds:CloudNode[]=[
  ...['balance','activity','send','receive','earn','prices','treasury','estimates'].map(id=>node('time-'+id,'time',id==='estimates'?'Work':id[0].toUpperCase()+id.slice(1))),
@@ -18,7 +18,8 @@ export const functionClouds:CloudNode[]=[
  ...earningParagraphs.map(p=>({...node(p.id,'time-earning-rule',p.name),note:p.note})),
  node('time-treasury-value','time-treasury','Treasury balance'),node('time-treasury-activity','time-treasury','Activity'),node('time-payout','time-treasury','Pay out'),
  ...['time-work-total','time-work-sessions','time-work-baseline','time-work-start'].map((id,i)=>node(id,'time-estimates',['Total','Sessions','Earlier work','Start'][i])),
- ...chessVariants.all.flatMap(v=>Object.entries(gameActionNames).map(([id,name])=>node('game-'+v.id+'-'+id,v.id+'-board',name)))
+ ...chessVariants.all.flatMap(v=>Object.entries(gameActionNames).filter(([id])=>v.id!=='kruzno'||!['forfeit','draw'].includes(id)).map(([id,name])=>node('game-'+v.id+'-'+id,v.id+'-board',name))),
+ node('game-kruzno-online-forfeit','kruzno-board','Forfeit'),node('game-kruzno-online-draw','kruzno-board','Draw')
 ];
 export function receiptClouds(receipt:{id:string;direction:string}){
  const id='time-tx-'+receipt.id;

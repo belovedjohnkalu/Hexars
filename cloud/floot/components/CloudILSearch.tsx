@@ -1,0 +1,14 @@
+import {useEffect,useRef,useState} from 'react';
+import {useNavigate} from 'react-router-dom';
+import {postIL,type ILResult} from '../endpoints/il_POST.schema';
+import {Button} from './Button';
+import {Input} from './Input';
+import {Dialog,DialogContent,DialogTitle,DialogDescription} from './Dialog';
+import {PageControls} from './PageControls';
+import styles from './CloudILSearch.module.css';
+export function CloudILSearch({onClose}:{onClose:()=>void}){
+ const navigate=useNavigate(),[kind,setKind]=useState<'name'|'il'>('name'),[query,setQuery]=useState(''),[data,setData]=useState<ILResult|null>(null),[busy,setBusy]=useState(false),[error,setError]=useState(''),request=useRef<AbortController|null>(null),input=useRef<HTMLInputElement>(null);
+ useEffect(()=>()=>request.current?.abort(),[]);
+ async function search(page=0){request.current?.abort();const controller=new AbortController();request.current=controller;setBusy(true);setError('');try{const result=await postIL(kind==='il'?{action:'resolve',il:query}:{action:'search',query,page},controller.signal);if(!controller.signal.aborted){setData(result);input.current?.blur();};}catch(e){if(!controller.signal.aborted){setData(null);setError(e instanceof Error?e.message:'Try again.');}}finally{if(!controller.signal.aborted)setBusy(false);}}
+ return <Dialog open onOpenChange={open=>{if(!open)onClose();}}><DialogContent className={styles.sheet} onOpenAutoFocus={e=>{e.preventDefault();input.current?.focus();}}><DialogTitle>Search Safari</DialogTitle><DialogDescription>Find a cloud by name, or open an IL.</DialogDescription><form noValidate onSubmit={e=>{e.preventDefault();if(query.trim())void search();}}><div className={styles.row}>{(['name','il'] as const).map(value=><Button key={value} variant={kind===value?'secondary':'ghost'} aria-pressed={kind===value} onClick={()=>{request.current?.abort();setBusy(false);setKind(value);setData(null);setError('');input.current?.focus();}}>{value==='name'?'Name':'IL'}</Button>)}</div><div className={styles.row}><Input ref={input} aria-label={kind==='name'?'Search cloud names':'Search IL'} placeholder={kind==='name'?'Cloud name':'IL02…'} autoComplete="off" autoCapitalize={kind==='il'?'characters':'none'} value={query} onChange={e=>{request.current?.abort();setBusy(false);setQuery(e.target.value);setData(null);setError('');}}/><Button type="submit" disabled={busy||!query.trim()}>{busy?'Finding…':'Search'}</Button></div></form>{error&&<p role="alert" className={styles.error}>{error}</p>}{data&&<><div className={styles.results}>{data.items.length?data.items.map(item=><Button key={item.scope+':'+item.id} variant="ghost" onClick={()=>{onClose();navigate(item.url);}}><span>{item.name}</span><small>{item.il}</small></Button>):<p role="status">Nothing here yet</p>}</div><PageControls page={data.page} total={data.pages} onChange={page=>void search(page)} label="Search results"/></>}</DialogContent></Dialog>;
+}

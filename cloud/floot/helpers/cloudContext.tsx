@@ -29,7 +29,7 @@ export async function cloudContext(request:Request,input:InputType){
  }
  if(scope==='accounts'){const seeds=await accountClouds(request,userId,isDev);if(input.action!=='load'&&!owner)cloudPolicy.fail('Only dev accounts can change Accounts.',userId?403:401);return {row:userId?await accountWorkspace(userId):null,userId,owner,isDev,devNumber,scope,seeds};}
  if(scope==='private'){if(!userId)cloudPolicy.fail('Sign in to open Journal.',401);const row=await cloudWorkspace(request,input);return {row,userId,owner,isDev,devNumber,scope,seeds:cloudTree.forScope(scope)};}
- const id=config.find(c=>c.kind===scope)?.workspaceId;if(!id)throw new Error('Space unavailable');
- if(input.action!=='load'&&!cloudPolicy.writable(scope,userId,owner))cloudPolicy.fail((scope==='chess'||scope==='home')?'Only dev accounts can change this space.':'Sign in to add to Safari.',userId?403:401);
+ const id=config.find(c=>c.kind===scope)?.workspaceId;if(!id)throw new Error('Cloud unavailable');
+ if(input.action!=='load'&&!cloudPolicy.writable(scope,userId,owner))cloudPolicy.fail((scope==='chess'||scope==='home')?'Only dev accounts can change this cloud.':'Sign in to add to Safari.',userId?403:401);
  const row=await db.selectFrom('ionWorkspaces').selectAll().where('id','=',id!).executeTakeFirstOrThrow();return {row,userId,owner,isDev,devNumber,scope,seeds:scope==='home'&&isDev?[...new Map([...functionClouds.filter(n=>n.id.startsWith('time-')),...cloudTree.forScope(scope)].map(n=>[n.id,n])).values()]:cloudTree.forScope(scope)};
 }

@@ -1,6 +1,8 @@
 import type {CloudNode} from '../endpoints/cloud_POST.schema';
 import {tacticalLevels} from './tacticalLevels';
-export const checkersRoot='e28bff47-f4b4-45f3-abef-8c8d2e63cd4e';
+export const checkersHome='8782a29d-b218-4803-8bb6-612e947063c7';
+export const checkersPlay='1e9f799a-866f-4f38-b6d2-4733e2e8f8da';
+export const checkersRoot='c18edc0c-fe04-4766-bcd6-141d0433b85e';
 const entries=[{id:'hexdame' as const,name:'HexDame',color:'cyan' as const},{id:'kruzno' as const,name:'Kruzno’s Checkers',color:'lavender' as const}];
 const rules={hexdame:[
  ['Board','61 cells, with 16 men for each side. White moves first. A player wins when the opponent has no legal move, whether captured out or blocked.','setup'],
@@ -20,7 +22,9 @@ const rules={hexdame:[
  ['Reference','Publisher: https://www.kruzno.com/hexcheckers.html . Capture priority over border exits was explicitly chosen for ION.','']
  ]};
 export const checkersClouds:CloudNode[]=[
- {id:checkersRoot,parentId:'hexagonal-chess',name:'Checkers',system:true,color:'cyan'},
+ {id:checkersHome,parentId:'hexagonal-chess',name:'Checkers',system:true,color:'cyan'},
+ {id:checkersPlay,parentId:checkersHome,name:'Play',system:true,color:'mint'},
+ {id:checkersRoot,parentId:checkersPlay,name:'Variants',system:true,color:'cyan'},
  ...entries.flatMap(v=>[
   {id:v.id+'-board',parentId:checkersRoot,name:v.name,variant:v.id,destination:v.id,isImage:true,system:true,color:v.color},
   {id:v.id+'-rules',parentId:v.id+'-board',name:'Rules',variant:v.id,system:true,color:'amber' as const},

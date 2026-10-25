@@ -1,3 +1,4 @@
+import {isPaidFeatureId} from './computerPolicy';
 import { workTotals,equalWorkShare } from './workTotals';
 import { signedInUserCount } from './signedInUsers';
 import { functionIdentifiers } from './functionIdentifiers';
@@ -22,8 +23,9 @@ async function catalog(userId:number|null,tx:TimeDB=db){
   sql<{productId:string;total:string}>`select metadata->>'productId' as product_id,sum(case when kind='purchase' then amount_us else -amount_us end)::text as total from ion_time_transactions where kind in ('purchase','correction') and metadata ? 'productId' group by metadata->>'productId'`.execute(tx),userId?tx.selectFrom('ionTimeAccounts').select('balanceUs').where('userId','=',userId).executeTakeFirst():Promise.resolve(undefined),workTotals(tx)
  ]);
  const readyAt=config.productionStartedAt?new Date(new Date(config.productionStartedAt).getTime()+86400000).toISOString():null,pricingReady=!!readyAt&&Date.parse(readyAt)<=Date.now(),purchased=new Set(owned.map(n=>n.productId)),recovered=new Map(revenue.rows.map(r=>[r.productId,r.total]));
- const paidFeatures=rows.filter(p=>!!p.publishedAt).length;const share=paidFeatures?equalWorkShare(work.totalWorkUs,paidFeatures):null;
- const products:TimeProduct[]=rows.map(p=>{const cost=p.publishedAt?share:null;return{id:p.id,kind:p.kind as 'variant'|'engine'|'feature',reference:p.reference,name:p.name,directUs:cost,freeUs:cost===null?null:'0',costUs:cost,proposalId:p.proposalId,pricingModel:'equal-work',totalWorkUs:work.totalWorkUs,paidFeatures,costVersion:'equal-work:'+work.totalWorkUs+':'+paidFeatures,affordable:!!p.publishedAt&&pricingReady&&cost!==null&&count>0&&BigInt(timePrice(cost,count))<=BigInt(account?.balanceUs||'0'),published:!!p.publishedAt,available:false,owned:role.dev||purchased.has(p.id),priceUs:cost!==null&&count?timePrice(cost,count):null,revenueUs:recovered.get(p.id)||'0'};});
+ const activeRows=rows.filter(p=>isPaidFeatureId(p.id));
+ const paidFeatures=activeRows.filter(p=>!!p.publishedAt).length;const share=paidFeatures?equalWorkShare(work.totalWorkUs,paidFeatures):null;
+ const products:TimeProduct[]=activeRows.map(p=>{const cost=p.publishedAt?share:null;return{id:p.id,kind:p.kind as 'variant'|'engine'|'feature',reference:p.reference,name:p.name,directUs:cost,freeUs:cost===null?null:'0',costUs:cost,proposalId:p.proposalId,pricingModel:'equal-work',totalWorkUs:work.totalWorkUs,paidFeatures,costVersion:'equal-work:'+work.totalWorkUs+':'+paidFeatures,affordable:!!p.publishedAt&&pricingReady&&cost!==null&&count>0&&BigInt(timePrice(cost,count))<=BigInt(account?.balanceUs||'0'),published:!!p.publishedAt,available:false,owned:role.dev||purchased.has(p.id),priceUs:cost!==null&&count?timePrice(cost,count):null,revenueUs:recovered.get(p.id)||'0'};});
  return{...role,products,buyers:count,readyAt,pricingReady,totalWorkUs:work.totalWorkUs,baselineUs:work.baselineUs,recordedUs:work.recordedUs,paidFeatures,pricingModel:'equal-work' as const};
 }
 async function snapshot(userId:number|null):Promise<TimeSnapshot>{

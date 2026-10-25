@@ -13,7 +13,7 @@ describe('Spatial camera lifecycle',()=>{
  });
  it('keeps a panned camera when content changes and still supports explicit keyboard reset',()=>{
   const props={width:900,height:900,viewKey:'camera-'+crypto.randomUUID(),initialZoom:1};
-  const view=render(<SpatialViewport {...props}><a href="#a">Word</a></SpatialViewport>),region=view.getByRole('region',{name:'Word space'}),world=view.container.querySelector('[data-camera-zoom]') as HTMLElement;
+  const view=render(<SpatialViewport {...props}><a href="#a">Word</a></SpatialViewport>),region=view.getByRole('region',{name:'Cloud'}),world=view.container.querySelector('[data-camera-zoom]') as HTMLElement;
   fireEvent.keyDown(region,{key:'ArrowDown'});const before=world.style.transform;
   view.rerender(<SpatialViewport {...props} height={1200}><a href="#b">Survivor</a></SpatialViewport>);expect(world.style.transform).toBe(before);
   fireEvent.keyDown(region,{key:'0'});expect(world.style.transform).not.toBe(before);

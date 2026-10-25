@@ -45,12 +45,12 @@ export async function handle(request: Request) {
     const input = schema.parse(superjson.parse(text));
     const user=await optionalGameUser(request);
     if (input.action === "new") {
-      if(isCheckers(input.variant)&&input.mode==='engine'&&input.engineId&&input.engineId!=='universal')throw new GameError('Choose Computer for checkers.',400);
-      await timeAccess.assert(user?.id??null,input.variant,input.mode==='engine'?(input.engineId??'universal'):undefined);
+      if(input.mode==='engine'&&input.engineId&&input.engineId!=='universal')throw new GameError('Choose Computer to start a new game.',400);
+      await timeAccess.assert(user?.id??null,input.variant,input.mode==='engine'?('universal'):undefined);
       const native = await runNativeEngine({
         action: "new",
         variant: input.variant,
-        engineId:input.engineId??'universal',
+        engineId:'universal',
         origin: request.url,
         signal: request.signal,
       });
@@ -63,7 +63,7 @@ export async function handle(request: Request) {
           accessTokenHash: tokenHash(accessToken),
           mode: input.mode,
           difficulty:input.difficulty??3,
-          engineId:input.engineId??'universal',
+          engineId:'universal',
           humanPlayer: input.humanPlayer,
           state: native.state,
           timeline: [],
@@ -82,7 +82,7 @@ export async function handle(request: Request) {
           difficulty:input.difficulty??3,
           humanPlayer: input.humanPlayer,
           engine: native.engine,
-          engineId:input.engineId??'universal',
+          engineId:'universal',
           execution: "cloud",
           game: native.game,
           moves: [],

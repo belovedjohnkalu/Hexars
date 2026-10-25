@@ -1,8 +1,8 @@
 import { gameOutcome } from "./gameOutcome";
 describe('Game result announcement',()=>{
- it('names the human or Tactical and preserves White–Black score order',()=>{
+ it('names the human or Computer and preserves White–Black score order',()=>{
  const result={status:'checkmate' as const,winner:1,scores:[0,1],reason:''};
- expect(gameOutcome(result,'engine',0)).toEqual({title:'Tactical Wins',score:'0 – 1',detail:''});
+ expect(gameOutcome(result,'engine',0)).toEqual({title:'Computer Wins',score:'0 – 1',detail:''});
  expect(gameOutcome(result,'engine',1).title).toBe('You Win');expect(gameOutcome(result,'two_players',0).title).toBe('Black Wins');
  });
  it('names each independent engine when it wins',()=>{for(const engine of ['Positional','Defensive','Materialist','Unconventional'])expect(gameOutcome({status:'checkmate',winner:1,scores:[0,1],reason:''},'engine',0,engine).title).toBe(engine+' Wins');});

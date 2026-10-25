@@ -1,7 +1,7 @@
 import { useEffect,useRef,useState } from 'react';
 import type { PointerEvent,MouseEvent,KeyboardEvent } from 'react';
 import type { CloudNode } from '../endpoints/cloud_POST.schema';
-export const CLOUD_HOLD_MS=300;
+export const CLOUD_HOLD_MS=180;
 let heldPointer=false,blockedUntil=0;
 export function useCloudHold(onHighlight?:(node:CloudNode)=>void){
  const current=useRef<{id:number;x:number;y:number;node:CloudNode}|null>(null),timer=useRef<ReturnType<typeof setTimeout>|undefined>(undefined),[holding,setHolding]=useState<string|null>(null);

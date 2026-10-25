@@ -26,6 +26,17 @@ int main(){try{for(const VariantId v:{"brusky","devasa"}){
  auto blocking=fixture(v);put(blocking,"g5",PieceType::Pawn,0,true);put(blocking,"h6",PieceType::Pawn,1,true);
  require(has(blocking,mv(v,"g5","g6"))==(v=="devasa"),"Enemy blocking distinction lost");require(!has(blocking,mv(v,"g5","h6")),"Pawn captured through shared edge");blocking.activePlayer=1;require(has(blocking,mv(v,"h6","h5"))==(v=="devasa"),"Black enemy blocking distinction lost");
  blocking.activePlayer=0;put(blocking,"h6",PieceType::Pawn,0,true);require(has(blocking,mv(v,"g5","g6")),"Friendly blocker incorrectly blocks both axes");
+ // Independent axes for friendly obstruction, both axes and both colors.
+ // Brusky's historical enemy blockade intentionally differs from De Vasa.
+ for(int blockedAxis=0;blockedAxis<2;++blockedAxis)for(PlayerId blocker=0;blocker<2;++blocker){
+  auto base=fixture(v);const auto source=cell(v,"g5");const auto directions=rules.pawnForwards(0);
+  put(base,source,PieceType::Pawn,0,true);put(base,plus(source,directions[blockedAxis]),PieceType::Knight,blocker,true);
+  for(int flipped=0;flipped<2;++flipped){const auto s=flipped?mirror(base):base;const auto transform=[&](Hex h){return !flipped?h:v=="brusky"?Hex{1-h.q,-1-h.r}:Hex{-h.q,-h.r};};
+   require(!has(s,{transform(source),transform(plus(source,directions[blockedAxis]))}),"Pawn entered occupied forward cell");
+   const bool open=blocker==0||v=="devasa";
+   require(has(s,{transform(source),transform(plus(source,directions[1-blockedAxis]))})==open,"Other pawn axis disagrees with friendly/enemy blocking policy");
+  }
+ }
  auto captures=fixture(v,v=="devasa"?"a2":"a1");const auto from=cell(v,v=="brusky"?"c2":"c3"),extra=plus(from,{1,-2});put(captures,from,PieceType::Pawn,0);for(const Hex direction:{Hex{-1,-1},Hex{2,-1},Hex{1,-2}})put(captures,plus(from,direction),PieceType::Knight,1,true);
  for(int flipped=0;flipped<2;++flipped){const auto s=flipped?mirror(captures):captures;const auto transform=[&](Hex h){return !flipped?h:v=="brusky"?Hex{1-h.q,-1-h.r}:Hex{-h.q,-h.r};};for(const Hex direction:{Hex{-1,-1},Hex{2,-1}})require(has(s,{transform(from),transform(plus(from,direction))}),"Side capture missing");require(has(s,{transform(from),transform(extra)})==(v=="brusky"),"Initial forward capture distinction lost");auto moved=s;const int at=rules.index(transform(from));moved.occupants[at].hasMoved=true;require(positionKey(s)!=positionKey(moved),"Pawn rights omitted from hash");require(!has(moved,{transform(from),transform(extra)}),"Moved pawn retained extra capture");for(const auto d:rules.pawnForwards(s.activePlayer))require(!has(moved,{transform(from),plus(transform(from),d,2)}),"Moved pawn retained double advance");}
  // Both advance axes, both capturers and both colors, from independent f7 examples.

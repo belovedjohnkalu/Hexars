@@ -13,7 +13,7 @@ import { channels } from './realtimeChannels';
 import { gameSessions } from "./gameSessions";
 type Credentials = { gameId: string; accessToken: string };
 
-export function useCloudGame(variant: VariantId, defaultMode: "engine" | "two_players" = "engine", difficulty=3,engineId:EngineId='tactical',userId:number|null=null) {
+export function useCloudGame(variant: VariantId, defaultMode: "engine" | "two_players" = "engine", difficulty=3,engineId:EngineId='universal',userId:number|null=null) {
   const [data, setData] = useState<OutputType | null>(null);
   const [busy, setBusy] = useState(false);
   const [pendingMove, setPendingMove] = useState<ChessMove | null>(null);
@@ -200,7 +200,7 @@ export function useCloudGame(variant: VariantId, defaultMode: "engine" | "two_pl
     newGame: (mode: "engine" | "two_players", humanPlayer: 0 | 1, variant: VariantId) => {
       sideGoal.current=null;setSideTarget(null);
       engineKey.current = "";
-      return perform({ action: "new", mode, humanPlayer, variant,difficulty:current.current?.difficulty??difficulty,engineId:current.current?.engineId??engineId });
+      return perform({ action: "new", mode, humanPlayer, variant,difficulty:current.current?.difficulty??difficulty,engineId:'universal' });
     },
     openGame: (link: string) => {
       try {
@@ -216,7 +216,7 @@ export function useCloudGame(variant: VariantId, defaultMode: "engine" | "two_pl
     },
     play: (move: ChessMove) => withSession("move", move),
     undo: () => withSession("undo"),
-    onlineAction:(action:'forfeit'|'draw')=>{const session=current.current;return session&&(session.mode==='online'||session.game.variant==='hexdame'||session.game.variant==='kruzno')?perform({action,gameId:session.gameId,accessToken:session.accessToken,version:session.version}):Promise.resolve(false);},
+    onlineAction:(action:'forfeit'|'draw')=>{const session=current.current;return session&&(session.mode==='online'||(session.game.variant==='hexdame'||session.game.variant==='kruzno'))?perform({action,gameId:session.gameId,accessToken:session.accessToken,version:session.version}):Promise.resolve(false);},
     refresh: () => {
       engineKey.current = "";
       return perform(

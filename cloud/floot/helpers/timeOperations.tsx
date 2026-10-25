@@ -1,3 +1,4 @@
+import {isPaidFeatureId} from './computerPolicy';
 import { workSessions } from './workSessions';
 import { ionNotifications } from './ionNotifications';
 import { timeFormat } from './timeMath';
@@ -52,6 +53,7 @@ export async function timeOperations(input:Exclude<TimeInput,{action:'snapshot'}
  if(input.action==='quote'){
   const now=Date.now(),id=randomUUID(),expiresAt=new Date(now+30000);let quote:TimeQuote;
   if(input.kind==='purchase'){
+   if(input.productId&&!isPaidFeatureId(input.productId))timeFail('This feature is free. Nothing was charged.',409,'FEATURE_NOW_FREE');
    const market=await timeLedger.catalog(userId),product=market.products.find(p=>p.id===input.productId);
    if(!product)timeFail('Choose a feature.');if(product.owned)timeFail('You already have access to this feature.',409);
    if(!product.published||!market.pricingReady)timeFail('This feature’s price is being prepared.',409);
@@ -75,6 +77,7 @@ export async function timeOperations(input:Exclude<TimeInput,{action:'snapshot'}
    const quote=await tx.selectFrom('ionTimeQuotes').selectAll().where('id','=',input.quoteId).where('actorId','=',userId).forUpdate().executeTakeFirst();
    if(!quote)timeFail('This confirmation is not available.',404);
    if(quote.usedTransactionId)return quote.usedTransactionId;
+   if(quote.kind==='purchase'&&!isPaidFeatureId(quote.productId||''))timeFail('This feature is free. Nothing was charged.',409,'FEATURE_NOW_FREE');
    if(new Date(quote.expiresAt).getTime()<=Date.now())timeFail('This price expired. Review it again.',409,'QUOTE_EXPIRED');
    const key='confirm:'+input.requestId;
    await sql`select pg_advisory_xact_lock(hashtextextended(${`time-confirm:${userId}:${input.requestId}`},0))`.execute(tx);

@@ -18,7 +18,8 @@
     "Scrollbar": "base.css",
     "CRUD": "CloudActions",
     "Date": "native",
-    "Textarea": "Textarea with disableResize"
+    "Textarea": "Textarea with disableResize",
+    "Select/Listbox": "authored"
   },
   "evidence": {
     "crudFullFlow": "../../../../tests/e2e/ion-refinements.live.cjs",

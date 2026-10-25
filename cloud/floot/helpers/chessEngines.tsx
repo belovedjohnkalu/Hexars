@@ -1,4 +1,5 @@
-// Public metadata only. Executable paths and asset checksums stay server-side.
+// Legacy executable metadata supports saved games. Only Computer is presented
+// for new games; native paths and asset checksums remain server-side.
 export const engineIds = ['tactical', 'positional', 'defensive', 'materialist', 'unconventional', 'universal'] as const;
 export type EngineId = typeof engineIds[number];
 export const chessEngines = [
@@ -13,8 +14,8 @@ export function isEngineId(value: unknown): value is EngineId {
   return engineIds.some(id => id === value);
 }
 export function engineId(value: unknown): EngineId {
-  return isEngineId(value) ? value : 'tactical';
+  return isEngineId(value) ? value : 'universal';
 }
 export function engineName(value: unknown): string {
-  return chessEngines.find(engine => engine.id === engineId(value))!.name;
+  return 'Computer';
 }

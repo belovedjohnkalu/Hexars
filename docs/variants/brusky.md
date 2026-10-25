@@ -60,3 +60,8 @@ The shared protocol exposes pointy orientation, full movement history and native
 
 
 Presentation clarification (0.48): the two immediately adjacent forward edge cells are movement destinations only and never captures. Preserve the historical exception: an unmoved pawn on its original starting cell can also capture the farther straight-ahead vertex cell between its two normal side captures. The rules paragraphs and teaching diagrams distinguish these cells explicitly; native move generation is unchanged.
+
+
+## Blocking review — 25 October 2026
+
+The requested independent-direction behavior already applies when the obstruction is friendly. The [historical overview](https://en.wikipedia.org/wiki/Hexagonal_chess#Brusky%27s_hexagonal_chess) explicitly prevents both advances when either immediately forward cell contains an enemy. The [Maastricht Ludii catalog](https://ludii.games/details.php?keyword=Brusky+Chess) also documents enemy blockage, although its description ties the condition to pawn-start cells; it is not a primary inventor manuscript. Green Chess uses simplified pawns. In the absence of a contradictory primary rule, ION retains its documented historical enemy-blocking policy. Both directions and both colors now have independent friendly/enemy obstruction fixtures. The historical unmoved pawn’s extra capture is unchanged.

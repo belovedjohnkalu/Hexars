@@ -7,7 +7,7 @@ export function AppHead({ title = "ION",iconUrl }: { title?: string;iconUrl?:str
   preload("/_cdn/static/6e6c9250-599e-4bf4-a9ae-66ff948afb59-InterVariable.woff2", { as: "font", type: "font/woff2", crossOrigin: "anonymous" });
   return <Helmet htmlAttributes={{lang:"en"}}>
     <title>{title}</title>
-    <meta name="description" content="A space for your thoughts. Open a cloud and explore." />
+    <meta name="description" content="Your clouds and droplets. Open one and explore." />
     <meta name="theme-color" content={chrome.themeColor} />
     <meta name="color-scheme" content={chrome.colorScheme} />
     <meta name="mobile-web-app-capable" content="yes" />
