@@ -1,0 +1,4 @@
+.status{display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;width:24px;height:24px;color:var(--word-blue);}
+.status[data-upload-state=pending]{animation:breathe 1.5s ease-in-out infinite;}.status[data-upload-state=failed]{color:var(--error);}
+@keyframes breathe{50%{opacity:.5;}}
+@media(prefers-reduced-motion:reduce){.status[data-upload-state=pending]{animation:none;}}

@@ -1,4 +1,5 @@
 import React from 'react';
+import {paneNavigation} from './paneNavigation';
 import { render,fireEvent,cleanup,act } from '@testing-library/react';
 import { SpatialViewport } from '../components/SpatialViewport';
 describe('Spatial camera lifecycle',()=>{
@@ -67,5 +68,23 @@ describe('Comfortable word-space opening',()=>{
  spyOnProperty(HTMLElement.prototype,'clientWidth','get').and.returnValue(390);spyOnProperty(HTMLElement.prototype,'clientHeight','get').and.returnValue(700);
  const v=render(<SpatialViewport width={1000} height={1000} viewKey={'inset-'+crypto.randomUUID()} contentBounds={{x:0,y:0,width:500,height:600}} maxFitZoom={1} fitPadding={28}>Words</SpatialViewport>);
  expect(Number((v.container.querySelector('[data-camera-zoom]') as HTMLElement).dataset.cameraZoom)).toBeCloseTo(334/500,6);
+ });
+});
+
+describe('Per-screen camera isolation',()=>{
+ afterEach(()=>{cleanup();paneNavigation.clear();});
+ it('retains separate zooms when two tiles open the same cloud',()=>{const key='pane-camera-'+crypto.randomUUID();paneNavigation.set('first',null,'/');const view=render(<SpatialViewport width={900} height={900} initialZoom={1} viewKey={key}>Word</SpatialViewport>),region=view.getByRole('region'),world=view.container.querySelector('[data-camera-zoom]') as HTMLElement;fireEvent.keyDown(region,{key:'+'});const first=Number(world.dataset.cameraZoom);act(()=>paneNavigation.set('second',null,'/'));expect(Number(world.dataset.cameraZoom)).toBe(1);fireEvent.keyDown(region,{key:'-'});const second=Number(world.dataset.cameraZoom);act(()=>paneNavigation.set('first',null,'/'));expect(Number(world.dataset.cameraZoom)).toBeCloseTo(first,8);act(()=>paneNavigation.set('second',null,'/'));expect(Number(world.dataset.cameraZoom)).toBeCloseTo(second,8);});
+});
+
+describe('Tiles overview receiving content',()=>{
+ afterEach(cleanup);
+ it('refits arriving tile metadata before interaction, then preserves a deliberate camera',()=>{
+  spyOnProperty(HTMLElement.prototype,'clientWidth','get').and.returnValue(390);spyOnProperty(HTMLElement.prototype,'clientHeight','get').and.returnValue(700);
+  const props={width:2000,height:2000,viewKey:'tile-arrival-'+crypto.randomUUID(),sharedCamera:true,maxFitZoom:1,fitPadding:20};
+  const view=render(<SpatialViewport {...props} contentFitKey="loading" contentBounds={{x:0,y:0,width:200,height:200}}>Tiles</SpatialViewport>),world=view.container.querySelector('[data-camera-zoom]') as HTMLElement;
+  expect(Number(world.dataset.cameraZoom)).toBe(1);
+  view.rerender(<SpatialViewport {...props} contentFitKey="received" contentBounds={{x:500,y:200,width:700,height:900}}>Tiles</SpatialViewport>);expect(Number(world.dataset.cameraZoom)).toBeCloseTo(.5,6);
+  fireEvent.keyDown(view.getByRole('region'),{key:'+'});const camera=world.style.transform;
+  view.rerender(<SpatialViewport {...props} contentFitKey="another update" contentBounds={{x:700,y:500,width:1000,height:1200}}>Tiles</SpatialViewport>);expect(world.style.transform).toBe(camera);
  });
 });

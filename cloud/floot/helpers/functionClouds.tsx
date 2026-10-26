@@ -18,8 +18,8 @@ export const functionClouds:CloudNode[]=[node('page-tiles','controls','Tiles'),n
  ...earningParagraphs.map(p=>({...node(p.id,'time-earning-rule',p.name),note:p.note})),
  node('time-treasury-value','time-treasury','Treasury balance'),node('time-treasury-activity','time-treasury','Activity'),node('time-payout','time-treasury','Pay out'),
  ...['time-work-total','time-work-sessions','time-work-baseline','time-work-start'].map((id,i)=>node(id,'time-estimates',['Total','Sessions','Earlier work','Start'][i])),
- ...chessVariants.all.flatMap(v=>Object.entries(gameActionNames).filter(([id])=>v.id!=='kruzno'||!['forfeit','draw'].includes(id)).map(([id,name])=>node('game-'+v.id+'-'+id,v.id+'-board',name))),
- node('game-kruzno-online-forfeit','kruzno-board','Forfeit'),node('game-kruzno-online-draw','kruzno-board','Draw')
+ ...chessVariants.all.flatMap(v=>Object.entries(gameActionNames).filter(([id])=>!['kruzno','hexdame'].includes(v.id)||!['forfeit','draw'].includes(id)).map(([id,name])=>node('game-'+v.id+'-'+id,v.id+'-board',name))),
+ ...['kruzno','hexdame'].flatMap(v=>[node('game-'+v+'-online-forfeit',v+'-board','Forfeit'),node('game-'+v+'-online-draw',v+'-board','Draw')])
 ];
 export function receiptClouds(receipt:{id:string;direction:string}){
  const id='time-tx-'+receipt.id;

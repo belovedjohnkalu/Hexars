@@ -1,9 +1,11 @@
-import { useLayoutEffect,useRef,useState,type ReactNode,type PointerEvent } from 'react';
+import {paneNavigation} from '../helpers/paneNavigation';
+import { useLayoutEffect,useRef,useState,useSyncExternalStore,type ReactNode,type PointerEvent } from 'react';
 import styles from './SpatialViewport.module.css';
 export type ContentBounds={x:number;y:number;width:number;height:number};
-type View={zoom:number;x:number;y:number};const views=new Map<string,{view:View;refitKey?:string}>();
-export function SpatialViewport({children,width,height,viewKey,label='Cloud',ready=true,initialZoom,minFitZoom,maxFitZoom=3,fitPadding=10,refitKey,contentBounds}:{children:ReactNode;width:number;height:number;viewKey:string;label?:string;ready?:boolean;initialZoom?:number;minFitZoom?:number;maxFitZoom?:number;fitPadding?:number;refitKey?:string;contentBounds?:ContentBounds}){
- const fitKey=useRef(''),hasFit=useRef(false),lastRefit=useRef(refitKey);
+type View={zoom:number;x:number;y:number};const views=new Map<string,{view:View;refitKey?:string;contentFitKey?:string}>();
+export function SpatialViewport({children,width,height,viewKey:requestedKey,sharedCamera=false,label='Cloud',ready=true,initialZoom,minFitZoom,maxFitZoom=3,fitPadding=10,refitKey,contentFitKey,contentBounds}:{children:ReactNode;width:number;height:number;viewKey:string;sharedCamera?:boolean;label?:string;ready?:boolean;initialZoom?:number;minFitZoom?:number;maxFitZoom?:number;fitPadding?:number;refitKey?:string;contentFitKey?:string;contentBounds?:ContentBounds}){
+ const pane=useSyncExternalStore(paneNavigation.subscribe,()=>paneNavigation.get()?.key||'',()=>''),viewKey=requestedKey+':'+(sharedCamera?'shared':pane);
+ const fitKey=useRef(''),hasFit=useRef(false),lastRefit=useRef(refitKey),lastContentFit=useRef(contentFitKey);
  const viewport=useRef<HTMLDivElement>(null),world=useRef<HTMLDivElement>(null),[view,setView]=useState<View>({zoom:1,x:0,y:0}),current=useRef(view),fit=useRef(view),points=useRef(new Map<number,{x:number;y:number}>()),last=useRef<{x:number;y:number;distance?:number}|null>(null),origin=useRef<{x:number;y:number}|null>(null),moved=useRef(false),touched=useRef(false);
  const apply=(v:View)=>{current.current=v;setView(v);};
  const scale=(next:number,cx?:number,cy?:number)=>{const el=viewport.current;if(!el)return;const b=el.getBoundingClientRect(),old=current.current,z=Math.max(Math.min(.025,fit.current.zoom/2),Math.min(3,next)),x=(cx??b.left+el.clientWidth/2)-b.left,y=(cy??b.top+el.clientHeight/2)-b.top;apply({zoom:z,x:x-(x-old.x)*z/old.zoom,y:y-(y-old.y)*z/old.zoom});touched.current=true;};
@@ -13,10 +15,11 @@ export function SpatialViewport({children,width,height,viewKey,label='Cloud',rea
   const bounds=contentBounds||{x:0,y:0,width,height},padding=contentBounds?fitPadding:0;
   // Touch canvases start at a usable scale; explicit zooms and manual overview zoom remain independent.
   const naturalZoom=Math.min(contentBounds?Math.max(.025,Math.min(3,maxFitZoom)):1,Math.max(1,el.clientWidth-padding*2)/Math.max(bounds.width,1),Math.max(1,el.clientHeight-padding*2)/Math.max(bounds.height,1)),z=initialZoom===undefined?Math.max(naturalZoom,Math.max(0,Math.min(3,minFitZoom??0))):naturalZoom,fitView={zoom:z,x:el.clientWidth/2-(bounds.x+bounds.width/2)*z,y:el.clientHeight/2-(bounds.y+bounds.height/2)*z};fit.current=fitView;
-  // Content changes must never refit a camera that has already opened.
-  if(!hasFit.current||lastRefit.current!==refitKey){const zoom=initialZoom??z;const cached=views.get(viewKey);apply((!hasFit.current&&cached&&cached.refitKey===refitKey?cached.view:undefined)||(initialZoom===undefined?fitView:{zoom,x:(el.clientWidth-width*zoom)/2,y:(el.clientHeight-height*zoom)/2}));hasFit.current=true;lastRefit.current=refitKey;}
- };const ro=new ResizeObserver(update);ro.observe(el);update();return()=>ro.disconnect();},[viewKey,width,height,ready,initialZoom,minFitZoom,maxFitZoom,fitPadding,refitKey,contentBounds]);
- useLayoutEffect(()=>()=>{if(hasFit.current){views.delete(viewKey);views.set(viewKey,{view:current.current,refitKey:lastRefit.current});if(views.size>128)views.delete(views.keys().next().value!);}},[viewKey]);
+  // Cloud updates retain their camera. An overview may fit arriving metadata
+  // until the user deliberately pans or zooms it.
+  if(!hasFit.current||lastRefit.current!==refitKey||!touched.current&&lastContentFit.current!==contentFitKey){const zoom=initialZoom??z;const cached=views.get(viewKey);apply((!hasFit.current&&cached&&cached.refitKey===refitKey&&cached.contentFitKey===contentFitKey?cached.view:undefined)||(initialZoom===undefined?fitView:{zoom,x:(el.clientWidth-width*zoom)/2,y:(el.clientHeight-height*zoom)/2}));hasFit.current=true;lastRefit.current=refitKey;}lastContentFit.current=contentFitKey;
+ };const ro=new ResizeObserver(update);ro.observe(el);update();return()=>ro.disconnect();},[viewKey,width,height,ready,initialZoom,minFitZoom,maxFitZoom,fitPadding,refitKey,contentFitKey,contentBounds]);
+ useLayoutEffect(()=>()=>{if(hasFit.current){views.delete(viewKey);views.set(viewKey,{view:current.current,refitKey:lastRefit.current,contentFitKey:lastContentFit.current});if(views.size>128)views.delete(views.keys().next().value!);}},[viewKey]);
  useLayoutEffect(()=>{const el=viewport.current;if(!el)return;const wheel=(e:WheelEvent)=>{e.preventDefault();if(e.ctrlKey||e.metaKey||e.altKey)scale(current.current.zoom*Math.exp(-e.deltaY*.006),e.clientX,e.clientY);};el.addEventListener('wheel',wheel,{passive:false});return()=>el.removeEventListener('wheel',wheel);},[]);
  const sample=():{x:number;y:number;distance?:number}|null=>{const p=[...points.current.values()];if(!p.length)return null;return p.length===1?p[0]:{x:(p[0].x+p[1].x)/2,y:(p[0].y+p[1].y)/2,distance:Math.hypot(p[0].x-p[1].x,p[0].y-p[1].y)};};
  function down(e:PointerEvent<HTMLDivElement>){if(e.button!==0||(e.target as HTMLElement).closest('[data-no-pan],button,input,[role=menu]'))return;points.current.set(e.pointerId,{x:e.clientX,y:e.clientY});if(points.current.size===1){moved.current=false;origin.current={x:e.clientX,y:e.clientY};}last.current=sample();}

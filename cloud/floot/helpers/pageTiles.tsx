@@ -1,13 +1,15 @@
+import {safePageURL} from './pageURL';
+import {readPageHistory,type PageHistory} from './pageHistory';
 import {cloudLayout,type CloudLayout} from './cloudLayout';
 import type {CloudColor} from './cloudColors';
 import {pageGeometry,pageScreenIds,type PageTree,type PageDirection} from './pageWorkspace';
-export type TileScreen={id:number;url:string;label:string};
-export type OpenTile={name?:string;color?:CloudColor;id:number;primary:number;focus:number;screens:TileScreen[];tree:PageTree};
-export type TileState={tiles:OpenTile[];current:number;trail:number[];cursor:number;nextId:number};
-export function safeTileURL(value:string){try{const u=new URL(value,location.origin);return value.startsWith('/')&&!value.startsWith('//')&&u.origin===location.origin&&!/\/(?:login|register|auth)(?:\/|$)/.test(u.pathname)?u.pathname+u.search+u.hash:null;}catch{return null;}}
-export const tileName=(tile:OpenTile)=>tile.name?.trim()||'Tile '+(tile.id+1);
-export function tileLabel(value:string){return value.replace(/\s*[·|]\s*(?:ION|Board Games).*$/,'').trim()||'ION';}
-export function createTileState(url:string):TileState{return{tiles:[{id:0,primary:0,focus:0,screens:[{id:0,url:safeTileURL(url)||'/',label:'ION'}],tree:{screen:0}}],current:0,trail:[0],cursor:0,nextId:1};}
+export type TileScreen={id:number;url:string;label:string;characters?:number;history?:PageHistory};
+export type OpenTile={number?:number;name?:string;color?:CloudColor;id:number;primary:number;focus:number;screens:TileScreen[];tree:PageTree};
+export type TileState={nextTileNumber?:number;tiles:OpenTile[];current:number;trail:number[];cursor:number;nextId:number};
+export const safeTileURL=safePageURL;
+export const tileName=(tile:OpenTile)=>tile.name?.trim()||'Tile '+(tile.number??tile.id+1);
+export function tileLabel(value:string){return value.replace(/\s*[·|]\s*(?:ION|Board Games|Hexagons).*$/,'').trim()||'ION';}
+export function createTileState(url:string):TileState{return{nextTileNumber:2,tiles:[{id:0,number:1,primary:0,focus:0,screens:[{id:0,url:safeTileURL(url)||'/',label:'ION'}],tree:{screen:0}}],current:0,trail:[0],cursor:0,nextId:1};}
 export function visitTile(state:TileState,id:number):TileState{
  if(state.current===id||!state.tiles.some(t=>t.id===id))return state;
  const trail=[...state.trail.slice(0,state.cursor+1),id];return{...state,current:id,trail,cursor:trail.length-1};
@@ -35,5 +37,12 @@ export function nearestRhombus(tiles:OpenTile[],id:number,direction:PageDirectio
 }
 
 export function readTileState(raw:string|null,fallback:string):TileState{
- try{const s=JSON.parse(raw||'null') as TileState;if(!s||!Array.isArray(s.tiles)||!s.tiles.length||!Number.isSafeInteger(s.nextId)||s.nextId<1)return createTileState(fallback);const ids=new Set<number>(),screenIds=new Set<number>();for(const tile of s.tiles){if(tile.name!==undefined&&(typeof tile.name!=='string'||!tile.name.trim()))throw Error();if(!Number.isSafeInteger(tile.id)||ids.has(tile.id)||!Array.isArray(tile.screens)||!tile.screens.length)throw Error();ids.add(tile.id);let nodes=0;const validate=(tree:PageTree,depth=0):void=>{if(++nodes>4096||depth>64||!tree||typeof tree!=='object')throw Error();if('screen'in tree){if(!Number.isSafeInteger(tree.screen)||screenIds.has(tree.screen)||!tile.screens.some(v=>v.id===tree.screen))throw Error();screenIds.add(tree.screen);}else{if(!['x','y'].includes(tree.axis)||!(tree.ratio>=.15&&tree.ratio<=.85))throw Error();validate(tree.first,depth+1);validate(tree.second,depth+1);}};validate(tile.tree);if(pageScreenIds(tile.tree).length!==tile.screens.length||!tile.screens.some(v=>v.id===tile.primary)||!tile.screens.some(v=>v.id===tile.focus))throw Error();for(const v of tile.screens){if(!safeTileURL(v.url)||typeof v.label!=='string')throw Error();v.label=tileLabel(v.label);}}if(!ids.has(s.current)||!Array.isArray(s.trail)||!s.trail.every(id=>ids.has(id))||!Number.isSafeInteger(s.cursor)||s.cursor<0||s.cursor>=s.trail.length||s.trail[s.cursor]!==s.current||s.nextId<=Math.max(...screenIds,...ids))throw Error();const primary=s.tiles.find(t=>t.id===s.current)!,url=primary.screens.find(v=>v.id===primary.primary)!.url;return url===fallback?s:createTileState(fallback);}catch{return createTileState(fallback);}
+ try{const s=JSON.parse(raw||'null') as TileState;if(!s||!Array.isArray(s.tiles)||!s.tiles.length||!Number.isSafeInteger(s.nextId)||s.nextId<1)return createTileState(fallback);const ids=new Set<number>(),screenIds=new Set<number>();for(const tile of s.tiles){if(tile.number!==undefined&&(!Number.isSafeInteger(tile.number)||tile.number<1))throw Error();if(tile.name!==undefined&&(typeof tile.name!=='string'||!tile.name.trim()))throw Error();if(!Number.isSafeInteger(tile.id)||ids.has(tile.id)||!Array.isArray(tile.screens)||!tile.screens.length)throw Error();ids.add(tile.id);let nodes=0;const validate=(tree:PageTree,depth=0):void=>{if(++nodes>4096||depth>64||!tree||typeof tree!=='object')throw Error();if('screen'in tree){if(!Number.isSafeInteger(tree.screen)||screenIds.has(tree.screen)||!tile.screens.some(v=>v.id===tree.screen))throw Error();screenIds.add(tree.screen);}else{if(!['x','y'].includes(tree.axis)||!(tree.ratio>=.15&&tree.ratio<=.85))throw Error();validate(tree.first,depth+1);validate(tree.second,depth+1);}};validate(tile.tree);if(pageScreenIds(tile.tree).length!==tile.screens.length||!tile.screens.some(v=>v.id===tile.primary)||!tile.screens.some(v=>v.id===tile.focus))throw Error();for(const v of tile.screens){if(!safeTileURL(v.url)||typeof v.label!=='string'||v.characters!==undefined&&(!Number.isSafeInteger(v.characters)||v.characters<0))throw Error();v.label=tileLabel(v.label);if(v.history)v.history=readPageHistory(v.history,v.url);}}if(!ids.has(s.current)||!Array.isArray(s.trail)||!s.trail.every(id=>ids.has(id))||!Number.isSafeInteger(s.cursor)||s.cursor<0||s.cursor>=s.trail.length||s.trail[s.cursor]!==s.current||s.nextId<=Math.max(...screenIds,...ids))throw Error();if(s.nextTileNumber!==undefined&&(!Number.isSafeInteger(s.nextTileNumber)||s.nextTileNumber<1))throw Error();const primary=s.tiles.find(t=>t.id===s.current)!,url=primary.screens.find(v=>v.id===primary.primary)!.url;return url===fallback?s:createTileState(fallback);}catch{return createTileState(fallback);}
+}
+
+export const tileCharacters=(tile:OpenTile)=>tile.screens.reduce((sum,screen)=>sum+(screen.characters??Array.from(screen.label).length),0);
+export function removeOpenTile(state:TileState,id:number):TileState{
+ if(!state.tiles.some(t=>t.id===id))return state;const tiles=state.tiles.filter(t=>t.id!==id);if(!tiles.length)return createTileState('/');
+ const previous=state.trail.slice(0,state.cursor+1).filter(v=>v!==id&&tiles.some(t=>t.id===v)),future=state.trail.slice(state.cursor+1).filter(v=>v!==id&&tiles.some(t=>t.id===v)),current=state.current===id?(previous.at(-1)??tiles[0].id):state.current;
+ if(previous.at(-1)!==current)previous.push(current);return{...state,tiles,current,trail:[...previous,...future],cursor:previous.length-1};
 }

@@ -1,0 +1,2 @@
+// View state may keep only same-application URLs; sign-in routes are transient.
+export function safePageURL(value:string){try{const base=typeof location==='undefined'?'https://ion.floot.app':location.origin,u=new URL(value,base);return value.startsWith('/')&&!value.startsWith('//')&&u.origin===base&&!/\/(?:login|register|auth)(?:\/|$)/.test(u.pathname)?u.pathname+u.search+u.hash:null;}catch{return null;}}

@@ -1,0 +1,307 @@
+{
+  "passed": true,
+  "release": "0.64",
+  "scope": "Polish Tiles and complete the original twenty-node IL0A00A2 snapshot",
+  "url": "https://ion.floot.app",
+  "codeVersion": 1793046641518,
+  "publishJob": "61a159f3-97e9-462b-bf3e-1161e3a6f6c3",
+  "helperSuites": {
+    "passed": 113,
+    "failed": 0,
+    "focusedRerunsPassed": true
+  },
+  "typecheck": "clean",
+  "browserChecks": [
+    "Ordinary view hides all tile surfaces; descendant weights join exactly 1/2/3 whole cells with 8/16-word rows",
+    "Double-tapping the tile name opens Rename directly with the persistent color wheel",
+    "Each tile retains its own previous page and Forward branch when switching",
+    "Duplicated screens diverge and keep independent Back/Forward histories",
+    "Tile names, page histories and split screens survive reload",
+    "Closing the primary screen promotes its companion with that screen’s intact history",
+    "Native browser Back stays inside the selected tile after switching contexts",
+    "No document overflow or browser exceptions",
+    "Phone input swipe creates the next numbered tile",
+    "Phone double-tap renames directly; holding and deleting an open tile preserves its source clouds",
+    "Entry and the color wheel stay above the simulated software keyboard without page scrolling",
+    "Real media upload shows the new failed/sending icons, retries successfully and retains typing focus",
+    "Phone interaction flows have no document overflow or uncaught exceptions",
+    "Guests and signed-in visitors see the Games artwork; both removed ILs remain unavailable",
+    "HexDame no longer shows the retired offline concession clouds",
+    "Server-confirmed dev sees complete tile planes, outlines and permanent ILs",
+    "All four tile functions remain dev-editable through their canonical Controls and editor",
+    "Two tiles showing the same cloud preserve different deliberate zooms"
+  ],
+  "uncaughtBrowserErrors": [],
+  "phoneVerification": "Chromium phone emulation; software-keyboard viewport simulated; no physical-device claim",
+  "staticAudit": {
+    "reviewedFindings": 38,
+    "unresolved": 0,
+    "newCategories": []
+  },
+  "archive": {
+    "root": "8eb1db7f-bb02-4b23-a102-b28c60968788",
+    "destination": "df45ea97-524e-4c1c-b2f6-2a96529562e3",
+    "count": 20,
+    "archivedVersion": 379,
+    "originalSnapshot": [
+      {
+        "node": {
+          "id": "8eb1db7f-bb02-4b23-a102-b28c60968788",
+          "name": "Other",
+          "color": "#f382d4",
+          "parentId": "8d489e18-161c-4c8b-a7a4-63cdfecc9394",
+          "createdBy": 1,
+          "contentEdits": [
+            "name",
+            "color"
+          ]
+        },
+        "depth": 0,
+        "label": "IL90A2"
+      },
+      {
+        "node": {
+          "id": "a7013359-61e3-47a5-9cd3-0d54bc49fefb",
+          "name": "Change the icon beside the cloud when uploading to be visually appealing and more intuitive.",
+          "color": "white",
+          "parentId": "8eb1db7f-bb02-4b23-a102-b28c60968788",
+          "createdBy": 1
+        },
+        "depth": 1,
+        "label": "IL90A20"
+      },
+      {
+        "node": {
+          "id": "0aadb812-05a6-4f0a-ba3f-67d4a41e8d7c",
+          "name": "Tiles",
+          "color": "#f4f4f6",
+          "parentId": "8eb1db7f-bb02-4b23-a102-b28c60968788",
+          "createdBy": 1
+        },
+        "depth": 1,
+        "label": "IL90A21"
+      },
+      {
+        "node": {
+          "id": "a0dc1c27-e607-4131-87ef-1121260acbf7",
+          "name": "Games",
+          "color": "#82cff3",
+          "parentId": "8eb1db7f-bb02-4b23-a102-b28c60968788",
+          "createdBy": 1
+        },
+        "depth": 1,
+        "label": "IL90A22"
+      },
+      {
+        "node": {
+          "id": "2353e6e7-d8b4-4404-8a55-a2c0579c76a8",
+          "name": "General",
+          "color": "#f3a682",
+          "parentId": "8eb1db7f-bb02-4b23-a102-b28c60968788",
+          "createdBy": 1
+        },
+        "depth": 1,
+        "label": "IL90A23"
+      },
+      {
+        "node": {
+          "id": "f0b88955-31f9-4ca4-a8ba-cd8dac52036b",
+          "name": "Pair IL0A3 with a picture",
+          "color": "white",
+          "parentId": "a0dc1c27-e607-4131-87ef-1121260acbf7",
+          "createdBy": 1
+        },
+        "depth": 2,
+        "label": "IL90A220"
+      },
+      {
+        "node": {
+          "id": "ec29856b-73ef-47f4-a43b-0217fbc6ee73",
+          "name": "Remove tiles that hold no words",
+          "color": "white",
+          "parentId": "0aadb812-05a6-4f0a-ba3f-67d4a41e8d7c",
+          "createdBy": 1,
+          "contentEdits": [
+            "name",
+            "color"
+          ]
+        },
+        "depth": 2,
+        "label": "IL90A210"
+      },
+      {
+        "node": {
+          "id": "95063d10-1691-446b-aaa3-2c89f82ca72c",
+          "name": "Each Tile's history should be independent, so as each screen's history should be",
+          "color": "white",
+          "parentId": "2353e6e7-d8b4-4404-8a55-a2c0579c76a8",
+          "createdBy": 1
+        },
+        "depth": 2,
+        "label": "IL90A230"
+      },
+      {
+        "node": {
+          "id": "0aeffbe9-829e-4f10-9f01-e41af3910baf",
+          "name": "The size of tiles still should be dependent of its droplets",
+          "color": "#f382ab",
+          "parentId": "0aadb812-05a6-4f0a-ba3f-67d4a41e8d7c",
+          "createdBy": 1
+        },
+        "depth": 2,
+        "label": "IL90A211"
+      },
+      {
+        "node": {
+          "id": "06f32fcd-e89e-44ee-8801-f8f18d0684d9",
+          "name": "For the variants page in desktop, put the tiles of the clouds left and right of the board instead of up and down",
+          "color": "#f38f82",
+          "parentId": "2353e6e7-d8b4-4404-8a55-a2c0579c76a8",
+          "createdBy": 1
+        },
+        "depth": 2,
+        "label": "IL90A231"
+      },
+      {
+        "node": {
+          "id": "60336b90-2ed1-4d37-9034-176fad58c59e",
+          "name": "Let the words in each tile reach 8 before starting a new line",
+          "color": "#82f398",
+          "parentId": "0aadb812-05a6-4f0a-ba3f-67d4a41e8d7c",
+          "createdBy": 1
+        },
+        "depth": 2,
+        "label": "IL90A212"
+      },
+      {
+        "node": {
+          "id": "14f9af19-7f7e-4041-8cf1-a9e5a689660a",
+          "name": "Remove the clouds il01a00a9 and il01a00b0 everywhere accross the app",
+          "color": "#f4f4f6",
+          "parentId": "2353e6e7-d8b4-4404-8a55-a2c0579c76a8",
+          "createdBy": 1
+        },
+        "depth": 2,
+        "label": "IL90A232"
+      },
+      {
+        "node": {
+          "id": "6d81fc5d-cc1a-4b71-b035-0d54dc3002df",
+          "name": "Each tile should contain 8 words per line. If 2 tiles are merged, they could contain 16 words in that line.",
+          "color": "#f4f4f6",
+          "parentId": "0aadb812-05a6-4f0a-ba3f-67d4a41e8d7c",
+          "createdBy": 1,
+          "contentEdits": [
+            "name",
+            "color"
+          ]
+        },
+        "depth": 2,
+        "label": "IL90A213"
+      },
+      {
+        "node": {
+          "id": "dfcaff31-b0a8-437f-b1be-9f570369080a",
+          "name": "Remove the border of the tiles for non-dev accounts so only the words show.",
+          "color": "#82dff3",
+          "parentId": "0aadb812-05a6-4f0a-ba3f-67d4a41e8d7c",
+          "createdBy": 1
+        },
+        "depth": 2,
+        "label": "IL90A214"
+      },
+      {
+        "node": {
+          "id": "fd15baf1-6e28-4231-bed2-c72391a3db2f",
+          "name": "Double tapping the \"Tile 1\" enable renaming from there",
+          "color": "#ab82f3",
+          "parentId": "0aadb812-05a6-4f0a-ba3f-67d4a41e8d7c",
+          "createdBy": 1
+        },
+        "depth": 2,
+        "label": "IL90A215"
+      },
+      {
+        "node": {
+          "id": "3ef131a7-d908-455f-833a-4560e9a7f1bf",
+          "name": "For its relative scaling: at first, length and width are 1.",
+          "color": "white",
+          "parentId": "0aeffbe9-829e-4f10-9f01-e41af3910baf",
+          "createdBy": 1
+        },
+        "depth": 3,
+        "label": "IL90A2110"
+      },
+      {
+        "node": {
+          "id": "fdea756a-b431-4c4b-85c1-541b33a54722",
+          "name": "When 1 tile is holds twice the size of droplets as the other tile",
+          "color": "white",
+          "parentId": "3ef131a7-d908-455f-833a-4560e9a7f1bf",
+          "createdBy": 1
+        },
+        "depth": 4,
+        "label": "IL90A21100"
+      },
+      {
+        "node": {
+          "id": "7daf2e59-45f7-4dfe-bdc3-ad48afa277e5",
+          "name": "One tile gets added to it, so it merges to be two tiles",
+          "color": "white",
+          "parentId": "fdea756a-b431-4c4b-85c1-541b33a54722",
+          "createdBy": 1
+        },
+        "depth": 5,
+        "label": "IL90A211000"
+      },
+      {
+        "node": {
+          "id": "e223f33e-ef9d-46b3-8d02-f141046a260d",
+          "name": "When its droplets are three times the size of the other, another tile gets added to it. So now its contents houses three merge tiles (not four)",
+          "color": "white",
+          "parentId": "7daf2e59-45f7-4dfe-bdc3-ad48afa277e5",
+          "createdBy": 1
+        },
+        "depth": 6,
+        "label": "IL90A2110000"
+      },
+      {
+        "node": {
+          "id": "57bae47d-0db3-4150-887d-1c018f5db84d",
+          "name": "A tile should never split in half, its only to be added unto",
+          "color": "white",
+          "parentId": "e223f33e-ef9d-46b3-8d02-f141046a260d",
+          "createdBy": 1
+        },
+        "depth": 7,
+        "label": "IL90A21100000"
+      }
+    ],
+    "allIdentitiesPreserved": true,
+    "refreshedHomeVersion": 380,
+    "refreshedChessVersion": 82,
+    "realtimeQueuePending": 0
+  },
+  "qaRetirement": {
+    "userId": 161,
+    "activeSessions": 0,
+    "passwords": 0,
+    "temporaryDevMemberships": 0,
+    "storedFixtureNodes": 0,
+    "visibleSavedGames": 0,
+    "reversedEarningEntries": 14,
+    "remainingWalletUs": "0",
+    "walletClosed": true,
+    "ownUploadedAssetsRemoved": 1,
+    "localCredentialsRemoved": true
+  },
+  "workSession": {
+    "id": "de35bce0-d0ac-4885-9e2a-7522a6626fc2",
+    "source": "agent",
+    "startedAt": "2026-10-26T19:21:46.000Z",
+    "qualification": "Observed implementation interval, not independently verified human labor.",
+    "endedAt": "2026-10-26T20:34:48.561Z",
+    "elapsedUs": "4382561405"
+  },
+  "checkpoint": "59e97411-a3e7-4459-acb8-e829b726d3ab"
+}

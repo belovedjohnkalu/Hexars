@@ -1,3 +1,5 @@
+import {paneNavigation} from './paneNavigation';
+import {safePageURL} from './pageURL';
 import {recordVisitedPage,previousPageStep,nextPageStep} from './visitedPages';
 import { useEffect,useLayoutEffect } from 'react';
 import { useLocation,useNavigate,useNavigationType } from 'react-router-dom';
@@ -12,6 +14,6 @@ export function historyKey(event:KeyboardEvent):number{
 }
 export function useHistoryKeys(){
  const location=useLocation(),kind=useNavigationType(),navigate=useNavigate();
- useLayoutEffect(()=>{const index=Number(window.history.state?.idx)||0;let entry=window.history.state?.ionVisitKey;if(typeof entry!=='string'){entry=crypto.randomUUID();window.history.replaceState({...window.history.state,ionVisitKey:entry},'',window.location.href);}recordVisitedPage(index,location.pathname+location.search+location.hash,kind==='PUSH',entry);},[location.key,kind]);
- useEffect(()=>{const key=(event:KeyboardEvent)=>{const step=historyKey(event),index=Number(window.history.state?.idx)||0;if(!step||step<0&&index<=0||step>0&&!nextPageStep(index))return;event.preventDefault();if(step<0){const back=previousPageStep(index);if(back)navigate(back);else navigate('/',{replace:true});}else{const forward=nextPageStep(index);if(forward)navigate(forward);}};window.addEventListener('keydown',key);return()=>window.removeEventListener('keydown',key);},[navigate]);
+ useLayoutEffect(()=>{const path=location.pathname+location.search+location.hash;if(paneNavigation.get()&&safePageURL(path)){const redirect=paneNavigation.record(path,kind);if(redirect)navigate(redirect,{replace:true,state:{restoreCamera:true}});return;}const index=Number(window.history.state?.idx)||0;let entry=window.history.state?.ionVisitKey;if(typeof entry!=='string'){entry=crypto.randomUUID();window.history.replaceState({...window.history.state,ionVisitKey:entry},'',window.location.href);}recordVisitedPage(index,location.pathname+location.search+location.hash,kind==='PUSH',entry);},[location.key,kind]);
+ useEffect(()=>{const key=(event:KeyboardEvent)=>{const step=historyKey(event);if(step&&paneNavigation.get()){const to=paneNavigation.step(step as 1|-1);if(to){event.preventDefault();navigate(to,{replace:true,state:{restoreCamera:true}});}return;}const index=Number(window.history.state?.idx)||0;if(!step||step<0&&index<=0||step>0&&!nextPageStep(index))return;event.preventDefault();if(step<0){const back=previousPageStep(index);if(back)navigate(back);else navigate('/',{replace:true});}else{const forward=nextPageStep(index);if(forward)navigate(forward);}};window.addEventListener('keydown',key);return()=>window.removeEventListener('keydown',key);},[navigate]);
 }

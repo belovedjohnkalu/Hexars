@@ -1,3 +1,4 @@
+import {isRetiredGameCloud} from '../helpers/retiredGameClouds';
 import {saveSharedRootName} from '../helpers/saveSharedRootName';
 import { attachCloudAuthors } from '../helpers/cloudAuthors';
 import { drainCloudRefresh } from '../helpers/drainCloudRefresh';
@@ -138,7 +139,7 @@ export async function handle(request: Request) {
     const authors=authorIds.length?await db.selectFrom('users').select(['id','displayName']).where('id','in',authorIds).execute():[];
     const withAuthors=attachCloudAuthors(readable,new Map(authors.map(u=>[u.id,u.displayName])));
     // Signed picture URLs are refreshed on every read, and never stored as authority.
-    let visible:CloudNode[] = await Promise.all(withAuthors.filter(n=>!n.removedBy&&n.id!=='time-balance'&&(context.isDev||!['time-treasury','time-estimates'].includes(n.id))&&(context.scope!=='accounts'||n.id!=='account-remember'||context.seeds.some(seed=>seed.id==='account-remember'))).map(async node => {
+    let visible:CloudNode[] = await Promise.all(withAuthors.filter(n=>!isRetiredGameCloud(n.id)&&!n.removedBy&&n.id!=='time-balance'&&(context.isDev||!['time-treasury','time-estimates'].includes(n.id))&&(context.scope!=='accounts'||n.id!=='account-remember'||context.seeds.some(seed=>seed.id==='account-remember'))).map(async node => {
       const visibleNode={...node,...(['time-added','time-spent','time-remaining'].includes(node.id)?{parentId:'time-activity'}:{}),...(node.id==='control-link'&&node.name==='Link'?{name:'Redirect'}:{}),identifier:functional?.[node.id]??(context.isDev||input.scope==='public'?namespaceIdentifier(identifiers?.get(node.id)?.label,Number((input.scope==='private'&&node.id==='private'||input.scope==='accounts'&&context.seeds.some(s=>s.id===node.id))?context.devNumber:identifiers?.get(node.id)?.devNumber??context.devNumber)):undefined),createdBy:undefined,canEdit:cloudPolicy.edit(input.scope,node,context.userId,context.owner),canCopy:!(input.scope==='schedule'&&context.seeds.some(seed=>seed.id===node.id))&&!!context.userId&&cloudPolicy.writable(input.scope,context.userId,context.owner)&&(context.owner||!cloudTree.roots.some(r=>r.id===node.id))};
       const keys=node.imageKeys?.length?node.imageKeys:node.imageKey?[node.imageKey]:[];
       if(!keys.length)return visibleNode;

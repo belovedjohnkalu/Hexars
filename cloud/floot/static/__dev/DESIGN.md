@@ -62,6 +62,18 @@ components:
 ---
 # ION Design System
 
+## 0.64 — whole tiles and independent journeys
+
+This section supersedes the 0.63 subdivisions and invisible whole-face hit targets. A cloud starts with one complete 60°/120° rhombus. Descendant-character weight, divided by the smallest positive sibling weight and rounded down, determines its integer cell count. Twice the weight joins two full cells; three times joins three, never four. Growth retains every earlier cell and never splits one. Empty decorative faces are absent. A named cloud with no droplets remains one cell; a genuinely blank placeholder is omitted. Labels and multimedia occupy a safe rectangle near the joined edge so large groups do not scatter their captions across an empty world.
+
+Type size still depends only on descendant characters. Own label length reserves space without changing its relative type size or cell count. Each unit of usable row width permits eight words before the next line: two cells across permit sixteen. Names are stored unchanged. Initial camera fitting measures printed content, with a readable minimum scale on small collections; the spatial world can extend beyond the viewport and remains pannable. Font readiness, keyboard placement and reduced-motion behavior retain their canonical owners.
+
+Ordinary accounts see only printed words and multimedia. Faces have no fill, border, selected outline or invisible blank click surface. Keyboard focus underlines the printed label, with a visible photo focus ring. Registered dev accounts see the geometric planes and outlines. CloudPresentationSync sets this presentation only after authoritative authentication and a matching server identity; it never grants editing permission. Backdrop gestures remain available between words.
+
+Each tile and each split screen has its own persisted visit list, Back/Forward cursor and camera namespace. Switching tiles restores that tile's page and history before navigation; duplication copies the current journey once, then the screens diverge. Native browser entries carry pane stamps so Back cannot wander into another tile's journey. Contextual Controls remains excluded from Back/Forward. Account changes clear view metadata and pending close checks. A tile's relative size reflects all already-received authorized page content across its screens, never its tile name. No other account or unvisited page is fetched to estimate size. Default tile numbers increase independently of split screen IDs. Double-tapping the tile name or pressing F2 opens the canonical Rename Tile sheet directly; a single tap opens Tiles and a hold selects it for Rename/Delete. Closing views retains content and existing unsaved-media guards.
+
+Desktop variant pages put navigation clouds to the left of the native board and play controls to the right; phone placement stays above and below. Online Forfeit/Draw remain available with their distinct online identities. The two retired offline HexDame concession ILs remain reserved and are filtered from all presentations, including old overrides. Games (IL0A3) has matching blue chess-and-checkers artwork without changing its identity or owner customization. Publishing feedback uses a CloudUpload or CircleAlert icon with a stable footprint, accessible status and reduced-motion support.
+
 ## Overview
 Product interface for people collecting words and pictures, and playing Hexagonal Chess on phones and desktops. English controls; names accept Unicode. The reference is iPhone's quiet glass controls floating over black space. The signature is entering a word by zooming into its cloud. Avoid dashboards, cards around every word, decorative charts, and excessive chessboard depth. The user's choice of Inter overrides generic display-font advice.
 

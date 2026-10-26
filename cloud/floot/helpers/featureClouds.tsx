@@ -1,10 +1,11 @@
+import {isRetiredGameCloud} from './retiredGameClouds';
 import { scheduleCalendar } from './scheduleCalendar';
 import type { CloudNode } from '../endpoints/cloud_POST.schema';
 import type { TimeProduct } from '../endpoints/time_POST.schema';
 import { chessVariants } from './chessVariants';
 import {isFreeVariant,isRetiredPriceCloud} from './computerPolicy';
 export function featureClouds(nodes:CloudNode[],products:TimeProduct[],dev=false):CloudNode[]{
- const retired=new Set(nodes.flatMap(n=>[n.id,n.parentId||'']).filter(isRetiredPriceCloud));let removing=true;while(removing){removing=false;for(const n of nodes)if(n.parentId&&retired.has(n.parentId)&&!retired.has(n.id)){retired.add(n.id);removing=true;}}nodes=nodes.filter(n=>!retired.has(n.id));
+ nodes=nodes.filter(n=>!isRetiredGameCloud(n.id));const retired=new Set(nodes.flatMap(n=>[n.id,n.parentId||'']).filter(isRetiredPriceCloud));let removing=true;while(removing){removing=false;for(const n of nodes)if(n.parentId&&retired.has(n.parentId)&&!retired.has(n.id)){retired.add(n.id);removing=true;}}nodes=nodes.filter(n=>!retired.has(n.id));
  if(dev)return nodes.map(n=>({...n,lockedItem:undefined}));
  const byId=new Map(nodes.map(n=>[n.id,n])),catalog=new Map(products.map(p=>[p.id,p])),memo=new Map<string,{show:boolean;item?:string}>(),visiting=new Set<string>();
  const inspect=(node:CloudNode):{show:boolean;item?:string}=>{
