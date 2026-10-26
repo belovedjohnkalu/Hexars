@@ -1,0 +1,74 @@
+{
+  "passed": true,
+  "release": "0.65",
+  "scope": "Compact adjoining content tiles and single-tap page-title refresh",
+  "url": "https://ion.floot.app",
+  "codeVersion": 1793052853379,
+  "publishJob": "dd43dabf-afa2-4bd1-99e0-5615af652343",
+  "helperSuites": {
+    "passed": 115,
+    "failed": 0,
+    "focusedRerunsPassed": true
+  },
+  "typecheck": "clean",
+  "browserChecks": [
+    "Phone content forms a connected edge-to-edge tile assembly without document overflow",
+    "Touch single title tap refreshes immediately instead of opening content",
+    "Phone keyboard title activation refreshes and retains both open tiles",
+    "Phone title refresh in a split screen reloads that screen independently",
+    "Desktop content forms a connected edge-to-edge tile assembly without document overflow",
+    "Pointer single title tap refreshes immediately instead of opening content",
+    "Desktop keyboard title activation refreshes and retains both open tiles",
+    "Desktop title refresh in a split screen reloads that screen independently",
+    "Desktop long labels fit adjoining whole-cell groups with full eight-word rows and descendant-only fonts",
+    "Desktop single-tap refresh preserves an unsent media draft and explains how to continue",
+    "Desktop holding the title keeps screen options and never triggers refresh",
+    "Desktop tile name renaming and the closely packed overview still restore the selected page",
+    "Phone long labels fit adjoining whole-cell groups with full eight-word rows and descendant-only fonts",
+    "Phone single-tap refresh preserves an unsent media draft and explains how to continue",
+    "Phone holding the title keeps screen options and never triggers refresh",
+    "Phone tile name renaming and the closely packed overview still restore the selected page",
+    "Phone dev outlines and ILs surround tightly fitted content, with complete sentences initially on-screen",
+    "Desktop dev outlines and ILs surround tightly fitted content, with complete sentences initially on-screen",
+    "The account-page title uses the same single-tap refresh button"
+  ],
+  "uncaughtBrowserErrors": [],
+  "phoneVerification": "Chromium phone emulation, not a physical iPhone test",
+  "staticAudit": {
+    "reviewedFindings": 38,
+    "unresolved": 0,
+    "newCategories": []
+  },
+  "checkpoint": "7acd8d97-b37c-459c-9443-e8c12896b0cf",
+  "qaRetirement": {
+    "userId": 162,
+    "activeSessions": 0,
+    "passwords": 0,
+    "temporaryDevMemberships": 0,
+    "storedFixtureNodes": 0,
+    "reversedEarningEntries": 2,
+    "remainingWalletUs": "0",
+    "walletClosed": true,
+    "uploadedAssets": 0,
+    "localCredentialsRemoved": true
+  },
+  "workSession": {
+    "id": "5bb55a50-6123-4d2e-9d30-6a50755e8638",
+    "source": "agent",
+    "startedAt": "2026-10-26T21:45:42.000Z",
+    "qualification": "Observed implementation interval, not independently verified human labor.",
+    "endedAt": "2026-10-26T22:18:52.778Z",
+    "elapsedUs": "1990778570"
+  },
+  "packingBenchmark": {
+    "items": 1024,
+    "coldMs": 1643.167778,
+    "cachedMs": 7.163088000000016,
+    "environment": "Node on the cloud execution workspace; not a mobile benchmark"
+  },
+  "realtimeRefresh": {
+    "homeVersion": 381,
+    "chessVersion": 83,
+    "pending": 0
+  }
+}

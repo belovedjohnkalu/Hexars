@@ -5,7 +5,7 @@ export {latticePixel,rhombiOverlap} from './wholeTileMosaic';
 export type LatticePoint=GridPoint;
 export type {WholeFace as RhombusFace} from './wholeTileMosaic';
 import type {WholeFace as RhombusFace} from './wholeTileMosaic';
-export function rhombusMosaic(items:{id:string;span?:number;units?:number}[],unit=160){return wholeTileMosaic(items.map(n=>({id:n.id,units:n.units??1})),unit);}
+export function rhombusMosaic(items:{id:string;span?:number;units?:number;cellScale?:number;logicalUnits?:number;baseColumns?:number;baseRows?:number}[],unit=160,aspect=1){return wholeTileMosaic(items.map(n=>({id:n.id,units:n.units??1,cellScale:n.cellScale,logicalUnits:n.logicalUnits,baseColumns:n.baseColumns,baseRows:n.baseRows})),unit,aspect);}
 
 // A shallow joined strip reserves room for the playable board. Its lozenges
 // use the same lattice and printed plane as the larger navigation mosaic.

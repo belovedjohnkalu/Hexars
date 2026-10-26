@@ -62,6 +62,12 @@ components:
 ---
 # ION Design System
 
+## 0.65 — adjoining content, single-tap refresh
+
+The current density requirement supersedes the common pixel size for every logical tile in 0.64. Fit each cloud's visible words, multimedia, IL and status independently, then pack those occupied groups edge to edge. Long sentences begin as wide rows of complete rhombi; pictures can use portrait groups. Descendant characters still determine type size and the logical whole-cell weight. Physical whole cells also reserve the measured text/media footprint; an existing logical cell is never split. Cell scale adapts to the occupied content, so neither a long neighbor nor a huge descendant count creates an empty square around every other cloud. Eight-word rows (sixteen across two logical cells) and unchanged stored text remain. Padding is a small measured inset, not a decorative margin. Small collections open with the complete occupied tile assembly inside the viewport; long labels and the final tile corners do not begin cropped at the screen edges. The same composition serves ordinary cloud pages and the open Tiles overview. The palette, Inter, flat playable boards and dev-only outlines are unchanged.
+
+A single activation of the page title refreshes that page through the existing view-refresh and unsaved-media guards. Pointer, touch and keyboard share the same action. Holds retain screen options and View cloud; swipes and cancelled gestures cannot trigger refresh. The tile name above the page title keeps its separate overview, rename and hold behavior.
+
 ## 0.64 — whole tiles and independent journeys
 
 This section supersedes the 0.63 subdivisions and invisible whole-face hit targets. A cloud starts with one complete 60°/120° rhombus. Descendant-character weight, divided by the smallest positive sibling weight and rounded down, determines its integer cell count. Twice the weight joins two full cells; three times joins three, never four. Growth retains every earlier cell and never splits one. Empty decorative faces are absent. A named cloud with no droplets remains one cell; a genuinely blank placeholder is omitted. Labels and multimedia occupy a safe rectangle near the joined edge so large groups do not scatter their captions across an empty world.

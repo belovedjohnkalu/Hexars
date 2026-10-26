@@ -1,7 +1,7 @@
 .surface{position:absolute;inset:0;display:block;width:100%;height:100%;overflow:visible;pointer-events:none;}
 .surface polygon{fill:transparent;stroke:transparent;stroke-width:1;stroke-linejoin:round;vector-effect:non-scaling-stroke;transition:fill 220ms var(--ease),stroke 180ms var(--ease);}
 :global(html[data-ion-dev="true"]) .surface polygon{fill:var(--rhombus-top);stroke:var(--rhombus-border);}:global(html[data-ion-dev="true"]) .surface[data-plane="1"] polygon{fill:var(--rhombus-right);}:global(html[data-ion-dev="true"]) .surface[data-plane="2"] polygon{fill:var(--rhombus-left);}
-.printed{position:absolute;left:0;top:0;transform-origin:0 0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;padding:calc(var(--face-side)*.10);text-align:center;line-height:1.25;pointer-events:none;max-width:none!important;}
+.printed{position:absolute;left:0;top:0;transform-origin:0 0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;padding:var(--face-inset,calc(var(--face-side)*.04));text-align:center;line-height:1.25;pointer-events:none;max-width:none!important;}
 .printed a,.printed button{pointer-events:auto;}
 @media(prefers-reduced-motion:reduce){.surface polygon{transition:none;}}
 @media(forced-colors:active){.surface polygon{fill:Canvas;stroke:CanvasText;}}
