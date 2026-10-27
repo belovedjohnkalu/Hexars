@@ -1,0 +1,9 @@
+import {proportionalCloudScale} from './proportionalCloudScale';
+import {mosaicCloudLayout} from './mosaicCloudLayout';
+const measure=(text:string,size:number)=>text.length*size*.5;
+describe('Exact descendant-character proportions',()=>{
+ it('preserves double and fractional ratios instead of min/max interpolation',()=>{const s=proportionalCloudScale([10,20,35]).scales;expect(s[1]/s[0]).toBeCloseTo(2,12);expect(s[2]/s[0]).toBeCloseTo(3.5,12);expect(s[2]/s[1]).toBeCloseTo(1.75,12);});
+ it('retains empty clouds without inventing a division by zero',()=>{expect(proportionalCloudScale([0,0]).scales).toEqual([1,1]);expect(proportionalCloudScale([0,10,20]).scales).toEqual([.5,.5,1]);expect(proportionalCloudScale([]).maxZoom).toBe(3);});
+ it('uses the same exact printed transform for text and pictures regardless of names or IDs',()=>{const out=mosaicCloudLayout([10,20,35].map((characters,i)=>({id:'photo'+i,name:i?'A different name':'Word',isImage:true,percent:i*50,characters})),390,650,measure),nodes=[0,1,2].map(i=>out.items.find(n=>n.id==='photo'+i)!);const font=(i:number)=>nodes[i].visualFontSize,picture=(i:number)=>nodes[i].pictureSize!*nodes[i].printScale;expect(font(1)/font(0)).toBeCloseTo(2,12);expect(font(2)/font(0)).toBeCloseTo(3.5,12);expect(picture(1)/picture(0)).toBeCloseTo(2,12);expect(picture(2)/picture(0)).toBeCloseTo(3.5,12);for(const n of nodes){const [a,b]=n.rhombus.matrix.slice(7,-1).split(',').map(Number);expect(Math.hypot(a,b)).toBeCloseTo(n.printScale,12);}});
+ it('keeps very small nodes accessible through a matching deep zoom range',()=>{const out=mosaicCloudLayout([{id:'small',name:'Small',characters:1,percent:0},{id:'large',name:'Large',characters:1000000,percent:100}],390,650,measure);expect(out.items.find(n=>n.id==='large')!.visualFontSize/out.items.find(n=>n.id==='small')!.visualFontSize).toBeCloseTo(1000000,6);expect(out.maxZoom).toBe(3000000);});
+});

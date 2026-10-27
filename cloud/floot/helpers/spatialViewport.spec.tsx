@@ -76,6 +76,12 @@ describe('Per-screen camera isolation',()=>{
  it('retains separate zooms when two tiles open the same cloud',()=>{const key='pane-camera-'+crypto.randomUUID();paneNavigation.set('first',null,'/');const view=render(<SpatialViewport width={900} height={900} initialZoom={1} viewKey={key}>Word</SpatialViewport>),region=view.getByRole('region'),world=view.container.querySelector('[data-camera-zoom]') as HTMLElement;fireEvent.keyDown(region,{key:'+'});const first=Number(world.dataset.cameraZoom);act(()=>paneNavigation.set('second',null,'/'));expect(Number(world.dataset.cameraZoom)).toBe(1);fireEvent.keyDown(region,{key:'-'});const second=Number(world.dataset.cameraZoom);act(()=>paneNavigation.set('first',null,'/'));expect(Number(world.dataset.cameraZoom)).toBeCloseTo(first,8);act(()=>paneNavigation.set('second',null,'/'));expect(Number(world.dataset.cameraZoom)).toBeCloseTo(second,8);});
 });
 
+describe('Proportional cloud navigation',()=>{
+ afterEach(cleanup);
+ it('allows the deep zoom required by small proportional clouds instead of stopping at three',()=>{const view=render(<SpatialViewport width={500} height={500} viewKey={'deep-'+crypto.randomUUID()} initialZoom={1} maxZoom={200}>Word</SpatialViewport>),region=view.getByRole('region');for(let i=0;i<20;i++)fireEvent.keyDown(region,{key:'+'});expect(Number(view.container.querySelector('[data-camera-zoom]')!.getAttribute('data-camera-zoom'))).toBeGreaterThan(3);});
+ it('brings a small keyboard-focused label to readable scale',()=>{const view=render(<SpatialViewport width={500} height={500} viewKey={'focus-'+crypto.randomUUID()} initialZoom={1} maxZoom={200} focusZoom><a href="#small" style={{fontSize:68}}><span data-print-scale="0.01">Small</span></a></SpatialViewport>),link=view.getByRole('link');spyOn(link,'matches').and.returnValue(true);fireEvent.focus(link);expect(Number(view.container.querySelector('[data-camera-zoom]')!.getAttribute('data-camera-zoom'))).toBeCloseTo(18/(68*.01),6);});
+});
+
 describe('Tiles overview receiving content',()=>{
  afterEach(cleanup);
  it('refits arriving tile metadata before interaction, then preserves a deliberate camera',()=>{

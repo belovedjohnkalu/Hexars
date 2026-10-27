@@ -1,0 +1,137 @@
+{
+  "passed": true,
+  "release": "0.66",
+  "scope": "Exact descendant-character proportions for text and pictures; saved dark appearance before first paint",
+  "url": "https://ion.floot.app",
+  "codeVersion": 1793060087506,
+  "publishJob": "b25fd6cb-ac35-4345-aab2-302d16d54546",
+  "helperSuites": {
+    "passed": 117,
+    "failed": 0,
+    "focusedRerunsPassed": true
+  },
+  "typecheck": "clean",
+  "browserChecks": [
+    "Phone saved dark paints correctly before any app JavaScript runs",
+    "Phone saved light paints correctly before any app JavaScript runs",
+    "Phone default light paints correctly before any app JavaScript runs",
+    "Desktop saved dark paints correctly before any app JavaScript runs",
+    "Desktop saved light paints correctly before any app JavaScript runs",
+    "Desktop default light paints correctly before any app JavaScript runs",
+    "Phone cold load and reload stay dark through delayed app startup",
+    "Desktop cold load and reload stay dark through delayed app startup",
+    "Desktop text and pictures preserve 2\u00d7, 3.5\u00d7 and 1.75\u00d7 descendant ratios across all depths",
+    "Desktop complete labels, pictures and fitted rhombi stay within their faces without document scrolling",
+    "Phone text and pictures preserve 2\u00d7, 3.5\u00d7 and 1.75\u00d7 descendant ratios across all depths",
+    "Phone complete labels, pictures and fitted rhombi stay within their faces without document scrolling",
+    "Desktop keyboard focus brings a very small proportional cloud into readable deep zoom"
+  ],
+  "uncaughtBrowserErrors": [],
+  "phoneVerification": "Chromium phone emulation, not a physical iPhone test",
+  "firstPaint": {
+    "appScriptsBlocked": true,
+    "appScriptsDelayed": true,
+    "savedDark": "#08090b",
+    "savedLightAndDefault": "#fafaf9",
+    "bootstrapBeforeModuleAndStyles": true,
+    "allSampledFramesMatchPreference": true
+  },
+  "ratioSamples": [
+    {
+      "mobile": false,
+      "nodes": [
+        {
+          "id": "8d16a9a1-7dec-4d65-8ca2-47cb0d0ed8ec",
+          "characters": 10,
+          "scale": 0.2857142857142857,
+          "font": 19.428576603140026,
+          "picture": 41.14286810076711
+        },
+        {
+          "id": "ec50fc09-efb8-43ca-8903-fe01987d26ba",
+          "characters": 20,
+          "scale": 0.5714285714285714,
+          "font": 38.85715320628005,
+          "picture": 82.28573620153422
+        },
+        {
+          "id": "26aa8748-cdf0-4b4e-a6c4-860433e88db3",
+          "characters": 35,
+          "scale": 1,
+          "font": 67.99997622124584,
+          "picture": 143.9999496449912
+        }
+      ]
+    },
+    {
+      "mobile": true,
+      "nodes": [
+        {
+          "id": "8d16a9a1-7dec-4d65-8ca2-47cb0d0ed8ec",
+          "characters": 10,
+          "scale": 0.2857142857142857,
+          "font": 19.428576603140026,
+          "picture": 41.14286810076711
+        },
+        {
+          "id": "ec50fc09-efb8-43ca-8903-fe01987d26ba",
+          "characters": 20,
+          "scale": 0.5714285714285714,
+          "font": 38.85715320628005,
+          "picture": 82.28573620153422
+        },
+        {
+          "id": "26aa8748-cdf0-4b4e-a6c4-860433e88db3",
+          "characters": 35,
+          "scale": 1,
+          "font": 67.99997622124584,
+          "picture": 143.9999496449912
+        }
+      ]
+    },
+    {
+      "focused": {
+        "zoom": 199.6349480968858,
+        "effectiveFont": 18,
+        "focusVisible": true,
+        "center": {
+          "x": 639.99609375,
+          "y": 442
+        }
+      },
+      "paintedPixels": 1909
+    }
+  ],
+  "emptyPolicy": "Use the smallest positive sibling scale; equal size when all are empty. No positive ratio to zero is defined.",
+  "staticAudit": {
+    "reviewedFindings": 38,
+    "unresolved": 0,
+    "newCategories": []
+  },
+  "checkpoint": "be988273-4d16-46f8-b738-42f157a8ce03",
+  "qaRetirement": {
+    "userId": 163,
+    "activeSessions": 0,
+    "passwords": 0,
+    "temporaryDevMemberships": 0,
+    "storedFixtureNodes": 0,
+    "earningEntries": 0,
+    "remainingWalletUs": "0",
+    "openWallets": 0,
+    "uploadedAssets": 0,
+    "localCredentialsRemoved": true
+  },
+  "workSession": {
+    "id": "1efd3fa3-15e8-4d10-b9df-2dfd89c28b0e",
+    "source": "agent",
+    "startedAt": "2026-10-26T23:46:15.000Z",
+    "qualification": "Observed implementation interval, not independently verified human labor.",
+    "endedAt": "2026-10-27T00:16:17.101Z",
+    "elapsedUs": "1802101305"
+  },
+  "realtimeRefresh": {
+    "homeVersion": 382,
+    "chessVersion": 84,
+    "pending": 0
+  }
+}

@@ -1,8 +1,8 @@
-import { useAppearance,appearanceChrome } from '../helpers/useAppearance';
+import { useAppearance,appearanceChrome,appearanceBootstrap,readDarkAppearance } from '../helpers/useAppearance';
 import { Helmet } from "react-helmet";
 import { preload } from "react-dom";
 export function AppHead({ title = "ION",iconUrl }: { title?: string;iconUrl?:string }) {
-  const {inverted}=useAppearance(),chrome=appearanceChrome(inverted);
+  const {dark}=useAppearance(),chrome=appearanceChrome(typeof window==='undefined'?dark:readDarkAppearance());
 
   preload("/_cdn/static/6e6c9250-599e-4bf4-a9ae-66ff948afb59-InterVariable.woff2", { as: "font", type: "font/woff2", crossOrigin: "anonymous" });
   return <Helmet htmlAttributes={{lang:"en"}}>
@@ -10,6 +10,7 @@ export function AppHead({ title = "ION",iconUrl }: { title?: string;iconUrl?:str
     <meta name="description" content="Your clouds and droplets. Open one and explore." />
     <meta name="theme-color" content={chrome.themeColor} />
     <meta name="color-scheme" content={chrome.colorScheme} />
+    <script id="ion-appearance-bootstrap" type="text/javascript">{appearanceBootstrap}</script>
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-title" content="ION" />
