@@ -1,5 +1,5 @@
 .dock{display:flex;align-items:flex-end;gap:8px;width:min(680px,100%);margin:0 auto;min-width:0;padding:0 14px calc(40px + env(safe-area-inset-bottom,0px));flex-shrink:0;}
 .navigation{flex:0 0 auto;max-width:112px;opacity:1;transition:max-width 220ms var(--ease),opacity 160ms var(--ease);}.composer{flex:1;min-width:0;}.composer>div{width:100%;max-width:none;padding-bottom:0;}
-.dock[data-dock-active=true]{width:100%;max-width:none;padding-inline:0;gap:0;}.dock[data-dock-active=true] .navigation{max-width:0;width:0;overflow:hidden;opacity:0;pointer-events:none;}
+.dock[data-dock-collapsed=true]{width:100%;max-width:none;padding-inline:0;gap:0;}.dock[data-dock-collapsed=true] .navigation{max-width:0;width:0;overflow:hidden;opacity:0;pointer-events:none;}
 @media(max-height:500px){.dock{padding-bottom:10px;}}
 @media(prefers-reduced-motion:reduce){.navigation{transition:none;}}

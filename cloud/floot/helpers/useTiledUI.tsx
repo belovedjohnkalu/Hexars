@@ -1,6 +1,6 @@
 import {useLayoutEffect,useSyncExternalStore} from 'react';
 import type {CloudNode} from '../endpoints/cloud_POST.schema';
-export const tiledUICloudId='account-tiled-ui';
+export {tiledUICloudId} from './interfaceSettingsClouds';
 const key='ion.layout.tiled',event='ion-layout';
 let memory=false,unsaved=false;
 export function readTiledUI(){if(typeof window==='undefined')return false;if(unsaved)return memory;try{return localStorage.getItem(key)==='true';}catch{return memory;}}

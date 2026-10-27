@@ -1,0 +1,7 @@
+import {purchaseDestination,applyPurchaseReceipt} from './purchaseJourney';
+import type {TimeReceipt,TimeSnapshot} from '../endpoints/time_POST.schema';
+describe('Open a committed purchase and retain its receipt',()=>{
+ it('opens the selected cloud rather than its receipt or the parent',()=>{expect(purchaseDestination('variant:mccooey','/?cloud=mccooey-rules&space=chess')).toBe('/?cloud=mccooey-rules&space=chess');expect(purchaseDestination('variant:mccooey')).toBe('/mccooey?mode=friend');});
+ it('never follows external or purchase-loop return URLs',()=>{for(const url of['https://example.invalid','//example.invalid','/\\example.invalid','/?cloud=time-product','/?cloud=controls'])expect(purchaseDestination('variant:shafran',url)).toBe('/shafran?mode=friend');});
+ it('projects only the confirmed outgoing purchase and preserves financial totals',()=>{const old={userId:1,balanceUs:'100',products:[{id:'variant:mccooey',owned:false},{id:'variant:shafran',owned:false}]} as TimeSnapshot,r={id:'r',kind:'purchase',direction:'out',metadata:{productId:'variant:mccooey'}} as TimeReceipt;const next=applyPurchaseReceipt(old,r);expect(next.products.map(p=>p.owned)).toEqual([true,false]);expect(next.balanceUs).toBe('100');expect(old.products[0].owned).toBeFalse();expect(applyPurchaseReceipt(old,{...r,kind:'transfer'})).toBe(old);expect(applyPurchaseReceipt(old,{...r,direction:'in'})).toBe(old);});
+});

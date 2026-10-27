@@ -15,6 +15,6 @@ export function TimeAccess({items,children}:{items:string[];children:ReactNode})
  if(time.snapshot.dev)return <>{children}</>;
  const missing=items.filter(id=>!time.snapshot!.products.some(p=>p.id===id&&p.owned)).map(id=>time.snapshot!.products.find(p=>p.id===id)??{id,name:'Feature'});
  if(!missing.length)return <>{children}</>;
- const first=missing.find(p=>'affordable'in p&&p.affordable),to='/?'+new URLSearchParams(first?{cloud:'time-product',space:'home',item:first.id,back:location.pathname+location.search+location.hash}:{cloud:'time-prices',space:'home'});
+ const first=missing.find(p=>'affordable'in p&&p.affordable),to='/?'+new URLSearchParams(first?{cloud:'time-product',space:'home',item:first.id,back:location.pathname+location.search+location.hash,open:location.pathname+location.search+location.hash}:{cloud:'time-prices',space:'home'});
  return location.pathname+location.search===to?null:<Navigate to={to} replace/>;
 }

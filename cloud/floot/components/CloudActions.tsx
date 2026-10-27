@@ -1,3 +1,4 @@
+import {nearbyDestinations} from '../helpers/nearbyDestinations';
 import {useTiledUI,layoutWords} from '../helpers/useTiledUI';
 import {postIL} from '../endpoints/il_POST.schema';
 import { useEffect,useRef,useState } from "react";
@@ -28,7 +29,7 @@ export function CloudActions({node,nodes,scope,version,mode,count,busy,error,onC
  const [editPage,setEditPage]=useState<'name'|'pictures'>('name'),[photoMode,setPhotoMode]=useState<'keep'|'replace'|'remove'>('keep'),[photos,setPhotos]=useState<CloudPhotoDraft[]>([]),[photoError,setPhotoError]=useState(''),[saving,setSaving]=useState(false);
  const transfer=mode==='move'||mode==='copy',cross=targetScope!==scope;
  useEffect(()=>{if(!cross){setTarget({nodes,version});return;}let alive=true;setTargetLoading(true);setTargetError('');void loadTarget(targetScope).then(value=>{if(alive)setTarget(value);}).catch(e=>{if(alive)setTargetError(e instanceof Error?e.message:'Couldn’t open the destination.');}).finally(()=>{if(alive)setTargetLoading(false);});return()=>{alive=false;};},[targetScope,nodes,version]);
- const options=target.nodes.filter(n=>!n.destination&&(n.id!=='hexagonal-chess'||dev)&&n.id!==node.id&&(cross||!cloudTree.path(nodes,n.id).some(p=>p.id===node.id))).filter(n=>(n.name+' '+(n.identifier||'')).toLowerCase().includes(query.toLowerCase()));
+ const options=nearbyDestinations(target.nodes,node,{cross,dev,query});
  useEffect(()=>setPage(0),[targetScope,query]);
  const perPage=useViewportHeight()<550?1:2;
  async function findIL(){if(busy||ilBusy)return;lookup.current?.abort();const controller=new AbortController();lookup.current=controller;setILBusy(true);setTargetError('');try{const item=(await postIL({action:'resolve',il},controller.signal)).items[0];const allowed=scope==='public'||scope==='private'?['public','private']:[scope];if(!item||!allowed.includes(item.scope))throw new Error('Choose an IL in '+(scope==='public'||scope==='private'?'Safari or Journal.':'this section.'));const value=await loadTarget(item.scope);const candidate=value.nodes.find(n=>n.id===item.id&&!n.removedBy&&!n.destination);if(!candidate||candidate.id===node.id||item.scope===scope&&cloudTree.path(nodes,candidate.id).some(n=>n.id===node.id))throw new Error('Choose a destination outside this branch.');if(!controller.signal.aborted){setTargetScope(item.scope);setTarget(value);setDestination(item.id);setILFound(true);setQuery('');}}catch(e){if(!controller.signal.aborted)setTargetError(e instanceof Error?e.message:'Couldn’t find that IL.');}finally{if(lookup.current===controller)setILBusy(false);}}

@@ -1,5 +1,5 @@
 .viewport { position: relative; width: 100%; height: 100%; min-height: 0; }
-.canvas { position: relative; animation: arrive 300ms var(--ease) both; transition: opacity 180ms ease; }
+.canvas { position: relative; animation: arrive 420ms var(--ease) both; transition: opacity 180ms ease; }
 .canvas.leaving { opacity: 0; }
 .node { position:absolute; left:0; top:0; display:flex; align-items:center; justify-content:center; padding:6px; color:var(--foreground); text-decoration:none; text-align:center; font:500 20px/1.18 var(--font-family-display); letter-spacing:-.035em; border-radius:var(--radius); transform:translate3d(var(--node-x),var(--node-y),0); transition:transform 360ms var(--ease),font-size 360ms var(--ease),color 180ms ease,opacity 180ms ease; cursor:pointer; -webkit-tap-highlight-color:transparent; -webkit-touch-callout:none; user-select:none; }
 .node span { max-width:100%; }
@@ -20,7 +20,7 @@
 .context { min-width:190px; border-radius:20px; padding:6px; background:var(--glass-solid); backdrop-filter:blur(28px); }
 .context [role=menuitem] { min-height:44px; font-size:17px; padding:10px 16px; cursor:pointer; }
 .danger { color:var(--error); }
-@keyframes arrive { from { opacity:0; } to { opacity:1; } }
+@keyframes arrive { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:translateY(0); } }
 @media(prefers-reduced-motion:reduce) { .canvas,.node { transition:none; animation:none; } }
 
 .node.node { background:transparent; border:0; box-shadow:none; white-space:nowrap; height:auto; }
@@ -54,3 +54,10 @@
 .viewport[data-layout="organic"] .node .caption{flex-direction:row;gap:6px;}
 .viewport[data-layout="organic"] .node:focus-visible .text{text-decoration:underline;text-underline-offset:.2em;}
 .viewport[data-layout="organic"] .node:focus-visible [data-photo-count]{outline:2px solid var(--rhombus-focus);outline-offset:3px;}
+
+/* Shared organic movement and luminous type; no layout or hitbox expansion. */
+.viewport[data-layout="organic"] .node.node{transition:transform 420ms var(--ease),font-size 360ms var(--ease),color 240ms ease,opacity 200ms ease;}
+:global(html[data-ion-theme="dark"]) .node .text{text-shadow:0 0 20px color-mix(in srgb,currentColor 22%,transparent),0 0 42px color-mix(in srgb,currentColor 10%,transparent);}
+:global(html[data-ion-theme="dark"]) .node:hover .text,:global(html[data-ion-theme="dark"]) .node:focus-visible .text{text-shadow:0 0 14px color-mix(in srgb,currentColor 40%,transparent),0 0 38px color-mix(in srgb,currentColor 24%,transparent);}
+.node [data-printed-plane]{transition:transform 420ms var(--ease),opacity 220ms ease;}
+@media(prefers-reduced-motion:reduce){.viewport[data-layout="organic"] .node.node,.node [data-printed-plane]{transition:none;}}

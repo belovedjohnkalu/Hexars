@@ -1,0 +1,47 @@
+{
+  "sourceFingerprint": "4276df52bd996292888a1d03812dde7e332a8607bcba3127857401de9ae9a8b3",
+  "sources": [
+    "cloud/floot/helpers/checkersRules.tsx",
+    "engines/engine-1/protocol.cpp",
+    "shared/include/hexchess/brusky.hpp",
+    "shared/include/hexchess/devasa.hpp",
+    "shared/include/hexchess/game_state.hpp",
+    "shared/include/hexchess/geometry.hpp",
+    "shared/include/hexchess/move.hpp",
+    "shared/include/hexchess/pieces.hpp",
+    "shared/include/hexchess/rules.hpp",
+    "shared/include/hexchess/variant.hpp",
+    "shared/include/hexchess/wellisch.hpp",
+    "shared/src/geometry.cpp",
+    "shared/src/hex_rules.cpp",
+    "shared/src/wellisch_rules.cpp",
+    "shared/variants/brusky.cpp",
+    "shared/variants/devasa.cpp",
+    "shared/variants/glinski.cpp",
+    "shared/variants/mccooey.cpp",
+    "shared/variants/shafran.cpp",
+    "shared/variants/variant.cpp",
+    "shared/variants/wellisch.cpp"
+  ],
+  "banks": {
+    "cloud/floot/helpers/dailyGlinskiPuzzles.tsx": "4e102152d36f1f43861e2ac03c45500ebf373ea66cb0f26d27d8a96257b132d8",
+    "cloud/floot/helpers/dailyMccooeyPuzzles.tsx": "74b80bc063977094b97d04ebd844bef21a2589197bd52a51636629a910b4e2bf",
+    "cloud/floot/helpers/dailyShafranPuzzles.tsx": "7156ca1638195f302565aa8d6beb8cda0ac1ecd0d7535e8498df667337688b45",
+    "cloud/floot/helpers/dailyBruskyPuzzles.tsx": "38b7b1136325d31c83c70b5a2e40d7eb1ef1fb1f68c0ec6da1d0aae24b23eb1f",
+    "cloud/floot/helpers/dailyDevasaPuzzles.tsx": "7a92675ef10faf74fe48392ad177d5462f746ca98b9082be6b9d14cd75eb40de",
+    "cloud/floot/helpers/dailyWellischPuzzles.tsx": "016871593351c736d44121d3b7ffee8f1d1318b346c11f4b89cb70e6d7f2a3e9",
+    "cloud/floot/helpers/dailyHexdamePuzzles.tsx": "805ffc55eb0091e4e20ab29bcd50c29678653c75e983c0cb28c38264e2bf731f",
+    "cloud/floot/helpers/dailyKruznoPuzzles.tsx": "c16d42bbb0f90726f6f378aa71d4f88793a72995cff6bb829b281185912e10b2"
+  },
+  "positions": 512,
+  "goals": {
+    "glinski": "mate",
+    "mccooey": "mate",
+    "shafran": "mate",
+    "brusky": "mate",
+    "devasa": "mate",
+    "wellisch": "king",
+    "hexdame": "promote",
+    "kruzno": "win"
+  }
+}

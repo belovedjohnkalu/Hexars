@@ -8,7 +8,7 @@ export type Rect={x:number;y:number;width:number;height:number};
 export type CloudLayout={width:number;height:number;maxZoom?:number;minFitZoom?:number;decorations?:RhombusFace[];items:Array<Rect&{id:string;fontSize:number;printScale?:number;visualFontSize?:number;pictureSize?:number;captionSize?:number;gridSlot?:number;lines?:string[];rhombus?:RhombusFace;content?:Rect}>};
 export function cloudLayout(items:Item[],width:number,height:number,measure:(text:string,size:number)=>number,options:{rhombi?:boolean;proportional?:boolean;anchors?:Record<string,{x:number;y:number}>;organic?:boolean;square?:boolean;boardGrid?:boolean;columns?:number;compact?:boolean;minTargetSize?:number;maxFontSize?:number;labelMaxWidth?:number;previous?:CloudLayout}={}):CloudLayout{
   if(options.rhombi)return mosaicCloudLayout(items,width,height,measure);
-  const previous=options.previous,narrow=options.compact??width<600,gap=options.organic?(narrow?4:6):narrow?16:24,cells=new Map<string,Rect[]>(),result:CloudLayout['items']=[];
+  const previous=options.previous,narrow=options.compact??width<600,gap=options.organic?(narrow?12:16):narrow?16:24,cells=new Map<string,Rect[]>(),result:CloudLayout['items']=[];
   function keys(rect:Rect){const list:string[]=[];for(let x=Math.floor(rect.x/128);x<=Math.floor((rect.x+rect.width)/128);x++)for(let y=Math.floor(rect.y/128);y<=Math.floor((rect.y+rect.height)/128);y++)list.push(x+","+y);return list;}
   const overlaps=(rect:Rect)=>keys(rect).some(k=>(cells.get(k)||[]).some(r=>rect.x<r.x+r.width-.01&&rect.x+rect.width>r.x+.01&&rect.y<r.y+r.height-.01&&rect.y+rect.height>r.y+.01));
   const reserve=(rect:Rect)=>{for(const k of keys(rect))cells.set(k,[...(cells.get(k)||[]),rect]);};
@@ -24,7 +24,7 @@ export function cloudLayout(items:Item[],width:number,height:number,measure:(tex
     return {id:item.id,fontSize,lines,width:Math.max(64,options.minTargetSize??0,labelWidth,isPicture?picture+24:0),height:Math.max(options.minTargetSize??0,isPicture?picture+Math.max(lines.length*captionSize*1.3,identifier.height)+(options.organic?20:32):Math.max(lines.length*fontSize*1.18,identifier.height)+(options.organic?12:20))+(item.publishing?26:0)+(item.annotation?20:0),...(isPicture?{pictureSize:picture,captionSize}:{})};
   });
   const limits=options.organic&&measured.length?{maxZoom:proportions?.maxZoom??3,minFitZoom:14/Math.min(...measured.map(n=>n.captionSize??n.fontSize))}:{};
-  if(options.organic&&measured.length>1)width=Math.max(width,Math.max(...measured.map(n=>n.width))*1.8+32,options.square?Math.max(...measured.map(n=>n.height))*1.15:0,Math.sqrt(measured.reduce((sum,n)=>sum+(n.width+gap)*(n.height+gap),0))*1.5);
+  if(options.organic&&measured.length>1)width=Math.max(width,Math.max(...measured.map(n=>n.width))*2.2+32,options.square?Math.max(...measured.map(n=>n.height))*1.15:0,Math.sqrt(measured.reduce((sum,n)=>sum+(n.width+gap)*(n.height+gap),0))*1.5);
   const spiralStep=options.organic?Math.max(6,Math.min(42,Math.sqrt(measured.reduce((n,item)=>n+item.width*item.height,0)/Math.max(1,measured.length))/14)):10;
   if(options.boardGrid){
     // Boards is an aligned two-column collection, not a spiral whose outer
@@ -51,7 +51,8 @@ export function cloudLayout(items:Item[],width:number,height:number,measure:(tex
   }
   for(const item of pending){
     const {width:w,height:h}=item,old=previous?.items.find(n=>n.id===item.id);
-    const anchor=options.anchors?.[item.id],centerX=old?old.x+old.width/2:previous?width/2:(anchor?.x??0)*width,centerY=old?old.y+old.height/2:previous?previous.height/2:(anchor?.y??0)*Math.min(width,height);
+    const columns=Math.max(2,Math.ceil(Math.sqrt(measured.length))),slot=measured.findIndex(n=>n.id===item.id),rows=Math.ceil(measured.length/columns),jitter=((slot*37)%11-5)*.006;
+    const anchor=options.anchors?.[item.id]??(options.organic&&options.square?(measured.length===2?{x:(slot?1:-1)*.18,y:(slot?1:-1)*.22}:{x:((slot%columns+.5)/columns-.5)*.88+jitter,y:((Math.floor(slot/columns)+.5)/rows-.5)*.8-jitter}):undefined),centerX=old?old.x+old.width/2:previous?width/2:(anchor?.x??0)*width,centerY=old?old.y+old.height/2:previous?previous.height/2:(anchor?.y??0)*(options.organic&&options.square?width:Math.min(width,height));
     let chosen:Rect|null=null;
     for(let attempt=0;attempt<12000;attempt++){
       const angle=attempt*2.399963,radius=spiralStep*Math.sqrt(attempt),x=centerX+Math.cos(angle)*radius*(options.organic?1.05:options.square?1:narrow?.85:1.65)-w/2,y=centerY+Math.sin(angle)*radius-h/2,index=result.length;

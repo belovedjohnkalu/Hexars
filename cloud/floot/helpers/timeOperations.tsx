@@ -19,6 +19,7 @@ export async function timeOperations(input:Exclude<TimeInput,{action:'snapshot'}
   const account=input.treasury?'treasury':timeLedger.wallet(userId);
   let query=db.selectFrom('ionTimeTransactions').select(['id','createdAt']).where(e=>e.or([e('fromAccount','=',account),e('toAccount','=',account)]));
   if(input.direction)query=query.where(input.direction==='in'?'toAccount':'fromAccount','=',account);
+  if(input.purchasesOnly)query=query.where('kind','=','purchase').where('fromAccount','=',account);
   if(input.receivedOnly)query=query.where('toAccount','=',account).where('kind','in',['transfer','payout']);
   if(input.before)query=query.where(e=>e.or([e('createdAt','<',new Date(input.before!.at)),e.and([e('createdAt','=',new Date(input.before!.at)),e('id','<',input.before!.id)])]));
   const rows=await query.orderBy('createdAt','desc').orderBy('id','desc').limit(13).execute(),page=rows.slice(0,12),last=page.at(-1);

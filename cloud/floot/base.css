@@ -116,3 +116,13 @@ html,body{background:var(--background);}::selection{background:color-mix(in srgb
 footer:has([data-composer-dock]){padding-inline:0!important;padding-bottom:0!important;min-height:0;}
 
 html[data-ion-keyboard=true] [data-composer-dock]{padding-bottom:8px;}
+
+/* 0.70: rich dark colours and one shared, restrained motion/glow system. */
+:root{--glow-soft:0 0 16px color-mix(in srgb,var(--word-blue) 12%,transparent);--motion-enter:420ms;}
+html[data-ion-theme=dark]{--word-blue:#72b4ff;--word-cyan:#4bdef2;--word-mint:#64e8a2;--word-amber:#ffd06b;--word-coral:#ff9978;--word-rose:#ff8bc9;--word-lavender:#b293ff;--shadow-focus:0 0 0 3px #8abfff55,0 0 24px #72b4ff33;--glow-soft:0 0 22px #72b4ff26;}
+:where(button,a,input,textarea,[role=switch]){transition:color 220ms ease,background-color 220ms ease,border-color 220ms ease,box-shadow 280ms var(--ease),opacity 180ms ease;}
+html[data-ion-theme=dark] :where(button[data-ion-title],h1,h2){text-shadow:0 0 24px color-mix(in srgb,currentColor 16%,transparent);}
+html[data-ion-theme=dark] :where([data-composer-dock], [role=dialog]){filter:drop-shadow(0 0 16px #72b4ff0c);}
+:where([role=dialog]){animation:ionSurfaceIn 360ms var(--ease) both;}
+@keyframes ionSurfaceIn{from{opacity:0;translate:0 12px;}to{opacity:1;translate:0 0;}}
+@media(prefers-reduced-motion:reduce){:where([role=dialog]){animation:none;}}

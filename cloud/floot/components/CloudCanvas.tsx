@@ -39,7 +39,7 @@ export function CloudCanvas({tabularNumbers=false,fitOnChange=false,nodes,parent
  useLayoutEffect(()=>{const el=area.current;if(!el)return;const measure=()=>setSize(old=>({width:Math.max(240,el.clientWidth),height:el.closest('[data-keyboard="true"]')?old.height:Math.max(160,el.clientHeight),frameHeight:el.closest<HTMLElement>('[data-ion-primary]')?.clientHeight||window.innerHeight}));measure();const observer=new ResizeObserver(measure);observer.observe(el);let alive=true;void document.fonts.ready.then(()=>{if(alive)setFontReady(1);});return()=>{alive=false;observer.disconnect();};},[]);
  const returnVariant=new URLSearchParams(location.search).get('return');
  const siblings=useMemo(()=>cloudTree.sizes(chessNavigationNodes(nodes,scope,returnVariant,showIdentifiers).map(n=>layoutCloud(n,tiled)),parentId).map(n=>n.note?{...n,isImage:false,imageUrl:undefined,imageUrls:undefined}:n),[nodes,parentId,scope,returnVariant,tiled]);
- const boardGrid=false,square=scope==='chess'&&(parentId==='boards'||parentId==='rules'||!!parentId?.endsWith('-rules')),lastLayout=useRef<{key:string;viewportWidth:number;generation:number;layout:CloudLayout}|null>(null),layoutKey=identity+':'+scope+':'+(parentId||'root')+(tiled?':tiled-v8':parentId===communityId?':community-v1':':organic-v8')+(coarsePointer?':touch':'');
+ const boardGrid=false,square=scope==='chess'&&(parentId==='boards'||parentId==='rules'||!!parentId?.endsWith('-rules')),lastLayout=useRef<{key:string;viewportWidth:number;generation:number;layout:CloudLayout}|null>(null),layoutKey=identity+':'+scope+':'+(parentId||'root')+(tiled?':tiled-v9':parentId===communityId?':community-v2':':organic-v9')+(coarsePointer?':touch':'');
  const layout=useMemo(()=>{
   const context=document.createElement('canvas').getContext('2d');
   const saved=lastLayout.current?.key===layoutKey?lastLayout.current:layoutCache.get(layoutKey),old=saved?.viewportWidth===size.width?saved.layout:undefined;
@@ -52,9 +52,9 @@ export function CloudCanvas({tabularNumbers=false,fitOnChange=false,nodes,parent
  const bounds=layout.items.length?{x:Math.min(...layout.items.map(n=>n.x)),y:Math.min(...layout.items.map(n=>n.y)),width:0,height:0}:undefined;
  if(bounds){bounds.width=Math.max(...layout.items.map(n=>n.x+n.width))-bounds.x;bounds.height=Math.max(...layout.items.map(n=>n.y+n.height))-bounds.y;}
  const rectangles=new Map(layout.items.map(n=>[n.id,n]));
- function destination(node:CloudNode){
+ function destination(node:CloudNode):string{
   if(scope==='home'&&(node.id===scheduleCalendar.root||node.calendarDate))return cloudURL(node.id,'schedule');
-  if(node.lockedItem)return '/?'+new URLSearchParams({cloud:'time-product',space:'home',item:node.lockedItem,back:location.pathname+location.search});
+  if(node.lockedItem)return '/?'+new URLSearchParams({cloud:'time-product',space:'home',item:node.lockedItem,back:location.pathname+location.search,open:destination({...node,lockedItem:undefined})});
   if(node.redirect)return redirectURL(node.redirect);
   if(node.href?.startsWith('/')&&!node.href.startsWith('//'))return node.href;
   if(node.destination==='saved-game'&&node.savedGameId&&node.variant)return '/'+node.variant+'?mode=saved&game='+node.savedGameId+(node.shareId?'&shareId='+node.shareId:'')+'&back='+encodeURIComponent(location.pathname+location.search);

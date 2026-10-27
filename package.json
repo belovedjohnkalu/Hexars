@@ -20,6 +20,7 @@
     "dev": "npm run dev --workspace web",
     "manager": "npm run start --workspace manager",
     "test:native": "node scripts/build-native.mjs --test",
+    "test:puzzles": "tsx tests/puzzles/verify.mts",
     "test:manager": "npm run build:positional && npm run build:defensive && npm run build:materialist && npm run build:unconventional && npm run build:universal && node --test tests/engine/*.test.mjs",
     "test:web": "npm run test --workspace web",
     "test": "npm run test:native && npm run test:search && npm run test:manager && npm run test:web && npm run test:api",

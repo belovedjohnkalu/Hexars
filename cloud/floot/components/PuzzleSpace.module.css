@@ -1,0 +1,17 @@
+.space{height:100%;min-height:0;display:flex;flex-direction:column;padding:0 14px;color:var(--foreground);}
+.heading{text-align:center;flex-shrink:0;}
+.heading h2{font-size:clamp(22px,3vw,30px);font-weight:550;letter-spacing:-.04em;margin:6px 0;}
+.side{margin:0;color:var(--muted-foreground);font-size:14px;}
+.status{font-size:17px;min-height:23px;margin:8px 0;color:var(--word-amber);transition:color 220ms ease;}
+.status[data-phase=solved]{color:var(--word-mint);text-shadow:0 0 24px color-mix(in srgb,currentColor 38%,transparent);}
+.status[data-phase=wrong]{color:var(--word-coral);}
+.content{flex:1;min-height:0;display:flex;flex-direction:column;}
+.board{flex:1;min-height:0;display:grid;place-items:center;position:relative;}
+.board svg{display:block;height:100%;width:100%;max-width:680px;min-height:0;}
+.actions{height:clamp(108px,19dvh,170px);min-height:80px;flex-shrink:0;position:relative;}
+.actions[aria-busy=true]{opacity:.65;}
+.error{font-size:14px;color:var(--error);text-align:center;display:flex;align-items:center;justify-content:center;gap:8px;}
+.empty{height:100%;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:14px;color:var(--muted-foreground);}
+@media(min-width:850px){.content{flex-direction:row;max-width:1120px;width:100%;margin:auto;}.board{width:65%;}.actions{height:100%;width:35%;min-height:220px;}}
+@media(max-height:500px){.heading h2{font-size:20px;margin:2px 0;}.heading{display:flex;gap:14px;align-items:center;justify-content:center;}.status{margin:4px 0;}.content{flex-direction:row;}.board{width:65%;}.actions{height:100%;width:35%;min-height:100px;}}
+@media(prefers-reduced-motion:no-preference){.status[data-phase=solved]{animation:celebrate 600ms var(--ease) both;}.status[data-phase=wrong]{animation:nudge 300ms ease;}.board{animation:boardIn 450ms var(--ease) both;}@keyframes celebrate{from{opacity:.5;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}@keyframes nudge{0%,100%{translate:0;}35%{translate:-4px;}70%{translate:3px;}}@keyframes boardIn{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}}

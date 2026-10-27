@@ -23,7 +23,7 @@ async function refresh(input:Refresh) {
   }catch(e){await db.updateTable('ionPublicSnapshots').set({leaseId:null,leaseUntil:new Date(0)}).where('key','=',input.key).where('leaseId','=',input.leaseId).execute();throw e;}
 }
 async function read(url:string) {
-  const u=new URL(url),origin=u.origin,key='ion069:'+u.hostname;
+  const u=new URL(url),origin=u.origin,key='ion070:'+u.hostname;
   let row=await db.selectFrom('ionPublicSnapshots').selectAll().where('key','=',key).executeTakeFirst();
   if(row?.payload&&new Date(row.validUntil).getTime()>Date.now())return{data:row.payload as unknown as PublicBootstrap,status:'hit'};
   if(!row){await db.insertInto('ionPublicSnapshots').values({key}).onConflict(oc=>oc.doNothing()).execute();row=await db.selectFrom('ionPublicSnapshots').selectAll().where('key','=',key).executeTakeFirstOrThrow();}

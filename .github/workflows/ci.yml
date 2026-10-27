@@ -17,6 +17,7 @@ jobs:
       - run: cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
       - run: cmake --build build --parallel 2
       - run: ctest --test-dir build --output-on-failure
+      - run: npm run test:puzzles
       - run: npm run test:manager
       - run: npm run test:web
       - run: npm run test:api

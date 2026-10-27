@@ -160,6 +160,22 @@ export interface IonCloudTransfers {
   userId: number;
 }
 
+export interface IonDailyPuzzleProgress {
+  attempts: Generated<number>;
+  createdAt: Generated<Timestamp>;
+  day: string;
+  hintUsed: Generated<boolean>;
+  lastRequestHash: string | null;
+  lastRequestId: string | null;
+  puzzleId: string;
+  solved: Generated<boolean>;
+  solvedMove: Json | null;
+  updatedAt: Generated<Timestamp>;
+  userId: number;
+  variant: string;
+  version: Generated<number>;
+}
+
 export interface IonDevAccounts {
   devNumber: Generated<Int8>;
   grantedAt: Generated<Timestamp>;
@@ -526,6 +542,7 @@ export interface DB {
   ionCloudIdentifierCounters: IonCloudIdentifierCounters;
   ionCloudIdentifiers: IonCloudIdentifiers;
   ionCloudTransfers: IonCloudTransfers;
+  ionDailyPuzzleProgress: IonDailyPuzzleProgress;
   ionDevAccounts: IonDevAccounts;
   ionDeviceAccounts: IonDeviceAccounts;
   ionEngineSlots: IonEngineSlots;

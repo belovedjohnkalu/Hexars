@@ -18,6 +18,7 @@ const move = z
     pass: z.literal(true).optional(),
   })
   .strict();
+export const chessMoveSchema=move;
 const session = { gameId: z.string().uuid(), accessToken: z.string().regex(/^[a-f0-9]{64}$/) };
 const mutation = { ...session, version: z.number().int().nonnegative() };
 export const schema = z.discriminatedUnion("action", [

@@ -5,7 +5,21 @@ ION is live at **https://ion.floot.app**. The authoritative application is in
 rules/search. The Cloudflare, Supabase and Vercel migration sources are retained
 for development; they do not serve the live app.
 
-## Chess hub — 0.69
+## Daily puzzles and organic refinements — 0.70
+
+Learn → Puzzles now offers a daily, rule-validated position for every chess and
+checkers variant, with Hint, practice and account-private completion across
+devices. Each variant has 64 rotating compositions. Paid variants keep their
+existing purchase requirement. See [puzzle validation](tests/puzzles/README.md).
+
+Controls → Settings holds Toggle Tiled UI. Organic clouds keep full eight-word
+lines, descendant-character sizing with a readable minimum, wider spacing and
+square packing. Move/Duplicate suggests nearby branches first. Desktop typing
+retains compact entry and both navigation arrows. Other Accounts stays tied to
+the actual remembered sign-ins on this device, including when switching devs.
+Purchases open the selected cloud; Time → Receipts keeps the purchase record.
+
+## Chess hub
 
 Open Board Games → Chess. **Play**, **Learn**, **Library** and **Community** form
 one hub. Continue returns to this account’s unfinished local-device match;
@@ -38,7 +52,7 @@ have not been certified**. See [capacity and staging gates](docs/chess-launch-ca
 ION uses pannable, zoomable clouds of words and pictures. Descendant characters
 set relative size, with a readable minimum; a cloud’s own name reserves geometry
 but does not set its font. Light and organic clouds are the defaults. Accounts
-provides explicit Dark and Toggle Tiled UI controls. The optional adjoining
+provides saved sign-ins; Controls → Settings contains the appearance controls. The optional adjoining
 rhombi, Skies/Tiles and split screens share the same content and game state.
 Inter is self-hosted; motion respects reduced-motion preferences.
 

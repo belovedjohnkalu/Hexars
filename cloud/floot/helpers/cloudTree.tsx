@@ -1,3 +1,5 @@
+import {puzzleClouds} from './puzzleClouds';
+import {interfaceSettingsClouds} from './interfaceSettingsClouds';
 import {chessHubClouds} from './chessHubClouds';
 import {checkersClouds} from './checkersClouds';
 import { scheduleCalendar } from './scheduleCalendar';
@@ -12,7 +14,7 @@ import type { CloudNode,CloudScope } from "../endpoints/cloud_POST.schema";
 const roots:CloudNode[]=[{"id": "hexagonal-chess", "parentId": null, "name": "Board Games", "imageUrl": "/_cdn/static/73922d54-c2d3-47e7-952e-07f83fbe44e7.png", "color": "blue"}, {"id": "public", "parentId": null, "name": "Safari", "color": "mint", "imageUrl":"/_cdn/static/73459c8d-8ae5-49db-a0c2-9d5b354c82a4.png"}, {"id": "private", "parentId": null, "name": "Journal", "color": "lavender", "imageUrl":"/_cdn/static/358b7227-6900-4d34-9670-740e52d2062a.png"}];
 roots.forEach((n,i)=>{n.parentId='ion';n.destination='space';n.space=(['chess','public','private'] as const)[i];});
 roots.push(...systemClouds.filter(n=>n.parentId==='ion'));
-const homeSeed=[systemClouds[0],...roots,...systemClouds.filter(n=>n.parentId==='controls'),...functionClouds.filter(n=>(n.parentId==='time'&&n.id!=='time-balance')||['time-added','time-spent','time-remaining'].includes(n.id)).map(n=>({...n,color:({ 'time-activity':'mint','time-send':'cyan','time-receive':'lavender','time-earn':'amber','time-prices':'blue','time-treasury':'amber','time-estimates':'lavender','time-added':'mint','time-spent':'coral','time-remaining':'amber'} as const)[n.id as 'time-activity'],href:'/?cloud='+n.id+'&space=home'}))];
+const homeSeed=[...interfaceSettingsClouds,systemClouds[0],...roots,...systemClouds.filter(n=>n.parentId==='controls'),...functionClouds.filter(n=>(n.parentId==='time'&&n.id!=='time-balance')||['time-added','time-spent','time-remaining'].includes(n.id)).map(n=>({...n,color:({ 'time-activity':'mint','time-send':'cyan','time-receive':'lavender','time-receipts':'rose','time-earn':'amber','time-prices':'blue','time-treasury':'amber','time-estimates':'lavender','time-added':'mint','time-spent':'coral','time-remaining':'amber'} as const)[n.id as 'time-activity'],href:'/?cloud='+n.id+'&space=home'}))];
 const seed:CloudNode[]=[
 {"id": "hexagonal-chess", "parentId": null, "name": "Board Games", "imageUrl": "/_cdn/static/73922d54-c2d3-47e7-952e-07f83fbe44e7.png", "color": "blue"},
 {"id": "engines", "parentId": "hexagonal-chess", "name": "Computer", "color": "coral"},
@@ -87,7 +89,7 @@ const seed:CloudNode[]=[
 ];
 seed.push(...horizontalRuleClouds());
 seed.push(...wellischRuleClouds());
-seed.push(...chessJourney,...checkersClouds,...chessHubClouds);
+seed.push(...chessJourney,...checkersClouds,...chessHubClouds,...puzzleClouds);
 function descendants(nodes:CloudNode[],id:string){
  const children=new Map<string,CloudNode[]>();for(const n of nodes)if(n.parentId){const group=children.get(n.parentId);if(group)group.push(n);else children.set(n.parentId,[n]);}
  const seen=new Set([id]),queue=[id];for(let i=0;i<queue.length;i++)for(const n of children.get(queue[i])||[])if(!seen.has(n.id)){seen.add(n.id);queue.push(n.id);}return seen.size-1;
