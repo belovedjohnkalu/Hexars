@@ -14,5 +14,9 @@
 .word .identifier { display:block; font:400 9px/11px var(--font-family-base); color:var(--muted-foreground); letter-spacing:0; }
 .word:has(.identifier) { flex-direction:column; gap:0; }
 
-.word.word{transform:none;padding:0;display:block;border-radius:0;min-height:0;height:auto;white-space:normal;font-size:16px;background:transparent!important;}
+.app[data-layout="tiled"] .word.word{transform:none;padding:0;display:block;border-radius:0;min-height:0;height:auto;white-space:normal;font-size:68px;background:transparent!important;}
 .word:focus-visible{outline:none;}.word:focus-visible [data-rhombus-shape]{stroke:var(--rhombus-focus);stroke-width:3;}
+
+.app[data-layout="organic"] .word:focus-visible{text-decoration:underline;text-underline-offset:.2em;}
+
+.app[data-layout="tiled"] .word [data-printed-plane]>span:not(.identifier){white-space:pre;}

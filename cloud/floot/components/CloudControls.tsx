@@ -1,3 +1,4 @@
+import {useTiledUI,layoutCloud} from '../helpers/useTiledUI';
 import { postFeatures } from '../endpoints/features_POST.schema';
 import { useState } from 'react';
 import { useLocation,useNavigate } from 'react-router-dom';
@@ -18,8 +19,8 @@ import { Input } from './Input';
 import styles from './CloudControls.module.css';
 export function CloudControls(props:{nodes:CloudNode[];onFeedback:(value:string)=>void;className?:string}){const location=useLocation();return new URLSearchParams(location.search).has('game')?<SavedGameControls onFeedback={props.onFeedback}/>:<CloudNodeControls {...props}/>;}
 function CloudNodeControls({nodes,onFeedback,className=''}:{nodes:CloudNode[];onFeedback:(value:string)=>void;className?:string}){
- const location=useLocation(),navigate=useNavigate(),params=new URLSearchParams(location.search),selectedId=params.get('selected'),source=cloudScope(new URLSearchParams({space:params.get('source')||'home'})),origin=safeCloudReturn(params.get('origin'));
- const {authState}=useAuth(),uid=authState.type==='authenticated'?authState.user.id:null,space=useCloudSpace(uid,authState.type==='loading',source,params.get('functional')||undefined),node=space.nodes.find(n=>n.id===selectedId),[mode,setMode]=useState<'rename'|'move'|'copy'|'remove'|null>(null),[linking,setLinking]=useState(false),[viewer,setViewer]=useState(false),[clipboard,setClipboard]=useState(false),[copyingText,setCopyingText]=useState(false);
+ const tiled=useTiledUI(),location=useLocation(),navigate=useNavigate(),params=new URLSearchParams(location.search),selectedId=params.get('selected'),source=cloudScope(new URLSearchParams({space:params.get('source')||'home'})),origin=safeCloudReturn(params.get('origin'));
+ const {authState}=useAuth(),uid=authState.type==='authenticated'?authState.user.id:null,space=useCloudSpace(uid,authState.type==='loading',source,params.get('functional')||undefined),original=space.nodes.find(n=>n.id===selectedId),node=original?layoutCloud(original,tiled):undefined,[mode,setMode]=useState<'rename'|'move'|'copy'|'remove'|null>(null),[linking,setLinking]=useState(false),[viewer,setViewer]=useState(false),[clipboard,setClipboard]=useState(false),[copyingText,setCopyingText]=useState(false);
  const [featureDialog,setFeatureDialog]=useState(false),[featureBusy,setFeatureBusy]=useState(false),[featureError,setFeatureError]=useState('');
  const dev=space.dev===true&&space.userId===uid;
  const allowed=(n:CloudNode)=>!!n.control&&!!node&&(n.control==='copy-text'?true:n.control==='copy-il'?(dev||source==='public')&&!!node.identifier:n.control==='view-photos'?cloudPhotoUrls(node).length>0:n.control==='copy'?!!node.canCopy:n.control==='remove'&&node.id==='home-hidden-features'?false:n.control==='remove'&&node.canHide?true:!!node.canEdit);

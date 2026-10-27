@@ -1,6 +1,7 @@
 import {CloudPresentationSync} from './CloudPresentationSync';
 import { NotificationProvider } from '../helpers/useNotifications';
 import { AppearanceSync } from '../helpers/useAppearance';
+import {LayoutSync} from '../helpers/useTiledUI';
 import { PageWorkspace } from './PageWorkspace';
 import { TimeProvider } from '../helpers/useTime';
 import { HistoryKeys } from './HistoryKeys';
@@ -32,7 +33,7 @@ export const GlobalContextProviders = ({
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider><NotificationProvider><TimeProvider><ThemeModeProvider>
-        <AppearanceSync /><CloudPresentationSync/>
+        <AppearanceSync /><LayoutSync/><CloudPresentationSync/>
         <ScrollToHashElement />
         <HistoryKeys />
         <TooltipProvider>

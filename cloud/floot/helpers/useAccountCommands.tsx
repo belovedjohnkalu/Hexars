@@ -4,11 +4,13 @@ import { postAccounts } from '../endpoints/auth/accounts_POST.schema';
 import type { CloudNode } from '../endpoints/cloud_POST.schema';
 import { useAuth } from './useAuth';
 import { cloudURL } from './cloudRoutes';
+import {toggleTiledUI} from './useTiledUI';
 export function useAccountCommands(refresh:()=>Promise<unknown>,feedback:(message:string)=>void){
  const navigate=useNavigate(),{logout}=useAuth(),[busy,setBusy]=useState(false),[error,setError]=useState(''),[forget,setForget]=useState<number|null>(null),lock=useRef(false);
  const accounts=cloudURL('accounts','accounts');
  const form=(mode:string,add=false)=>'/login?'+new URLSearchParams({mode,back:accounts,...(add?{add:'1',remember:'1'}:{})});
  async function command(node:CloudNode){const action=node.accountAction;if(!action||lock.current)return;
+  if(action==='toggle-tiled-ui'){toggleTiledUI();return;}
   if(action==='signin'||action==='signup'||action==='recover'){navigate(form(action));return;}
   if(action.startsWith('forget:')){setForget(Number(action.split(':')[1]));return;}
   lock.current=true;setBusy(true);setError('');

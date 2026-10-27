@@ -62,6 +62,16 @@ components:
 ---
 # ION Design System
 
+## 0.68 — organic by default, optional Tiled UI and Skies
+
+Organic upright words and pictures are the default again. Accounts contains the functional cloud “Toggle Tiled UI,” using the same persistent per-device preference pattern as appearance. Its pressed state and existing on/off colors communicate the choice. The opt-in tiled mode preserves the complete adjoining rhombus composition, contained affine printing, dev-only planes, descendant-based scale and visible minimum. Both modes retain Inter, actual light/dark tokens, media colors, native board geometry and the pre-paint theme bootstrap.
+
+CloudCanvas owns the mode switch through the existing cloudLayout owner. Organic mode uses its non-overlapping spiral composition and common descendant-character print ratios with the protected readable minimum; own names reserve geometry only. The whole-word wrapping, picture frames, focus/hold behavior and no document scrolling remain. Mode-specific camera keys retain separate views without rewriting visit history or remounting live games. Layout changes synchronize through the same-origin device preference; blocked storage retains the choice in memory for that document.
+
+The overview is Skies in organic mode and Tiles in tiled mode. An unnamed view is Sky N or Tile N; a custom name stays the same. Skies size their labels by the number of screens they hold, with an accessible screen count. The tiled presentation calls these partitions. Tiled views retain their authorized content-based weights. One existing view tree, screen identities, drafts, game sessions and Back/Forward histories serve both presentations. Creating, holding, renaming, selecting, closing and moving views retain their existing authorities and unsaved-media guards. Mode vocabulary reaches headings, title menus, rename sheets and frame labels; permanent cloud ILs and dev-edited labels are preserved.
+
+Live and saved variant pages follow the same preference. Organic actions are upright words around the flat board; Tiled UI fits complete labels and ILs through the same measured whole-cell layout as other clouds, retaining exact adjoining faces around the board. Online chats use the selected presentation, with no added droplets or new online actions. A layout switch preserves the board position, selected game, side, review state and native legal move authority.
+
 ## 0.67 — a visible minimum
 
 The latest visibility requirement qualifies 0.66's exact scale at the small end. Clamp the shared printed scale to one half of the largest sibling: the 68px type base has a 34px world minimum, and the 144px picture base has a 72px world minimum. Relative descendant-character proportions remain exact above that floor, including fractional multipliers; tiny positive totals and empty leaves remain discoverable. Names still reserve geometry without determining their own font size. Pictures, captions, ILs and occupied faces retain the same shared print transform and adjoining composition.

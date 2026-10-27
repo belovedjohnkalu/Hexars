@@ -10,6 +10,7 @@ export async function accountClouds(request:Request,userId:number|null,isDev=fal
  if(userId){add('account-add','Add account','add','accounts','cyan');if(!saved.some(a=>a.id===userId))add('account-remember','Remember','remember','accounts','mint');add('account-signout','Sign out','signout','accounts','coral');}
  else{add('account-signin','Sign in','signin','accounts','blue');add('account-create','Create account','signup','accounts','mint');}
  add('account-recover','Recover password','recover','accounts','amber');
+ add('account-tiled-ui','Toggle Tiled UI','toggle-tiled-ui','accounts','mint');
  if(isDev)nodes.push({id:'account-signed-in-users',parentId:'accounts',name:'Signed in',system:true,color:'blue'});
  nodes.push(...accountListNodes(saved,userId));
  return nodes;

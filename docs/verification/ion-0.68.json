@@ -1,0 +1,94 @@
+{
+  "passed": true,
+  "release": "0.68",
+  "scope": "Organic default, persistent Tiled UI toggle, partition-sized Skies, and fitted variant controls",
+  "url": "https://ion.floot.app",
+  "codeVersion": 1793072990110,
+  "publishJob": "e02e24e5-db7f-4cf6-a349-8156f458b195",
+  "helperSuites": {
+    "passed": 120,
+    "failed": 0,
+    "fullRegressionSuites": 119,
+    "additionalSuite": "helpers/actionTileGroup.spec.tsx",
+    "focusedRerunsPassed": true
+  },
+  "typecheck": "clean",
+  "browserChecks": [
+    "Phone starts with readable, non-overlapping upright organic clouds",
+    "Phone Accounts toggle persists through reload and synchronizes another open page",
+    "Phone Skies sizes each view by its actual partition count",
+    "Phone layout switches and renaming preserve the existing partitions and their pages",
+    "Desktop starts with readable, non-overlapping upright organic clouds",
+    "Desktop Accounts toggle persists through reload and synchronizes another open page",
+    "Desktop Skies sizes each view by its actual partition count",
+    "Desktop layout switches and renaming preserve the existing partitions and their pages",
+    "The layout toggle keeps working when its device storage is blocked",
+    "Phone live board retains its move, selection, side and native cell targets across layout switches",
+    "Phone saved variant follows the chosen presentation without changing its recorded position",
+    "Phone a layout change preserves the mounted composer and its unsent word",
+    "Desktop live board retains its move, selection, side and native cell targets across layout switches",
+    "Desktop saved variant follows the chosen presentation without changing its recorded position",
+    "Desktop a layout change preserves the mounted composer and its unsent word"
+  ],
+  "uncaughtBrowserErrors": [],
+  "phoneVerification": "Chromium phone emulation, not a physical iPhone test",
+  "preferences": {
+    "default": "organic",
+    "toggle": "Accounts \u2192 Toggle Tiled UI",
+    "storage": "per-device same-origin localStorage; in-document memory fallback when blocked",
+    "openViewsAndGamesShared": true,
+    "skySizing": "partition count only; content does not influence Sky size",
+    "tileSizing": "received authorized content, as before",
+    "devEditedLabelsPreserved": true,
+    "permanentFunctionalIdsPreserved": true,
+    "organicSplitName": "Screen",
+    "tiledSplitName": "Partition"
+  },
+  "variantControls": {
+    "owner": "actionTileGroup \u2192 mosaicCloudLayout",
+    "commonPrintScale": true,
+    "fullWordsAndIdentifiersReserved": true,
+    "nativeFullCellHitboxes": 91,
+    "liveAndSavedPositionsPreserved": true
+  },
+  "staticAudit": {
+    "reviewedFindings": 38,
+    "unresolved": 0,
+    "newCategories": []
+  },
+  "checkpoint": "63b4d3ac-de5f-4f1e-84df-1eeef14a9795",
+  "qaRetirement": {
+    "userId": 164,
+    "activeSessions": 0,
+    "passwords": 0,
+    "temporaryDevMemberships": 0,
+    "storedFixtureNodes": 0,
+    "hiddenTestGames": 4,
+    "reversedEarningEntries": 0,
+    "remainingWalletUs": "0",
+    "openWallets": 0,
+    "uploadedAssets": 0,
+    "localCredentialsRemoved": true
+  },
+  "workSession": {
+    "id": "1f7d29be-7151-40ec-bd7a-4349bdb8f9eb",
+    "source": "agent",
+    "startedAt": "2026-10-27T02:54:16.000Z",
+    "endedAt": "2026-10-27T03:45:29.868Z",
+    "elapsedUs": "3073868311",
+    "qualification": "Observed implementation interval, not independently verified human labor."
+  },
+  "realtimeRefresh": {
+    "homeVersion": 385,
+    "chessVersion": 87,
+    "pending": 0
+  },
+  "additionalWorkSession": {
+    "id": "456c1a24-b113-4dd5-9a43-4345d3311434",
+    "source": "agent",
+    "startedAt": "2026-10-27T03:49:40.872Z",
+    "endedAt": "2026-10-27T03:52:36.678Z",
+    "elapsedUs": "175806380",
+    "qualification": "Observed implementation interval, not independently verified human labor."
+  }
+}

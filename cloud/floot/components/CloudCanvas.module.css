@@ -48,3 +48,9 @@
 
 :global(html:not([data-ion-dev="true"])) .node{pointer-events:none;}:global(html:not([data-ion-dev="true"])) .node [data-printed-plane]>*{pointer-events:auto;}
 :global(html:not([data-ion-dev="true"])) .node:focus-visible [data-rhombus-shape]{stroke:transparent;}:global(html:not([data-ion-dev="true"])) .node:focus-visible .text{text-decoration:underline;text-underline-offset:.2em;}:global(html:not([data-ion-dev="true"])) .node:focus-visible [data-photo-count]{outline:2px solid var(--rhombus-focus);outline-offset:3px;}
+
+.viewport[data-layout="organic"] .node.node{display:flex;align-items:center;justify-content:center;padding:6px;border-radius:var(--radius);pointer-events:auto;}
+.viewport[data-layout="organic"] .node.picture{flex-direction:column;gap:8px;}
+.viewport[data-layout="organic"] .node .caption{flex-direction:row;gap:6px;}
+.viewport[data-layout="organic"] .node:focus-visible .text{text-decoration:underline;text-underline-offset:.2em;}
+.viewport[data-layout="organic"] .node:focus-visible [data-photo-count]{outline:2px solid var(--rhombus-focus);outline-offset:3px;}
