@@ -4,7 +4,7 @@ import { cloudTextLines } from './cloudText';
 import { identifierFootprint } from "./cloudIdentifiers";
 type Item={id:string;name:string;identifier?:string;imageUrl?:string;isImage?:boolean;percent:number;characters?:number;publishing?:string};
 export type Rect={x:number;y:number;width:number;height:number};
-export type CloudLayout={width:number;height:number;maxZoom?:number;decorations?:RhombusFace[];items:Array<Rect&{id:string;fontSize:number;printScale?:number;visualFontSize?:number;pictureSize?:number;captionSize?:number;gridSlot?:number;lines?:string[];rhombus?:RhombusFace;content?:Rect}>};
+export type CloudLayout={width:number;height:number;maxZoom?:number;minFitZoom?:number;decorations?:RhombusFace[];items:Array<Rect&{id:string;fontSize:number;printScale?:number;visualFontSize?:number;pictureSize?:number;captionSize?:number;gridSlot?:number;lines?:string[];rhombus?:RhombusFace;content?:Rect}>};
 export function cloudLayout(items:Item[],width:number,height:number,measure:(text:string,size:number)=>number,options:{rhombi?:boolean;anchors?:Record<string,{x:number;y:number}>;organic?:boolean;square?:boolean;boardGrid?:boolean;columns?:number;compact?:boolean;minTargetSize?:number;maxFontSize?:number;labelMaxWidth?:number;previous?:CloudLayout}={}):CloudLayout{
   if(options.rhombi)return mosaicCloudLayout(items,width,height,measure);
   const previous=options.previous,narrow=options.compact??width<600,gap=options.organic?(narrow?4:6):narrow?16:24,cells=new Map<string,Rect[]>(),result:CloudLayout['items']=[];

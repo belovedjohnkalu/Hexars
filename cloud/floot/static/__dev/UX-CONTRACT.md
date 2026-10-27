@@ -1,5 +1,10 @@
 # ION interaction contract
 
+## 0.67 current overrides — discoverable small clouds
+
+- Keep descendant-proportional printing above a one-half relative scale floor. The smallest label has at least 34 world pixels and the smallest picture at least 72 world pixels, using the existing 68/144 bases. Empty leaves use the smallest positive weight before applying that floor; all-empty siblings remain equal. The floor deliberately qualifies exact ratios only where those ratios would make content disappear. Own labels still affect geometry only. No server counts, permissions or data are changed.
+- Both CloudCanvas and the Tiles overview supply a content-derived initial camera floor so the smallest printed type begins at least 14 screen pixels. Large assemblies remain pannable rather than auto-shrinking into unreadable content. Manual zoom-out, readable keyboard focus, independent pane histories and cameras remain. An untouched camera can refit when the readability threshold changes; manual camera intent stays preserved. A new layout/camera namespace avoids restoring obsolete microscopic views. Keep adjoining fitted rhombi, complete-word text, contained pictures and the existing dark first-paint bootstrap.
+
 ## 0.66 current overrides — proportional print and first paint
 
 - Positive descendant-character ratios directly scale fonts and picture dimensions, including fractional multipliers. The same affine print scale applies to the entire group. Normalize visible, authorized siblings by their common largest total; exclude each cloud's own label and count all its descendant depths. The 68px type and 144px picture bases replace compressed min/max font interpolation and deterministic per-ID picture sizes. Zero-weight clouds use the smallest positive scale, or equal scale in an all-empty group. Logical whole-cell counts remain integer; measured content and cell geometry never round the printed proportions. The 0.65 compact adjoining arrangement and complete-word wrapping remain the canonical layout.

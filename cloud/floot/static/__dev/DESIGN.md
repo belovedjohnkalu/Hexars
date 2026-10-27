@@ -62,6 +62,12 @@ components:
 ---
 # ION Design System
 
+## 0.67 — a visible minimum
+
+The latest visibility requirement qualifies 0.66's exact scale at the small end. Clamp the shared printed scale to one half of the largest sibling: the 68px type base has a 34px world minimum, and the 144px picture base has a 72px world minimum. Relative descendant-character proportions remain exact above that floor, including fractional multipliers; tiny positive totals and empty leaves remain discoverable. Names still reserve geometry without determining their own font size. Pictures, captions, ILs and occupied faces retain the same shared print transform and adjoining composition.
+
+CloudCanvas and Tiles choose their initial camera from both content bounds and a 14px minimum for the smallest printed type. When all content cannot fit at that readable size, preserve pan/zoom rather than shrinking every label away. Deliberate zooming out remains possible. A changed readability threshold can refit an untouched camera; user-adjusted cameras and visit histories remain owned by the existing viewport. Version the camera namespace so a previously microscopic view is not restored into this new layout. Dark first paint, fonts, colors, authorization, boards and stored content are unchanged.
+
 ## 0.66 — exact text and picture proportions, dark first paint
 
 Preserve the adjoining, independently fitted composition of 0.65. Positive descendant-character totals now determine exact relative printed scale: twice the characters gives twice the font size and twice the picture width/height; fractional ratios remain fractional. Normalize all visible siblings by their common largest weight. The shared 68px type and 144px picture bases are transformed together with captions, ILs, gaps and status, with no individual min/max interpolation, integer rounding, name-based sizing or per-ID picture jitter. Own names reserve geometry only; all authorized descendant depths contribute. Empty clouds use the smallest positive sibling's scale, or equal scale when all are empty, so they remain present without defining a ratio to zero. Whole-cell footprints retain their separate integer topology and exact shared edges; geometric fitting never rounds the printed ratio.

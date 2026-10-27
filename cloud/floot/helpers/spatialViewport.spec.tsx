@@ -1,5 +1,6 @@
 import React from 'react';
 import {paneNavigation} from './paneNavigation';
+import {mosaicCloudLayout} from './mosaicCloudLayout';
 import { render,fireEvent,cleanup,act } from '@testing-library/react';
 import { SpatialViewport } from '../components/SpatialViewport';
 describe('Spatial camera lifecycle',()=>{
@@ -78,6 +79,7 @@ describe('Per-screen camera isolation',()=>{
 
 describe('Proportional cloud navigation',()=>{
  afterEach(cleanup);
+ it('opens even extreme mixed-size content with its smallest type visible and still permits deliberate overview zoom',()=>{const layout=mosaicCloudLayout([{id:'small',name:'Small',characters:1,percent:0},{id:'large',name:'Large',characters:1000000,percent:100}],390,650,(text,size)=>text.length*size*.5),small=layout.items.find(n=>n.id==='small')!;const view=render(<SpatialViewport width={2000} height={2000} contentBounds={{x:0,y:0,width:2000,height:2000}} minFitZoom={layout.minFitZoom} maxZoom={layout.maxZoom} viewKey={'readable-'+crypto.randomUUID()}>Words</SpatialViewport>),world=view.container.querySelector('[data-camera-zoom]') as HTMLElement;expect(Number(world.dataset.cameraZoom)*small.visualFontSize).toBeGreaterThanOrEqual(14);fireEvent.keyDown(view.getByRole('region'),{key:'-'});expect(Number(world.dataset.cameraZoom)*small.visualFontSize).toBeLessThan(14);});
  it('allows the deep zoom required by small proportional clouds instead of stopping at three',()=>{const view=render(<SpatialViewport width={500} height={500} viewKey={'deep-'+crypto.randomUUID()} initialZoom={1} maxZoom={200}>Word</SpatialViewport>),region=view.getByRole('region');for(let i=0;i<20;i++)fireEvent.keyDown(region,{key:'+'});expect(Number(view.container.querySelector('[data-camera-zoom]')!.getAttribute('data-camera-zoom'))).toBeGreaterThan(3);});
  it('brings a small keyboard-focused label to readable scale',()=>{const view=render(<SpatialViewport width={500} height={500} viewKey={'focus-'+crypto.randomUUID()} initialZoom={1} maxZoom={200} focusZoom><a href="#small" style={{fontSize:68}}><span data-print-scale="0.01">Small</span></a></SpatialViewport>),link=view.getByRole('link');spyOn(link,'matches').and.returnValue(true);fireEvent.focus(link);expect(Number(view.container.querySelector('[data-camera-zoom]')!.getAttribute('data-camera-zoom'))).toBeCloseTo(18/(68*.01),6);});
 });

@@ -1,0 +1,376 @@
+{
+  "passed": true,
+  "release": "0.67",
+  "scope": "Keep the smallest clouds visible in the adjoining proportional arrangement",
+  "url": "https://ion.floot.app",
+  "codeVersion": 1793066055651,
+  "publishJob": "6a35cdeb-b84f-468c-9f8a-b63e56061b82",
+  "helperSuites": {
+    "passed": 8,
+    "failed": 0,
+    "focusedRerunsPassed": 4
+  },
+  "typecheck": "clean",
+  "browserChecks": [
+    "320px Home opens with visible smallest labels and pictures, dark theme and no document scrolling",
+    "320px Tiles keeps its pages and New Tile control visible",
+    "390px Home opens with visible smallest labels and pictures, dark theme and no document scrolling",
+    "390px Tiles keeps its pages and New Tile control visible",
+    "1280px Home opens with visible smallest labels and pictures, dark theme and no document scrolling",
+    "1280px Tiles keeps its pages and New Tile control visible"
+  ],
+  "uncaughtBrowserErrors": [],
+  "phoneVerification": "Chromium emulation, not a physical iPhone test",
+  "visibility": {
+    "relativeFloor": 0.5,
+    "minimumWorldFontPx": 34,
+    "minimumWorldPictureEdgePx": 72,
+    "minimumInitialScreenFontPx": 14,
+    "exactRatiosAboveFloor": true,
+    "allHomeCloudsWithinInitialViewport": true,
+    "manualOverviewZoomRetained": true
+  },
+  "browserSamples": [
+    {
+      "width": 320,
+      "nodes": [
+        {
+          "id": "public",
+          "characters": 531,
+          "scale": 0.5,
+          "font": 17.412909125809215,
+          "picture": 36.874395795831276,
+          "rect": {
+            "x": 98.54206848144531,
+            "y": 441.5499267578125,
+            "width": 58.41081237792969,
+            "height": 101.1705322265625,
+            "top": 441.5499267578125,
+            "right": 156.952880859375,
+            "bottom": 542.720458984375,
+            "left": 98.54206848144531
+          }
+        },
+        {
+          "id": "private",
+          "characters": 0,
+          "scale": 0.5,
+          "font": 17.412909125809215,
+          "picture": 36.874395795831276,
+          "rect": {
+            "x": 138.40000915527344,
+            "y": 305.0099182128906,
+            "width": 138.8803253173828,
+            "height": 80.1826171875,
+            "top": 305.0099182128906,
+            "right": 277.28033447265625,
+            "bottom": 385.1925354003906,
+            "left": 138.40000915527344
+          }
+        },
+        {
+          "id": "controls",
+          "characters": 430,
+          "scale": 0.5,
+          "font": 17.412909125809215,
+          "picture": 36.874395795831276,
+          "rect": {
+            "x": 28,
+            "y": 291.279541015625,
+            "width": 63.24461364746094,
+            "height": 109.54290771484375,
+            "top": 291.279541015625,
+            "right": 91.24461364746094,
+            "bottom": 400.82244873046875,
+            "left": 28
+          }
+        },
+        {
+          "id": "accounts",
+          "characters": 51,
+          "scale": 0.5,
+          "font": 17.412909125809215,
+          "picture": 36.874395795831276,
+          "rect": {
+            "x": 28,
+            "y": 400.82244873046875,
+            "width": 70.54206848144531,
+            "height": 122.18243408203125,
+            "top": 400.82244873046875,
+            "right": 98.54206848144531,
+            "bottom": 523.0048828125,
+            "left": 28
+          }
+        },
+        {
+          "id": "time",
+          "characters": 51,
+          "scale": 0.5,
+          "font": 17.412909125809215,
+          "picture": 36.874395795831276,
+          "rect": {
+            "x": 253.0594482421875,
+            "y": 431.3065185546875,
+            "width": 38.9405517578125,
+            "height": 89.92938232421875,
+            "top": 431.3065185546875,
+            "right": 292,
+            "bottom": 521.2359008789062,
+            "left": 253.0594482421875
+          }
+        },
+        {
+          "id": "a4f2cf74-a925-40fc-a293-4fbd96e7466d",
+          "characters": 38463,
+          "scale": 1,
+          "font": 34.82581825161843,
+          "picture": 73.74879159166255,
+          "rect": {
+            "x": 28,
+            "y": 339.85723876953125,
+            "width": 263.9904479980469,
+            "height": 152.41497802734375,
+            "top": 339.85723876953125,
+            "right": 291.9904479980469,
+            "bottom": 492.272216796875,
+            "left": 28
+          }
+        }
+      ]
+    },
+    {
+      "width": 390,
+      "nodes": [
+        {
+          "id": "public",
+          "characters": 531,
+          "scale": 0.5,
+          "font": 22.029968363713174,
+          "picture": 46.65169771139261,
+          "rect": {
+            "x": 117.24639892578125,
+            "y": 448.0593566894531,
+            "width": 73.89852905273438,
+            "height": 127.99606323242188,
+            "top": 448.0593566894531,
+            "right": 191.14492797851562,
+            "bottom": 576.055419921875,
+            "left": 117.24639892578125
+          }
+        },
+        {
+          "id": "private",
+          "characters": 0,
+          "scale": 0.5,
+          "font": 22.029968363713174,
+          "picture": 46.65169771139261,
+          "rect": {
+            "x": 167.6727294921875,
+            "y": 275.3155822753906,
+            "width": 175.70465087890625,
+            "height": 101.44314575195312,
+            "top": 275.3155822753906,
+            "right": 343.37738037109375,
+            "bottom": 376.75872802734375,
+            "left": 167.6727294921875
+          }
+        },
+        {
+          "id": "controls",
+          "characters": 430,
+          "scale": 0.5,
+          "font": 22.029968363713174,
+          "picture": 46.65169771139261,
+          "rect": {
+            "x": 28,
+            "y": 257.944580078125,
+            "width": 80.01400756835938,
+            "height": 138.58834838867188,
+            "top": 257.944580078125,
+            "right": 108.01400756835938,
+            "bottom": 396.5329284667969,
+            "left": 28
+          }
+        },
+        {
+          "id": "accounts",
+          "characters": 51,
+          "scale": 0.5,
+          "font": 22.029968363713174,
+          "picture": 46.65169771139261,
+          "rect": {
+            "x": 28,
+            "y": 396.5329284667969,
+            "width": 89.24639892578125,
+            "height": 154.57925415039062,
+            "top": 396.5329284667969,
+            "right": 117.24639892578125,
+            "bottom": 551.1121826171875,
+            "left": 28
+          }
+        },
+        {
+          "id": "time",
+          "characters": 51,
+          "scale": 0.5,
+          "font": 22.029968363713174,
+          "picture": 46.65169771139261,
+          "rect": {
+            "x": 312.7342834472656,
+            "y": 435.09991455078125,
+            "width": 49.26568603515625,
+            "height": 113.77423095703125,
+            "top": 435.09991455078125,
+            "right": 361.9999694824219,
+            "bottom": 548.8741455078125,
+            "left": 312.7342834472656
+          }
+        },
+        {
+          "id": "a4f2cf74-a925-40fc-a293-4fbd96e7466d",
+          "characters": 38463,
+          "scale": 1,
+          "font": 44.05993672742635,
+          "picture": 93.30339542278521,
+          "rect": {
+            "x": 28,
+            "y": 319.4027099609375,
+            "width": 333.9879150390625,
+            "height": 192.8280029296875,
+            "top": 319.4027099609375,
+            "right": 361.9879150390625,
+            "bottom": 512.230712890625,
+            "left": 28
+          }
+        }
+      ]
+    },
+    {
+      "width": 1280,
+      "nodes": [
+        {
+          "id": "public",
+          "characters": 531,
+          "scale": 0.5,
+          "font": 34,
+          "picture": 72,
+          "rect": {
+            "x": 466.30694580078125,
+            "y": 447.74365234375,
+            "width": 114.05145263671875,
+            "height": 197.54296875,
+            "top": 447.74365234375,
+            "right": 580.3583984375,
+            "bottom": 645.28662109375,
+            "left": 466.30694580078125
+          }
+        },
+        {
+          "id": "private",
+          "characters": 0,
+          "scale": 0.5,
+          "font": 34,
+          "picture": 72,
+          "rect": {
+            "x": 643.85400390625,
+            "y": 238.71337890625,
+            "width": 271.17413330078125,
+            "height": 156.5625,
+            "top": 238.71337890625,
+            "right": 915.0281372070312,
+            "bottom": 395.27587890625,
+            "left": 643.85400390625
+          }
+        },
+        {
+          "id": "controls",
+          "characters": 430,
+          "scale": 0.5,
+          "font": 34,
+          "picture": 72,
+          "rect": {
+            "x": 637.8560791015625,
+            "y": 475.49072265625,
+            "width": 246.9796142578125,
+            "height": 142.59375,
+            "top": 475.49072265625,
+            "right": 884.835693359375,
+            "bottom": 618.08447265625,
+            "left": 637.8560791015625
+          }
+        },
+        {
+          "id": "accounts",
+          "characters": 51,
+          "scale": 0.5,
+          "font": 34,
+          "picture": 72,
+          "rect": {
+            "x": 328.56829833984375,
+            "y": 368.22021484375,
+            "width": 137.7386474609375,
+            "height": 238.5703125,
+            "top": 368.22021484375,
+            "right": 466.30694580078125,
+            "bottom": 606.79052734375,
+            "left": 328.56829833984375
+          }
+        },
+        {
+          "id": "time",
+          "characters": 51,
+          "scale": 0.5,
+          "font": 34,
+          "picture": 72,
+          "rect": {
+            "x": 761.3458862304688,
+            "y": 431.59228515625,
+            "width": 190.0858154296875,
+            "height": 109.74609375,
+            "top": 431.59228515625,
+            "right": 951.4317016601562,
+            "bottom": 541.33837890625,
+            "left": 761.3458862304688
+          }
+        },
+        {
+          "id": "a4f2cf74-a925-40fc-a293-4fbd96e7466d",
+          "characters": 38463,
+          "scale": 1,
+          "font": 68,
+          "picture": 144,
+          "rect": {
+            "x": 328.56829833984375,
+            "y": 249.18115234375,
+            "width": 515.4609985351562,
+            "height": 297.6015625,
+            "top": 249.18115234375,
+            "right": 844.029296875,
+            "bottom": 546.78271484375,
+            "left": 328.56829833984375
+          }
+        }
+      ]
+    }
+  ],
+  "staticAudit": {
+    "reviewedFindings": 38,
+    "unresolved": 0,
+    "newCategories": []
+  },
+  "checkpoint": "da54155a-eb5f-4a72-a7c7-1bd1e3b43e00",
+  "qaData": "Public content and ephemeral browser view state only; no test accounts, database fixtures or assets created.",
+  "workSession": {
+    "id": "cdf9c395-27a1-4375-be95-7423f2cbb48c",
+    "source": "agent",
+    "startedAt": "2026-10-27T01:43:05.000Z",
+    "endedAt": "2026-10-27T01:55:59.206Z",
+    "elapsedUs": "774206848",
+    "qualification": "Observed implementation interval, not independently verified human labor."
+  },
+  "realtimeRefresh": {
+    "homeVersion": 383,
+    "chessVersion": 85,
+    "pending": 0
+  }
+}
