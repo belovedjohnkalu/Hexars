@@ -1,2 +1,3 @@
+// floot:external — OAuth/MCP integration entrypoint; consent screens also call the consent/authorization routes.
 import { ionPluginOAuth,pluginError } from '../../helpers/ionPluginOAuth';
 export async function handle(request:Request){try{if(Number(request.headers.get('content-length'))>131072)return Response.json({error:'invalid_request'},{status:413});const text=await request.text();if(text.length>131072)return Response.json({error:'invalid_request'},{status:413});const result=await ionPluginOAuth.register(new Request(request.url,{method:'POST',headers:request.headers,body:text}));return Response.json(result,{status:201,headers:{'Cache-Control':'no-store'}});}catch(error){return pluginError(error);}}

@@ -11,6 +11,10 @@ export type Generated<T> = T extends ColumnType<infer S, infer I, infer U>
 
 export type Int8 = ColumnType<string, bigint | number | string, bigint | number | string>;
 
+export type IonChessReportReason = "abuse" | "other" | "spam" | "unsafe";
+
+export type IonChessVisibility = "deleted" | "hidden" | "visible";
+
 export type IonLobbyStatus = "cancelled" | "playing" | "waiting";
 
 export type Json = JsonValue;
@@ -31,6 +35,7 @@ export type UserRole = "admin" | "user";
 
 export interface HexchessGames {
   accessTokenHash: string;
+  cachedView: Json | null;
   createdAt: Generated<Timestamp>;
   difficulty: Generated<number>;
   engineId: Generated<string>;
@@ -44,11 +49,85 @@ export interface HexchessGames {
   timeline: Generated<Json>;
   updatedAt: Generated<Timestamp>;
   version: Generated<number>;
+  viewCode: string | null;
 }
 
 export interface IonAccountSpaces {
   userId: number;
   workspaceId: string;
+}
+
+export interface IonCatalogSignal {
+  id: Generated<boolean>;
+  leaseId: string | null;
+  leaseUntil: Generated<Timestamp>;
+}
+
+export interface IonChessFollows {
+  createdAt: Generated<Timestamp>;
+  topicId: string;
+  userId: number;
+}
+
+export interface IonChessPlayers {
+  firstDay: Timestamp;
+  lastDay: Timestamp;
+  returned7d: Generated<boolean>;
+  userId: number;
+}
+
+export interface IonChessReplies {
+  authorUserId: number;
+  body: string;
+  createdAt: Generated<Timestamp>;
+  id: string;
+  topicId: string;
+  updatedAt: Generated<Timestamp>;
+  version: Generated<number>;
+  visibility: Generated<IonChessVisibility>;
+}
+
+export interface IonChessReports {
+  createdAt: Generated<Timestamp>;
+  id: string;
+  reason: IonChessReportReason;
+  replyId: string | null;
+  reporterUserId: number;
+  resolvedAt: Timestamp | null;
+  resolvedBy: number | null;
+  topicId: string;
+}
+
+export interface IonChessRoomSizes {
+  characters: Generated<Int8>;
+  roomId: string;
+  shard: number;
+}
+
+export interface IonChessSettings {
+  communityEnabled: Generated<boolean>;
+  id: Generated<boolean>;
+  rulesSlots: Generated<number>;
+  searchSlots: Generated<number>;
+  slowSeconds: Generated<number>;
+  updatedAt: Generated<Timestamp>;
+  updatedBy: number | null;
+}
+
+export interface IonChessTopics {
+  authorUserId: number;
+  body: string;
+  createdAt: Generated<Timestamp>;
+  id: string;
+  locked: Generated<boolean>;
+  pinned: Generated<boolean>;
+  replyCharacters: Generated<Int8>;
+  replyCount: Generated<number>;
+  roomId: string;
+  title: string;
+  updatedAt: Generated<Timestamp>;
+  version: Generated<number>;
+  visibility: Generated<IonChessVisibility>;
 }
 
 export interface IonCloudAccounts {
@@ -93,11 +172,24 @@ export interface IonDeviceAccounts {
   userId: number;
 }
 
+export interface IonEngineSlots {
+  expiresAt: Generated<Timestamp>;
+  kind: string;
+  leaseId: string | null;
+  slot: number;
+}
+
 export interface IonGameMembers {
   gameId: string;
   hiddenAt: Timestamp | null;
   seat: number | null;
   userId: number;
+}
+
+export interface IonGameOperations {
+  expiresAt: Timestamp;
+  gameId: string;
+  leaseId: string;
 }
 
 export interface IonGameShares {
@@ -188,6 +280,16 @@ export interface IonPluginTokens {
   userId: number;
 }
 
+export interface IonPublicSnapshots {
+  fingerprint: string | null;
+  key: string;
+  leaseId: string | null;
+  leaseUntil: Generated<Timestamp>;
+  payload: Json | null;
+  updatedAt: Generated<Timestamp>;
+  validUntil: Generated<Timestamp>;
+}
+
 export interface IonPushSubscriptions {
   identityHash: string;
   sessionId: string;
@@ -201,6 +303,12 @@ export interface IonRememberedDevices {
   tokenHash: string;
 }
 
+export interface IonRequestBuckets {
+  count: Generated<number>;
+  key: string;
+  openedAt: Generated<Timestamp>;
+}
+
 export interface IonScheduleAccounts {
   userId: number;
   workspaceId: string;
@@ -210,6 +318,15 @@ export interface IonSharedSpaces {
   kind: string;
   ownerUserId: number;
   workspaceId: string;
+}
+
+export interface IonStartingPositions {
+  buildCode: string;
+  createdAt: Generated<Timestamp>;
+  engine: string;
+  state: Json;
+  variant: string;
+  view: Json;
 }
 
 export interface IonTimeAccounts {
@@ -397,13 +514,23 @@ export interface Users {
 export interface DB {
   hexchessGames: HexchessGames;
   ionAccountSpaces: IonAccountSpaces;
+  ionCatalogSignal: IonCatalogSignal;
+  ionChessFollows: IonChessFollows;
+  ionChessPlayers: IonChessPlayers;
+  ionChessReplies: IonChessReplies;
+  ionChessReports: IonChessReports;
+  ionChessRoomSizes: IonChessRoomSizes;
+  ionChessSettings: IonChessSettings;
+  ionChessTopics: IonChessTopics;
   ionCloudAccounts: IonCloudAccounts;
   ionCloudIdentifierCounters: IonCloudIdentifierCounters;
   ionCloudIdentifiers: IonCloudIdentifiers;
   ionCloudTransfers: IonCloudTransfers;
   ionDevAccounts: IonDevAccounts;
   ionDeviceAccounts: IonDeviceAccounts;
+  ionEngineSlots: IonEngineSlots;
   ionGameMembers: IonGameMembers;
+  ionGameOperations: IonGameOperations;
   ionGameShares: IonGameShares;
   ionHomePreferences: IonHomePreferences;
   ionLobbyMembers: IonLobbyMembers;
@@ -414,10 +541,13 @@ export interface DB {
   ionPluginClients: IonPluginClients;
   ionPluginCodes: IonPluginCodes;
   ionPluginTokens: IonPluginTokens;
+  ionPublicSnapshots: IonPublicSnapshots;
   ionPushSubscriptions: IonPushSubscriptions;
   ionRememberedDevices: IonRememberedDevices;
+  ionRequestBuckets: IonRequestBuckets;
   ionScheduleAccounts: IonScheduleAccounts;
   ionSharedSpaces: IonSharedSpaces;
+  ionStartingPositions: IonStartingPositions;
   ionTimeAccounts: IonTimeAccounts;
   ionTimeConfig: IonTimeConfig;
   ionTimeCostProposals: IonTimeCostProposals;
@@ -444,11 +574,21 @@ export interface DB {
 // Use these for zod schema enums or other purposes, since the kysely enums are just types
 export const UserRoleArrayValues: [UserRole, ...UserRole[]] = ["admin","user"];
 export const IonLobbyStatusArrayValues: [IonLobbyStatus, ...IonLobbyStatus[]] = ["cancelled","playing","waiting"];
+export const IonChessVisibilityArrayValues: [IonChessVisibility, ...IonChessVisibility[]] = ["deleted","hidden","visible"];
+export const IonChessReportReasonArrayValues: [IonChessReportReason, ...IonChessReportReason[]] = ["abuse","other","spam","unsafe"];
 // Table/column names whose snake_case spelling kysely's default CamelCasePlugin
 // cannot recover from the camelCase name used in code (an underscore directly
 // before a digit, e.g. reminder_48h_sent ⇄ reminder48hSent). The db helper's
 // CamelCasePlugin subclass consults this map so those identifiers work in
 // queries. Regenerated on every schema pull.
-export const kyselyIdentifierOverrides: Record<string, string> = {};
+// If the db helper still creates a bare `new CamelCasePlugin()`, replace it with:
+//   class FlootCamelCasePlugin extends CamelCasePlugin {
+//     protected override snakeCase(str: string): string {
+//       return kyselyIdentifierOverrides[str] ?? super.snakeCase(str)
+//     }
+//   }
+// and pass `new FlootCamelCasePlugin()` in plugins, otherwise queries on these
+// columns fail with "column does not exist".
+export const kyselyIdentifierOverrides: Record<string, string> = {"returned7d":"returned_7d"};
 
 // Note: kysely maps the table/column/enum names from snake_case to camelCase and PascalCase. When running SQL statements, make sure to use snake_case, but TypeScript code should use camelCase or PascalCase.

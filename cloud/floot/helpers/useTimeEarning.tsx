@@ -18,6 +18,7 @@ export function useTimeEarning(userId:number|null,onCredit:()=>void){
   const visibility=()=>{if(eligible())run('claim');else{setStatus('paused');if(claimed)run('stop');}};
   const focus=()=>{elsewhere=false;lastInteraction=performance.now();visibility();};
   const tick=()=>{if(eligible()){if(claimed)run('heartbeat');else if(!elsewhere)run('claim');}else{setStatus('paused');if(claimed)run('stop');}};
+  // floot-polling-ok: This is the existing monetary earning lease, not a presence/read poll. Server-observed heartbeats cap credits, prevent offline claims and deduplicate devices; pub/sub cannot prove eligible foreground time.
   const timer=setInterval(tick,15000);visibility();
   for(const type of ['pointerdown','keydown'])window.addEventListener(type,activity,{passive:true});document.addEventListener('visibilitychange',visibility);window.addEventListener('focus',focus);window.addEventListener('blur',visibility);window.addEventListener('online',visibility);window.addEventListener('pagehide',visibility);window.addEventListener('ion.screen-visibility',visibility);
   return()=>{alive=false;clearInterval(timer);for(const type of ['pointerdown','keydown'])window.removeEventListener(type,activity);document.removeEventListener('visibilitychange',visibility);window.removeEventListener('focus',focus);window.removeEventListener('blur',visibility);window.removeEventListener('online',visibility);window.removeEventListener('pagehide',visibility);window.removeEventListener('ion.screen-visibility',visibility);if(claimed)run('stop');};

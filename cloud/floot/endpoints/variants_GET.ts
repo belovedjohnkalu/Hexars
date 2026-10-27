@@ -1,3 +1,4 @@
+// floot:external — Read-only native starting-board catalog for integration clients.
 import { runNativeEngine } from "../helpers/runNativeEngine";
 import { chessVariants } from "../helpers/chessVariants";
 import type { OutputType } from "./variants_GET.schema";

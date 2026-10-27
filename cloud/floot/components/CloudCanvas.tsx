@@ -1,9 +1,10 @@
+import {chessHubId,communityId} from '../helpers/chessHubClouds';
 import {useTiledUI,tiledUICloudId,layoutCloud} from '../helpers/useTiledUI';
 import {CloudPublishingStatus} from './CloudPublishingStatus';
 import {requestPageAction} from '../helpers/pageWorkspaceEvents';
 import {RhombusSurface} from './RhombusSurface';
 import {checkersRoot} from '../helpers/checkersClouds';
-import { chessNavigationNodes,chessNavigationAnchors } from '../helpers/chessNavigation';
+import { chessNavigationNodes,chessNavigationAnchors,chessCommunityAnchors } from '../helpers/chessNavigation';
 import { useRandomWordColor,randomColorCloudId } from '../helpers/useRandomWordColor';
 import { notificationsId } from '../helpers/notificationRoutes';
 import { useNotifications } from '../helpers/useNotifications';
@@ -37,14 +38,14 @@ export function CloudCanvas({tabularNumbers=false,fitOnChange=false,nodes,parent
  const area=useRef<HTMLDivElement>(null),[size,setSize]=useState({width:360,height:480,frameHeight:480}),[fontReady,setFontReady]=useState(0),location=useLocation(),hold=useCloudHold(onHighlight);
  useLayoutEffect(()=>{const el=area.current;if(!el)return;const measure=()=>setSize(old=>({width:Math.max(240,el.clientWidth),height:el.closest('[data-keyboard="true"]')?old.height:Math.max(160,el.clientHeight),frameHeight:el.closest<HTMLElement>('[data-ion-primary]')?.clientHeight||window.innerHeight}));measure();const observer=new ResizeObserver(measure);observer.observe(el);let alive=true;void document.fonts.ready.then(()=>{if(alive)setFontReady(1);});return()=>{alive=false;observer.disconnect();};},[]);
  const returnVariant=new URLSearchParams(location.search).get('return');
- const siblings=useMemo(()=>cloudTree.sizes(chessNavigationNodes(nodes,scope,returnVariant).map(n=>layoutCloud(n,tiled)),parentId).map(n=>n.note?{...n,isImage:false,imageUrl:undefined,imageUrls:undefined}:n),[nodes,parentId,scope,returnVariant,tiled]);
- const boardGrid=false,square=scope==='chess'&&(parentId==='boards'||parentId==='rules'||!!parentId?.endsWith('-rules')),lastLayout=useRef<{key:string;viewportWidth:number;generation:number;layout:CloudLayout}|null>(null),layoutKey=identity+':'+scope+':'+(parentId||'root')+(tiled?':tiled-v8':':organic-v8')+(coarsePointer?':touch':'');
+ const siblings=useMemo(()=>cloudTree.sizes(chessNavigationNodes(nodes,scope,returnVariant,showIdentifiers).map(n=>layoutCloud(n,tiled)),parentId).map(n=>n.note?{...n,isImage:false,imageUrl:undefined,imageUrls:undefined}:n),[nodes,parentId,scope,returnVariant,tiled]);
+ const boardGrid=false,square=scope==='chess'&&(parentId==='boards'||parentId==='rules'||!!parentId?.endsWith('-rules')),lastLayout=useRef<{key:string;viewportWidth:number;generation:number;layout:CloudLayout}|null>(null),layoutKey=identity+':'+scope+':'+(parentId||'root')+(tiled?':tiled-v8':parentId===communityId?':community-v1':':organic-v8')+(coarsePointer?':touch':'');
  const layout=useMemo(()=>{
   const context=document.createElement('canvas').getContext('2d');
   const saved=lastLayout.current?.key===layoutKey?lastLayout.current:layoutCache.get(layoutKey),old=saved?.viewportWidth===size.width?saved.layout:undefined;
   const removed=old?.items.some(item=>!siblings.some(n=>n.id===item.id)),previous=removed?undefined:old;
   const width=Math.max(previous?.width||0,size.width,Math.min(2600,Math.sqrt(siblings.length)*140));
-  const packed=cloudLayout(siblings.map(n=>({...n,identifier:showIdentifiers?n.identifier:undefined,name:n.name})),width,size.height,(text,font)=>{if(!context)return text.length*font*.54;context.font='500 '+font+'px Inter, sans-serif';return context.measureText(tabularNumbers?text.replace(/\d/g,'0'):text).width;},{rhombi:tiled,proportional:true,anchors:scope==='chess'&&parentId==='hexagonal-chess'?chessNavigationAnchors:undefined,organic:true,square:true,boardGrid,columns:parentId==='boards'||parentId==='rules'||siblings.length<=6?2:Math.max(2,Math.ceil(Math.sqrt(siblings.length)*.8)),compact:size.width<600,minTargetSize:coarsePointer?72:undefined,maxFontSize:Math.min(100,Math.min(size.width,size.height)*.18),labelMaxWidth:Math.max(180,Math.min(560,size.width*.78)),previous});
+  const packed=cloudLayout(siblings.map(n=>({...n,identifier:showIdentifiers?n.identifier:undefined,name:n.name})),width,size.height,(text,font)=>{if(!context)return text.length*font*.54;context.font='500 '+font+'px Inter, sans-serif';return context.measureText(tabularNumbers?text.replace(/\d/g,'0'):text).width;},{rhombi:tiled,proportional:true,anchors:scope==='chess'?(parentId==='hexagonal-chess'||parentId===chessHubId)?chessNavigationAnchors:parentId===communityId?chessCommunityAnchors:undefined:undefined,organic:true,square:true,boardGrid,columns:parentId==='boards'||parentId==='rules'||siblings.length<=6?2:Math.max(2,Math.ceil(Math.sqrt(siblings.length)*.8)),compact:size.width<600,minTargetSize:coarsePointer?72:undefined,maxFontSize:Math.min(100,Math.min(size.width,size.height)*.18),labelMaxWidth:Math.max(180,Math.min(560,size.width*.78)),previous});
   return {...packed,generation:(saved?.generation||0)+(removed?1:0)};
  },[siblings,size,fontReady,scope,square,boardGrid,layoutKey,showIdentifiers,parentId,tabularNumbers,coarsePointer,tiled]);
  useLayoutEffect(()=>{if(!fontReady||loading)return;lastLayout.current={key:layoutKey,viewportWidth:size.width,generation:layout.generation,layout};layoutCache.delete(layoutKey);layoutCache.set(layoutKey,lastLayout.current);if(layoutCache.size>128)layoutCache.delete(layoutCache.keys().next().value!);},[layout,size.width,fontReady,loading,layoutKey]);

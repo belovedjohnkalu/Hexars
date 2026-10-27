@@ -1,0 +1,8 @@
+import { applyBuyerCount } from './applyBuyerCount';
+import type { TimeSnapshot } from '../endpoints/time_POST.schema';
+describe('Pushed population pricing without a refetch storm',()=>{
+  const snapshot={userId:69,dev:false,owner:false,buyers:2,buyersObservedAt:'2026-10-27T00:00:00Z',balanceUs:'10',earnedUs:'30',addedUs:'40',spentUs:'30',pricingReady:true,products:[{id:'variant:mccooey',costUs:'30',published:true,owned:false,priceUs:'15',affordable:false},{id:'variant:shafran',costUs:'100',published:true,owned:true,priceUs:'50',affordable:false}]} as TimeSnapshot;
+  it('updates exact prices and discovery without changing balances, purchases or production costs',()=>{const next=applyBuyerCount(snapshot,3,'2026-10-27T00:00:01Z');expect(next.products[0].priceUs).toBe('10');expect(next.products[0].affordable).toBeTrue();expect(next.products[0].owned).toBeFalse();expect(next.products[1].owned).toBeTrue();expect(next.balanceUs).toBe(snapshot.balanceUs);expect(next.earnedUs).toBe(snapshot.earnedUs);expect(next.spentUs).toBe(snapshot.spentUs);expect(next.products[0].costUs).toBe('30');expect(snapshot.products[0].priceUs).toBe('15');});
+  it('ignores stale, malformed and negative observations',()=>{expect(applyBuyerCount(snapshot,4,'2026-10-26T00:00:00Z')).toBe(snapshot);expect(applyBuyerCount(snapshot,-1,'2026-10-28T00:00:00Z')).toBe(snapshot);expect(applyBuyerCount(snapshot,4,'wrong')).toBe(snapshot);});
+  it('keeps owned features owned when no buyers remain and avoids dividing by zero',()=>{const next=applyBuyerCount(snapshot,0,'2026-10-28T00:00:00Z');expect(next.products.every(p=>p.priceUs===null&&!p.affordable)).toBeTrue();expect(next.products[1].owned).toBeTrue();});
+});

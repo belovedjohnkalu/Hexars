@@ -1,3 +1,6 @@
+import {db} from './db';
+import {gameViewCache} from './gameViewCache';
+import { nativeAdmission } from './nativeAdmission';
 import { isCheckers } from './checkersRules';
 import { runCheckers } from './checkersRuntime';
 import { nativeEngineAsset } from './nativeEngineAssets';
@@ -64,6 +67,21 @@ async function executable(origin: string, engineId?: EngineId, signal?: AbortSig
 }
 
 export async function runNativeEngine(options: Options): Promise<NativeResult> {
+  const variant=options.variant??'glinski',code=gameViewCache.code(variant,options.engineId);
+  if(options.action==='new'){
+    const cached=await db.selectFrom('ionStartingPositions').select(['state','view','engine']).where('variant','=',variant).where('buildCode','=',code).executeTakeFirst();
+    const game=cached?gameViewCache.read(cached.view,code,cached.state,options.engineId):null;
+    if(cached&&game)return{engine:cached.engine,state:cached.state,game,diagnostics:null};
+  }
+  const release = await nativeAdmission(options.action === "search" ? "search" : "rules");
+  try {
+    const result=await executeNative(options);
+    if(options.action==='new')await db.insertInto('ionStartingPositions').values({variant,buildCode:code,state:result.state,view:result.game as unknown as Json,engine:result.engine}).onConflict(oc=>oc.columns(['variant','buildCode']).doUpdateSet({state:result.state,view:result.game as unknown as Json,engine:result.engine})).execute();
+    return result;
+  } finally { await release(); }
+}
+
+async function executeNative(options: Options): Promise<NativeResult> {
   const variant=options.variant??(options.state&&typeof options.state==='object'&&!Array.isArray(options.state)?options.state.variant:undefined);
   if(isCheckers(variant))return runCheckers(options);
   const filename = await executable(options.origin,options.engineId,options.signal);

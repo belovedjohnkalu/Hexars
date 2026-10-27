@@ -13,7 +13,7 @@ export async function handle(request: Request) {
     // Create response with user data
     const response = new Response(
       superjson.stringify({
-        expiresAt:Math.floor(Date.now()/1000)*1000+86400000,
+        expiresAt:session.credentialExpiresAt&&session.credentialExpiresAt-Date.now()>=43200000?session.credentialExpiresAt:Math.floor(Date.now()/1000)*1000+86400000,
         user: {
           id: user.id,
           email: user.email,
@@ -25,12 +25,13 @@ export async function handle(request: Request) {
       {
         headers: {
           "Content-Type": "application/json",
+          "Cache-Control": "private, no-store",
         },
       }
     );
 
     // Update the session cookie with the new lastAccessed time
-    await setServerSession(response, {
+    if(!session.credentialExpiresAt||session.credentialExpiresAt-Date.now()<43200000)await setServerSession(response, {
       id: session.id,
       createdAt: session.createdAt,
       lastAccessed: session.lastAccessed.getTime(),
@@ -45,6 +46,7 @@ export async function handle(request: Request) {
           status: 401,
           headers: {
             "Content-Type": "application/json",
+          "Cache-Control": "private, no-store",
           },
         }
       );
@@ -56,6 +58,7 @@ export async function handle(request: Request) {
         status: 400,
         headers: {
           "Content-Type": "application/json",
+          "Cache-Control": "private, no-store",
         },
       }
     );

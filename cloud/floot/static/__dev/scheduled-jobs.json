@@ -1,1 +1,7 @@
-{}
+{
+  "chessMaintenance": {
+    "schedule": "17 4 * * *",
+    "timezone": "UTC",
+    "enabled": true
+  }
+}

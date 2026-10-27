@@ -1,11 +1,8 @@
 import { useCallback,useEffect,useRef,useState } from 'react';
 import {postLibrary,type LibraryUndo} from '../endpoints/library_POST.schema';
 import { postHistory } from '../endpoints/history_POST.schema';
-import { postGame } from '../endpoints/game_POST.schema';
 import { historyClouds } from './historyClouds';
-import { gameSessions } from './gameSessions';
-import { chessVariants } from './chessVariants';
-import { RealtimeClient } from './RealtimeClient';
+import { realtimeLease } from './realtimeLease';
 import { channels } from './realtimeChannels';
 import type { CloudNode } from '../endpoints/cloud_POST.schema';
 export function useChessHistory(userId:number|null,enabled:boolean){
@@ -25,8 +22,8 @@ export function useChessHistory(userId:number|null,enabled:boolean){
    finally{if(current()&&own===sequence)setLoading(false);}
   };
   reload.current=()=>load(true);
-  void(async()=>{const known=new Map<string,{gameId:string;accessToken:string}>();for(const variant of chessVariants.all)for(const mode of ['engine','two_players'] as const){const saved=gameSessions.stored(variant.id,mode);if(saved)known.set(saved.gameId,saved);}await Promise.allSettled([...known.values()].map(saved=>postGame({action:'get',...saved},{signal:controller.signal})));if(current())await load();})();
-  const client=new RealtimeClient(),off=client.subscribe(channels.player(userId),()=>void load()),again=client.onReconnect(()=>void load());void client.connect();
+  void load(); // Games are attached when played or opened; Library must not inspect every saved engine session.
+  const client=realtimeLease(userId),off=client.subscribe(channels.player(userId),()=>void load()),again=client.onReconnect(()=>void load());void client.connect();
   return()=>{controller.abort();restoreController.current?.abort();reload.current=async()=>{};off();again();client.close();};
  },[userId,enabled,identity]);
  const matches=identity!==null&&loadedIdentity===identity,visibleUndo=matches?undo:undefined;

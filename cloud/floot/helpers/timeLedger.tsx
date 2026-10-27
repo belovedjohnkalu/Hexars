@@ -27,7 +27,7 @@ async function catalog(userId:number|null,tx:TimeDB=db){
  const activeRows=rows.filter(p=>isPaidFeatureId(p.id));
  const paidFeatures=activeRows.filter(p=>!!p.publishedAt).length;const share=paidFeatures?equalWorkShare(work.totalWorkUs,paidFeatures):null;
  const products:TimeProduct[]=activeRows.map(p=>{const cost=p.publishedAt?share:null;return{id:p.id,kind:p.kind as 'variant'|'engine'|'feature',reference:p.reference,name:p.name,directUs:cost,freeUs:cost===null?null:'0',costUs:cost,proposalId:p.proposalId,pricingModel:'equal-work',totalWorkUs:work.totalWorkUs,paidFeatures,costVersion:'equal-work:'+work.totalWorkUs+':'+paidFeatures,affordable:!!p.publishedAt&&pricingReady&&cost!==null&&count>0&&BigInt(timePrice(cost,count))<=BigInt(account?.balanceUs||'0'),published:!!p.publishedAt,available:false,owned:role.dev||purchased.has(p.id),priceUs:cost!==null&&count?timePrice(cost,count):null,revenueUs:recovered.get(p.id)||'0'};});
- return{...role,products,buyers:count,readyAt,pricingReady,totalWorkUs:work.totalWorkUs,baselineUs:work.baselineUs,recordedUs:work.recordedUs,paidFeatures,pricingModel:'equal-work' as const};
+ return{...role,products,buyers:count,buyersObservedAt:new Date().toISOString(),readyAt,pricingReady,totalWorkUs:work.totalWorkUs,baselineUs:work.baselineUs,recordedUs:work.recordedUs,paidFeatures,pricingModel:'equal-work' as const};
 }
 async function snapshot(userId:number|null):Promise<TimeSnapshot>{
  const market=await catalog(userId),labels=await sharedDisplayNames(market.products,market.dev);

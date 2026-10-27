@@ -1,3 +1,4 @@
+import {chessHubClouds} from './chessHubClouds';
 import {checkersClouds} from './checkersClouds';
 import { scheduleCalendar } from './scheduleCalendar';
 import { cloudPercent } from './cloudPercent';
@@ -86,7 +87,7 @@ const seed:CloudNode[]=[
 ];
 seed.push(...horizontalRuleClouds());
 seed.push(...wellischRuleClouds());
-seed.push(...chessJourney,...checkersClouds);
+seed.push(...chessJourney,...checkersClouds,...chessHubClouds);
 function descendants(nodes:CloudNode[],id:string){
  const children=new Map<string,CloudNode[]>();for(const n of nodes)if(n.parentId){const group=children.get(n.parentId);if(group)group.push(n);else children.set(n.parentId,[n]);}
  const seen=new Set([id]),queue=[id];for(let i=0;i<queue.length;i++)for(const n of children.get(queue[i])||[])if(!seen.has(n.id)){seen.add(n.id);queue.push(n.id);}return seen.size-1;

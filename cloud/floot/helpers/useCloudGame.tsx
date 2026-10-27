@@ -9,16 +9,16 @@ import {
   type VariantId,
 } from "../endpoints/game_POST.schema";
 
-import { RealtimeClient } from './RealtimeClient';
+import { realtimeLease } from './realtimeLease';
 import { channels } from './realtimeChannels';
 import { gameSessions } from "./gameSessions";
 type Credentials = { gameId: string; accessToken: string };
 
-export function useCloudGame(variant: VariantId, defaultMode: "engine" | "two_players" = "engine", difficulty=3,engineId:EngineId='universal',userId:number|null=null) {
+export function useCloudGame(variant: VariantId, defaultMode: "engine" | "two_players" = "engine", difficulty=3,engineId:EngineId='universal',userId:number|null=null,accountReady=true) {
   const [playback,setPlayback]=useState<ReturnType<typeof checkersPlayback>>([]),playbackTimers=useRef<ReturnType<typeof setTimeout>[]>([]);
   useEffect(()=>()=>playbackTimers.current.forEach(clearTimeout),[]);
   const [data, setData] = useState<OutputType | null>(null);
-  const [busy, setBusy] = useState(false);
+  const [busy, setBusy] = useState(false),busyNow=useRef(false);busyNow.current=busy;
   const [pendingMove, setPendingMove] = useState<ChessMove | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [missing,setMissing]=useState(false);
@@ -84,7 +84,7 @@ export function useCloudGame(variant: VariantId, defaultMode: "engine" | "two_pl
             );
             if (sequence === requestSequence.current) {
               accept(latest);
-              engineKey.current = "";
+              if('version'in body&&latest.version>body.version)engineKey.current = "";else setError("This board is updating. Refresh in a moment.");
             }
             return false;
           } catch {
@@ -110,6 +110,8 @@ export function useCloudGame(variant: VariantId, defaultMode: "engine" | "two_pl
   );
 
   useEffect(() => {
+    if(!accountReady)return;
+    setData(null);current.current=null;credentials.current=null;
     sideGoal.current=null;setSideTarget(null);
     const timer = setTimeout(() => {
       const linked = gameSessions.fromHash();
@@ -126,7 +128,7 @@ export function useCloudGame(variant: VariantId, defaultMode: "engine" | "two_pl
       controller.current?.abort();
       ++requestSequence.current;
     };
-  }, [perform, variant, defaultMode]);
+  }, [perform, variant, defaultMode,userId,accountReady]);
 
   useEffect(() => {
     const openLinkedGame = () => {
@@ -178,9 +180,9 @@ export function useCloudGame(variant: VariantId, defaultMode: "engine" | "two_pl
     });
   }, [data, busy, error, perform, variant,defaultMode,difficulty,engineId,playback.length]);
 
-  useEffect(()=>{if(!data)return;let alive=true,timer:ReturnType<typeof setTimeout>|undefined;const update=()=>{clearTimeout(timer);timer=setTimeout(()=>{if(!alive||document.visibilityState!=='visible')return;if(controller.current&&!controller.current.signal.aborted&&current.current&&busy){update();return;}const saved=current.current;if(!saved)return;void postGame({action:'get',gameId:saved.gameId,accessToken:saved.accessToken}).then(result=>{if(alive&&current.current?.gameId===result.gameId&&(result.version>current.current.version||current.current.offline)&&!result.offline)accept(result);}).catch(()=>{});},120);};
-    const client=userId?new RealtimeClient():null,off=client?.subscribe(channels.player(userId!),event=>{if(!event.chat&&(!event.gameId||event.gameId===current.current?.gameId))update();}),again=client?.onReconnect(update),status=client?.onStatus(s=>{if(s==='connected')update();});if(client)void client.connect();window.addEventListener('focus',update);window.addEventListener('online',update);document.addEventListener('visibilitychange',update);return()=>{alive=false;clearTimeout(timer);off?.();again?.();status?.();client?.close();window.removeEventListener('focus',update);window.removeEventListener('online',update);document.removeEventListener('visibilitychange',update);};
-  },[data?.gameId,userId,busy,accept]);
+  useEffect(()=>{if(!data)return;let alive=true,timer:ReturnType<typeof setTimeout>|undefined;const update=()=>{clearTimeout(timer);timer=setTimeout(()=>{if(!alive||document.visibilityState!=='visible')return;if(controller.current&&!controller.current.signal.aborted&&current.current&&busyNow.current){update();return;}const saved=current.current;if(!saved)return;void postGame({action:'get',gameId:saved.gameId,accessToken:saved.accessToken}).then(result=>{if(alive&&current.current?.gameId===result.gameId&&(result.version>current.current.version||current.current.offline)&&!result.offline){accept(result);setError(null);}}).catch(()=>{});},120);};
+    const client=userId?realtimeLease(userId):null,off=client?.subscribe(channels.player(userId!),event=>{if(!event.chat&&(!event.gameId||event.gameId===current.current?.gameId))update();}),again=client?.onReconnect(update),status=client?.onStatus(s=>{if(s==='connected')update();});if(client)void client.connect();window.addEventListener('focus',update);window.addEventListener('online',update);document.addEventListener('visibilitychange',update);return()=>{alive=false;clearTimeout(timer);off?.();again?.();status?.();client?.close();window.removeEventListener('focus',update);window.removeEventListener('online',update);document.removeEventListener('visibilitychange',update);};
+  },[data?.gameId,userId,accept]);
 
   const withSession = (action: "move" | "undo", move?: ChessMove) => {
     const session = current.current;

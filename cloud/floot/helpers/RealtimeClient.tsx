@@ -29,7 +29,7 @@ export class RealtimeClient {
   private statusListeners = new Set<(s: RealtimeStatus) => void>();
   private reconnectListeners = new Set<() => void>();
   private delay = 500;
-  private readonly maxDelay = 15000;
+  private readonly maxDelay = 60000;
   // Idle-based keepalive: only ping when nothing has been sent or received for
   // idlePingAfterMs (just under API Gateway's 10-min idle close). A connection
   // with real traffic never pings — its own traffic already resets the idle

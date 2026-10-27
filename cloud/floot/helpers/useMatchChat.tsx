@@ -1,5 +1,5 @@
 import { useEffect,useRef,useState } from 'react';
-import { RealtimeClient } from './RealtimeClient';
+import { realtimeLease } from './realtimeLease';
 import { channels } from './realtimeChannels';
 import { postMatchChat,type ChatWord } from '../endpoints/match_chat_POST.schema';
 export function useMatchChat(gameId:string|undefined,userId:number|null,enabled:boolean){
@@ -8,7 +8,7 @@ export function useMatchChat(gameId:string|undefined,userId:number|null,enabled:
  useEffect(()=>{setMessages([]);setDraft('');setError('');setBusy(false);pending.current=null;sending.current=false;return()=>controller.current?.abort();},[gameId,userId,enabled]);
  useEffect(()=>{
   if(!enabled||!gameId||!userId)return;
-  const client=new RealtimeClient();let alive=true;
+  const client=realtimeLease(userId);let alive=true;
   const off=client.subscribe(channels.player(userId),event=>{const word=event.chat as ChatWord|undefined;if(!alive||!word||word.gameId!==gameId||word.expiresAt<=Date.now())return;setMessages(old=>[...old.filter(m=>m.id!==word.id&&m.expiresAt>Date.now()),word]);});
   void client.connect();const timer=setInterval(()=>setMessages(old=>old.some(m=>m.expiresAt<=Date.now())?old.filter(m=>m.expiresAt>Date.now()):old),1000);
   return()=>{alive=false;clearInterval(timer);off();client.close();};

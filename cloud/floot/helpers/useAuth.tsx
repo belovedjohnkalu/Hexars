@@ -59,7 +59,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
        const previous=deviceData.identity();if(previous&&previous!=='guest'&&previous!==String(result.user.id))void deviceData.clear(previous);deviceData.setIdentity(result.user.id);if(result.expiresAt)void deviceData.session({user:result.user,expiresAt:result.expiresAt});void deviceData.prune();return result.user;
       }catch(error){if(signal.aborted)throw error;if(transientFailure(error)){const cached=await deviceData.session();if(cached){deviceData.setIdentity(cached.user.id);return cached.user;}}deviceData.setIdentity(null);if(error&&typeof error==='object'&&'status'in error&&[401,403].includes(Number(error.status))){const cached=await deviceData.session();if(cached)void deviceData.clear(String(cached.user.id));void deviceData.session(null);}throw error;}
     },
-    retry: 1,
+    retry: (count, failure) => transientFailure(failure) && count < 1,
     enabled: true,
     staleTime: Infinity,
   });

@@ -5,7 +5,7 @@ import { Input } from './Input';
 import { Spinner } from './Spinner';
 import { postOnline,type Lobby } from '../endpoints/online_POST.schema';
 import { useAuth } from '../helpers/useAuth';
-import { RealtimeClient } from '../helpers/RealtimeClient';
+import { realtimeLease } from '../helpers/realtimeLease';
 import { channels } from '../helpers/realtimeChannels';
 import { chessVariants } from '../helpers/chessVariants';
 import styles from './OnlineSpace.module.css';
@@ -14,7 +14,7 @@ export function OnlineSpace({join=false}:{join?:boolean}){
  const [attempt,setAttempt]=useState(0),[lobby,setLobby]=useState<Lobby|null>(null),[code,setCode]=useState(''),[busy,setBusy]=useState(false),[error,setError]=useState(''),current=useRef<Lobby|null>(null),started=useRef(''),retry=useRef<(()=>void)|null>(null);
  const inputVariant=params.get('variant'),variant=chessVariants.isId(inputVariant)?inputVariant:'random',kind=params.get('kind')==='create'?'create':'find',savedId=params.get('room');
  function accept(value:Lobby){current.current=value;setLobby(value);if(value.status==='playing'&&value.gameId)navigate('/'+value.variant+'?mode=online#game='+value.gameId+'&key='+'0'.repeat(64),{replace:true});}
- useEffect(()=>{if(!userId||join)return;const key=userId+':'+location.search+':'+attempt;if(started.current===key)return;started.current=key;let alive=true,refreshing=false,refreshAgain=false;const client=new RealtimeClient(),controller=new AbortController();
+ useEffect(()=>{if(!userId||join)return;const key=userId+':'+location.search+':'+attempt;if(started.current===key)return;started.current=key;let alive=true,refreshing=false,refreshAgain=false;const client=realtimeLease(userId),controller=new AbortController();
   // A new lobby/account must not refresh the previous lobby while it opens.
   current.current=null;setLobby(null);
   const refresh=async()=>{const saved=current.current;if(!alive||!saved||saved.status!=='waiting')return;if(refreshing){refreshAgain=true;return;}refreshing=true;
@@ -27,7 +27,8 @@ export function OnlineSpace({join=false}:{join?:boolean}){
   const foreground=()=>{if(document.documentElement.dataset.ionScreenActive!=='false'&&document.visibilityState==='visible')void refresh();};
   const off=client.subscribe(channels.player(userId),()=>void refresh()),again=client.onReconnect(()=>void refresh()),status=client.onStatus(state=>{if(state==='connected')void refresh();});
   // Realtime is at-most-once; recover a match missed during the first subscription.
-  const timer=setInterval(foreground,5000);window.addEventListener('focus',foreground);window.addEventListener('online',foreground);window.addEventListener('ion.screen-visibility',foreground);document.addEventListener('visibilitychange',foreground);
+  const timer=undefined; // Realtime reconnect and foreground reconcile without idle polling.
+  window.addEventListener('focus',foreground);window.addEventListener('online',foreground);window.addEventListener('ion.screen-visibility',foreground);document.addEventListener('visibilitychange',foreground);
   setBusy(true);setError('');void client.connect().then(async()=>{if(!alive)return;const stored=savedId;let value:Lobby|undefined;if(stored)try{const old=await postOnline({action:'get',id:stored},controller.signal);if(old.status!=='cancelled')value=old;}catch(e){if(!e||typeof e!=='object'||!('status'in e)||e.status!==404)throw e;}value||=await postOnline(kind==='create'?{action:'create',variant,...(params.get('family')==='checkers'?{family:'checkers' as const}:{})}:{action:'find',variant,...(params.get('family')==='checkers'?{family:'checkers' as const}:{})},controller.signal);if(alive){try{sessionStorage.setItem('ion.online.room',value.id);}catch{}accept(value);await refresh();}}).catch(e=>{if(alive)setError(e instanceof Error?e.message:'Couldn’t connect.');}).finally(()=>{if(alive)setBusy(false);});
   return()=>{alive=false;controller.abort();clearInterval(timer);window.removeEventListener('focus',foreground);window.removeEventListener('online',foreground);window.removeEventListener('ion.screen-visibility',foreground);document.removeEventListener('visibilitychange',foreground);off();again();status();client.close();retry.current=null;started.current='';const waiting=current.current;if(waiting?.status==='waiting')void postOnline({action:'cancel',id:waiting.id}).catch(()=>{});};
  },[userId,join,location.search,attempt]);

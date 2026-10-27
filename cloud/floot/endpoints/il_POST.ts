@@ -1,3 +1,4 @@
+import {communityIL} from '../helpers/communityIL';
 import {db} from '../helpers/db';
 import {optionalGameUser} from '../helpers/gameAccess';
 import {cloudILLocation,resolveCloudIL} from '../helpers/cloudILNavigation';
@@ -6,7 +7,7 @@ import {featureClouds} from '../helpers/featureClouds';
 import {timeLedger} from '../helpers/timeLedger';
 import {cloudURL} from '../helpers/cloudRoutes';
 import type {CloudScope,OutputType} from './cloud_POST.schema';
-import {handle as loadCloud} from './cloud_POST';
+import {cloudService as loadCloud} from '../helpers/cloudService';
 import {schema,type ILItem} from './il_POST.schema';
 const headers={'Content-Type':'application/json','Cache-Control':'private, no-store'};
 const credentials={workspaceId:'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',accessToken:'a'.repeat(64)};
@@ -21,6 +22,7 @@ export async function handle(request:Request){try{
   const query=input.query.toLocaleLowerCase(),items=publicCloud.nodes.filter(n=>n.name.toLocaleLowerCase().includes(query)||n.identifier?.toLocaleLowerCase().includes(query)).map(n=>({id:n.id,name:n.name,il:n.identifier!,scope:'public' as const,url:cloudILLocation(n,'public')})).filter(n=>!!n.il);
   const pages=Math.ceil(items.length/2),page=Math.min(input.page,Math.max(0,pages-1));return new Response(JSON.stringify({items:items.slice(page*2,page*2+2),page,pages,total:items.length}),{headers});
  }
+ const discussion=await communityIL(input.il);if(discussion)return new Response(JSON.stringify({items:[discussion],page:0,pages:1,total:1}),{headers});
  const found=await resolveCloudIL(input.il,{
   viewerNamespace:async()=>{const user=await optionalGameUser(request);return user?(await db.selectFrom('ionDevAccounts').select('devNumber').where('userId','=',user.id).executeTakeFirst())?.devNumber:undefined;},
   lookup:async(label,namespace)=>(await db.selectFrom('ionCloudIdentifiers').select('nodeId').where('label','=',label).where('devNumber','=',namespace).execute()).map(n=>n.nodeId),

@@ -1,3 +1,8 @@
+import {playerName} from '../helpers/playerName';
+import {sql} from 'kysely';
+import {nativeEngineAsset} from '../helpers/nativeEngineAssets';
+import {gameViewCache} from '../helpers/gameViewCache';
+import {gameOperationLease} from '../helpers/gameOperationLease';
 import {isCheckers} from '../helpers/checkersRules';
 import { onlineMatchState,withOnlineResult,decideOnlineMatch } from '../helpers/onlineMatch';
 import { timeAccess } from '../helpers/timeAccess';
@@ -39,6 +44,7 @@ function activePlayer(state: Json) {
 const headers = { "Content-Type": "application/json", "Cache-Control": "no-store" };
 
 export async function handle(request: Request) {
+  let release: (() => Promise<void>) | undefined;
   try {
     const text = await request.text();
     if (text.length > 4096) throw new GameError("Request too large", 413);
@@ -56,7 +62,7 @@ export async function handle(request: Request) {
       });
       const gameId = randomUUID();
       const accessToken = randomBytes(32).toString("hex");
-      await db
+      await db.transaction().execute(async tx=>{await tx
         .insertInto("hexchessGames")
         .values({
           id: gameId,
@@ -66,13 +72,16 @@ export async function handle(request: Request) {
           engineId:'universal',
           humanPlayer: input.humanPlayer,
           state: native.state,
+          cachedView:native.game as unknown as Json,
+          viewCode:gameViewCache.code(input.variant,'universal'),
           timeline: [],
           moves: [],
           version: 0,
           lastSearch: null,
         })
         .execute();
-      if(user)await db.insertInto('ionGameMembers').values({gameId,userId:user.id,seat:null}).onConflict(oc=>oc.columns(['gameId','userId']).doNothing()).execute();
+      if(user)await tx.insertInto('ionGameMembers').values({gameId,userId:user.id,seat:null}).onConflict(oc=>oc.columns(['gameId','userId']).doNothing()).execute();
+      });
       return new Response(
         superjson.stringify({
           gameId,
@@ -92,7 +101,8 @@ export async function handle(request: Request) {
       );
     }
 
-    const row=await db.selectFrom('hexchessGames').selectAll().where('id','=',input.gameId).executeTakeFirst();
+    const base=db.selectFrom('hexchessGames').where('id','=',input.gameId);
+    const row=await(input.action==='get'?base.select(['id','accessTokenHash','mode','humanPlayer','state','moves','version','lastSearch','createdAt','updatedAt','difficulty','engineId','onlineState','cachedView','viewCode']).select(sql<Json>`'[]'::jsonb`.as('timeline')):base.selectAll()).executeTakeFirst();
     const member=user?await db.selectFrom('ionGameMembers').selectAll().where('gameId','=',input.gameId).where('userId','=',user.id).executeTakeFirst():null;
     const capability=!!row&&row.accessTokenHash===tokenHash(input.accessToken);
     if(!row||(!member&&!capability)||(row.mode==='online'&&!member))throw new GameError('This saved game is not available to this account.',404);
@@ -108,6 +118,7 @@ export async function handle(request: Request) {
     }
     if (input.action !== "get" && input.action !== "review" && input.version !== row.version)
       throw new GameError("This game changed on another device. Refresh to continue.", 409);
+    if (input.action !== 'get' && input.action !== 'review') release = await gameOperationLease(row.id);
     let moves = (Array.isArray(row.moves) ? row.moves : []) as unknown as MoveRecord[];
     let timeline = Array.isArray(row.timeline) ? row.timeline : [];
     let lastSearch = row.lastSearch as unknown as SearchDiagnostics | null;
@@ -154,15 +165,13 @@ export async function handle(request: Request) {
       const prior=await runNativeEngine({action:'inspect',origin:request.url,state:nextState});if(prior.game.result.status!=='ongoing')throw new GameError('Game has ended',400);
       nextState={...(nextState as object),...(input.action==='draw'?{agreed:true}:{resigned:row.mode==='engine'?row.humanPlayer:activePlayer(row.state)})} as Json;
     }
-    const native = await runNativeEngine({
+    const cached = input.action === 'get' ? gameViewCache.read(row.cachedView,row.viewCode,row.state,resolveEngineId(row.engineId)) : null;
+    const native = cached ? {engine:checkers?'Computer':nativeEngineAsset(resolveEngineId(row.engineId)).identity,state:row.state,game:cached,diagnostics:null,appliedMove:undefined,previousGame:undefined} : await runNativeEngine({
       action: input.action === "move" ? "move" : input.action === "engine" ? "search" : "inspect",
-      origin: request.url,
-      state: nextState,
-      difficulty:row.difficulty,
-      engineId:resolveEngineId(row.engineId),
-      move: input.action === "move" ? input.move : undefined,
-      signal: request.signal,
+      origin: request.url, state: nextState, difficulty:row.difficulty, engineId:resolveEngineId(row.engineId),
+      move: input.action === "move" ? input.move : undefined, signal: request.signal,
     });
+    if(input.action==='get'&&!cached)await db.updateTable('hexchessGames').set({cachedView:native.game as unknown as Json,viewCode:gameViewCache.code(native.game.variant,resolveEngineId(row.engineId))}).where('id','=',row.id).where('version','=',row.version).execute();
 
     if(row.mode==='online'&&(input.action==='forfeit'||input.action==='draw'))onlineState=decideOnlineMatch(native.game,onlineState,member!.seat!,input.action);
     if(row.mode==='online'&&input.action==='move')onlineState={};
@@ -213,6 +222,8 @@ export async function handle(request: Request) {
         .updateTable("hexchessGames")
         .set({
           state: nextState,
+          cachedView:native.game as unknown as Json,
+          viewCode:gameViewCache.code(native.game.variant,resolveEngineId(row.engineId)),
           onlineState:onlineState as unknown as Json,
           timeline,
           moves: moves as unknown as Json,
@@ -230,8 +241,9 @@ export async function handle(request: Request) {
       version = updated.version;
     }
 
+    if(user&&!user.email.endsWith('@example.invalid')&&!checkers&&(input.action==='move'||input.action==='engine'))try{await sql`INSERT INTO ion_chess_players(user_id,first_day,last_day) VALUES(${user.id},(now() AT TIME ZONE 'UTC')::date,(now() AT TIME ZONE 'UTC')::date) ON CONFLICT(user_id) DO UPDATE SET last_day=excluded.last_day,returned_7d=ion_chess_players.returned_7d OR excluded.last_day>ion_chess_players.first_day AND excluded.last_day<=ion_chess_players.first_day+7 WHERE ion_chess_players.last_day<excluded.last_day`.execute(db);}catch{console.error('Chess usage update delayed');}
     const players=row.mode==='online'?await db.selectFrom('ionGameMembers').innerJoin('users','users.id','ionGameMembers.userId').select(['ionGameMembers.seat','users.displayName as name']).where('gameId','=',row.id).orderBy('seat').execute():undefined;
-    if(input.action!=='get'&&input.action!=='review'){const members=await db.selectFrom('ionGameMembers').select('userId').where('gameId','=',row.id).execute();await Promise.all(members.map(m=>publish(channels.player(m.userId),{gameId:row.id,version})));}
+    if(input.action!=='get'&&input.action!=='review'){const members=await db.selectFrom('ionGameMembers').select('userId').where('gameId','=',row.id).execute();await Promise.allSettled(members.map(m=>publish(channels.player(m.userId),{gameId:row.id,version})));}
     const output: OutputType = {
       gameId: row.id,
       accessToken: input.accessToken,
@@ -240,7 +252,7 @@ export async function handle(request: Request) {
       difficulty:row.difficulty,
       humanPlayer:row.mode==='online'?member!.seat!:humanPlayer,
       engineId:resolveEngineId(row.engineId),
-      ...(players?{players:players.filter(p=>p.seat!==null).map(p=>({seat:p.seat!,name:p.name}))}:{}),
+      ...(players?{players:players.filter(p=>p.seat!==null).map(p=>({seat:p.seat!,name:playerName(p.name)}))}:{}),
       engine: native.engine,
       execution: "cloud",
       game: row.mode==='online'&&(input.action!=='review'||input.ply===timeline.length)?withOnlineResult(native.game,onlineState):native.game,
@@ -260,6 +272,6 @@ export async function handle(request: Request) {
             ? 400
             : 503;
     if (status >= 500) console.error("HexChess game request failed:", message);
-    return new Response(superjson.stringify({ error: message }), { status, headers });
-  }
+    return new Response(superjson.stringify({ error: message }), { status, headers:{...headers,...(status===503||status===429?{'Retry-After':'2'}:{})} });
+  } finally { if(release)await release().catch(()=>console.error("Game lease release delayed")); }
 }

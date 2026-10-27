@@ -41,7 +41,7 @@ export type CloudNode = {
 };
 export type InputType = z.input<typeof schema>;
 export type OutputType = {
-  nodes: CloudNode[]; version: number; timeZone?:string; signedInUsers?:number; workspaceId?: string; account?: boolean; scope?:CloudScope; canAdd?:boolean; canManage?:boolean; dev?:boolean; owner?:boolean; userId?:number;
+  nodes: CloudNode[]; version: number; timeZone?:string; signedInUsers?:number; signedInUsersExpireAt?:string; workspaceId?: string; account?: boolean; scope?:CloudScope; canAdd?:boolean; canManage?:boolean; dev?:boolean; owner?:boolean; userId?:number;
   undo?: { operationId: string; name: string; parentId: string | null; count: number; expiresAt?:number };
   upload?: { url: string; headers: Record<string, string> };
 };

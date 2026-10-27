@@ -1,0 +1,404 @@
+{
+  "release": "ION 0.69",
+  "live": "https://ion.floot.app",
+  "scope": "Chess hub and measured capacity hardening",
+  "typecheck": "clean",
+  "unit": {
+    "passedSuites": 130,
+    "failedSuites": 0,
+    "explicitHookSuites": true,
+    "batches": [
+      [
+        "helpers/accountCommands.spec.tsx",
+        "helpers/accountDeviceNodes.spec.tsx",
+        "helpers/accountListNodes.spec.tsx",
+        "helpers/accountTimeZone.spec.tsx",
+        "helpers/actionTileGroup.spec.tsx",
+        "helpers/appearanceBootstrap.spec.tsx",
+        "helpers/applyBuyerCount.spec.tsx",
+        "helpers/boardActionMosaic.spec.tsx",
+        "helpers/checkersClouds.spec.tsx",
+        "helpers/checkersInteraction.spec.tsx",
+        "helpers/checkersPlayback.spec.tsx",
+        "helpers/checkersRules.spec.tsx",
+        "helpers/checkersRuntime.spec.tsx",
+        "helpers/chessEngines.spec.tsx",
+        "helpers/chessHub.spec.tsx",
+        "helpers/chessNavigation.spec.tsx",
+        "helpers/cloudAuthors.spec.tsx",
+        "helpers/cloudChanges.spec.tsx",
+        "helpers/cloudColorWheel.spec.tsx",
+        "helpers/cloudColors.spec.tsx"
+      ],
+      [
+        "helpers/cloudComposer.spec.tsx",
+        "helpers/cloudContent.spec.tsx",
+        "helpers/cloudControls.spec.tsx",
+        "helpers/cloudDeletionUi.spec.tsx",
+        "helpers/cloudDrafts.spec.tsx",
+        "helpers/cloudEditUi.spec.tsx",
+        "helpers/cloudIL.spec.tsx",
+        "helpers/cloudIdentifierView.spec.tsx",
+        "helpers/cloudIdentifiers.spec.tsx",
+        "helpers/cloudLayout.spec.tsx",
+        "helpers/cloudLinks.spec.tsx",
+        "helpers/cloudMedia.spec.tsx",
+        "helpers/cloudNames.spec.tsx",
+        "helpers/cloudOutbox.spec.tsx",
+        "helpers/cloudPercent.spec.tsx",
+        "helpers/cloudPhotos.spec.tsx",
+        "helpers/cloudRefinements.spec.tsx",
+        "helpers/cloudScopes.spec.tsx",
+        "helpers/cloudText.spec.tsx",
+        "helpers/cloudTransfer.spec.tsx"
+      ],
+      [
+        "helpers/cloudTransferNodes.spec.tsx",
+        "helpers/cloudTree.spec.tsx",
+        "helpers/cloudWordLimits.spec.tsx",
+        "helpers/colorWheelFocus.spec.tsx",
+        "helpers/communityIdentity.spec.tsx",
+        "helpers/communityPaging.spec.tsx",
+        "helpers/communityRestore.spec.tsx",
+        "helpers/communitySizing.spec.tsx",
+        "helpers/composerContinuity.spec.tsx",
+        "helpers/composerSendFocus.spec.tsx",
+        "helpers/computerPolicy.spec.tsx",
+        "helpers/devNamespace.spec.tsx",
+        "helpers/devPromptWorkflow.spec.tsx",
+        "helpers/deviceData.spec.tsx",
+        "helpers/drainCloudRefresh.spec.tsx",
+        "helpers/equalCatalog.spec.tsx",
+        "helpers/equalWorkPricing.spec.tsx",
+        "helpers/featureAuthority.spec.tsx",
+        "helpers/featureClouds.spec.tsx",
+        "helpers/fittedTiles.spec.tsx"
+      ],
+      [
+        "helpers/floatingNavigation.spec.tsx",
+        "helpers/functionClouds.spec.tsx",
+        "helpers/gameCloudLayout.spec.tsx",
+        "helpers/gameFacing.spec.tsx",
+        "helpers/gameOutcome.spec.tsx",
+        "helpers/gameRetention.spec.tsx",
+        "helpers/gameViewCache.spec.tsx",
+        "helpers/historyClouds.spec.tsx",
+        "helpers/homeFeatures.spec.tsx",
+        "helpers/horizontalVariants.spec.tsx",
+        "helpers/ilInteractions.spec.tsx",
+        "helpers/ionPluginMcp.spec.tsx",
+        "helpers/ionPluginOAuth.spec.tsx",
+        "helpers/ionPluginWords.spec.tsx",
+        "helpers/navigationGestures.spec.tsx",
+        "helpers/nickname.spec.tsx",
+        "helpers/notificationDelivery.spec.tsx",
+        "helpers/notificationRoutes.spec.tsx",
+        "helpers/onlineMatch.spec.tsx",
+        "helpers/onlineRecovery.spec.tsx"
+      ],
+      [
+        "helpers/organicLayout.spec.tsx",
+        "helpers/pageHistory.spec.tsx",
+        "helpers/pageTiles.spec.tsx",
+        "helpers/pageWorkspace.spec.tsx",
+        "helpers/pageWorkspaceUi.spec.tsx",
+        "helpers/paneHistoryUi.spec.tsx",
+        "helpers/photoViewer.spec.tsx",
+        "helpers/previewMove.spec.tsx",
+        "helpers/proportionalCloudScale.spec.tsx",
+        "helpers/publicBootstrap.spec.tsx",
+        "helpers/publicSnapshotCache.spec.tsx",
+        "helpers/pushAuthority.spec.tsx",
+        "helpers/readingLinks.spec.tsx",
+        "helpers/realtimeLease.spec.tsx",
+        "helpers/resumeCloudTyping.spec.tsx",
+        "helpers/rhombusMosaic.spec.tsx",
+        "helpers/safariPermissions.spec.tsx",
+        "helpers/scheduleCalendar.spec.tsx",
+        "helpers/schedulePrivacy.spec.tsx",
+        "helpers/shafran.spec.tsx"
+      ],
+      [
+        "helpers/sharedRootNames.spec.tsx",
+        "helpers/sideSwitch.spec.tsx",
+        "helpers/signedInUsers.spec.tsx",
+        "helpers/skies.spec.tsx",
+        "helpers/spatialViewport.spec.tsx",
+        "helpers/themeMode.spec.tsx",
+        "helpers/tileName.spec.tsx",
+        "helpers/timeAccess.spec.tsx",
+        "helpers/timeHub.spec.tsx",
+        "helpers/timeMath.spec.tsx",
+        "helpers/timePresentation.spec.tsx",
+        "helpers/timeRevisions.spec.tsx",
+        "helpers/titleTap.spec.tsx",
+        "helpers/useAppearance.spec.tsx",
+        "helpers/useChessHistory.spec.tsx",
+        "helpers/useCloudGame.spec.tsx",
+        "helpers/useCloudSpace.spec.tsx",
+        "helpers/useHistoryKeys.spec.tsx",
+        "helpers/useMediaQuery.spec.tsx",
+        "helpers/usePictureTap.spec.tsx"
+      ],
+      [
+        "helpers/useScheduleCalendar.spec.tsx",
+        "helpers/useTiledUI.spec.tsx",
+        "helpers/useTimeEarning.spec.tsx",
+        "helpers/useTimeRecovery.spec.tsx",
+        "helpers/useTimeTotals.spec.tsx",
+        "helpers/validateCloudPhoto.spec.tsx",
+        "helpers/visitedPages.spec.tsx",
+        "helpers/wellisch.spec.tsx",
+        "helpers/wholeTileGeometry.spec.tsx",
+        "helpers/workSessions.spec.tsx"
+      ]
+    ]
+  },
+  "productionChecks": {
+    "api": [
+      "Registered devs receive editable hub controls and permanent labels",
+      "Shared guest bootstrap ignores a dev cookie and omits dev/private authority",
+      "Three concurrent retries create one topic with one permanent IL",
+      "A public UUID cannot steal a private cloud identity or its IL",
+      "Author, dev and expected-account checks reject cross-account changes",
+      "Following is private to the signed-in account",
+      "Reports are visible only to registered devs",
+      "Replies deduplicate, keep separate ILs and size by actual descendant characters",
+      "Topic and reply ILs resolve without signing in",
+      "Closing a discussion stops new replies and can be reversed",
+      "Competing edits cannot overwrite a newer version",
+      "Hidden replies disappear from public reads and IL navigation",
+      "Deletion undo is signed, account-bound and version-bound",
+      "All eight existing variants still start with native legal moves and complete geometry",
+      "Paid variants still require an authoritative purchase",
+      "Concurrent cached board reads preserve the same authoritative version",
+      "Six simultaneous engine requests commit exactly one legal reply",
+      "Code matchmaking, account-only seats and agreed draws stay authoritative",
+      "A cancel/join race cannot cancel a game after it starts",
+      "Undo really expires after its original ten-second window",
+      "Dev settings and measured return usage are available without changing limits"
+    ],
+    "community": {
+      "checks": [
+        "Phone Community uses both axes without overlapping targets",
+        "Phone direct Following links open a readable discussion with reachable actions",
+        "Live edits, removal and undo cannot remove a topic with the same UUID",
+        "Phone failed sends retain an account-scoped draft through reload",
+        "Landscape Community uses both axes without overlapping targets",
+        "Landscape direct Following links open a readable discussion with reachable actions",
+        "Landscape opens replies without crowding the reader",
+        "Landscape failed sends retain an account-scoped draft through reload",
+        "A committed reply updates its count without refetching every viewer",
+        "Desktop Community uses both axes without overlapping targets",
+        "Desktop direct Following links open a readable discussion with reachable actions",
+        "Desktop failed sends retain an account-scoped draft through reload",
+        "Dev settings, measured usage and hold-to-edit action labels are reachable",
+        "Guests can read discussions without receiving posting or dev controls"
+      ],
+      "errors": []
+    },
+    "boards": {
+      "checks": [
+        "Phone live board retains its move, selection, side and native cell targets across layout switches",
+        "Phone saved variant follows the chosen presentation without changing its recorded position",
+        "Phone a layout change preserves the mounted composer and its unsent word",
+        "Desktop live board retains its move, selection, side and native cell targets across layout switches",
+        "Desktop saved variant follows the chosen presentation without changing its recorded position",
+        "Desktop a layout change preserves the mounted composer and its unsent word"
+      ],
+      "errors": []
+    },
+    "layouts": {
+      "checks": [
+        "Phone starts with readable, non-overlapping upright organic clouds",
+        "Phone Accounts toggle persists through reload and synchronizes another open page",
+        "Phone Skies sizes each view by its actual partition count",
+        "Phone layout switches and renaming preserve the existing partitions and their pages",
+        "Desktop starts with readable, non-overlapping upright organic clouds",
+        "Desktop Accounts toggle persists through reload and synchronizes another open page",
+        "Desktop Skies sizes each view by its actual partition count",
+        "Desktop layout switches and renaming preserve the existing partitions and their pages",
+        "The layout toggle keeps working when its device storage is blocked"
+      ],
+      "errors": []
+    }
+  },
+  "smallObservations": {
+    "boardRead": {
+      "requests": 16,
+      "concurrency": 4,
+      "p50": 241,
+      "p95": 1138
+    },
+    "guestStartup": {
+      "before": {
+        "requests": [
+          "/_api/auth/session",
+          "/_api/icon",
+          "/_api/auth/session",
+          "/_api/_realtime/token",
+          "/_api/time",
+          "/_api/cloud",
+          "/_api/_realtime/token",
+          "/_api/_realtime/token",
+          "/_api/_realtime/token"
+        ],
+        "errors": []
+      },
+      "after": {
+        "requests": [
+          "/_api/icon",
+          "/_api/auth/session",
+          "/_api/_realtime/token",
+          "/_api/public_bootstrap"
+        ],
+        "errors": []
+      },
+      "controlledVitalsBenchmark": false
+    },
+    "publicCache": {
+      "cache": [
+        {
+          "status": 200,
+          "snapshot": "stale",
+          "ms": 293,
+          "cache": "Miss from cloudfront",
+          "age": null
+        },
+        {
+          "status": 200,
+          "snapshot": "hit",
+          "ms": 203,
+          "cache": "Miss from cloudfront",
+          "age": null
+        },
+        {
+          "status": 200,
+          "snapshot": "hit",
+          "ms": 227,
+          "cache": "Miss from cloudfront",
+          "age": null
+        },
+        {
+          "status": 200,
+          "snapshot": "hit",
+          "ms": 197,
+          "cache": "Miss from cloudfront",
+          "age": null
+        },
+        {
+          "status": 200,
+          "snapshot": "hit",
+          "ms": 182,
+          "cache": "Miss from cloudfront",
+          "age": null
+        },
+        {
+          "status": 200,
+          "snapshot": "hit",
+          "ms": 272,
+          "cache": "Miss from cloudfront",
+          "age": null
+        }
+      ],
+      "signins": [
+        {
+          "status": 200
+        },
+        {
+          "status": 200
+        },
+        {
+          "status": 200
+        }
+      ]
+    },
+    "cdnHitClaimed": false
+  },
+  "migrations": [
+    "052-chess-hub.sql",
+    "053-chess-return-metrics.sql",
+    "054-starting-positions.sql",
+    "055-public-read-model.sql",
+    "056-community-sizing.sql",
+    "057-community-identity.sql"
+  ],
+  "dataRetirement": {
+    "accounts": [
+      165,
+      166,
+      167
+    ],
+    "expiredSessionCheck": [
+      {
+        "fixture": 165,
+        "status": 401
+      },
+      {
+        "fixture": 166,
+        "status": 401
+      },
+      {
+        "fixture": 167,
+        "status": 401
+      }
+    ],
+    "devGrantsPasswordsDeviceLinksActiveEarning": 0,
+    "ledgerEntries": 0,
+    "distinctGamesHidden": 24,
+    "membershipsHidden": 28,
+    "postsRetired": {
+      "topics": 2,
+      "replies": 3
+    },
+    "unrelatedReplies": 0,
+    "sharedSizingAfterRetirement": 0,
+    "realSignedInUsers": 5,
+    "userRowsAndPermanentILsRetained": true,
+    "realContentPreserved": true
+  },
+  "staticAudit": {
+    "findings": 44,
+    "unresolvedCanonicalOwners": 0,
+    "strictExitCode": 1,
+    "disposition": "38 previously reviewed findings retained; six new regex false positives (four Button-asChild navigation actions, two canonical Textarea disableResize controls). Not a clean strict-audit pass."
+  },
+  "capacity": {
+    "millionConcurrencyCertified": false,
+    "millionProductionLoadTestRun": false,
+    "hostingQuotasVerified": false,
+    "databaseResized": false,
+    "returnRateGuaranteed": false,
+    "targetReturnRate": 0.1,
+    "measurement": "First observed signed-in Chess play, return on a later UTC day within seven days. Cohorts mature after seven days. Reserved QA users excluded.",
+    "stagingOriginGuard": {
+      "deniedCases": 8,
+      "permittedCases": 1,
+      "networkTrafficSent": false
+    }
+  },
+  "constraints": [
+    "Published-origin API and browser checks; preview sandbox returned a policy 403 and was not bypassed.",
+    "Phone emulation, desktop and short landscape checked; physical iPhone and native keyboard/store tests not performed.",
+    "Daily Time earning still requires its established 15-second financial lease; this is a separately quantified launch bottleneck.",
+    "k6 script is staging-only; planning figures are not measured capacity."
+  ],
+  "deployment": {
+    "job": "1f3775c0-a5ba-4843-bfb3-d36d67219444",
+    "status": "succeeded",
+    "plan": "pro",
+    "nativeBuildsUsed": 0,
+    "badge": false,
+    "codeCheckpoint": "e433d19f-8c6c-4a6b-b831-684b62e0204e",
+    "releaseCheckpoint": "2249cb05-01ae-4dee-bab6-948e6aa0faaa"
+  },
+  "work": {
+    "id": "71ba3845-32b0-4779-881a-05ba26bb0e69",
+    "devUserId": 1,
+    "source": "agent",
+    "startedAt": "2026-10-27T04:28:48.700283Z",
+    "endedAt": "2026-10-27T06:55:18.000000Z",
+    "durationUs": "8789299717",
+    "basis": "Observed elapsed agent implementation/testing interval. Not independently verified human labor. No historical time invented; post-close release bookkeeping excluded."
+  }
+}

@@ -1,94 +1,89 @@
 # ION
 
-ION is live on **Floot** at https://ion.floot.app. Its main navigation is a
-pannable, zoomable cloud of words and pictures.
+ION is live at **https://ion.floot.app**. The authoritative application is in
+`cloud/floot`, using Floot-hosted React, managed Postgres, Realtime and cloud C++
+rules/search. The Cloudflare, Supabase and Vercel migration sources are retained
+for development; they do not serve the live app.
 
-ION now has an OAuth-protected **ChatGPT plugin** for reading and saving words in your private **Journal**, plus your purchased **Schedule**. [Install and connect ION](https://ion.floot.app/chatgpt). The portable package is in [plugins/ion](plugins/ion), with [deployment notes](docs/integrations/chatgpt.md). Schedule uses the Time estimate-and-purchase system; devs can set its estimate under Wallet → Estimates → Schedule. The website and database remain on Floot.
+## Chess hub — 0.69
 
-Open **Hexagonal Chess**, then
-**Boards** to choose Gliński, McCooey, Shafran, Brusky, De Vasa or Wellisch, **Engines** to select Tactical, Positional, Defensive, Materialist, Unconventional or Universal, or **Rules**
-for separate rule paragraphs. Rule lists are words; illustrations appear inside each paragraph, and long text uses fitted pages without scrolling.
+Open Board Games → Chess. **Play**, **Learn**, **Library** and **Community** form
+one hub. Continue returns to this account’s unfinished local-device match;
+signed-in games remain available through Library across devices. Learn has a
+first-game guide, complete rules/diagrams and a rotating daily idea.
 
-Home starts with **Hexagonal Chess**, **Public**, **Private**, **Controls** and **Accounts**. Dev accounts may add more. Public has the same saved continuous-gradient color wheel as Private and is readable
-across accounts and devices, with live updates; sign in to contribute. Private is
-visible only to its signed-in account. Hold a word for 300 ms to open Controls and edit or transfer its entire
-branch between Public and Private, with confirmation before publishing. Only explicit
-dev accounts can edit the shared Hexagonal Chess content. Existing personal
-content stays private; it is not published automatically.
+Play offers Gliński, McCooey, Shafran, Brusky, De Vasa and Wellisch. Checkers has
+HexDame and Kruzno. Choose a board, then Computer with six difficulty levels,
+Pass and Play, or Online. Computer is the unified public choice; the six
+independent C++ engine implementations and their historical documentation remain
+in the repository. They are not six separately priced public choices.
 
-Dev accounts see permanent IL labels beside accessible clouds and can copy them from Controls. Each actual hierarchy level adds a zero-based arrival segment without placeholder zeros: IL1 → IL10 → IL100. Segments run 0–9, A0–Z9, AA0–ZZ9, then AAA0 onward. Deletion never releases a number; moves retain labels and copies receive new ones. Ordinary accounts never receive these labels. Existing content is initialized in its saved order.
+Community has Start here, Strategy, Variants, Your games, Ideas and Following.
+Visitors can read; signed-in players can post, follow and report. Authors can
+edit/delete their own posts. Registered devs can rename/move hub entries, edit
+action labels, configure posting/admission limits, and pin, close, move, hide or
+restore discussions. Public text contains names rather than emails. Drafts and
+automatic resume caches are account-scoped. Public forum ILs link directly to
+discussions or replies without sharing a workspace identity.
 
-Every confirmed word and picture is stored on the server. Select multiple photos for a collage; hold it and choose View photos to inspect each image full screen with pan/zoom. Accounts and Controls use the same cloud navigation. Remember accounts on a
-trusted device to switch without re-entering passwords; forgetting removes that
-shortcut. No passwords are stored in browser storage. Each cloud accepts 1,024 immediate droplets; total workspace size and nesting are independent. React/TypeScript renders the interface; authoritative rules and
-the five independent engines run in C++ on the cloud server. No local engine installation is
-required. A domain change requires signing in again; account content persists.
+The release includes shared public snapshots, one realtime connection per
+account/document, bounded discussion pages, native board/starting-position
+caches, duplicate-search protection and per-room matchmaking locks. These remove
+specific bottlenecks; **one million concurrent visitors and a 10% return rate
+have not been certified**. See [capacity and staging gates](docs/chess-launch-capacity.md),
+[release details](docs/releases/ion-0.69.md) and [verification](docs/verification/ion-0.69.json).
 
-Shafran is available on the live ION app, with 70 cells, triple pawn advances,
-both crossed en passant cells, four castling choices per side and an equal stalemate.
-Private cloud names have no 80-character restriction; full labels stay on one line
-in an expanding spatial canvas, with pan and zoom. Home at a space root opens ION.
-Moves now animate immediately from native visual deltas while the cloud confirms
-them; failures restore the saved board.
+## Clouds, accounts and presentation
 
-The Cloudflare,
-Supabase and Vercel migration is paused at the user's request. The live Floot
-source is mirrored under `cloud/floot`; `web` is the separate migration source.
+ION uses pannable, zoomable clouds of words and pictures. Descendant characters
+set relative size, with a readable minimum; a cloud’s own name reserves geometry
+but does not set its font. Light and organic clouds are the defaults. Accounts
+provides explicit Dark and Toggle Tiled UI controls. The optional adjoining
+rhombi, Skies/Tiles and split screens share the same content and game state.
+Inter is self-hosted; motion respects reduced-motion preferences.
 
-A [Vercel Services configuration](docs/vercel-services.md) is also prepared for
-review: a public web service, a public API gateway, and a private native API.
-The gateway calls the private API through a runtime service binding. It has not
-been deployed.
+Safari is shared and live. Journal is private to its signed-in account. Hold or
+right-click to open Controls. Dev authority comes from the server’s registered
+dev accounts, never a label or client role. Permanent ILs survive deletion and
+moves; copies receive new identities. Copy IL is available to everyone in
+Safari, and direct IL links are a navigation mechanism. Back/Forward follows
+visited pages. Confirmed content is server-saved; unsent drafts stay local to
+the current account. Remembered sign-ins never store passwords in browser storage.
 
-Historical saved-game keys, protocol identifiers and `HEXARS_` server variable
-names are preserved so the ION rename does not break existing games or hosting
-configuration. Package workspaces now use `@ion/` names.
-
-## Install on your phone
-
-- iPhone/iPad: open the website in Safari → Share → Add to Home Screen → Add.
-- Android: open it in Chrome → ⋮ → Install app or Add to Home screen.
-
-The **Install** action appears only when the browser supplies an installation prompt or when manual installation is supported in top-level iPhone/iPad Safari. It is hidden in incompatible browsers, embedded frames and an already installed app. The home-screen app uses a standalone window. This is an installable web app, not an App Store or Play Store binary. Internet access is required for cloud play.
-
-Games are saved without automatic expiry. Signed-in games appear in private **History** under Hexagonal Chess, grouped by year, month and day, then by individual variant previews. Each level opens explicitly, including a single-child level. Valid older local saved links can attach on opening; ownership of unrelated anonymous games is never guessed. Existing capability links still authorize local games, while online matches require account membership and the assigned seat.
-
-**Online** supports email-authenticated random matching by variant (or Random), and four-digit rooms for two players or three in Wellisch. Waiting rooms expire after 15 minutes; saved games do not. Moves are native-validated and delivered through private live update channels, without match polling. Downward title pulls refresh. Vertical board swipes switch the engine side only before the first move, then rotate the view. Each cell has a complete hexagonal hitbox, and dashed lavender last-move outlines differ from legal blue destinations.
-
-**Positional 1.0.0** and **Defensive 1.0.0** are separate C++ executables with independent search and evaluation. All six engines support all six variants and the six-level ladder. Build them with `npm run build:engines`; test the new searches with `npm run test:search`. Add `-- --cloud` to `build:positional` or `build:defensive` for a static Linux binary. See [engine release notes](docs/ion-independent-engines-release.md).
-
-**Materialist 1.0.0** uses memory-enhanced zero-window search and material/exchange evaluation. **Unconventional 1.0.0** uses guided PUCT tree search and sampled rollouts, with separate per-player rewards for Wellisch. They share the existing difficulty, save and cloud execution flow. See [the fourth and fifth engines](docs/ion-materialist-unconventional-release.md).
-
-
-## Design
-
-ION uses pure black, neutral glass, self-hosted Inter, and smaller words. Drag to
-pan, pinch or Ctrl/Command-wheel to zoom, or use keyboard zoom. App pages do not scroll. Hold/right-click a word for Edit, Move, Copy or Delete.
-ION, Accounts and Controls are read-only for ordinary accounts; dev accounts can customize them. Only dev accounts may change shared Chess entries. Deletion within a space is reversible.
-The compact insert bar and parent Back sit at the bottom. Public, Private and the owner’s Hexagonal Chess editor have a compact continuous gradient wheel, visible only while entering a word. New selections avoid exact duplicate colors among siblings, including server-side allocation. Existing saved colors and branch copies are preserved. Home uses fixed positions. Deletion Undo expires after ten seconds.
-
-Boards opens native starting-position pictures for all six published variants. Each
-game places its interactive board among Variants, Rules, Engines, Board Reset
-and Undo, plus Pass and Play to deselect Tactical. Swipe right for an earlier move, left for a newer one; Present returns
-to live play. A bold result sheet identifies checkmate, stalemate and draws.
-Pieces remain flat, high-contrast silhouettes. Semantic inset outlines distinguish
-moves, captures, check, selection and the previous move. Motion respects reduced
-motion. The Pro hosting badge setting is disabled.
-
-## Playable now
-
-- A native-authoritative 91-cell board: 36 starting pieces in Gliński, 32 in McCooey. Choose its starting picture in Boards.
-- All six piece movements, checks and pins, en passant and four promotion choices. Gliński pawns regain a double advance from friendly original pawn cells. McCooey pawns capture along bishop diagonals and double-advance only on their first move, excluding the center pawn.
-- Checkmate, Gliński fractional stalemate (¾–¼), McCooey equal stalemate (½–½), automatic threefold repetition, the fifty-move rule, and automatic material draws. ION ends in a ½–½ draw when each side has only its king plus at most one bishop, knight, or rook. Pawns, queens, or two pieces on either side prevent this house-rule draw; an already-delivered checkmate wins. Gliński and McCooey have no castling; Shafran supports short and long castling on both flanks.
-- Human versus Tactical, Positional, Defensive, Materialist, Unconventional or Universal as White or Black, or a shared two-player board.
-- Separate saved games per variant, shared links, undo, automatic pass-and-play orientation, promotion and keyboard/touch controls.
-- Tactical: material and positional evaluation, iterative-deepening alpha-beta, capture ordering, bounded quiescence, and time/node limits. Six levels before board selection: Pre-Beginner (40 ms/depth 1/125 nodes, with a 50% random legal choice), Beginner (80 ms/depth 1), Easy (200 ms/depth 2), Medium (750 ms/depth 3), Hard (1.5 s/depth 4), Expert (3 s/depth 5), each with its own node limit. These are not Elo ratings.
-
-[Brusky](docs/variants/brusky.md) and [De Vasa](docs/variants/devasa.md) are playable with their own pawn rules, en passant, promotion, castling, results and Tactical search. Their 84-cell and 81-cell boards use native pointy geometry. [Wellisch](docs/variants/wellisch.md) adds three-player pass-and-play and human-versus-two-Tactical games: first king capture transfers the army, pawns keep their direction, and the remaining game ends by normal mate/stalemate. Captured-piece promotion reserves, delayed promotion and king–rook swaps are saved natively. Tactical 0.9.0 uses MaxN for this variant. Positional, Defensive, Materialist and Unconventional are also playable here; Universal is the sixth independent engine, with phase-adaptive PVS and selective three-player MaxN. Strength has not been rated. See [Universal](docs/universal-engine.md) and [ION 0.26](docs/releases/ion-0.26.md).
+Saved games do not expire automatically. Library supports private History,
+shared games, recorded positions, notations and opponents. Online requires an
+email account, supports random matching and four-digit rooms, and assigns
+account-only seats (three in Wellisch). Online play offers Forfeit, Draw and
+temporary chat. Native rules validate moves, promotions and results; full-cell
+hitboxes and distinct inset outlines show legal moves, captures and last moves.
 
 ## Time
 
-ION’s sixth word opens a cloud-backed wallet: active-use earning, private activity, player-name transfers, permanent unlocks and a dev treasury. Prices use full approved creation estimates divided by unique signed-in accounts. Charging requires approved estimates and a 24-hour production count warm-up; no historic costs are invented. See [Time](docs/time/README.md) and [ION 0.27](docs/releases/ion-0.27.md).
+Time offers active-use earning, account-private activity, transfers, permanent
+feature purchases and dev work administration. Each published paid feature’s
+price is total approved development Time divided equally by the paid-feature
+count, then by real accounts with unexpired server sessions. Saved sign-ins
+count once per account; reserved test accounts do not count. Recorded work uses
+observed session intervals and preserves the append-only ledger. Elapsed agent
+work is not independently verified human labor.
+
+Gliński, its rules, Online, Library, HexDame and Computer remain free. Unaffordable
+unpurchased features stay hidden; affordable ones show a purchase gate. Server
+purchase proof remains authoritative. Existing engine products stay out of the
+public price pool. See the current release and earlier [Time documentation](docs/time/README.md)
+for historical context.
+
+## Install and integrations
+
+On iPhone/iPad Safari, use Share → Add to Home Screen. Android Chrome can offer
+Install app. Install is hidden on unsupported browsers, embedded screens and
+already installed apps. Cloud play requires internet; no service worker or
+native store build is part of this release.
+
+The OAuth-protected [ChatGPT integration](https://ion.floot.app/chatgpt) can read
+and save words in Journal and purchased Schedule. Its portable package is in
+[plugins/ion](plugins/ion), with [connection notes](docs/integrations/chatgpt.md).
+OAuth/MCP endpoints are intentionally available to external clients.
 
 ## Work on the source
 
@@ -99,7 +94,7 @@ npm ci
 npm run dev
 ```
 
-Open http://localhost:5173. The Vite website now uses the independent frontend in `web/src`. To play locally, configure Supabase and run the native API alongside Vite; follow [the cloud migration guide](docs/cloud-migration.md). The old Floot site remains online during preparation. Frontend assets and font files are served locally.
+Open http://localhost:5173. The Vite website now uses the independent frontend in `web/src`. To play locally, configure Supabase and run the native API alongside Vite; follow [the cloud migration guide](docs/cloud-migration.md). The live Floot app remains authoritative during migration preparation. Frontend assets and font files are served locally.
 
 To compile and check native code:
 
@@ -116,7 +111,8 @@ The original local manager is retained as a diagnostic foundation. Start `npm ru
 ## Source layout
 
 ```text
-cloud/floot/                Active Floot app source, tests and migrations
+cloud/floot/                Active Floot app source and helper tests
+cloud/migrations/           Authoritative additive Floot database migrations
 cloud/floot-development/    Preserved unpublished Floot work
 api/                        Node API, Supabase storage, fixed native executable bridge
 supabase/migrations/        Postgres schema and owner RLS

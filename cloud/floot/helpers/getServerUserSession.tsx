@@ -3,30 +3,12 @@ import { db } from "./db";
 import { User } from "./User";
 
 import {
-  CleanupProbability,
   getServerSessionOrThrow,
   NotAuthenticatedError,
-  SessionExpirationSeconds,
 } from "./getSetServerSession";
 
 export async function getServerUserSession(request: Request) {
   const session = await getServerSessionOrThrow(request);
-
-  // Occasionally clean up expired sessions
-  if (Math.random() < CleanupProbability) {
-    const expirationDate = new Date(
-      Date.now() - SessionExpirationSeconds * 1000
-    );
-    try {
-      await db
-        .deleteFrom("sessions")
-        .where("lastAccessed", "<", expirationDate)
-        .execute();
-    } catch (cleanupError) {
-      // Log but don't fail the request if cleanup fails
-      console.error("Session cleanup error:", cleanupError);
-    }
-  }
 
   // Query the sessions and users tables in a single join query
   const results = await db
@@ -36,6 +18,7 @@ export async function getServerUserSession(request: Request) {
       "sessions.id as sessionId",
       "sessions.createdAt as sessionCreatedAt",
       "sessions.lastAccessed as sessionLastAccessed",
+      "sessions.credentialExpiresAt as storedCredentialExpiresAt",
       "users.id",
       "users.email",
       "users.displayName",
@@ -60,13 +43,19 @@ export async function getServerUserSession(request: Request) {
     role: result.role,
   };
 
-  // Update the session's lastAccessed timestamp
+  // Read-heavy play and realtime reconnects must not write on every request.
+  // The SQL predicate also coalesces simultaneous requests for this session.
   const now = new Date();
-  await db
-    .updateTable("sessions")
-    .set({ lastAccessed: now,...(session.credentialExpiresAt?{credentialExpiresAt:sql`greatest(credential_expires_at,${new Date(session.credentialExpiresAt)})`}:{}) })
-    .where("id", "=", session.id)
-    .execute();
+  const newerCredential = session.credentialExpiresAt && session.credentialExpiresAt > new Date(result.storedCredentialExpiresAt || 0).getTime();
+  if (now.getTime() - new Date(result.sessionLastAccessed||0).getTime() >= 60000 || newerCredential) {
+    await db.updateTable('sessions').set({
+      lastAccessed: now,
+      ...(newerCredential ? {credentialExpiresAt:sql`greatest(credential_expires_at,${new Date(session.credentialExpiresAt!)})`} : {}),
+    }).where('id','=',session.id).where(eb => eb.or([
+      eb('lastAccessed','<',new Date(now.getTime()-60000)),
+      ...(newerCredential ? [eb('credentialExpiresAt','is',null),eb('credentialExpiresAt','<',new Date(session.credentialExpiresAt!))] : []),
+    ])).execute();
+  }
 
   return {
     user: user satisfies User,

@@ -74,6 +74,7 @@ export async function setServerSession(
   response: Response,
   session: Session
 ): Promise<void> {
+  const previous=await db.selectFrom('sessions').select(['credentialExpiresAt','expiresAt']).where('id','=',session.id).executeTakeFirst();
   const expires=Math.floor(Date.now()/1000)+86400;
   const token = await new SignJWT({
     id: session.id,
@@ -97,7 +98,8 @@ export async function setServerSession(
   ].join("; ");
 
   response.headers.set("Set-Cookie", cookieValue);
-  await signedInUsersChanged();
+  // Rolling an already-live cookie does not change who is signed in.
+  if(!previous?.credentialExpiresAt||new Date(previous.expiresAt).getTime()<=Date.now())await signedInUsersChanged();
 }
 
 export function clearServerSession(response: Response) {

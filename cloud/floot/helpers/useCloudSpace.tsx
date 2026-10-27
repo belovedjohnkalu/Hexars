@@ -1,3 +1,4 @@
+import {publicBootstrap} from './publicBootstrap';
 import {deviceData} from './deviceData';
 import {useCloudOutbox} from './useCloudOutbox';
 import {cloudOutbox} from './cloudOutbox';
@@ -5,7 +6,7 @@ import {transientFailure} from './cacheRead';
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { postCloud,type CloudScope,type InputType,type OutputType } from "../endpoints/cloud_POST.schema";
 import { cloudTree } from "./cloudTree";
-import { RealtimeClient } from "./RealtimeClient";
+import { realtimeLease } from "./realtimeLease";
 import { channels } from "./realtimeChannels";
 type Credentials={workspaceId:string;accessToken:string;functionalId?:string};
 import type { CloudColor } from "./cloudColors";
@@ -19,7 +20,7 @@ function credentials():Credentials{
  const bytes=crypto.getRandomValues(new Uint8Array(32)),value={workspaceId:crypto.randomUUID(),accessToken:Array.from(bytes,b=>b.toString(16).padStart(2,'0')).join('')};localStorage.setItem('ion.private-space.v1',JSON.stringify(value));return value;
  }catch{return {workspaceId:crypto.randomUUID(),accessToken:'0'.repeat(64)};}
 }
-export function useCloudSpace(accountId:number|null=null,authLoading=false,scope:CloudScope='private',functionalId?:string){
+export function useCloudSpace(accountId:number|null=null,authLoading=false,scope:CloudScope='private',functionalId?:string,visibilityKey?:string){
  const outbox=useCloudOutbox(accountId,scope),[offline,setOffline]=useState(false);
  const [data,setData]=useState<OutputType>(()=>blank(scope)),[loading,setLoading]=useState(true),[ready,setReady]=useState(false),[busy,setBusy]=useState(false),[error,setError]=useState(''),[phase,setPhase]=useState<'idle'|'uploading'|'saving'>('idle');
  const identity=useRef<Credentials|null>(null),current=useRef(data),scopeKey=useRef(''),loadSequence=useRef(0),mounted=useRef(true),locked=useRef(false),uploadController=useRef<AbortController|null>(null);
@@ -29,20 +30,23 @@ export function useCloudSpace(accountId:number|null=null,authLoading=false,scope
  const saved=(value:OutputType)=>{accept(value);void deviceData.put(String(accountId||'guest'),'cloud:'+scope,value);window.dispatchEvent(new window.CustomEvent('ion.cloud-saved',{detail:value}));};
  const [undoClock,setUndoClock]=useState(Date.now());
  useEffect(()=>{const deadline=data.undo?.expiresAt;if(!deadline)return;setUndoClock(Date.now());const t=setTimeout(()=>setUndoClock(Date.now()),Math.max(0,deadline-Date.now())+10);return()=>clearTimeout(t);},[data.undo?.operationId,data.undo?.expiresAt]);
- const load=useCallback(async(signal?:AbortSignal)=>{
+ const load=useCallback(async(signal?:AbortSignal,fresh=false)=>{
   const next=scope+':'+(accountId||'guest'),sequence=++loadSequence.current,active=()=>mounted.current&&!signal?.aborted&&scopeKey.current===next&&sequence===loadSequence.current;
   try{if(scopeKey.current!==next){scopeKey.current=next;current.current=blank(scope);setData(current.current);setReady(false);setLoading(true);}identity.current={...credentials(),...(functionalId?{functionalId}:{})};
    if((scope==='private'||scope==='schedule')&&!accountId){accept(blank(scope));setReady(true);setError('');return;}
    const cached=await deviceData.get<OutputType>(String(accountId||'guest'),'cloud:'+scope);if(active()&&cached&&(cached.userId||null)===accountId){accept(cached);setReady(true);setLoading(false);}
    let connect=false;try{connect=scope==='private'&&!!accountId&&sessionStorage.getItem('ion.connect-space')==='yes';}catch{}
-   const value=await postCloud({action:'load',scope,...(accountId?{expectedUserId:accountId}:{}),timeZone:Intl.DateTimeFormat().resolvedOptions().timeZone,account:!!accountId,...identity.current,connect},{signal});
+   const value=!fresh&&!accountId&&(scope==='home'||scope==='chess')?(await publicBootstrap.read(signal))[scope]:await postCloud({action:'load',scope,...(accountId?{expectedUserId:accountId}:{}),timeZone:Intl.DateTimeFormat().resolvedOptions().timeZone,account:!!accountId,...identity.current,connect},{signal});
    if(active()){accept(value);setOffline(false);void deviceData.put(String(accountId||'guest'),'cloud:'+scope,value);if(connect)sessionStorage.removeItem('ion.connect-space');setReady(true);setError('');}
   }catch(e){if(active()){const cached=await deviceData.get<OutputType>(String(accountId||'guest'),'cloud:'+scope);if(cached&&(cached.userId||null)===accountId&&transientFailure(e)){accept(cached);setReady(true);setOffline(true);setError('');}else setError(failureMessage(e));}}finally{if(active())setLoading(false);}
  },[accountId,scope,accept,functionalId]);
  useEffect(()=>{mounted.current=true;if(authLoading)return;const controller=new AbortController();void load(controller.signal);const refresh=()=>{if(document.documentElement.dataset.ionScreenActive!=='false'&&document.visibilityState==='visible'&&!locked.current)void load(controller.signal);};window.addEventListener('focus',refresh);window.addEventListener('online',refresh);window.addEventListener('ion.screen-visibility',refresh);if(scope==='home')window.addEventListener('ion.home-changed',refresh);document.addEventListener('visibilitychange',refresh);return()=>{mounted.current=false;controller.abort();window.removeEventListener('focus',refresh);window.removeEventListener('online',refresh);window.removeEventListener('ion.screen-visibility',refresh);window.removeEventListener('ion.home-changed',refresh);document.removeEventListener('visibilitychange',refresh);};},[load,authLoading]);
- useEffect(()=>{if(authLoading||((scope==='private'||scope==='accounts'||scope==='schedule')&&!accountId))return;const client=new RealtimeClient();let timer:ReturnType<typeof setTimeout>|undefined;const refresh=()=>{clearTimeout(timer);timer=setTimeout(()=>{if(locked.current)refresh();else void load();},250);};const subscriptions=(scope==='home'?[channels.cloud('home',0),channels.cloud('public',0),channels.cloud('chess',0),channels.timeCatalog,...(accountId?[channels.time(accountId)]:[]),...(accountId?[channels.cloud('private',accountId),channels.cloud('accounts',accountId)]:[])]:[channels.cloud(scope,accountId||0),...(scope==='schedule'?[channels.cloud('home',0)]:[]),...(scope==='accounts'&&data.dev?[channels.timeCatalog]:[]),...(scope==='chess'?[channels.timeCatalog,...(accountId?[channels.time(accountId)]:[])]:[])]).map(channel=>client.subscribe(channel,refresh));const off=()=>subscriptions.forEach(unsubscribe=>unsubscribe()),again=client.onReconnect(refresh);void client.connect();return()=>{clearTimeout(timer);off();again();client.close();};},[scope,accountId,authLoading,load,data.dev]);
- // Expiry has no sign-out event. Reconcile only visible dev Accounts pages.
- useEffect(()=>{if(scope!=='accounts'||!data.dev||authLoading)return;const controller=new AbortController();const timer=setInterval(()=>{if(document.documentElement.dataset.ionScreenActive!=='false'&&document.visibilityState==='visible'&&!locked.current)void load(controller.signal);},5000);return()=>{clearInterval(timer);controller.abort();};},[scope,accountId,authLoading,data.dev,load]);
+ useEffect(()=>{if(authLoading||((scope==='private'||scope==='accounts'||scope==='schedule')&&!accountId))return;const client=realtimeLease(accountId);let timer:ReturnType<typeof setTimeout>|undefined;const refresh=(event?:{version?:number;buyers?:number})=>{if(typeof event?.buyers==='number'){if(scope==='accounts'&&data.dev)setData(old=>({...old,signedInUsers:event.buyers}));return;}if(!accountId&&(scope==='home'||scope==='chess'))publicBootstrap.changed(event?.version);clearTimeout(timer);timer=setTimeout(()=>{if(locked.current)refresh();else void load();},250+Math.random()*750);};const subscriptions=(scope==='home'?[channels.cloud('home',0),channels.cloud('public',0),channels.cloud('chess',0),channels.timeCatalog,...(accountId&&visibilityKey===undefined?[channels.time(accountId)]:[]),...(accountId?[channels.cloud('private',accountId),channels.cloud('accounts',accountId)]:[])]:[channels.cloud(scope,accountId||0),...(scope==='schedule'?[channels.cloud('home',0)]:[]),...(scope==='accounts'&&data.dev?[channels.timeCatalog]:[]),...(scope==='chess'?[channels.timeCatalog,...(accountId&&visibilityKey===undefined?[channels.time(accountId)]:[])]:[])]).map(channel=>client.subscribe(channel,refresh));const off=()=>subscriptions.forEach(unsubscribe=>unsubscribe()),again=client.onReconnect(refresh);void client.connect();return()=>{clearTimeout(timer);off();again();client.close();};},[scope,accountId,authLoading,load,data.dev,visibilityKey]);
+ const previousVisibility=useRef<{identity:string;key:string}|null>(null);
+ useEffect(()=>{if(visibilityKey===undefined||!accountId||!['home','chess'].includes(scope))return;const identity=scope+':'+accountId,old=previousVisibility.current;previousVisibility.current={identity,key:visibilityKey};if(old?.identity===identity&&old.key!==visibilityKey)void load();},[scope,accountId,visibilityKey,load]);
+ // Reconcile a known server expiry once, rather than polling every five seconds.
+ useEffect(()=>{if(scope!=='accounts'||!data.dev||authLoading||!data.signedInUsersExpireAt)return;const controller=new AbortController();const timer=setTimeout(()=>{if(document.documentElement.dataset.ionScreenActive!=='false'&&document.visibilityState==='visible'&&!locked.current)void load(controller.signal);},Math.max(1000,Date.parse(data.signedInUsersExpireAt)-Date.now()+100));return()=>{clearTimeout(timer);controller.abort();};},[scope,accountId,authLoading,data.dev,data.signedInUsersExpireAt,load]);
+
  async function mutate(body:NewNode|Record<string,unknown>,kind:'add'|'change'){
   if(!identity.current||!ready||locked.current||scopeKey.current!==scope+':'+(accountId||'guest'))return false;locked.current=true;setBusy(true);setError('');
   try{if(kind==='add'){
@@ -73,5 +77,5 @@ export function useCloudSpace(accountId:number|null=null,authLoading=false,scope
   relocate:(id:string,parentId:string|null,copy:boolean,operationId:string)=>mutate({action:copy?'copy':'move',id,parentId,operationId},'change'),
   transfer:(id:string,targetScope:'public'|'private',targetParent:string,targetVersion:number,copy:boolean,operationId:string)=>mutate({action:'transfer',id,targetScope,targetParent,targetVersion,mode:copy?'copy':'move',operationId},'change'),
   loadTarget:(targetScope:CloudScope)=>postCloud({action:'load',scope:targetScope,...(accountId?{expectedUserId:accountId}:{}),...(identity.current||credentials())}),
-  cancelUpload:()=>uploadController.current?.abort(),retry:load,clearError:()=>setError('')};
+  cancelUpload:()=>uploadController.current?.abort(),retry:load,retryLive:()=>load(undefined,true),clearError:()=>setError('')};
 }

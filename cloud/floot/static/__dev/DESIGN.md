@@ -62,6 +62,16 @@ components:
 ---
 # ION Design System
 
+## 0.69 — Chess as a quiet, social hub
+
+The existing Chess cloud keeps its identity and dev-defined placement. Play, Learn, Community and Library are the core journeys; Continue appears only for the current account's unfinished game. Organic packing, descendant-character sizing, the visible minimum, light default, saved dark first paint and opt-in Tiled UI remain canonical. No marketing dashboard, extra global account button or new brand is introduced. Learn adds an editable first-game guide and a daily link to an existing Gliński lesson. Its day boundary follows the device's local calendar without a server poll; custom dev redirects and names win.
+
+Community uses CloudCanvas for bounded topic/reply previews and PagedText for complete reading. A preview can be brief; the complete post always remains available. Native kit Dialog, Button, Input, Textarea, Switch and PageControls own forms, actions, reading, settings and moderation. Posting preserves an account-scoped draft on failure and never claims success before the server commits. The discussion composer warns that posts are public. Author names never expose a legacy email-shaped display name. New labels, category clouds and guides are editable through existing registered-dev Controls; Manage adds posting pace, pause, capacity limits, reporting and measured return usage.
+
+Motion is brief opacity/position feedback, disabled for reduced motion. Mobile content stays within the visual viewport; regular content has no document scroll. Discussion forms own their text-entry overflow. Boards remain flat and use the existing native cell targets and move indicators. Live connections are shared by mounted features within each document, separately for each signed-in identity. Layout and theme choices do not restart a match or mutate its position.
+
+Community opens as a compact two-dimensional cloud, with the same descendant-only visible sizing floor. Long discussion headings use the existing paged reader; small landscape screens open replies separately. Shared read-model caching, account-scoped drafts/resume, topic-only live updates and sharded room totals keep product motion separate from background accounting. Light remains the default, with the explicit saved dark preference honored from first paint.
+
 ## 0.68 — organic by default, optional Tiled UI and Skies
 
 Organic upright words and pictures are the default again. Accounts contains the functional cloud “Toggle Tiled UI,” using the same persistent per-device preference pattern as appearance. Its pressed state and existing on/off colors communicate the choice. The opt-in tiled mode preserves the complete adjoining rhombus composition, contained affine printing, dev-only planes, descendant-based scale and visible minimum. Both modes retain Inter, actual light/dark tokens, media colors, native board geometry and the pre-paint theme bootstrap.

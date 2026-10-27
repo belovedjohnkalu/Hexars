@@ -52,7 +52,7 @@ function LivePlay({variant}:{variant:VariantId}){
  const mode=new URLSearchParams(location.search).get('mode')==='friend'?'two_players':'engine';
  const rawLevel=new URLSearchParams(location.search).get('level');const value=Number(rawLevel??3),difficulty=Number.isInteger(value)&&value>=0&&value<=5?value:3;
  const {authState}=useAuth(),engineId='universal' as const;
- const cloud=useCloudGame(variant,mode,difficulty,engineId,authState.type==='authenticated'?authState.user.id:null),data=cloud.data,game=data?.game;
+ const cloud=useCloudGame(variant,mode,difficulty,engineId,authState.type==='authenticated'?authState.user.id:null,authState.type!=='loading'),data=cloud.data,game=data?.game;
  const [selected,setSelected]=useState<Hex|null>(null),[promotions,setPromotions]=useState<ChessMove[]>([]),[reset,setReset]=useState(false),[resultOpen,setResultOpen]=useState(false);
  const [forfeit,setForfeit]=useState(false),chatComposing=useRef(false),chatInput=useRef<HTMLInputElement>(null);
  const [capturePath,setCapturePath]=useState<Hex[]>([]);

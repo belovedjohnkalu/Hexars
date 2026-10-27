@@ -7,6 +7,8 @@
 // every room. Keep each channel aligned with its React Query key, e.g.
 //   channels.room(id)   <->   queryKey ["room", id]
 export const channels = {
+  chessRoom:(id:string)=>'chess-room:'+id,
+  chessTopic:(id:string)=>'chess-topic:'+id,
   time:(id:number)=>'time-user:'+id,
   timeCatalog:'time:catalog',
   timeTreasury:'time:treasury',

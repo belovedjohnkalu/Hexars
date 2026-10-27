@@ -115,6 +115,7 @@ async function fetchGame(body: InputType, init?: RequestInit): Promise<OutputTyp
   const response = await fetch("/_api/game", {
     ...init,
     method: "POST",
+    signal:init?.signal?AbortSignal.any([init.signal,AbortSignal.timeout(30000)]):AbortSignal.timeout(30000),
     body: superjson.stringify(schema.parse(body)),
     headers: { "Content-Type": "application/json", ...(init?.headers ?? {}) },
   });
