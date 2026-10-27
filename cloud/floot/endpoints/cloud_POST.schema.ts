@@ -10,11 +10,12 @@ const credentials = { functionalId:z.string().max(100).optional(), expectedUserI
 const parentId = z.string().max(80).nullable();
 const name = z.string().trim().min(1, "Give this cloud a name.");
 const version = z.number().int().nonnegative();
+const dimensions=z.object({width:z.number().int().positive().max(100000),height:z.number().int().positive().max(100000)}).optional();
 export const schema = z.discriminatedUnion("action", [
   z.object({ action: z.literal("load"), connect: z.boolean().optional(), timeZone:z.string().max(100).optional(), ...credentials }),
-  z.object({ action: z.literal("add"), ...credentials, id: z.string().uuid(), parentId, name, version, color:z.custom<CloudColor>(isCloudColor,"Choose a color from the wheel.").optional(), imageType: z.enum(photoTypes).optional(), images:z.array(z.object({id:z.string().uuid(),contentType:z.enum(photoTypes)})).optional() }),
+  z.object({ action: z.literal("add"), ...credentials, id: z.string().uuid(), parentId, name:z.string().trim().default(''), version, color:z.custom<CloudColor>(isCloudColor,"Choose a color from the wheel.").optional(), imageType: z.enum(photoTypes).optional(), images:z.array(z.object({id:z.string().uuid(),contentType:z.enum(photoTypes),dimensions})).optional() }),
   z.object({ action: z.literal("upload"), ...credentials, id: z.string().uuid(), fileId:z.string().uuid().optional(), contentType: z.enum(photoTypes), sizeBytes: z.number().int().positive().max(200*1024*1024) }),
-  z.object({action:z.literal('update'),...credentials,id:z.string().min(1).max(100),name,color:z.custom<CloudColor>(isCloudColor).optional(),note:z.string().nullable().optional(),photoMode:z.enum(['keep','replace','remove']).default('keep'),assetId:z.string().uuid().optional(),images:z.array(z.object({id:z.string().uuid(),contentType:z.enum(photoTypes)})).optional(),version}),
+  z.object({action:z.literal('update'),...credentials,id:z.string().min(1).max(100),name:z.string().trim(),color:z.custom<CloudColor>(isCloudColor).optional(),note:z.string().nullable().optional(),photoMode:z.enum(['keep','replace','remove']).default('keep'),assetId:z.string().uuid().optional(),images:z.array(z.object({id:z.string().uuid(),contentType:z.enum(photoTypes),dimensions})).optional(),retainMedia:z.array(z.number().int().nonnegative()).optional(),version}),
   z.object({ action: z.literal("rename"), ...credentials, id: z.string().min(1).max(80), name, color:z.custom<CloudColor>(isCloudColor,"Choose a color from the wheel.").optional(), version }),
   z.object({action:z.literal('link'),...credentials,id:z.string().min(1).max(80),target:redirectSchema.nullable(),words:z.array(z.number().int().nonnegative()).optional(),version}),
   z.object({ action: z.literal("remove"), ...credentials, id: z.string().min(1).max(80), operationId: z.string().uuid(), expectedCount: z.number().int().nonnegative(), keepChildren: z.boolean().optional(), version }),
@@ -25,10 +26,13 @@ export const schema = z.discriminatedUnion("action", [
 ]).superRefine((input, context) => {
   if(input.action==='upload'&&input.sizeBytes>mediaMaxBytes(input.contentType))context.addIssue({code:'custom',path:['sizeBytes'],message:'File is too large.'});
   if (!("name" in input)) return;
-  const result = cloudNames.schema(input.scope).safeParse(input.name);
+  const mediaOnly=input.action==='add'&&!!(input.images?.length||input.imageType)||input.action==='update';
+  const result = cloudNames.schema(input.scope,mediaOnly).safeParse(input.name);
   if (!result.success) for (const issue of result.error.issues) context.addIssue({ ...issue, path: ["name", ...issue.path] });
 });
 export type CloudNode = {
+  mediaDimensions?:Array<{width:number;height:number}|null>;
+  imageStaticUrls?:string[];
   publishing?:'pending'|'failed';publishError?:string;mediaTypes?:PhotoType[];
   author?:{name:string}; contentEdits?:Array<'name'|'color'|'note'|'images'>;
   homeFeature?:boolean; canHide?:boolean; hiddenFeature?:boolean;

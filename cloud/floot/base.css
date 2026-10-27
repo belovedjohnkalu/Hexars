@@ -126,3 +126,8 @@ html[data-ion-theme=dark] :where([data-composer-dock], [role=dialog]){filter:dro
 :where([role=dialog]){animation:ionSurfaceIn 360ms var(--ease) both;}
 @keyframes ionSurfaceIn{from{opacity:0;translate:0 12px;}to{opacity:1;translate:0 0;}}
 @media(prefers-reduced-motion:reduce){:where([role=dialog]){animation:none;}}
+
+/* 0.71: one indigo board palette and distinct inset-move semantics. */
+:root{--board-light:#d6def3;--board-medium:#9aadd5;--board-dark:#5a74ab;--board-legal:#008967;--board-capture:#c34826;--board-check:#d62d57;--board-selected:#8f6500;--board-last:#8d47db;}
+html[data-ion-theme=dark]{--board-light:#202b4f;--board-medium:#405782;--board-dark:#7a9ac4;--board-legal:#55f1bd;--board-capture:#ffae68;--board-check:#ff6c9a;--board-selected:#ffdf73;--board-last:#d19bff;}
+html[data-ion-editing=true] [data-composer-dock]:not([data-edit-composer]){visibility:hidden;pointer-events:none;}

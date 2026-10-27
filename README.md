@@ -5,6 +5,23 @@ ION is live at **https://ion.floot.app**. The authoritative application is in
 rules/search. The Cloudflare, Supabase and Vercel migration sources are retained
 for development; they do not serve the live app.
 
+## Functionality — 0.71
+
+Editable words open in the footer on double-tap. Pictures retain double-tap
+full-screen viewing; Ctrl/Cmd-click opens Controls. Edits keep chosen media,
+allow verified pictures/audio, preserve the original identity and retain failed
+drafts. Picture-only clouds keep natural proportions without filename captions.
+Drag an editable cloud onto another to nest it; Move remains available in Controls.
+New identical nonempty sibling names are rejected by the server.
+
+The floating arrows now go Up the hierarchy and Down to its last opened droplet.
+Ctrl/Cmd-Left or Right opens a typing-ready Sky; Ctrl/Cmd-Enter publishes and
+enters the confirmed cloud. Skies prints a minimal +. Shared theme-aware colors
+are richer, with indigo boards and distinct move/capture/check/last-move outlines.
+The verified Functionality branch is archived under Prompts → Completed.
+See [release details](docs/releases/ion-0.71.md) and
+[verification](docs/verification/ion-0.71.json).
+
 ## Daily puzzles and organic refinements — 0.70
 
 Learn → Puzzles now offers a daily, rule-validated position for every chess and
@@ -60,8 +77,9 @@ Safari is shared and live. Journal is private to its signed-in account. Hold or
 right-click to open Controls. Dev authority comes from the server’s registered
 dev accounts, never a label or client role. Permanent ILs survive deletion and
 moves; copies receive new identities. Copy IL is available to everyone in
-Safari, and direct IL links are a navigation mechanism. Back/Forward follows
-visited pages. Confirmed content is server-saved; unsent drafts stay local to
+Safari, and direct IL links are a navigation mechanism. Keyboard Back/Forward
+follows visited pages; the floating Up/Down arrows follow the cloud hierarchy.
+Confirmed content is server-saved; unsent drafts stay local to
 the current account. Remembered sign-ins never store passwords in browser storage.
 
 Saved games do not expire automatically. Library supports private History,

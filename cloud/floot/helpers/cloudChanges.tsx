@@ -1,4 +1,5 @@
 import { unusedColor,colorHex } from "./cloudColors";
+import {cloudEditMedia} from './cloudEditMedia';
 import { randomUUID } from "node:crypto";
 import type { CloudNode, InputType } from "../endpoints/cloud_POST.schema";
 type Change = Extract<InputType, {action:"update"|"rename"|"remove"|"restore"|"move"|"copy"|"link"}>;
@@ -27,7 +28,8 @@ function applyAll(nodes:CloudNode[],input:Change,currentVersion:number,seeds:Clo
   }
   if(input.action==='update'){
     if(input.version!==currentVersion)return fail('Your cloud changed. Try again.',409);
-    return nodes.map(n=>n.id===input.id?{...n,name:input.name,...(input.color?{color:input.color}:{}),...(input.note!==undefined?{note:input.note??undefined}:{}),...(n.name!==input.name?{wordRedirect:undefined}:{}),...(input.photoMode!=='keep'?{imageKey:undefined,imageUrl:undefined,imageUrls:undefined,imageKeys:input.photoMode==='replace'?verifiedImages:undefined,isImage:input.photoMode==='replace',mediaTypes:input.photoMode==='replace'?input.images?.map(i=>i.contentType):undefined}:{}),contentEdits:[...new Set([...(n.contentEdits||[]),'name' as const,...(input.color?['color' as const]:[]),...(input.note!==undefined?['note' as const]:[]),...(input.photoMode!=='keep'?['images' as const]:[])])]}:n);
+    const media=cloudEditMedia(node,input,verifiedImages),updated={...node,...media};if(!input.name.trim()&&!updated.isImage&&!updated.imageKey&&!updated.imageKeys?.length&&!updated.imageUrl&&!updated.imageStaticUrls?.length)fail('Add words or media before saving.',422);
+    return nodes.map(n=>n.id===input.id?{...n,name:input.name,...(input.color?{color:input.color}:{}),...(input.note!==undefined?{note:input.note??undefined}:{}),...(n.name!==input.name?{wordRedirect:undefined}:{}),...media,contentEdits:[...new Set([...(n.contentEdits||[]),'name' as const,...(input.color?['color' as const]:[]),...(input.note!==undefined?['note' as const]:[]),...(Object.keys(media).length?['images' as const]:[])])]}:n);
   }
   if(input.action==="rename"&&node.name===input.name&&(!input.color||node.color===input.color))return nodes;
   if(input.action==="move"&&node.parentId===input.parentId)return nodes;

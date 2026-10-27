@@ -43,7 +43,7 @@ export function pageKeyTarget(event:KeyboardEvent){
  const target=event.target instanceof Element?event.target:null;
  if(target?.closest('[role="dialog"],[role="alertdialog"],[role="menu"],[role="listbox"],[role="combobox"],[role="slider"],[role="spinbutton"],[role="tablist"],[data-cell],[data-no-navigation-keys]'))return false;
  const editor=target?.closest('input,textarea,select,[contenteditable]:not([contenteditable="false"]),[role="textbox"]');
- return !editor||editor instanceof HTMLInputElement&&editor.matches('[data-cloud-input]')&&editor.value===''&&!editor.readOnly&&!editor.disabled;
+ return !editor||editor instanceof HTMLInputElement&&editor.matches('[data-cloud-input]')&&(editor.value===''||(event.ctrlKey||event.metaKey)&&/^Arrow(Left|Right)$/.test(event.key))&&!editor.readOnly&&!editor.disabled;
 }
 export function pageKey(event:KeyboardEvent){return !event.ctrlKey&&!event.metaKey&&pageKeyTarget(event)&&['ArrowUp','ArrowDown'].includes(event.key)?event.key==='ArrowUp'?1:-1:0;}
 export function isPagePane(){try{return window.parent!==window&&window.name.startsWith('ion-page-')&&window.parent.location.origin===window.location.origin;}catch{return false;}}

@@ -23,7 +23,7 @@ function CloudNodeControls({nodes,onFeedback,className=''}:{nodes:CloudNode[];on
  const {authState}=useAuth(),uid=authState.type==='authenticated'?authState.user.id:null,space=useCloudSpace(uid,authState.type==='loading',source,params.get('functional')||undefined),original=space.nodes.find(n=>n.id===selectedId),node=original?layoutCloud(original,tiled):undefined,[mode,setMode]=useState<'rename'|'move'|'copy'|'remove'|null>(null),[linking,setLinking]=useState(false),[viewer,setViewer]=useState(false),[clipboard,setClipboard]=useState(false),[copyingText,setCopyingText]=useState(false);
  const [featureDialog,setFeatureDialog]=useState(false),[featureBusy,setFeatureBusy]=useState(false),[featureError,setFeatureError]=useState('');
  const dev=space.dev===true&&space.userId===uid;
- const allowed=(n:CloudNode)=>!!n.control&&!!node&&(n.control==='copy-text'?true:n.control==='copy-il'?(dev||source==='public')&&!!node.identifier:n.control==='view-photos'?cloudPhotoUrls(node).length>0:n.control==='copy'?!!node.canCopy:n.control==='remove'&&node.id==='home-hidden-features'?false:n.control==='remove'&&node.canHide?true:!!node.canEdit);
+ const allowed=(n:CloudNode)=>!!n.control&&!!node&&(n.control==='copy-text'?!!node.name.trim():n.control==='copy-il'?(dev||source==='public')&&!!node.identifier:n.control==='view-photos'?cloudPhotoUrls(node).length>0:n.control==='copy'?!!node.canCopy:n.control==='remove'&&node.id==='home-hidden-features'?false:n.control==='remove'&&node.canHide?true:!!node.canEdit);
  const visible=nodes.filter(n=>n.id!=='page-tiles').filter(n=>n.parentId!=='controls'||(selectedId?allowed(n):!n.control)).map(n=>n.control==='remove'&&node?.hiddenFeature?{...n,name:'Restore'}:n);
  async function changeFeature(){if(!node?.canHide||featureBusy)return;setFeatureBusy(true);setFeatureError('');try{await postFeatures({action:node.hiddenFeature?'restore':'hide',id:node.id});const lastRestore=node.hiddenFeature&&!space.nodes.some(n=>n.id!==node.id&&n.hiddenFeature&&n.parentId==='home-hidden-features');const fromHidden=new URL(origin,'https://ion.floot.app').searchParams.get('cloud')==='home-hidden-features';done(node.hiddenFeature?'Restored':'Removed from Home',lastRestore&&fromHidden?'/':origin);}catch(e){setFeatureError(e instanceof Error?e.message:'Try again.');}finally{setFeatureBusy(false);}}
  const hasActions=visible.some(n=>n.parentId==='controls');
@@ -31,10 +31,11 @@ function CloudNodeControls({nodes,onFeedback,className=''}:{nodes:CloudNode[];on
  async function command(n:CloudNode){if(!node||!allowed(n))return;
   if(n.control==='remove'&&node.canHide){if(node.hiddenFeature)await changeFeature();else setFeatureDialog(true);return;}
   if(n.control==='copy-text'){setCopyingText(true);try{await navigator.clipboard.writeText(node.name);onFeedback('Copied');}catch{setClipboard(true);}return;}
+  if(n.control==='rename'){navigate(origin,{state:{restoreCamera:true,editCloud:{id:node.id,scope:source,functional:params.get('functional')||undefined}}});return;}
   if(n.control==='link'){setLinking(true);return;}
   if(n.control==='view-photos'){setViewer(true);return;}
   if(n.control==='copy-il'){setCopyingText(false);try{await navigator.clipboard.writeText(node.identifier!);onFeedback('IL copied');}catch{setClipboard(true);}return;}
-  if(n.control==='rename'||n.control==='move'||n.control==='copy'||n.control==='remove')setMode(n.control);
+  if(n.control==='move'||n.control==='copy'||n.control==='remove')setMode(n.control);
  }
  return <div className={styles.page+' '+className}>
  {selectedId&&node&&<p className={styles.selection}><span className={styles.selectionName} title={node.name}>{node.name}</span>{node.author&&<span className={styles.author}>By {node.author.name}</span>}</p>}

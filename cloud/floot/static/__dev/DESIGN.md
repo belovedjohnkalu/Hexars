@@ -3,19 +3,19 @@ version: alpha
 name: ION
 description: A quiet iPhone-inspired space where words and pictures open into clouds.
 colors:
-  background: "#000000"
-  foreground: "#f5f5f7"
-  surface: "#111111"
-  primary: "#eeeeef"
-  muted: "#a1a1a6"
-  error: "#ff8176"
-  wordBlue: "#7bb3ff"
-  wordCyan: "#70dce2"
-  wordMint: "#a5dba7"
-  wordAmber: "#f5d17c"
-  wordCoral: "#ffa78b"
-  wordRose: "#f6a4d5"
-  wordLavender: "#c5a1ff"
+  background: "#fafaf9"
+  foreground: "#17191d"
+  surface: "#f0f0ee"
+  primary: "#22252a"
+  muted: "#60656d"
+  error: "#b64236"
+  wordBlue: "#285989"
+  wordCyan: "#17646c"
+  wordMint: "#346442"
+  wordAmber: "#815c16"
+  wordCoral: "#925036"
+  wordRose: "#974b74"
+  wordLavender: "#694591"
 typography:
   sans:
     fontFamily: "Inter, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif"
@@ -363,3 +363,16 @@ Dark retains its near-black base, flat blue boards and Inter, with richer semant
 A server-confirmed purchase projects ownership for navigation immediately, then refreshes authoritative Time. The selected cloud opens; purchase records live under Time → Receipts, filtered on the server to this account’s outgoing purchases. Ledger, transfer records and permanent birth ILs are not rewritten. Failed confirmation retains its quote and idempotent request identity.
 
 Learn → Puzzles uses canonical native board rendering and shared CloudCanvas actions. Each variant receives a 64-position daily rotation, selected by account-local date with DST-aware midnight refresh. Chess uses mate-in-one, Wellisch its historical army takeover, HexDame promotion and Kruzno a win. All composed positions and accepted continuations are generated and verified against authoritative rules before shipment. Server-only banks prevent per-view native searches. Hint selects a starting piece; Again practices without rewriting first-solve statistics. Signed-in progress is private, versioned, idempotent and account-realtime; guest progress is device-local. No puzzle wallet reward or public completion fanout exists. Paid variants retain server entitlement checks. New functional clouds receive permanent server ILs and normal dev label editing.
+
+
+## 0.71 — direct cloud manipulation and media editing
+
+The canonical runtime remains base.css (Model B). Frontmatter now mirrors its accepted light-default tokens; earlier black-only descriptions are historical, superseded by the established light/dark switch. Inter and the no-document-scroll canvas remain. This resolves existing documentation drift rather than changing the default again. cloudColors owns one saturated continuous spectrum, projected to actual #fafaf9/#08090b background contrast; CloudColorWheel supplies that same spectrum to the shared Slider through --word-spectrum. Light and dark names, the thumb and the track therefore agree. Saved colors retain their underlying RGB values.
+
+Board Games now uses a shared indigo/slate palette through --board-light/medium/dark. --board-legal/capture/check/selected/last are distinct semantic roles, consumed by the common chess/checkers board and rules diagrams. Complete-cell hitboxes and the flat board remain; previous moves retain a dashed inset outline. Media and pieces are not inverted.
+
+Hold/Ctrl/Cmd-click keeps Controls. Editable words gain a deliberate double-tap and F2 shortcut to the canonical footer editor. Pictures keep double-tap fullscreen viewing. The footer edits words and media together, always shows the color wheel, contains retained/new media above the entry field and uses the existing Cancel/Save primitives. Retained media is paged without document scrolling. It preserves the original IL, original notes and failed drafts; Escape/Cancel can confirm discarding changed content. Portrait and landscape pictures reserve their real ratio within their descendant-scaled footprint; unlabeled picture-only clouds do not invent a filename caption.
+
+Cloud dragging follows the pointer without re-rendering the full collection on each frame. A visible ring identifies a valid drop cloud. Drop commits the existing authorized, versioned Move operation; failure restores the starting placement. Descendants, locked destinations and read-only words are not valid moves. Move in Controls remains the non-drag alternative.
+
+The visible navigation bubble now uses Up/Down: actual hierarchy ascent and the previously opened direct droplet, isolated per account, Sky and screen. Keyboard visited-page history remains separately owned by HistoryKeys/paneNavigation. Ctrl/Cmd Left or Right creates a fresh Sky, starting in Journal for a signed-in account and Safari for a guest; typing is immediately available where permitted. Skies prints + for the default New Sky action, with its accessible name and permanent functional identity retained. Ctrl/Cmd Enter publishes synchronously and enters only after server confirmation; ordinary Add retains its existing account-bound outbox behavior. Existing drafts, split views and dev-edited labels remain.

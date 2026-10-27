@@ -1,6 +1,6 @@
 import { cloudPhotoMaxBytes } from './cloudPhotoMaxBytes';
 import type { CloudNode } from '../endpoints/cloud_POST.schema';
-export type CloudPhotoDraft={id:string;file:File;uploaded?:boolean;uploadedFor?:string};
+export type CloudPhotoDraft={id:string;file:File;uploaded?:boolean;uploadedFor?:string;dimensions?:{width:number;height:number}};
 export const imageTypes=['image/png','image/jpeg','image/webp','image/gif'] as const;
 export const photoTypes=[...imageTypes,'video/mp4','video/quicktime','video/webm','audio/mpeg','audio/mp4','audio/x-m4a','audio/ogg','audio/wav','audio/x-wav','audio/webm'] as const;
 export type PhotoType=typeof photoTypes[number];

@@ -223,7 +223,7 @@ export function CloudBoard({
                     <polygon
                       points={inset}
                       fill="none"
-                      stroke="#ffc566"
+                      stroke="var(--board-capture)"
                       strokeWidth={3}
                       strokeDasharray="4 7"
                     />

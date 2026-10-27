@@ -4,14 +4,14 @@ export type CloudColor=typeof cloudColors[number]|`#${string}`;
 const legacy:Record<typeof cloudColors[number],string>={white:'#f5f5f7',blue:'#7bb3ff',cyan:'#70dce2',mint:'#a5dba7',amber:'#f5d17c',coral:'#ffa78b',rose:'#f6a4d5',lavender:'#c5a1ff'};
 export const isCloudColor=(value:unknown):value is CloudColor=>typeof value==='string'&&(/^[#][0-9a-f]{6}$/i.test(value)||Object.hasOwn(legacy,value));
 export const colorHex=(color?:CloudColor):string=>color&&/^[#][0-9a-f]{6}$/i.test(color)?color.toLowerCase():legacy[color as keyof typeof legacy]||legacy.white;
-export function accessibleCloudHex(hex:string,dark=false){const rgb=[1,3,5].map(i=>parseInt(hex.slice(i,i+2),16)),lum=(channels:number[])=>channels.map(v=>v/255).map(v=>v<=.04045?v/12.92:((v+.055)/1.055)**2.4).reduce((n,v,i)=>n+v*[.2126,.7152,.0722][i],0),background=dark?.008:.65,contrast=(l:number)=>dark?(l+.05)/(background+.05):(background+.05)/(l+.05);let current=rgb;for(let step=0;step<60&&contrast(lum(current))<4.6;step++)current=current.map(v=>dark?v+(255-v)*.08:v*.93);return '#'+current.map(v=>Math.round(v).toString(16).padStart(2,'0')).join('');}
+export function accessibleCloudHex(hex:string,dark=false){const rgb=[1,3,5].map(i=>parseInt(hex.slice(i,i+2),16)),lum=(channels:number[])=>channels.map(v=>v/255).map(v=>v<=.04045?v/12.92:((v+.055)/1.055)**2.4).reduce((n,v,i)=>n+v*[.2126,.7152,.0722][i],0),background=lum(dark?[8,9,11]:[250,250,249]),contrast=(l:number)=>dark?(l+.05)/(background+.05):(background+.05)/(l+.05);let current=rgb;for(let step=0;step<80&&contrast(lum(current))<4.6;step++)current=current.map(v=>dark?v+(255-v)*.045:v*.95);return '#'+current.map(v=>Math.round(v).toString(16).padStart(2,'0')).join('');}
 export const colorValue=(color?:CloudColor)=>color&&!color.startsWith('#')?'var(--word-'+color+')':!color?'var(--word-white)':'light-dark('+accessibleCloudHex(colorHex(color))+','+accessibleCloudHex(colorHex(color),true)+')';
 export const colorName=(color:CloudColor)=>color.startsWith('#')?color.toUpperCase():color[0].toUpperCase()+color.slice(1);
 const toHex=(rgb:number[]):CloudColor=>('#'+rgb.map(v=>Math.round(v).toString(16).padStart(2,'0')).join('')) as CloudColor;
 export function spectrumColor(hue:number):CloudColor{
- const h=((hue%360)+360)%360/60,c=.82*(1-Math.abs(2*.73-1)),x=c*(1-Math.abs(h%2-1)),m=.73-c/2;
+ const h=((hue%360)+360)%360/60,c=.92*(1-Math.abs(2*.56-1)),x=c*(1-Math.abs(h%2-1)),m=.56-c/2;
  const rgb=h<1?[c,x,0]:h<2?[x,c,0]:h<3?[0,c,x]:h<4?[0,x,c]:h<5?[x,0,c]:[c,0,x];
- return toHex(rgb.map(v=>(v+m)*255));
+ return accessibleCloudHex(toHex(rgb.map(v=>(v+m)*255)),true) as CloudColor;
 }
 export function colorHue(color:CloudColor):number{
  const hex=colorHex(color),[r,g,b]=[1,3,5].map(i=>parseInt(hex.slice(i,i+2),16)/255),max=Math.max(r,g,b),min=Math.min(r,g,b),d=max-min;

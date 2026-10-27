@@ -37,3 +37,5 @@
 
 @media(pointer:coarse){.wrap{padding-bottom:max(12px,env(safe-area-inset-bottom,0px));}}
 .extras{position:relative;bottom:auto;margin-bottom:4px;}
+
+.savedMedia{display:flex;flex-wrap:wrap;gap:6px;padding:5px 10px;max-width:100%;}.savedFile{display:flex;align-items:center;gap:3px;min-width:0;background:var(--surface);border-radius:10px;padding:3px;color:var(--muted-foreground);font-size:12px;}.savedFile img{display:block;width:80px;height:62px;object-fit:contain;border-radius:6px;}.savedFile button{width:32px;height:32px;min-width:32px;}

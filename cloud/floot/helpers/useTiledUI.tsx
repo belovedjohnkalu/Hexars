@@ -14,6 +14,6 @@ const organicWords={collection:'Skies',unit:'Sky',unitLower:'sky',partition:'Scr
 export function layoutWords(tiled:boolean){return tiled?tiledWords:organicWords;}
 export function layoutCloud(node:CloudNode,tiled:boolean):CloudNode{
  if(tiled)return node;
- const defaults:Record<string,[string,string]>={'page-tiles':['Tiles','Skies'],'page-tile-new':['New Tile','New Sky']},names=defaults[node.id];
+ const defaults:Record<string,[string,string]>={'page-tiles':['Tiles','Skies'],'page-tile-new':['New Tile','+']},names=defaults[node.id];
  return names&&node.name===names[0]?{...node,name:names[1]}:node;
 }

@@ -17,6 +17,6 @@ export function requestPageAction(detail:PageAction){if(isPagePane())window.pare
 export function pageKeyboardAction(event:KeyboardEvent,multiple:boolean):PageAction|null{
  if(!/^Arrow(Left|Right|Up|Down)$/.test(event.key))return null;
  const direction=event.key.slice(5).toLowerCase() as PageDirection;
- if(event.ctrlKey||event.metaKey)return{action:'tile-direction',direction};
+ if(event.ctrlKey||event.metaKey)return direction==='left'||direction==='right'?{action:'new-tile'}:{action:'tile-direction',direction};
  return multiple&&(direction==='left'||direction==='right')?{action:'focus',direction}:null;
 }

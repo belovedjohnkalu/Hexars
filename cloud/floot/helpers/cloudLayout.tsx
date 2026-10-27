@@ -3,7 +3,7 @@ import {mosaicCloudLayout} from './mosaicCloudLayout';
 import type {RhombusFace} from './rhombusMosaic';
 import { cloudTextLines } from './cloudText';
 import { identifierFootprint } from "./cloudIdentifiers";
-type Item={id:string;name:string;identifier?:string;imageUrl?:string;isImage?:boolean;percent:number;characters?:number;publishing?:string;annotation?:boolean};
+type Item={id:string;name:string;identifier?:string;imageUrl?:string;isImage?:boolean;percent:number;characters?:number;publishing?:string;annotation?:boolean;mediaAspect?:number};
 export type Rect={x:number;y:number;width:number;height:number};
 export type CloudLayout={width:number;height:number;maxZoom?:number;minFitZoom?:number;decorations?:RhombusFace[];items:Array<Rect&{id:string;fontSize:number;printScale?:number;visualFontSize?:number;pictureSize?:number;captionSize?:number;gridSlot?:number;lines?:string[];rhombus?:RhombusFace;content?:Rect}>};
 export function cloudLayout(items:Item[],width:number,height:number,measure:(text:string,size:number)=>number,options:{rhombi?:boolean;proportional?:boolean;anchors?:Record<string,{x:number;y:number}>;organic?:boolean;square?:boolean;boardGrid?:boolean;columns?:number;compact?:boolean;minTargetSize?:number;maxFontSize?:number;labelMaxWidth?:number;previous?:CloudLayout}={}):CloudLayout{
@@ -21,7 +21,8 @@ export function cloudLayout(items:Item[],width:number,height:number,measure:(tex
     const picture=proportions?144*relative.get(item.id)!:options.organic?(narrow?82:110)+percent*.65+(item.characters===undefined?0:4*item.characters/(item.characters+80)):(narrow?105:135)+item.percent*.25,captionSize=proportions?fontSize:options.organic?14+percent*.09+(item.characters===undefined?0:2*item.characters/(item.characters+80)):16,isPicture=item.isImage||item.imageUrl;
     const labelSize=isPicture?captionSize:fontSize,lines=cloudTextLines(item.name,options.labelMaxWidth?{width:Math.max(120,options.labelMaxWidth-identifier.width),measure:text=>measure(text,labelSize)}:undefined);
     const labelWidth=Math.max(...lines.map(line=>measure(line,isPicture?captionSize:fontSize)))+(options.organic?12:24)+identifier.width;
-    return {id:item.id,fontSize,lines,width:Math.max(64,options.minTargetSize??0,labelWidth,isPicture?picture+24:0),height:Math.max(options.minTargetSize??0,isPicture?picture+Math.max(lines.length*captionSize*1.3,identifier.height)+(options.organic?20:32):Math.max(lines.length*fontSize*1.18,identifier.height)+(options.organic?12:20))+(item.publishing?26:0)+(item.annotation?20:0),...(isPicture?{pictureSize:picture,captionSize}:{})};
+    const aspect=item.mediaAspect||1,pictureWidth=aspect<1?picture*aspect:picture,pictureHeight=aspect>1?picture/aspect:picture;
+    return {id:item.id,fontSize,lines,width:Math.max(64,options.minTargetSize??0,labelWidth,isPicture?pictureWidth+24:0),height:Math.max(options.minTargetSize??0,isPicture?pictureHeight+Math.max(lines.length*captionSize*1.3,identifier.height)+(options.organic?20:32):Math.max(lines.length*fontSize*1.18,identifier.height)+(options.organic?12:20))+(item.publishing?26:0)+(item.annotation?20:0),...(isPicture?{pictureSize:picture,captionSize}:{})};
   });
   const limits=options.organic&&measured.length?{maxZoom:proportions?.maxZoom??3,minFitZoom:14/Math.min(...measured.map(n=>n.captionSize??n.fontSize))}:{};
   if(options.organic&&measured.length>1)width=Math.max(width,Math.max(...measured.map(n=>n.width))*2.2+32,options.square?Math.max(...measured.map(n=>n.height))*1.15:0,Math.sqrt(measured.reduce((sum,n)=>sum+(n.width+gap)*(n.height+gap),0))*1.5);

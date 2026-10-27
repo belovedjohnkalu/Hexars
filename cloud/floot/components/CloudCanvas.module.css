@@ -61,3 +61,10 @@
 :global(html[data-ion-theme="dark"]) .node:hover .text,:global(html[data-ion-theme="dark"]) .node:focus-visible .text{text-shadow:0 0 14px color-mix(in srgb,currentColor 40%,transparent),0 0 38px color-mix(in srgb,currentColor 24%,transparent);}
 .node [data-printed-plane]{transition:transform 420ms var(--ease),opacity 220ms ease;}
 @media(prefers-reduced-motion:reduce){.viewport[data-layout="organic"] .node.node,.node [data-printed-plane]{transition:none;}}
+
+.node[data-dragging=true]{z-index:15!important;transition:none!important;opacity:.8;cursor:grabbing;filter:drop-shadow(0 8px 15px #0004);}.node[data-drop-target=true]{outline:3px solid var(--word-mint);outline-offset:6px;border-radius:12px;filter:drop-shadow(0 0 18px color-mix(in srgb,var(--word-mint) 35%,transparent));}
+.srOnly{position:absolute;width:1px;height:1px;clip-path:inset(50%);overflow:hidden;white-space:nowrap;}
+
+/* Captured pointer events still arrive; descendants must leave drag hit testing. */
+.node[data-dragging=true],.node[data-dragging=true] *{pointer-events:none!important;}
+.node[data-drop-target=true] [data-rhombus-shape]{stroke:var(--word-mint);stroke-width:4;}

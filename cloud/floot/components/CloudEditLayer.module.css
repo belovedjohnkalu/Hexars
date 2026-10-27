@@ -1,0 +1,6 @@
+.layer{position:fixed;left:0;width:100%;z-index:25;pointer-events:none;display:flex;align-items:flex-end;}
+.footer{width:100%;pointer-events:auto;padding-top:12px;background:linear-gradient(transparent,var(--background) 22%);}
+.title{text-align:center;color:var(--muted-foreground);font-size:13px;margin:0 0 8px;}
+.message{display:flex;align-items:center;justify-content:center;gap:12px;margin:0 20px 36px;color:var(--muted-foreground);}
+.error{color:var(--error);text-align:center;font-size:14px;max-width:640px;margin:0 auto 16px;padding-inline:18px;}
+@media(prefers-reduced-motion:no-preference){.footer{animation:editorIn 240ms var(--ease) both;}@keyframes editorIn{from{opacity:0;translate:0 10px;}to{opacity:1;translate:0;}}}

@@ -14,6 +14,7 @@ import { featureClouds } from './featureClouds';
 import { functionClouds } from './functionClouds';
 import { functionIdentifiers } from './functionIdentifiers';
 import { assertCloudWordLimits } from './cloudWordLimits';
+import {uniqueCloudNames} from './uniqueCloudNames';
 import { timeLedger } from './timeLedger';
 import { accountDeviceNodes } from './accountDeviceNodes';
 import { namespaceIdentifier } from './cloudIdentifiers';
@@ -88,9 +89,9 @@ export async function cloudService(request: Request,guestCatalog?:Pick<Awaited<R
         }
         if(input.images?.length){
           const keys=await mapPhotos(input.images,image=>validateCloudPhoto("ion/"+row.id+"/"+context.userId+"/"+input.id+"/"+image.id+"."+extensions[image.contentType],image.contentType));
-          node.imageKeys=keys;node.mediaTypes=input.images.map(i=>i.contentType);
+          node.imageKeys=keys;node.mediaTypes=input.images.map(i=>i.contentType);node.mediaDimensions=input.images.map(i=>i.dimensions||null);node.isImage=true;
         }
-        assertCloudWordLimits(all,[...all,node],input.scope);
+        uniqueCloudNames(all,[...all,node]);assertCloudWordLimits(all,[...all,node],input.scope);
         assertCloudCapacity([...context.seeds,...nodes],[...context.seeds,...nodes,node]);
         nodes = [...nodes, node];
         const updated = await db.updateTable("ionWorkspaces").set({ nodes: nodes as unknown as Json, version: row.version + 1, updatedAt: new Date() })
@@ -123,7 +124,7 @@ export async function cloudService(request: Request,guestCatalog?:Pick<Awaited<R
       let next=cloudChanges.apply(nodes,input,row.version,context.seeds,verifiedImages);
       if(input.action==='copy')next=next.map(n=>n.copyOperation===input.operationId?{...n,createdBy:context.userId!}:n);
       if(next!==nodes){
-        assertCloudWordLimits([...context.seeds,...nodes],[...context.seeds,...next],input.scope);
+        uniqueCloudNames([...context.seeds,...nodes],[...context.seeds,...next]);assertCloudWordLimits([...context.seeds,...nodes],[...context.seeds,...next],input.scope);
         assertCloudCapacity([...context.seeds,...nodes],[...context.seeds,...next]);
         const updated=(input.action==='rename'||input.action==='update')&&(input.scope==='home'||input.scope==='chess')&&input.id==='hexagonal-chess'?await saveSharedRootName(row.id,row.version,next):await db.updateTable("ionWorkspaces").set({nodes:next as unknown as Json,version:row.version+1,updatedAt:new Date()}).where("id","=",row.id).where("version","=",row.version).returning("version").executeTakeFirst();
         if(!updated)throw new CloudError("Your cloud changed. Try again.",409);
@@ -145,9 +146,9 @@ export async function cloudService(request: Request,guestCatalog?:Pick<Awaited<R
     let visible:CloudNode[] = await Promise.all(withAuthors.filter(n=>!isRetiredGameCloud(n.id)&&!n.removedBy&&n.id!=='time-balance'&&(context.isDev||!['time-treasury','time-estimates'].includes(n.id))&&(context.scope!=='accounts'||n.id!=='account-remember'||context.seeds.some(seed=>seed.id==='account-remember'))).map(async node => {
       const visibleNode={...node,...(['time-added','time-spent','time-remaining'].includes(node.id)?{parentId:'time-activity'}:{}),...(node.id==='control-link'&&node.name==='Link'?{name:'Redirect'}:{}),identifier:functional?.[node.id]??(context.isDev||input.scope==='public'?namespaceIdentifier(identifiers?.get(node.id)?.label,Number((input.scope==='private'&&node.id==='private'||input.scope==='accounts'&&context.seeds.some(s=>s.id===node.id))?context.devNumber:identifiers?.get(node.id)?.devNumber??context.devNumber)):undefined),createdBy:undefined,canEdit:cloudPolicy.edit(input.scope,node,context.userId,context.owner),canCopy:!(input.scope==='schedule'&&context.seeds.some(seed=>seed.id===node.id))&&!!context.userId&&cloudPolicy.writable(input.scope,context.userId,context.owner)&&(context.owner||!cloudTree.roots.some(r=>r.id===node.id))};
       const keys=node.imageKeys?.length?node.imageKeys:node.imageKey?[node.imageKey]:[];
-      if(!keys.length)return visibleNode;
+      if(!keys.length)return node.imageStaticUrls?.length?{...visibleNode,imageStaticUrls:undefined,imageUrl:node.imageStaticUrls[0],imageUrls:node.imageStaticUrls}:visibleNode;
       const urls=await Promise.all(keys.map(async filename=>{const result=await getUrl({visibility:'private',filename,expiresInSeconds:3600});return result.ok?result.url:'';}));
-      return {...visibleNode,isImage:true,imageKey:undefined,imageKeys:undefined,imageUrl:urls[0],imageUrls:urls};
+      const allUrls=[...(node.imageStaticUrls||[]),...urls];return {...visibleNode,isImage:true,imageKey:undefined,imageKeys:undefined,imageStaticUrls:undefined,imageUrl:allUrls[0],imageUrls:allUrls};
     }));
     const roomSizes=input.scope==='chess'||input.scope==='home'?await communitySizing.read(context.userId):new Map<string,number>();
     if(input.scope==='chess')visible=communitySizing.apply(visible,roomSizes);

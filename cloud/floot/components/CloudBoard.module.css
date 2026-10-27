@@ -6,13 +6,13 @@
 .cell[aria-disabled="true"] { cursor: default; }
 .hex { transition: fill 200ms ease; }
 .indicator { animation: fadeIn 180ms var(--ease) both; }
-.indicatorColour { stroke: var(--primary); stroke-width: 3; }
-.indicator[data-indicator="capture"] .indicatorColour { stroke: #ffc566; }
+.indicatorColour { stroke: var(--board-legal); stroke-width: 3; }
+.indicator[data-indicator="capture"] .indicatorColour { stroke: var(--board-capture); }
 .indicator[data-indicator="check"] .indicatorColour,
 .indicator[data-indicator="check-move"] .indicatorColour,
-.indicator[data-indicator="capture-check"] .indicatorColour { stroke: #ff8176; }
-.indicator[data-indicator="selected"] .indicatorColour { stroke: #ffffff; }
-.indicator[data-indicator="last-move"] .indicatorColour { stroke: var(--word-lavender); stroke-width: 3.5; opacity: 1; }
+.indicator[data-indicator="capture-check"] .indicatorColour { stroke: var(--board-check); }
+.indicator[data-indicator="selected"] .indicatorColour { stroke: var(--board-selected); }
+.indicator[data-indicator="last-move"] .indicatorColour { stroke: var(--board-last); stroke-width: 3.5; opacity: 1; }
 .keyboardRing { opacity: 0; transition: opacity 120ms ease; }
 .cell:focus-visible .keyboardRing { opacity: 1; }
 .piecePosition { transition: transform 220ms cubic-bezier(.22,1,.36,1); }

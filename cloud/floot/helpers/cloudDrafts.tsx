@@ -1,6 +1,6 @@
 import type { CloudColor } from "./cloudColors";
 import type { CloudPhotoDraft } from './cloudPhotos';
-type Draft={name:string;file?:File;photos?:CloudPhotoDraft[];color?:CloudColor};
+type Draft={name:string;file?:File;photos?:CloudPhotoDraft[];color?:CloudColor;retainMedia?:number[]};
 const cache=new Map<string,Draft>();
 const storageKey="ion.word-drafts.v1";
 function read():Record<string,string>{try{const value=JSON.parse(sessionStorage.getItem(storageKey)||"{}");if(!value||typeof value!=="object"||Array.isArray(value))return {};return Object.fromEntries(Object.entries(value).filter(([,name])=>typeof name==="string")) as Record<string,string>;}catch{return {};}}
