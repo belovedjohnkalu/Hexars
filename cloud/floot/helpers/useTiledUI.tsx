@@ -10,7 +10,7 @@ export function toggleTiledUI(){setTiledUI(!readTiledUI());}
 export function useTiledUI(){return useSyncExternalStore(subscribe,readTiledUI,()=>false);}
 export function LayoutSync(){const tiled=useTiledUI();useLayoutEffect(()=>{document.documentElement.dataset.ionLayout=readTiledUI()?'tiled':'organic';},[tiled]);return null;}
 const tiledWords={collection:'Tiles',unit:'Tile',unitLower:'tile',partition:'Partition',partitionLower:'partition',partitions:'Partitions'} as const;
-const organicWords={collection:'Skies',unit:'Sky',unitLower:'sky',partition:'Screen',partitionLower:'screen',partitions:'Screens'} as const;
+const organicWords={collection:'Skies',unit:'Sky',unitLower:'sky',partition:'Bubble',partitionLower:'bubble',partitions:'Bubbles'} as const;
 export function layoutWords(tiled:boolean){return tiled?tiledWords:organicWords;}
 export function layoutCloud(node:CloudNode,tiled:boolean):CloudNode{
  if(tiled)return node;

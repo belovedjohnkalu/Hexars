@@ -1,5 +1,23 @@
 # ION interaction contract
 
+## 0.72 — Frontend overrides
+
+CloudCanvas/cloudLayout and PageTiles own a compact axial-ring arrangement;
+wholeTileMosaic targets a hexagonal footprint while preserving joined, non-overlapping
+faces. Eight complete words per line, descendant-based sizing, a readable minimum,
+stored positions and pan/zoom remain. Layout/camera keys are versioned for the
+new geometry. Dev and non-dev tiled views share invisible decorative borders;
+keyboard focus and drop targets remain visible. Tiled interface edges are square.
+
+useAppearance/AppHead own a light-only pre-paint and chrome, clearing old dark
+preferences without altering user data. The old dark setting is retired from
+cloud responses but retains its IL and stored record. CloudColorWheel remains a
+keyboard/touch-accessible slider below the input, preserves focus and manual
+override, and uses the readable light palette. Random color defaults on, while an
+explicit saved off choice remains respected. Only known stock Home images get a
+light filter; custom media and board pieces are unchanged. Organic partitions are
+Bubbles; down-arrow closes the focused Bubble with existing draft checks.
+
 ## 0.69 — Chess hub, public reads and community
 
 Canonical owners: CloudCanvas/cloudLayout own organic and tiled navigation; chessHubClouds owns new seed identities; CloudExplorer remains the route and registered-dev edit entry point; gameSessions/useChessResume own account-scoped Continue; CommunitySpace/useCommunity/communityStore own discussions; canonical Dialog/Input/Textarea/Button/Switch/PageControls/PagedText own interaction and reading. Existing home, board, Time and Library authorities are retained.

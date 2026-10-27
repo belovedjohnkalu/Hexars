@@ -9,9 +9,9 @@ export const colorValue=(color?:CloudColor)=>color&&!color.startsWith('#')?'var(
 export const colorName=(color:CloudColor)=>color.startsWith('#')?color.toUpperCase():color[0].toUpperCase()+color.slice(1);
 const toHex=(rgb:number[]):CloudColor=>('#'+rgb.map(v=>Math.round(v).toString(16).padStart(2,'0')).join('')) as CloudColor;
 export function spectrumColor(hue:number):CloudColor{
- const h=((hue%360)+360)%360/60,c=.92*(1-Math.abs(2*.56-1)),x=c*(1-Math.abs(h%2-1)),m=.56-c/2;
+ const h=((hue%360)+360)%360/60,c=.84*(1-Math.abs(2*.46-1)),x=c*(1-Math.abs(h%2-1)),m=.46-c/2;
  const rgb=h<1?[c,x,0]:h<2?[x,c,0]:h<3?[0,c,x]:h<4?[0,x,c]:h<5?[x,0,c]:[c,0,x];
- return accessibleCloudHex(toHex(rgb.map(v=>(v+m)*255)),true) as CloudColor;
+ return accessibleCloudHex(toHex(rgb.map(v=>(v+m)*255))) as CloudColor;
 }
 export function colorHue(color:CloudColor):number{
  const hex=colorHex(color),[r,g,b]=[1,3,5].map(i=>parseInt(hex.slice(i,i+2),16)/255),max=Math.max(r,g,b),min=Math.min(r,g,b),d=max-min;

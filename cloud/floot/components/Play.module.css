@@ -53,7 +53,7 @@
 .status[data-checkers=true] .identifier { font:400 9px/11px var(--font-family-base); color:var(--muted-foreground); letter-spacing:0; }
 
 .app[data-layout="tiled"] .word.word{transform:none;padding:0;display:block;border-radius:0;min-height:0;height:auto;white-space:normal;font-size:68px!important;line-height:1.2;background:transparent!important;}
-.word:focus-visible{outline:none;}.word:focus-visible [data-rhombus-shape]{stroke:var(--rhombus-focus);stroke-width:3;}:global(html[data-ion-dev="true"]) .word:hover [data-rhombus-shape]{stroke:var(--foreground);}.word .identifier{font-size:9px;}.chatWord{padding:0;}.chatLine{white-space:pre;}
+.word:focus-visible{outline:none;}.word:focus-visible [data-rhombus-shape]{stroke:var(--rhombus-focus);stroke-width:3;}.word .identifier{font-size:9px;}.chatWord{padding:0;}.chatLine{white-space:pre;}
 
 .app[data-layout="organic"] .word:focus-visible{text-decoration:underline;text-underline-offset:.2em;}
 .app[data-layout="organic"] .chatWord{display:flex;flex-direction:column;justify-content:center;align-items:center;padding:6px;}

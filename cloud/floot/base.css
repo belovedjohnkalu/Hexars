@@ -79,10 +79,7 @@
   --board-medium: #294463;
   --board-dark: #4b7196;
 }
-.dark {
-}
-
-:root { color-scheme: dark; font-synthesis: none; --glass: linear-gradient(145deg, #ffffff12, #ffffff06 55%, #ffffff03); --glass-border: #ffffff26; }
+:root { color-scheme: light; font-synthesis: none; --glass: linear-gradient(145deg, #ffffff12, #ffffff06 55%, #ffffff03); --glass-border: #ffffff26; }
 html { background: var(--background); }
 body { margin: 0; color: var(--foreground); font-family: var(--font-family-base); -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; font-optical-sizing: auto; }
 ::selection { background: #eeeeef45; color: #ffffff; }
@@ -108,9 +105,8 @@ button[data-ion-title]:active { opacity:.66; }
 button[data-ion-title]:focus-visible { outline:2px solid var(--foreground); outline-offset:2px; }
 [data-ion-composer-navigation] { touch-action:none; }
 
-/* Light is the default; media and boards keep their original colours. */
+/* ION uses a light canvas and legible semantic colors. */
 :root{color-scheme:light;--background:#fafaf9;--foreground:#17191d;--surface:#f0f0ee;--surface-foreground:#17191d;--sidebar:#efefed;--sidebar-foreground:#303238;--card:#ffffff;--card-foreground:#17191d;--popup:#ffffff;--popup-foreground:#17191d;--primary:#22252a;--primary-foreground:#ffffff;--secondary:#e7e8e7;--secondary-foreground:#24272c;--accent:#e1e4e5;--accent-foreground:#17191d;--muted:#e9eae8;--muted-foreground:#60656d;--success:#247447;--success-foreground:#ffffff;--error:#b64236;--error-foreground:#ffffff;--warning:#8b620c;--warning-foreground:#ffffff;--info:#3c596d;--info-foreground:#ffffff;--info-hover:#30383d;--info-active:#17191d;--border:#191d2526;--glass-solid:#ffffffec;--glass-border:#161b242b;--glass:linear-gradient(145deg,#ffffffed,#ffffffc4);--shadow:0 8px 24px #18212a0d;--shadow-md:inset 0 1px 0 #ffffff,0 8px 24px #18212a12;--shadow-lg:0 16px 60px #18212a24;--shadow-focus:0 0 0 3px #315b8040;--scrollbar-thumb:#9da3a8;--scrollbar-track:#f1f2f1;--scrollbar-hover:#59616b;--word-white:#24282e;--word-blue:#285989;--word-cyan:#17646c;--word-mint:#346442;--word-amber:#815c16;--word-coral:#925036;--word-rose:#974b74;--word-lavender:#694591;--inversion-on:#2a7140;--inversion-off:#ae453c;--rhombus-top:#f9f9f7;--rhombus-right:#e3e5e3;--rhombus-left:#ccd0ce;--rhombus-border:#747a7a;--rhombus-focus:#295a88;--overlay-background:#1118203d;--tile-label:#4d5660;}
-html[data-ion-theme=dark]{color-scheme:dark;--background:#08090b;--foreground:#f5f5f7;--surface:#141619;--surface-foreground:#f5f5f7;--sidebar:#0c0e10;--sidebar-foreground:#e5e5e7;--card:#1b1e22;--card-foreground:#f5f5f7;--popup:#191c20;--popup-foreground:#f5f5f7;--primary:#eeeeef;--primary-foreground:#101010;--secondary:#292d32;--secondary-foreground:#f0f0f2;--accent:#dedee0;--accent-foreground:#151515;--muted:#202428;--muted-foreground:#b2b7bd;--success:#94d0a4;--error:#ff9a8e;--warning:#f3cb78;--info:#d5d5da;--info-foreground:#171717;--info-hover:#ffffff;--info-active:#d5d5da;--border:#ffffff26;--glass-solid:#20242aeb;--glass-border:#ffffff30;--glass:linear-gradient(145deg,#ffffff12,#ffffff03);--shadow:0 8px 24px #00000030;--shadow-md:inset 0 1px 0 #ffffff12,0 12px 36px #00000040;--shadow-lg:0 16px 60px #00000050;--shadow-focus:0 0 0 3px #d5d5da35;--scrollbar-thumb:#59616b;--scrollbar-track:#101317;--scrollbar-hover:#a1a1a6;--word-white:#f5f5f7;--word-blue:#9dc8fb;--word-cyan:#9adce0;--word-mint:#b0dab6;--word-amber:#f1d594;--word-coral:#efb49b;--word-rose:#edb4d8;--word-lavender:#d0b6f0;--inversion-on:#a2d3ad;--inversion-off:#f49b91;--rhombus-top:#22262b;--rhombus-right:#171b20;--rhombus-left:#101419;--rhombus-border:#6d7580;--rhombus-focus:#b2d6ff;--overlay-background:#00000091;--tile-label:#b2bbc6;}
 html,body{background:var(--background);}::selection{background:color-mix(in srgb,var(--word-blue) 28%,transparent);color:var(--foreground);}
 
 footer:has([data-composer-dock]){padding-inline:0!important;padding-bottom:0!important;min-height:0;}
@@ -119,15 +115,12 @@ html[data-ion-keyboard=true] [data-composer-dock]{padding-bottom:8px;}
 
 /* 0.70: rich dark colours and one shared, restrained motion/glow system. */
 :root{--glow-soft:0 0 16px color-mix(in srgb,var(--word-blue) 12%,transparent);--motion-enter:420ms;}
-html[data-ion-theme=dark]{--word-blue:#72b4ff;--word-cyan:#4bdef2;--word-mint:#64e8a2;--word-amber:#ffd06b;--word-coral:#ff9978;--word-rose:#ff8bc9;--word-lavender:#b293ff;--shadow-focus:0 0 0 3px #8abfff55,0 0 24px #72b4ff33;--glow-soft:0 0 22px #72b4ff26;}
 :where(button,a,input,textarea,[role=switch]){transition:color 220ms ease,background-color 220ms ease,border-color 220ms ease,box-shadow 280ms var(--ease),opacity 180ms ease;}
-html[data-ion-theme=dark] :where(button[data-ion-title],h1,h2){text-shadow:0 0 24px color-mix(in srgb,currentColor 16%,transparent);}
-html[data-ion-theme=dark] :where([data-composer-dock], [role=dialog]){filter:drop-shadow(0 0 16px #72b4ff0c);}
 :where([role=dialog]){animation:ionSurfaceIn 360ms var(--ease) both;}
 @keyframes ionSurfaceIn{from{opacity:0;translate:0 12px;}to{opacity:1;translate:0 0;}}
 @media(prefers-reduced-motion:reduce){:where([role=dialog]){animation:none;}}
 
 /* 0.71: one indigo board palette and distinct inset-move semantics. */
 :root{--board-light:#d6def3;--board-medium:#9aadd5;--board-dark:#5a74ab;--board-legal:#008967;--board-capture:#c34826;--board-check:#d62d57;--board-selected:#8f6500;--board-last:#8d47db;}
-html[data-ion-theme=dark]{--board-light:#202b4f;--board-medium:#405782;--board-dark:#7a9ac4;--board-legal:#55f1bd;--board-capture:#ffae68;--board-check:#ff6c9a;--board-selected:#ffdf73;--board-last:#d19bff;}
 html[data-ion-editing=true] [data-composer-dock]:not([data-edit-composer]){visibility:hidden;pointer-events:none;}
+html[data-ion-layout=tiled]{--radius-sm:0px;--radius:0px;--radius-md:0px;--radius-lg:0px;--radius-full:0px;}

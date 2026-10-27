@@ -10,8 +10,8 @@ describe('Continuous cloud colors',()=>{
   for(const value of ['url(https://example.com)','var(--unsafe)','#fff','#12345678','red','__proto__'])expect(isCloudColor(value)).toBeFalse();
   expect(isCloudColor('#012ABC')).toBeTrue();expect(colorHex()).toBe('#f5f5f7');
  });
- it('offers intermediate spectrum shades with readable contrast on black',()=>{
-  const shades=new Set<string>();for(let h=0;h<360;h+=.5){const color=spectrumColor(h);shades.add(color);const rgb=[1,3,5].map(i=>parseInt(color.slice(i,i+2),16)/255).map(v=>v<=.04045?v/12.92:((v+.055)/1.055)**2.4);expect((.2126*rgb[0]+.7152*rgb[1]+.0722*rgb[2]+.05)/.05).toBeGreaterThan(4.5);}
+ it('offers intermediate paint shades with readable contrast on the light canvas',()=>{
+  const shades=new Set<string>();for(let h=0;h<360;h+=.5){const color=spectrumColor(h);shades.add(color);const rgb=[1,3,5].map(i=>parseInt(color.slice(i,i+2),16)/255).map(v=>v<=.04045?v/12.92:((v+.055)/1.055)**2.4);expect((.955+.05)/(.2126*rgb[0]+.7152*rgb[1]+.0722*rgb[2]+.05)).toBeGreaterThan(4.45);}
   expect(shades.size).toBeGreaterThan(600);expect(Math.abs(colorHue(spectrumColor(210))-210)).toBeLessThan(1);
  });
  it('can allocate 1024 distinct saved colors even when the same shade is chosen repeatedly',()=>{

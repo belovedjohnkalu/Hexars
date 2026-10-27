@@ -51,4 +51,5 @@ describe('Random word color',()=>{
   fireEvent.change(input,{target:{value:'Second'}});await act(async()=>{fireEvent.submit(form);});
   expect(colorHex(add.calls.mostRecent().args[0].color)).not.toBe(colorHex('white'));
  });
+ it('places the palette after the input and starts with distinct paint colors',()=>{const view=render(<CloudComposer colors scope="chess" parentId="boards" busy={false} disabled={false} draft={{name:'First'}} onDraft={()=>{}} onAdd={async()=>true}/>),input=view.getByLabelText('Add a word or name your file');fireEvent.focus(input);const wheel=view.getByRole('slider');expect(input.compareDocumentPosition(wheel)&Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();expect(wheel.getAttribute('aria-valuetext')).not.toBe('White');});
 });

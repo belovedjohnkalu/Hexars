@@ -1,8 +1,9 @@
+import {activeCloudScreen} from './cloudTyping';
 // Restore an interrupted typing session, never open a keyboard for a new visitor.
 export function resumeCloudTyping(input:HTMLInputElement){
  let focused=document.activeElement===input,suspended=false,start:number|null=null,end:number|null=null;
  const remember=()=>{if(!focused&&document.activeElement!==input)return;suspended=true;start=input.selectionStart;end=input.selectionEnd;};
- const resume=()=>{if(!suspended||document.hidden)return;suspended=false;if(!input.isConnected||input.disabled||input.readOnly||document.querySelector('[role="dialog"],[role="alertdialog"]'))return;input.focus({preventScroll:true});if(start!==null&&end!==null)input.setSelectionRange(start,end);};
+ const resume=()=>{if(!suspended||document.hidden)return;suspended=false;if(!activeCloudScreen()||!input.isConnected||input.disabled||input.readOnly||document.querySelector('[role="dialog"],[role="alertdialog"]'))return;input.focus({preventScroll:true});if(start!==null&&end!==null)input.setSelectionRange(start,end);};
  const focus=()=>{focused=true;};
  const blur=()=>{if(suspended||document.hidden||!document.hasFocus())remember();else{focused=false;suspended=false;}};
  const visibility=()=>{if(document.hidden)remember();else resume();};

@@ -2,7 +2,9 @@ import React,{useState} from 'react';
 import { render,fireEvent,cleanup,act } from '@testing-library/react';
 import { CloudComposer } from '../components/CloudComposer';
 describe('Send without dismissing typing',()=>{
- afterEach(cleanup);
+ let oldEvent:typeof Event;
+ beforeEach(()=>{oldEvent=globalThis.Event;globalThis.Event=window.Event;});
+ afterEach(()=>{cleanup();globalThis.Event=oldEvent;});
  for(const success of [true,false])it('keeps focus through a '+(success?'successful':'failed')+' pending send',async()=>{
   let finish:(value:boolean)=>void=()=>{};const pending=new Promise<boolean>(resolve=>{finish=resolve;}),sent=jasmine.createSpy('sent');
   function Example(){const [busy,setBusy]=useState(false);return <CloudComposer parentId="private" colors busy={busy} disabled={false} draft={{name:'Draft'}} onDraft={()=>{}} onAdd={async value=>{sent(value);setBusy(true);const result=await pending;setBusy(false);return result;}}/>;}

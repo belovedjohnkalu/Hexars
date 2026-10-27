@@ -6,4 +6,4 @@ export function cloudTextLines(name:string,wrap?:{width?:number;measure?:(text:s
 export const cloudText=(name:string)=>cloudTextLines(name).join('\n');
 export const characterLength=(text:string)=>Array.from(text).length;
 
-export const tileTextLines=(name:string,columns=1)=>cloudTextLines(name,{wordsPerLine:8*Math.max(1,Math.floor(columns))});
+export const tileTextLines=(name:string,_columns=1)=>cloudTextLines(name,{wordsPerLine:8});

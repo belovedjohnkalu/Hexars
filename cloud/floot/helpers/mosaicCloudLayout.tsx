@@ -18,7 +18,7 @@ export function mosaicCloudLayout(items:MosaicItem[],width:number,height:number,
   const baseColumns=Math.max(1,Math.ceil(textWidth/(128*.90))),baseRows=Math.max(1,Math.ceil(textHeight/(128*.90))),footprint=fittedTileFootprint(counts[i],baseColumns,baseRows),needed=Math.max(textWidth/footprint.bodyColumns,textHeight/footprint.bodyRows)/.90*printScale,quantum=2**(Math.floor(Math.log2(needed/unit))-10),cellScale=Math.ceil(needed/unit/quantum)*quantum;
   return{id:item.id,fontSize,captionSize,printScale,visualFontSize:fontSize*printScale,lines,pictureSize:picture?pictureSize:undefined,units:footprint.units,logicalUnits:counts[i],baseColumns,baseRows,cellScale,textWidth,textHeight};
  });
- const geometry=rhombusMosaic(measured,unit,1),byId=new Map(measured.map(n=>[n.id,n]));
+ const geometry=rhombusMosaic(measured,unit,1,true),byId=new Map(measured.map(n=>[n.id,n]));
  return{width:geometry.width,height:geometry.height,maxZoom:proportions.maxZoom,minFitZoom:14/Math.min(...measured.map(n=>n.visualFontSize)),items:geometry.faces.map(face=>{
   const item=byId.get(face.id)!,[a,b,c,d,x,y]=face.matrix.slice(7,-1).split(',').map(Number),w=face.contentWidth!/item.printScale,h=face.contentHeight!/item.printScale,inset=Math.min(w,h)*.04,cw=Math.min(w,item.textWidth+inset*2),ch=Math.min(h,item.textHeight+inset*2),ox=(w-cw)/2,oy=(h-ch)/2,corners=[[ox,oy],[ox+cw,oy],[ox+cw,oy+ch],[ox,oy+ch]].map(([u,v])=>({x:face.x+x+a*u+c*v,y:face.y+y+b*u+d*v})),left=Math.min(...corners.map(p=>p.x)),top=Math.min(...corners.map(p=>p.y));
   return{...item,x:face.x,y:face.y,width:face.width,height:face.height,rhombus:face,content:{x:left,y:top,width:Math.max(...corners.map(p=>p.x))-left,height:Math.max(...corners.map(p=>p.y))-top}};

@@ -5,8 +5,7 @@
 .canvas{flex:1;min-height:0;}.assembly{position:absolute;inset:0;pointer-events:none;}
 .tile.tile,.control.control{position:absolute;display:block;padding:0;border:0;border-radius:0;background:transparent;box-shadow:none;min-height:0;white-space:normal;cursor:pointer;user-select:none;-webkit-tap-highlight-color:transparent;pointer-events:auto;}
 .caption{font:500 1em/1.25 var(--font-family-base);white-space:pre;text-align:center;max-width:none;}.tile small,.il{font:400 10px/1.25 var(--font-family-monospace);max-width:100px;overflow-wrap:anywhere;white-space:normal;color:var(--muted-foreground);}
-:global(html[data-ion-dev="true"]) .tile:hover [data-rhombus-shape],:global(html[data-ion-dev="true"]) .control:hover [data-rhombus-shape]{stroke:var(--foreground);stroke-width:2;}:global(html[data-ion-dev="true"]) .tile[data-current=true] [data-rhombus-shape]{stroke:var(--rhombus-focus);stroke-width:2.2;}:global(html[data-ion-dev="true"]) .tile[data-selected=true] [data-rhombus-shape]{stroke:var(--error);stroke-width:3;}
-.tile:focus-visible,.control:focus-visible{outline:none;}.tile:focus-visible [data-rhombus-shape],.control:focus-visible [data-rhombus-shape]{stroke:var(--rhombus-focus);stroke-width:3;}.tile:active,.control:active{opacity:.7;}.decoration{position:absolute;pointer-events:none;}
+.tile:focus-visible,.control:focus-visible{outline:none;}.tile:focus-visible .caption,.control:focus-visible .caption{text-decoration:underline;text-underline-offset:.2em;}.tile:active,.control:active{opacity:.7;}.decoration{position:absolute;pointer-events:none;}
 
 .tile[data-current=true] .caption{font-weight:650;}.tile[data-selected=true] .caption{text-decoration:underline;text-underline-offset:.2em;}
 

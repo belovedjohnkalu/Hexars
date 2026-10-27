@@ -2,7 +2,7 @@ import { useEffect,useRef,type CSSProperties } from 'react';
 import { Slider } from './Slider';
 import { accessibleCloudHex,colorHue,colorName,colorValue,spectrumColor,unusedColor,type CloudColor } from '../helpers/cloudColors';
 import styles from './CloudColorWheel.module.css';
-const noColors:CloudColor[]=[],wordSpectrum='linear-gradient(90deg,'+Array.from({length:13},(_,i)=>{const hex=spectrumColor(i*30);return 'light-dark('+accessibleCloudHex(hex)+','+accessibleCloudHex(hex,true)+') '+i/12*100+'%';}).join(',')+')';
+const noColors:CloudColor[]=[],wordSpectrum='linear-gradient(90deg,'+Array.from({length:13},(_,i)=>accessibleCloudHex(spectrumColor(i*30))+' '+i/12*100+'%').join(',')+')';
 export function CloudColorWheel({value,onChange,disabled=false,usedColors=noColors}:{value:CloudColor;onChange:(c:CloudColor)=>void;disabled?:boolean;usedColors?:readonly (CloudColor|undefined)[]}){
  const hold=useRef<{id:number;x:number;y:number}|null>(null),timer=useRef<ReturnType<typeof setTimeout>|undefined>(undefined),whiteHeld=useRef(false);
  const cancel=()=>{clearTimeout(timer.current);hold.current=null;};

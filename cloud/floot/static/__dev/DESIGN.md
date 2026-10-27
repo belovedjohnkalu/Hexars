@@ -62,6 +62,31 @@ components:
 ---
 # ION Design System
 
+## 0.72 — light canvas and hexagonal clouds
+
+This section supersedes the earlier square-packing and dark-theme directions.
+Light is the sole appearance: the pre-paint bootstrap clears saved dark choices,
+sets light browser chrome, and never changes user content or stored colors.
+The retired dark-theme cloud keeps its permanent identity but is omitted from
+the rendered service. The default ION favicon is the original mark inverted to
+dark lines on white. Only the original dark-backed Home illustrations receive a
+light presentation; uploaded or dev-replaced pictures keep their colors.
+
+Organic words and pictures grow in compact six-sided axial rings, retaining a
+readable descendant-based size floor, complete words, collision-safe hitboxes,
+pan/zoom and stable positions during additions. Tiles use the same hexagonal
+target for their adjoining whole rhombi, with no decorative fill or border for
+devs or other accounts. Eight-word lines apply to both modes. Tiled controls use
+straight edges; organic partitions are called Bubbles and have soft light rims.
+The focused Bubble alone closes on the desktop down arrow, subject to the
+existing unsaved-media guard. Existing IDs, histories and edit authority remain.
+
+The horizontal paint palette sits beneath the input while typing or editing.
+Colors use the contrast-checked light spectrum, with a different default color
+for each new word; the existing random-color setting and manual override remain.
+Inter remains the common sans-serif face. Keep keyboard focus, touch capture,
+media previews, reduced motion and small-viewport editing intact.
+
 ## 0.69 — Chess as a quiet, social hub
 
 The existing Chess cloud keeps its identity and dev-defined placement. Play, Learn, Community and Library are the core journeys; Continue appears only for the current account's unfinished game. Organic packing, descendant-character sizing, the visible minimum, light default, saved dark first paint and opt-in Tiled UI remain canonical. No marketing dashboard, extra global account button or new brand is introduced. Learn adds an editable first-game guide and a daily link to an existing Gliński lesson. Its day boundary follows the device's local calendar without a server poll; custom dev redirects and names win.

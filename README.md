@@ -5,6 +5,20 @@ ION is live at **https://ion.floot.app**. The authoritative application is in
 rules/search. The Cloudflare, Supabase and Vercel migration sources are retained
 for development; they do not serve the live app.
 
+## Frontend — 0.72
+
+ION now uses a light appearance throughout. Older dark preferences are cleared
+on load, and the default browser icon uses dark lines on white. Stock Home
+illustrations adapt to the light canvas while personal pictures keep their
+original colors.
+
+Organic clouds and adjoining tiles grow in a compact hexagonal arrangement, with
+whole eight-word lines, readable sizes and pan/zoom. Organic screens are Bubbles;
+the desktop down arrow closes the selected Bubble. The paint palette sits below
+the input and chooses varied colors by default, with manual control available.
+The verified Frontend prompts are archived in Completed. See
+[release details](docs/releases/ion-0.72.md).
+
 ## Functionality — 0.71
 
 Editable words open in the footer on double-tap. Pictures retain double-tap
@@ -68,7 +82,7 @@ have not been certified**. See [capacity and staging gates](docs/chess-launch-ca
 
 ION uses pannable, zoomable clouds of words and pictures. Descendant characters
 set relative size, with a readable minimum; a cloud’s own name reserves geometry
-but does not set its font. Light and organic clouds are the defaults. Accounts
+but does not set its font. Light is the sole theme and organic clouds are the default. Accounts
 provides saved sign-ins; Controls → Settings contains the appearance controls. The optional adjoining
 rhombi, Skies/Tiles and split screens share the same content and game state.
 Inter is self-hosted; motion respects reduced-motion preferences.

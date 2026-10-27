@@ -17,6 +17,6 @@ export function AppHead({ title = "ION",iconUrl }: { title?: string;iconUrl?:str
     <meta name="apple-mobile-web-app-status-bar-style" content={chrome.statusBarStyle} />
     <link rel="manifest" href="/manifest.json" />
     <link rel="apple-touch-icon" href="/_cdn/static/05f18ada-46bb-4d90-9cb3-5594bbd781cc-ion-geometric-mark-512.png" />
-    <link rel="icon" type={iconUrl?"image/png":"image/svg+xml"} href={iconUrl||"/_api/icon?v=4"} />
+    <link rel="icon" type={iconUrl?"image/png":"image/svg+xml"} href={iconUrl||"/_api/icon?v=5"} />
   </Helmet>;
 }

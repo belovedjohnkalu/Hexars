@@ -61,8 +61,9 @@
 }
 
 /* The spectrum is a presentation of the shared, keyboard-accessible Slider. */
-.spectrum { height:44px; min-width:0; }
-.spectrum .track { height:7px; background:var(--word-spectrum); }
+.spectrum { height:44px; min-width:0; -webkit-tap-highlight-color:transparent; }
+.spectrum * { -webkit-tap-highlight-color:transparent; }
+.spectrum .track { height:9px; background:var(--word-spectrum); }
 .spectrum:hover .track { background:var(--word-spectrum); }
 .spectrum .range { background:transparent; transition:none; }
 .spectrum .thumb { width:24px; height:24px; border:3px solid var(--background); background:var(--selected-color); box-shadow:0 0 0 1px var(--muted-foreground); transition:box-shadow 160ms var(--ease); }
