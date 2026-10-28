@@ -2,7 +2,7 @@ import React from 'react';
 import { render,fireEvent,cleanup,act } from '@testing-library/react';
 import { CloudColorWheel } from '../components/CloudColorWheel';
 import { CloudComposer } from '../components/CloudComposer';
-import { colorHex } from './cloudColors';
+import { colorHex,colorHue } from './cloudColors';
 describe('Gradient color control',()=>{
  afterEach(cleanup);
  it('exposes one named keyboard slider instead of a preset list',()=>{
@@ -52,4 +52,6 @@ describe('Random word color',()=>{
   expect(colorHex(add.calls.mostRecent().args[0].color)).not.toBe(colorHex('white'));
  });
  it('places the palette after the input and starts with distinct paint colors',()=>{const view=render(<CloudComposer colors scope="chess" parentId="boards" busy={false} disabled={false} draft={{name:'First'}} onDraft={()=>{}} onAdd={async()=>true}/>),input=view.getByLabelText('Add a word or name your file');fireEvent.focus(input);const wheel=view.getByRole('slider');expect(input.compareDocumentPosition(wheel)&Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();expect(wheel.getAttribute('aria-valuetext')).not.toBe('White');});
+ it('uses a new paint when the first droplet opens another cloud',()=>{const props={colors:true,scope:'chess' as const,busy:false,disabled:false,onDraft:()=>{},onAdd:async()=>true};const view=render(<CloudComposer {...props} parentId="first" storageKey="first" draft={{name:''}}/>),input=view.getByLabelText('Add a word or name your file');fireEvent.focus(input);const before=Number((view.getByRole('slider').getAttribute('aria-valuenow')));view.rerender(<CloudComposer {...props} parentId="second" storageKey="second" draft={{name:''}}/>);const after=Number((view.getByRole('slider').getAttribute('aria-valuenow')));const gap=Math.abs(after-before);expect(Math.min(gap,360-gap)).toBeGreaterThan(30);expect(view.getByRole('slider').getAttribute('aria-valuetext')).not.toBe('White');});
+ it('does not reuse paint after a fast successful send',async()=>{const add=jasmine.createSpy('add').and.resolveTo(true),view=render(<CloudComposer colors scope="chess" parentId="boards" busy={false} disabled={false} draft={{name:'First'}} onDraft={()=>{}} onAdd={add}/>),form=view.getByRole('form'),input=view.getByLabelText('Add a word or name your file');await act(async()=>{fireEvent.submit(form);});const first=add.calls.mostRecent().args[0];fireEvent.change(input,{target:{value:'Second'}});await act(async()=>{fireEvent.submit(form);});const second=add.calls.mostRecent().args[0],gap=Math.abs(colorHue(first.color)-colorHue(second.color));expect(colorHex(second.color)).not.toBe(colorHex(first.color));expect(Math.min(gap,360-gap)).toBeGreaterThan(30);});
 });

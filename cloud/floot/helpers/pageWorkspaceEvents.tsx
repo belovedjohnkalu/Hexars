@@ -15,8 +15,10 @@ export function validPageAction(value:unknown):value is PageAction{
 }
 export function requestPageAction(detail:PageAction){if(isPagePane())window.parent.postMessage({type:'ion.page-action',...detail},location.origin);else window.dispatchEvent(new window.CustomEvent('ion.page-action',{detail}));}
 export function pageKeyboardAction(event:KeyboardEvent,multiple:boolean):PageAction|null{
- if(!/^Arrow(Left|Right|Up|Down)$/.test(event.key))return null;
+ if(event.altKey||event.shiftKey||!/^Arrow(Left|Right|Up|Down)$/.test(event.key))return null;
  const direction=event.key.slice(5).toLowerCase() as PageDirection;
  if(event.ctrlKey||event.metaKey)return direction==='left'||direction==='right'?{action:'new-tile'}:{action:'tile-direction',direction};
- return multiple&&(direction==='left'||direction==='right')?{action:'focus',direction}:null;
+ if(direction==='right')return {action:'split',direction:'right'};
+ if(direction==='left'&&multiple)return {action:'close'};
+ return null;
 }

@@ -4,7 +4,7 @@ import {recordVisitedPage,previousPageStep,nextPageStep} from './visitedPages';
 import { useEffect,useLayoutEffect } from 'react';
 import { useLocation,useNavigate,useNavigationType } from 'react-router-dom';
 export function historyKey(event:KeyboardEvent):number{
- if(event.defaultPrevented||event.repeat||event.isComposing||event.keyCode===229||event.altKey||event.ctrlKey||event.metaKey||event.shiftKey)return 0;
+ if(event.defaultPrevented||event.repeat||event.isComposing||event.keyCode===229||event.ctrlKey||event.metaKey||event.shiftKey)return 0;
  if(event.key!=='ArrowLeft'&&event.key!=='ArrowRight')return 0;
  const target=event.target instanceof Element?event.target:null;
  if(target?.closest('[role="dialog"],[role="alertdialog"],[role="menu"],[role="listbox"],[role="combobox"],[role="slider"],[role="spinbutton"],[role="tablist"],[data-cell],[data-no-navigation-keys]'))return 0;

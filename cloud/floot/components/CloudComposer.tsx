@@ -10,8 +10,8 @@ import { resumeCloudTyping } from '../helpers/resumeCloudTyping';
 import { focusCloudComposer } from '../helpers/cloudTyping';
 import { mapPhotos,photoFileError,mediaAccept,mediaKind,mediaWordCost,type CloudPhotoDraft } from '../helpers/cloudPhotos';
 import type { CloudScope,CloudNode } from '../endpoints/cloud_POST.schema';
-import { useRandomWordColor } from '../helpers/useRandomWordColor';
-import { colorValue,unusedColor,randomWordColor,type CloudColor } from '../helpers/cloudColors';
+import { useRandomWordColor,nextRandomWordColor } from '../helpers/useRandomWordColor';
+import { colorValue,unusedColor,type CloudColor } from '../helpers/cloudColors';
 import { CloudColorWheel } from './CloudColorWheel';
 import { PageControls } from './PageControls';
 import { Button } from './Button';
@@ -27,12 +27,12 @@ export function CloudComposer({parentId,busy,disabled,onAdd,draft,onDraft,upload
  const limit=(scope==='public'||scope==='private')&&nodes.length?cloudWordLimit(nodes,parentId):undefined;
  const form=useForm({defaultValues:{name:draft.name},schema:z.object({name:cloudNames.schema(scope,true,limit)})});
  const [retained,setRetained]=useState<number[]>(()=>draft.retainMedia??cloudPhotoUrls(editNode||{id:'',name:'',parentId:null}).map((_,i)=>i));
- const [editing,setEditing]=useState(!!editNode),[color,setColor]=useState<CloudColor>(()=>draft.color?unusedColor(draft.color,usedColors):randomColors.enabled?randomWordColor(usedColors):unusedColor('white',usedColors));
+ const [editing,setEditing]=useState(!!editNode),[color,setColor]=useState<CloudColor>(()=>draft.color?unusedColor(draft.color,usedColors):randomColors.enabled?nextRandomWordColor(usedColors):unusedColor('white',usedColors));
  const [photos,setPhotos]=useState<CloudPhotoDraft[]>(()=>draft.photos??(draft.file?[{id:crypto.randomUUID(),file:draft.file}]:[])),[fileError,setFileError]=useState(''),[previews,setPreviews]=useState<string[]>([]),[page,setPage]=useState(0),[savedPage,setSavedPage]=useState(0);
  const binding=useRef(storageKey),rebinding=useRef(false),latestName=useRef(form.values.name);latestName.current=form.values.name;
- useLayoutEffect(()=>{if(binding.current===storageKey)return;binding.current=storageKey;rebinding.current=true;form.setValues({name:draft.name});setPhotos([...(draft.photos??(draft.file?[{id:crypto.randomUUID(),file:draft.file}]:[]))]);setColor(draft.color||'white');setFileError('');pending.current=null;},[storageKey]);
+ useLayoutEffect(()=>{if(binding.current===storageKey)return;binding.current=storageKey;rebinding.current=true;form.setValues({name:draft.name});setPhotos([...(draft.photos??(draft.file?[{id:crypto.randomUUID(),file:draft.file}]:[]))]);setColor(draft.color?unusedColor(draft.color,usedColors):randomColors.enabled?nextRandomWordColor(usedColors):unusedColor('white',usedColors));setFileError('');pending.current=null;},[storageKey]);
  const previousRandom=useRef(randomColors.enabled);
- useEffect(()=>{if(previousRandom.current!==randomColors.enabled){previousRandom.current=randomColors.enabled;if(randomColors.enabled)setColor(randomWordColor(usedColors));}},[randomColors.enabled,usedColors]);
+ useEffect(()=>{if(previousRandom.current!==randomColors.enabled){previousRandom.current=randomColors.enabled;if(randomColors.enabled)setColor(nextRandomWordColor(usedColors));}},[randomColors.enabled,usedColors]);
  const savedWords=retained.reduce((sum,i)=>sum+mediaWordCost(editNode?.mediaTypes?.[i]||'image/png'),0),totalWords=wordCount(form.values.name)+savedWords+photos.reduce((total,p)=>total+mediaWordCost(p.file.type),0),canChoosePictures=!disabled&&(limit===undefined||BigInt(totalWords+PICTURE_WORDS)<=limit),overLimit=limit!==undefined&&BigInt(totalWords)>limit,canChooseAudio=!disabled&&(limit===undefined||BigInt(totalWords+500000)<=limit);
  const fileInput=useRef<HTMLInputElement>(null),audioInput=useRef<HTMLInputElement>(null),wordInput=useRef<HTMLInputElement>(null),pending=useRef<Submission|null>(null),composing=useRef(false),enterAfter=useRef(false),mounted=useRef(true),submitting=useRef(false);
  useEffect(()=>{mounted.current=true;return()=>{mounted.current=false;};},[]);
@@ -51,7 +51,7 @@ export function CloudComposer({parentId,busy,disabled,onAdd,draft,onDraft,upload
   const checked=cloudNames.schema(scope,photos.length+retained.length>0,limit).safeParse(name);if(!checked.success){form.setFieldError('name',checked.error.issues[0]?.message||'Check the name.');wordInput.current?.focus();return;}
   const item=pending.current??{openAfter:enterAfter.current,id:editNode?.id||crypto.randomUUID(),parentId,name,file:photos[0]?.file,photos,...(editNode?{retainMedia:retained}:{}),...(colors?{color:editNode?color:unusedColor(color,usedColors)}:{})};item.openAfter=enterAfter.current;pending.current=item;
   const shouldFocus=!!wordInput.current&&!!document.activeElement?.closest('[data-cloud-draft]');if(shouldFocus)wordInput.current?.focus({preventScroll:true});submitting.current=true;
-  try{if(await onAdd(item)){if(enterAfter.current)onEnter?.(item);enterAfter.current=false;const nextColor=colors?(randomColors.enabled?randomWordColor([...usedColors,item.color]):unusedColor(color,[...usedColors,item.color])):color;pending.current=null;if(mounted.current&&binding.current===storageKey){if(latestName.current===values.name)form.setValues({name:''});setColor(nextColor);setPhotos(current=>current.filter(p=>!item.photos?.some(sent=>sent.id===p.id)));setFileError('');if(shouldFocus)wordInput.current?.focus({preventScroll:true});}}}finally{submitting.current=false;}
+  try{if(await onAdd(item)){if(enterAfter.current)onEnter?.(item);enterAfter.current=false;const nextColor=colors?(randomColors.enabled?nextRandomWordColor([...usedColors,item.color]):unusedColor(color,[...usedColors,item.color])):color;pending.current=null;if(mounted.current&&binding.current===storageKey){if(latestName.current===values.name)form.setValues({name:''});setColor(nextColor);setPhotos(current=>current.filter(p=>!item.photos?.some(sent=>sent.id===p.id)));setFileError('');if(shouldFocus)wordInput.current?.focus({preventScroll:true});}}}finally{submitting.current=false;}
  });
  return <div data-composer-expanded={colors&&(editing||!!editNode)||photos.length+retained.length>0} className={styles.wrap+' '+className}><Form {...form}><form id={editNode?"cloud-editor-form":"cloud-composer-form"} data-cloud-draft={storageKey} noValidate onSubmit={submit} className={styles.form} onBlur={e=>{if(!e.currentTarget.contains(e.relatedTarget as Node|null))setEditing(false);}} aria-label={editNode?'Edit cloud':scope==='home'&&parentId==='ion'?'Add a feature':'Add to this cloud'}>
  {photos.length+retained.length>0&&<div className={styles.extras}>

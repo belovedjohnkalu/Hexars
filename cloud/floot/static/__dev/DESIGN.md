@@ -62,6 +62,16 @@ components:
 ---
 # ION Design System
 
+## 0.73 — desktop Bubbles and distinct quick-entry paint
+
+On desktop, Right opens a Bubble directly beside the focused screen and Left
+closes the focused extra Bubble. The same close guard protects unsaved media;
+Alt+Left and Alt+Right retain page history. Text entry and interactive controls
+keep their arrow keys. A new cloud's first droplet receives random paint when
+the saved random-color setting is on. Recent automatic colors are separated
+around the existing readable spectrum, including rapid successive sends;
+manual paint choices and failed drafts remain stable.
+
 ## 0.72 — light canvas and hexagonal clouds
 
 This section supersedes the earlier square-packing and dark-theme directions.

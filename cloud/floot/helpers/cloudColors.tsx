@@ -33,7 +33,17 @@ export function unusedColor(preferred:CloudColor,used:readonly (CloudColor|undef
  throw new Error('Couldn’t choose a new color. Try another shade.');
 }
 
-// Pick from the same readable spectrum as the manual wheel; avoid sibling colors.
+// Prefer paint that looks different from the last few colors, not merely a
+// different RGB triplet. Keep the first pick uniform across the full wheel.
 export function randomWordColor(used:readonly (CloudColor|undefined)[],random:()=>number=Math.random):CloudColor{
- return unusedColor(spectrumColor(random()*360),used);
+ const start=random()*360,recent=used.filter((color):color is CloudColor=>!!color).slice(-4);
+ if(!recent.length)return spectrumColor(start);
+ const taken=new Set(used.map(colorHex));let best:CloudColor|undefined,score=-1;
+ for(let i=0;i<48;i++){
+  const hue=(start+i*137.50776405)%360,color=spectrumColor(hue);
+  if(taken.has(colorHex(color)))continue;
+  const gap=Math.min(...recent.map(previous=>{const distance=Math.abs(hue-colorHue(previous));return Math.min(distance,360-distance);}));
+  if(gap>score){best=color;score=gap;}
+ }
+ return best??unusedColor(spectrumColor(start),used);
 }

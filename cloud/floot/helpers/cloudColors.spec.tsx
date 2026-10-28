@@ -3,7 +3,7 @@ import { cloudChanges } from './cloudChanges';
 import { cloudPolicy } from './cloudPolicy';
 import { schema,type CloudNode } from '../endpoints/cloud_POST.schema';
 describe('Continuous cloud colors',()=>{
- it('randomizes over the readable spectrum and avoids an existing shade',()=>{expect(randomWordColor([],()=>0)).toBe(spectrumColor(0));expect(randomWordColor([spectrumColor(180)],()=>.5)).not.toBe(spectrumColor(180));});
+ it('randomizes over the readable spectrum and makes recent paint visibly different',()=>{expect(randomWordColor([],()=>0)).toBe(spectrumColor(0));const previous=spectrumColor(180),next=randomWordColor([previous],()=>.5),gap=Math.abs(colorHue(next)-colorHue(previous));expect(colorHex(next)).not.toBe(colorHex(previous));expect(Math.min(gap,360-gap)).toBeGreaterThan(90);});
  const credentials={workspaceId:'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',accessToken:'a'.repeat(64)};
  it('preserves every legacy color and safely accepts only full RGB values',()=>{
   expect(colorValue('blue')).toBe('var(--word-blue)');expect(colorValue('white')).toBe('var(--word-white)');expect(colorValue('#A1B2C3')).toMatch(/^light-dark\(/);expect(colorHex('#A1B2C3')).toBe('#a1b2c3');

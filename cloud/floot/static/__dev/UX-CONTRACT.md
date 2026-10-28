@@ -1,5 +1,15 @@
 # ION interaction contract
 
+## 0.73 — desktop Bubble arrows and quick-entry colors
+
+PageWorkspace owns plain Right to open a Bubble beside the focused screen and
+plain Left to close the focused extra Bubble on desktop. Closing retains the
+unsaved-media guard. Alt+Left/Right remains page Back/Forward; editable fields,
+sliders and other interactive controls keep their own keys. CloudComposer owns
+the saved random-color preference and preserves manual choices and failed
+submissions. New first droplets and quick successful sends use distinct recent
+colors from the contrast-checked spectrum.
+
 ## 0.72 — Frontend overrides
 
 CloudCanvas/cloudLayout and PageTiles own a compact axial-ring arrangement;
