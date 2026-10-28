@@ -11,7 +11,3 @@
 
 :global(html:not([data-ion-dev="true"])) .tile,:global(html:not([data-ion-dev="true"])) .control{pointer-events:none;}:global(html:not([data-ion-dev="true"])) .tile [data-printed-plane]>*, :global(html:not([data-ion-dev="true"])) .control [data-printed-plane]>*{pointer-events:auto;}
 :global(html:not([data-ion-dev="true"])) .tile:focus-visible [data-rhombus-shape],:global(html:not([data-ion-dev="true"])) .control:focus-visible [data-rhombus-shape]{stroke:transparent;}:global(html:not([data-ion-dev="true"])) .tile:focus-visible .caption,:global(html:not([data-ion-dev="true"])) .control:focus-visible .caption{text-decoration:underline;text-underline-offset:.2em;}
-
-.overview[data-layout="organic"] .tile.tile,.overview[data-layout="organic"] .control.control{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;padding:6px;border-radius:var(--radius);pointer-events:auto;}
-.overview[data-layout="organic"] .caption{max-width:100%;line-height:1.18;}
-.overview[data-layout="organic"] .tile:focus-visible .caption,.overview[data-layout="organic"] .control:focus-visible .caption{text-decoration:underline;text-underline-offset:.2em;}

@@ -9,11 +9,11 @@ export async function communityIL(value:string):Promise<ILItem|null> {
   const row=(await sql<{id:string;topicId:string;replyId:string|null;roomId:string;name:string}>`
     SELECT i.node_id AS id,t.id::text AS "topicId",NULL::text AS "replyId",t.room_id AS "roomId",t.title AS name
     FROM ion_cloud_identifiers i JOIN ion_chess_topics t ON 'chess-topic:'||t.id::text=i.node_id
-    WHERE i.label=${il.label} AND i.dev_number=${il.namespace}::bigint AND t.visibility='visible'
+    WHERE md5(i.label)=md5(${il.label}) AND i.label=${il.label} AND i.dev_number=${il.namespace}::bigint AND t.visibility='visible'
     UNION ALL
     SELECT i.node_id,t.id::text,r.id::text,t.room_id,t.title
     FROM ion_cloud_identifiers i JOIN ion_chess_replies r ON 'chess-reply:'||r.id::text=i.node_id JOIN ion_chess_topics t ON t.id=r.topic_id
-    WHERE i.label=${il.label} AND i.dev_number=${il.namespace}::bigint AND t.visibility='visible' AND r.visibility='visible' LIMIT 1
+    WHERE md5(i.label)=md5(${il.label}) AND i.label=${il.label} AND i.dev_number=${il.namespace}::bigint AND t.visibility='visible' AND r.visibility='visible' LIMIT 1
   `.execute(db)).rows[0];
   if(!row)return null;
   try{await communityStore.room(row.roomId);}catch{return null;}

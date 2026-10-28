@@ -1,5 +1,19 @@
 # ION interaction contract
 
+## 0.74 — Tiles only and indexed IL location
+
+LayoutSync fixes the app to Tiled UI and clears a retired device preference.
+Settings does not expose the old layout control. CloudCanvas, games, saved
+games, page partitions and the Tiles overview receive the tiled presentation
+on first render, including an account that saved Organic UI earlier.
+
+The permanent label is read through the identifier digest index. A transaction-
+maintained node/workspace table locates its current workspace after moves,
+copies and removals. The IL endpoint restricts personal locations to the
+authenticated account, loads that scope once, then applies the same visibility
+and purchase policy as ordinary navigation. Static functional ILs use one
+known scope hint. Birth labels and identifier parent records never change.
+
 ## 0.73 — desktop Bubble arrows and quick-entry colors
 
 PageWorkspace owns plain Right to open a Bubble beside the focused screen and

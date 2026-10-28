@@ -62,6 +62,21 @@ components:
 ---
 # ION Design System
 
+## 0.74 — Tiles only and direct IL navigation
+
+Tiles and their joined rhombus surfaces are the sole presentation on every
+device. An old saved Organic preference is ignored and cleared. Controls keeps
+its editable Settings cloud, but the obsolete layout toggle is hidden and
+cannot switch the app back. Existing tile names, partitions, saved camera
+positions, cloud identities and content remain. Default vocabulary is Tiles
+and Partitions throughout the live interface.
+
+An IL keeps its birth label when a cloud moves. A database reverse index
+tracks its current workspace, so opening an IL loads only that authorized
+scope instead of searching every cloud scope. Personal location rows are
+matched to the server session, and the ordinary cloud response remains the
+final authority for hidden, removed and purchased content.
+
 ## 0.73 — desktop Bubbles and distinct quick-entry paint
 
 On desktop, Right opens a Bubble directly beside the focused screen and Left

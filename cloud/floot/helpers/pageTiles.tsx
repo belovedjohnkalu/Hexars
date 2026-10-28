@@ -8,8 +8,8 @@ export type TileScreen={id:number;url:string;label:string;characters?:number;his
 export type OpenTile={number?:number;name?:string;color?:CloudColor;id:number;primary:number;focus:number;screens:TileScreen[];tree:PageTree};
 export type TileState={nextTileNumber?:number;tiles:OpenTile[];current:number;trail:number[];cursor:number;nextId:number};
 export const safeTileURL=safePageURL;
-export const tileName=(tile:OpenTile,tiled=true)=>tile.name?.trim()||(tiled?'Tile ':'Sky ')+(tile.number??tile.id+1);
-export const tileWeight=(tile:OpenTile,tiled=true)=>tiled?tileCharacters(tile):tile.screens.length;
+export const tileName=(tile:OpenTile)=>tile.name?.trim()||'Tile '+(tile.number??tile.id+1);
+export const tileWeight=(tile:OpenTile)=>tileCharacters(tile);
 export function tileLabel(value:string){return value.replace(/\s*[·|]\s*(?:ION|Board Games|Hexagons).*$/,'').trim()||'ION';}
 export function createTileState(url:string):TileState{return{nextTileNumber:2,tiles:[{id:0,number:1,primary:0,focus:0,screens:[{id:0,url:safeTileURL(url)||'/',label:'ION'}],tree:{screen:0}}],current:0,trail:[0],cursor:0,nextId:1};}
 export function visitTile(state:TileState,id:number):TileState{
@@ -32,10 +32,9 @@ export function rhombusLayout(tiles:OpenTile[]){
  const minX=Math.min(0,...raw.map(t=>t.left))-32,minY=Math.min(0,...raw.map(t=>t.top))-32,maxX=Math.max(0,...raw.map(t=>t.left+t.width))+32,maxY=Math.max(0,...raw.map(t=>t.top+t.height))+32;
  return{width:maxX-minX,height:maxY-minY,tiles:raw.map(t=>{const geometry=pageGeometry(t.tile.tree,t.columns,t.rows);return{...t,left:t.left-minX,top:t.top-minY,polygon:t.points.map(p=>`${p.x-t.left},${p.y-t.top}`).join(' '),lines:geometry.dividers.map(line=>{const a=project(t.x+line.x1,t.y+line.y1),b=project(t.x+line.x2,t.y+line.y2);return{x1:a.x-t.left,y1:a.y-t.top,x2:b.x-t.left,y2:b.y-t.top};})};})};
 }
-export function tileOverviewItems(tiles:OpenTile[],tiled:boolean){const maximum=Math.max(1,...tiles.map(t=>tileWeight(t,tiled)));return tiles.map(t=>({id:'open-tile-'+t.id,name:tileName(t,tiled),parentId:'page-tiles',characters:tileWeight(t,tiled),percent:cloudPercent(tileWeight(t,tiled),0,maximum).value,color:t.color,annotation:t.screens.length>1}));}
-export function skyAnchors(items:{id:string}[]){return Object.fromEntries(items.map((n,i)=>{const angle=.45+i*2.399963,radius=Math.min(.34,.13+.035*Math.sqrt(i));return[n.id,{x:Math.cos(angle)*radius,y:Math.sin(angle)*radius}];}));}
-export function nearestRhombus(tiles:OpenTile[],id:number,direction:PageDirection,positions?:CloudLayout['items'],tiled=true){
- const cards=[...tileOverviewItems(tiles,tiled),{id:'page-tile-new',name:tiled?'New Tile':'New Sky',percent:0}],rects=positions||cloudLayout(cards,520,520,(text,size)=>text.length*size*.6,{rhombi:tiled,organic:!tiled,hexagonal:true,proportional:!tiled,maxFontSize:tiled?68:48,compact:false,labelMaxWidth:320}).items;
+export function tileOverviewItems(tiles:OpenTile[]){const maximum=Math.max(1,...tiles.map(tileWeight));return tiles.map(t=>({id:'open-tile-'+t.id,name:tileName(t),parentId:'page-tiles',characters:tileWeight(t),percent:cloudPercent(tileWeight(t),0,maximum).value,color:t.color,annotation:t.screens.length>1}));}
+export function nearestRhombus(tiles:OpenTile[],id:number,direction:PageDirection,positions?:CloudLayout['items']){
+ const cards=[...tileOverviewItems(tiles),{id:'page-tile-new',name:'New Tile',percent:0}],rects=positions||cloudLayout(cards,520,520,(text,size)=>text.length*size*.6,{rhombi:true,hexagonal:true,maxFontSize:68,compact:false,labelMaxWidth:320}).items;
  const list=tiles.map(tile=>({tile,rect:rects.find(r=>r.id==='open-tile-'+tile.id)!})).filter(t=>!!t.rect),from=list.find(t=>t.tile.id===id);if(!from)return id;
  const sign=direction==='left'||direction==='up'?-1:1,horizontal=direction==='left'||direction==='right';return list.filter(t=>t!==from).map(t=>{const dx=t.rect.x+t.rect.width/2-from.rect.x-from.rect.width/2,dy=t.rect.y+t.rect.height/2-from.rect.y-from.rect.height/2,along=(horizontal?dx:dy)*sign;return{t,along,score:along+Math.abs(horizontal?dy:dx)*1.5};}).filter(t=>t.along>1).sort((a,b)=>a.score-b.score)[0]?.t.tile.id??id;
 }

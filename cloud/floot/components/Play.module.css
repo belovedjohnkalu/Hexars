@@ -55,7 +55,5 @@
 .app[data-layout="tiled"] .word.word{transform:none;padding:0;display:block;border-radius:0;min-height:0;height:auto;white-space:normal;font-size:68px!important;line-height:1.2;background:transparent!important;}
 .word:focus-visible{outline:none;}.word:focus-visible [data-rhombus-shape]{stroke:var(--rhombus-focus);stroke-width:3;}.word .identifier{font-size:9px;}.chatWord{padding:0;}.chatLine{white-space:pre;}
 
-.app[data-layout="organic"] .word:focus-visible{text-decoration:underline;text-underline-offset:.2em;}
-.app[data-layout="organic"] .chatWord{display:flex;flex-direction:column;justify-content:center;align-items:center;padding:6px;}
 
 .app[data-layout="tiled"] .word [data-printed-plane]>span:not(.identifier){white-space:pre;}
