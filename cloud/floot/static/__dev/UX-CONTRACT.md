@@ -1,5 +1,16 @@
 # ION interaction contract
 
+## 0.75 — concise cloud controls and transparent icons
+
+Holding a cloud opens a compact, keyboard-accessible Controls dialog in the
+current screen. Its actions are determined from the same authorized cloud and
+saved-game services as the former Controls route; edits, moves, deletion,
+redirects, sharing and clipboard fallbacks retain their existing owners.
+Closing restores focus without changing page history or the cloud camera.
+The composer color wheel sits above the input while editing. Home presents
+icons prominently with smaller captions; descendant-based scaling remains.
+Hub, Console and Reserve retain their existing cloud IDs and permissions.
+
 ## 0.74 — Tiles only and indexed IL location
 
 LayoutSync fixes the app to Tiled UI and clears a retired device preference.

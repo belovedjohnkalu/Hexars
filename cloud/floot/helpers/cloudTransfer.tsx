@@ -13,7 +13,7 @@ import type { InputType,CloudNode } from "../endpoints/cloud_POST.schema";
 import type { Json } from "./schema";
 export async function cloudTransfer(request:Request,raw:Extract<InputType,{action:'transfer'}>){
  const input={...raw,scope:raw.scope||'private'};
- if(!['public','private'].includes(input.scope)||input.scope===input.targetScope)cloudPolicy.fail('Choose Safari or Journal.',400);
+ if(!['public','private'].includes(input.scope)||input.scope===input.targetScope)cloudPolicy.fail('Choose Hub or Journal.',400);
  const source=await cloudContext(request,input),target=await cloudContext(request,{...input,scope:input.targetScope,action:'load'});
  if(!source.userId||!source.row||!target.row)cloudPolicy.fail('Sign in to transfer a cloud.',401);
  if(source.owner||input.scope==='public')await cloudIdentifierStore([...cloudTree.forScope(input.scope),...(source.row!.nodes as unknown as CloudNode[])],source.devNumber);

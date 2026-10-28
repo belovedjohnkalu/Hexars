@@ -1,3 +1,4 @@
+import {openCloudControls} from '../helpers/cloudControlPopup';
 import {useEffect,useMemo,useRef,useState} from 'react';
 import {useLocation,useNavigate} from 'react-router-dom';
 import {CloudBoard} from './CloudBoard';
@@ -7,7 +8,7 @@ import {LoadingScreen} from './LoadingScreen';
 import {useDailyPuzzle} from '../helpers/useDailyPuzzle';
 import {gameFacing} from '../helpers/gameFacing';
 import {checkersStepView,pathPrefix} from '../helpers/checkersInteraction';
-import {controlsURL,cloudURL} from '../helpers/cloudRoutes';
+import {cloudURL} from '../helpers/cloudRoutes';
 import {puzzleRoot} from '../helpers/puzzleClouds';
 import {chessVariants} from '../helpers/chessVariants';
 import type {CloudNode} from '../endpoints/cloud_POST.schema';
@@ -39,7 +40,7 @@ export function PuzzleSpace({variant,nodes,userId,dev=false}:{variant:VariantId;
  return <section className={styles.space} data-puzzle-id={puzzle.id} data-puzzle-phase={phase} data-puzzle-version={puzzle.progress.version}>
   <div className={styles.heading}><h2>{goalLabel}</h2><p className={styles.side}>{['White','Black','Red'][puzzle.game.activePlayer]} to move</p><p className={styles.status} data-phase={phase} role="status" aria-live="polite">{live.busy?'Checking…':phase==='solved'?'Solved':phase==='wrong'?'Try another move':phase==='hint'?'Try this piece':'Today'}</p></div>
   <div className={styles.content}><div className={styles.board}><CloudBoard game={display!} selected={selected} onCell={choose} flipped={typeof facing==='boolean'?facing:false} rotation={typeof facing==='number'?facing:undefined} coordinates={false} theme="neutral" lastMove={phase==='solved'?last:path.length>1?{from:path[path.length-2],to:path[path.length-1]}:undefined} disabled={live.busy||phase==='solved'&&!practice}/></div>
-  <div className={styles.actions} aria-busy={live.busy}><CloudCanvas identity={'puzzles:'+(userId??'guest')} nodes={actions} parentId={id} scope="chess" opening={null} loading={false} showIdentifiers={dev} onOpen={(e,_id,to)=>{e.preventDefault();navigate(to);}} onHighlight={n=>navigate(controlsURL(n,'chess',location.pathname+location.search))} onCommand={n=>{if(n.id.endsWith('-hint'))void hint();else if(n.id.endsWith('-reset'))reset();}}/></div></div>
+  <div className={styles.actions} aria-busy={live.busy}><CloudCanvas identity={'puzzles:'+(userId??'guest')} nodes={actions} parentId={id} scope="chess" opening={null} loading={false} showIdentifiers={dev} onOpen={(e,_id,to)=>{e.preventDefault();navigate(to);}} onHighlight={n=>openCloudControls(n,'chess',location.pathname+location.search)} onCommand={n=>{if(n.id.endsWith('-hint'))void hint();else if(n.id.endsWith('-reset'))reset();}}/></div></div>
   {live.error&&<div className={styles.error} role="alert"><span>{live.error}</span><Button variant="ghost" onClick={()=>void live.reload()}>Retry</Button></div>}
  </section>;
 }

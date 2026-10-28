@@ -1,0 +1,6 @@
+.panel.panel{width:min(380px,calc(100vw - 32px));padding:22px;animation-duration:150ms;}
+.title.title{margin:0 50px 3px 0;font-size:20px;}
+.description.description{font-size:13px;margin:0 0 12px;}
+.loading{margin:18px 0;color:var(--muted-foreground);}
+.error{display:flex;align-items:center;gap:8px;color:var(--error);font-size:14px;}
+@media(prefers-reduced-motion:reduce){.panel.panel{animation:none;}}

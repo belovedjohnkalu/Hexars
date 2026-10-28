@@ -50,7 +50,7 @@
 :global(html:not([data-ion-dev="true"])) .node:focus-visible [data-rhombus-shape]{stroke:transparent;}:global(html:not([data-ion-dev="true"])) .node:focus-visible .text{text-decoration:underline;text-underline-offset:.2em;}:global(html:not([data-ion-dev="true"])) .node:focus-visible [data-photo-count]{outline:2px solid var(--rhombus-focus);outline-offset:3px;}
 
 .viewport[data-layout="tiled"] .picture [data-photo-count],.viewport[data-layout="tiled"] .picture img{border-radius:0;}
-.homeArt{background:var(--background);}.homeArt img{filter:invert(1) hue-rotate(180deg);}
+.node[data-node-id="a4f2cf74-a925-40fc-a293-4fbd96e7466d"] .text{font-family:ui-rounded,"SF Pro Rounded","Avenir Next","Trebuchet MS",sans-serif;font-weight:650;letter-spacing:-.02em;}
 
 /* Luminous type without enlarging tile hitboxes. */
 :global(html[data-ion-theme="dark"]) .node .text{text-shadow:0 0 20px color-mix(in srgb,currentColor 22%,transparent),0 0 42px color-mix(in srgb,currentColor 10%,transparent);}

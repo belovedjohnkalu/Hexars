@@ -43,3 +43,4 @@
 .error>span{min-width:0;overflow-wrap:anywhere;}
 
 .footer:has([data-composer-dock]){padding:0;}.bottom:has([data-composer-dock]){width:100%;max-width:none;}.app[data-keyboard=true] [data-composer-dock]{padding-bottom:8px;}
+.app[data-cloud="a4f2cf74-a925-40fc-a293-4fbd96e7466d"] .title{font-family:ui-rounded,"SF Pro Rounded","Avenir Next","Trebuchet MS",sans-serif;font-weight:650;letter-spacing:-.02em;}

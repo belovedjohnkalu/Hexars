@@ -11,12 +11,12 @@ import { systemClouds } from "./systemClouds";
 import { horizontalRuleClouds } from "./horizontalRules";
 import { wellischRuleClouds } from "./wellischRules";
 import type { CloudNode,CloudScope } from "../endpoints/cloud_POST.schema";
-const roots:CloudNode[]=[{"id": "hexagonal-chess", "parentId": null, "name": "Board Games", "imageUrl": "/_cdn/static/73922d54-c2d3-47e7-952e-07f83fbe44e7.png", "color": "blue"}, {"id": "public", "parentId": null, "name": "Safari", "color": "mint", "imageUrl":"/_cdn/static/73459c8d-8ae5-49db-a0c2-9d5b354c82a4.png"}, {"id": "private", "parentId": null, "name": "Journal", "color": "lavender", "imageUrl":"/_cdn/static/358b7227-6900-4d34-9670-740e52d2062a.png"}];
+const roots:CloudNode[]=[{"id": "hexagonal-chess", "parentId": null, "name": "Board Games", "imageUrl": "/_cdn/static/30263651-96cf-448a-a691-ec99bfbe0bf4-ion-boardgames-transparent.png", "color": "blue"}, {"id": "public", "parentId": null, "name": "Hub", "color": "mint", "imageUrl":"/_cdn/static/22186170-92cc-4a5d-9af2-494eb6272bbc-ion-hub-transparent.png"}, {"id": "private", "parentId": null, "name": "Journal", "color": "lavender", "imageUrl":"/_cdn/static/c23935b7-3f0d-4b50-b66e-091b7cb03c53-ion-journal-transparent.png"}];
 roots.forEach((n,i)=>{n.parentId='ion';n.destination='space';n.space=(['chess','public','private'] as const)[i];});
 roots.push(...systemClouds.filter(n=>n.parentId==='ion'));
 const homeSeed=[...interfaceSettingsClouds,systemClouds[0],...roots,...systemClouds.filter(n=>n.parentId==='controls'),...functionClouds.filter(n=>(n.parentId==='time'&&n.id!=='time-balance')||['time-added','time-spent','time-remaining'].includes(n.id)).map(n=>({...n,color:({ 'time-activity':'mint','time-send':'cyan','time-receive':'lavender','time-receipts':'rose','time-earn':'amber','time-prices':'blue','time-treasury':'amber','time-estimates':'lavender','time-added':'mint','time-spent':'coral','time-remaining':'amber'} as const)[n.id as 'time-activity'],href:'/?cloud='+n.id+'&space=home'}))];
 const seed:CloudNode[]=[
-{"id": "hexagonal-chess", "parentId": null, "name": "Board Games", "imageUrl": "/_cdn/static/73922d54-c2d3-47e7-952e-07f83fbe44e7.png", "color": "blue"},
+{"id": "hexagonal-chess", "parentId": null, "name": "Board Games", "imageUrl": "/_cdn/static/30263651-96cf-448a-a691-ec99bfbe0bf4-ion-boardgames-transparent.png", "color": "blue"},
 {"id": "engines", "parentId": "hexagonal-chess", "name": "Computer", "color": "coral"},
 {"id": "boards", "parentId": "hexagonal-chess", "name": "Boards", "color": "cyan"},
 {"id": "glinski-board", "parentId": "boards", "name": "Gliński’s Variant", "destination": "glinski", "isImage": true, "color": "cyan"},

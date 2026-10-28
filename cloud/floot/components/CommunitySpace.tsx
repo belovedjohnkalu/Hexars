@@ -1,3 +1,4 @@
+import {openCloudControls} from '../helpers/cloudControlPopup';
 import {communityIdentity} from '../helpers/communityIdentity';
 import {communityUndo} from '../helpers/communityUndo';
 import { useEffect, useRef, useState, useSyncExternalStore } from 'react';
@@ -12,7 +13,7 @@ import { PagedText } from './PagedText';
 import { Spinner } from './Spinner';
 import { useCommunity } from '../helpers/useCommunity';
 import { useCloudHold, useCloudHoldGuard } from '../helpers/useCloudHold';
-import { cloudURL, controlsURL } from '../helpers/cloudRoutes';
+import { cloudURL } from '../helpers/cloudRoutes';
 import { deviceData } from '../helpers/deviceData';
 import type { CloudNode } from '../endpoints/cloud_POST.schema';
 import type { CommunityTopic, CommunityReply } from '../endpoints/community_POST.schema';
@@ -31,7 +32,7 @@ export function CommunitySpace({roomId,nodes,userId,dev=false,className=''}:{roo
   const pending=useRef<{key:string;id:string}|null>(null),draftKey='community-draft:'+roomId+':'+(topicId||'new'),current=useRef('');current.current=String(userId)+':'+draftKey;
   const draftReady=useRef(false),firstField=useRef<HTMLInputElement|null>(null),textField=useRef<HTMLTextAreaElement|null>(null);
   const hold=useCloudHold(node=>{const t=live.data.topics?.find(t=>communityIdentity.topic(t.id)===node.id);if(t){setSelection({topic:t});setSheet('actions');return;}const reply=live.data.replies?.find(r=>communityIdentity.reply(r.id)===node.id);if(topic&&reply){setSelection({topic,reply});setSheet('actions');}});
-  const editLabelHold=useCloudHold(node=>{if(dev){setWriting(false);setSheet(null);navigate(controlsURL(node,'chess',location.pathname+location.search));}});
+  const editLabelHold=useCloudHold(node=>{if(dev){setWriting(false);setSheet(null);openCloudControls(node,'chess',location.pathname+location.search);}});
   const name=(id:string,fallback:string)=>nodes.find(n=>n.id==='chess-action-'+id)?.name||fallback;
   function labelHold(id:string){const n=nodes.find(n=>n.id==='chess-action-'+id);return dev&&n?editLabelHold.handlers(n):{};}
   useEffect(()=>{

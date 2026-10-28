@@ -62,6 +62,15 @@ components:
 ---
 # ION Design System
 
+## 0.75 — icon-led Home and in-place controls
+
+The Home tiles favor transparent, brushed-silver and blue companion artwork,
+with modest labels beneath. Console uses a rounded system face while the rest
+of the product keeps Inter. Hub, Console, Reserve and Settings share the same
+family of icons; old dark rectangular backplates are removed. A small tiled
+Controls dialog opens in place when a cloud is held. Its actions use existing
+permissions and editing flows, and the color wheel sits above the composer.
+
 ## 0.74 — Tiles only and direct IL navigation
 
 Tiles and their joined rhombus surfaces are the sole presentation on every

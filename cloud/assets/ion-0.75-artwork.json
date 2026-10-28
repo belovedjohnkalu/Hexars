@@ -1,0 +1,19 @@
+{
+  "release": "0.75",
+  "style": "Transparent brushed-silver and subtle blue ION companion icons",
+  "provenance": "Generated and background-edited from the existing ION icons, then uploaded to Floot asset storage",
+  "assets": {
+    "settings": "/_cdn/static/7b10e41f-8468-46ca-aeca-26a0e57c3717-ion-settings-transparent.png",
+    "hub": "/_cdn/static/22186170-92cc-4a5d-9af2-494eb6272bbc-ion-hub-transparent.png",
+    "console": "/_cdn/static/a4f0f02f-1726-45db-b130-a97be96f4ce1-ion-console-transparent.png",
+    "reserve": "/_cdn/static/f864addf-257e-412b-b49a-4abe66f700b9-ion-reserve-transparent.png",
+    "journal": "/_cdn/static/c23935b7-3f0d-4b50-b66e-091b7cb03c53-ion-journal-transparent.png",
+    "controls": "/_cdn/static/75eac983-9589-4893-b186-d1769e9bb10f-ion-controls-transparent.png",
+    "accounts": "/_cdn/static/39361196-e165-43fc-b5aa-7c954dafb70c-ion-accounts-transparent.png",
+    "boardGames": "/_cdn/static/30263651-96cf-448a-a691-ec99bfbe0bf4-ion-boardgames-transparent.png",
+    "hidden": "/_cdn/static/ac831181-4d44-42ff-873b-612ed6b72241-ion-hidden-transparent.png",
+    "prompts": "/_cdn/static/365d4fe1-dabf-4a9b-8fa4-24d612716922-ion-prompts-transparent.png",
+    "schedule": "/_cdn/static/c57c2070-6b19-4421-8b0f-9a9e2abe4a94-ion-schedule-transparent.png",
+    "randomGame": "/_cdn/static/feca5456-7684-4f65-804c-38d79a3c4b82-ion-random-transparent.png"
+  }
+}

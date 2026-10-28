@@ -8,3 +8,12 @@
 .author { margin-top:4px; font-size:14px; color:var(--foreground); opacity:.75; }
 
 .selectionName { white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.compact{position:relative;min-height:0;}
+.compact .selection{position:static;margin:0 0 12px;text-align:left;overflow:visible;pointer-events:auto;font-size:15px;}
+.compact .selectionName{white-space:normal;overflow-wrap:anywhere;}
+.compact .author{font-size:12px;margin-top:2px;}
+.compactMessage{color:var(--muted-foreground);margin:14px 0;}
+.actionGrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px;}
+.action.action{min-width:0;min-height:44px;height:auto;padding:9px 10px;justify-content:flex-start;gap:8px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);font-size:15px;line-height:1.2;white-space:normal;text-align:left;}
+.action svg{flex-shrink:0;}.action span{overflow-wrap:anywhere;}.action small{font:10px var(--font-family-monospace);color:var(--muted-foreground);}
+.action:focus-visible{outline:2px solid var(--primary);outline-offset:2px;}

@@ -21,7 +21,7 @@ export async function handle(request:Request){try{
  // hidden dev content and paid-feature discovery are identical to navigation.
  const snapshot=async(scope:CloudScope,targetId?:string):Promise<OutputType|null>=>{const id=targetId?.replace(/^function-u\d+:/,''),functionalId=id&&(dynamicTimeId(id)||timePageCloud(id))?id:undefined;const r=await loadCloud(new Request(new URL('/_api/cloud',request.url),{method:'POST',headers:{'Content-Type':'application/json',cookie:request.headers.get('cookie')||''},body:JSON.stringify({action:'load',scope,...credentials,...(functionalId?{functionalId}:{})}),signal:request.signal}));return r.ok?await r.json():null;};
  if(input.action==='search'){
-  const publicCloud=await snapshot('public');if(!publicCloud)fail('Safari search is unavailable. Try again.',503);
+  const publicCloud=await snapshot('public');if(!publicCloud)fail('Hub search is unavailable. Try again.',503);
   const query=input.query.toLocaleLowerCase(),items=publicCloud.nodes.filter(n=>n.name.toLocaleLowerCase().includes(query)||n.identifier?.toLocaleLowerCase().includes(query)).map(n=>({id:n.id,name:n.name,il:n.identifier!,scope:'public' as const,url:cloudILLocation(n,'public')})).filter(n=>!!n.il);
   const pages=Math.ceil(items.length/2),page=Math.min(input.page,Math.max(0,pages-1));return new Response(JSON.stringify({items:items.slice(page*2,page*2+2),page,pages,total:items.length}),{headers});
  }

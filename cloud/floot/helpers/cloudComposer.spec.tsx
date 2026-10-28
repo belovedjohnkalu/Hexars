@@ -15,6 +15,7 @@ describe("Cloud composer", () => {
     expect((view.getByRole("button",{name:"Add"}) as HTMLButtonElement).disabled).toBeTrue();
     expect(view.getByLabelText("Add a word or name your file")).toBeTruthy();
   });
+  it('places the color wheel above the input while editing',()=>{const view=render(<CloudComposer parentId={null} colors busy={false} disabled={false} draft={draft} onDraft={()=>{}} onAdd={async()=>true}/>),input=view.getByLabelText('Add a word or name your file');fireEvent.focus(input);const wheel=view.container.querySelector('[data-color-wheel]');expect(wheel).not.toBeNull();expect(wheel!.compareDocumentPosition(input)&Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();});
   it("saves to the current parent and clears only after success", async () => {
     const added:jasmine.Spy=jasmine.createSpy("add").and.resolveTo(true);
     const changed=()=>{};

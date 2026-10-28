@@ -3,13 +3,13 @@ import {wholeTileCounts,wholeTileFootprint,fittedTileFootprint} from './wholeTil
 import {tileTextLines} from './cloudText';
 import {identifierFootprint} from './cloudIdentifiers';
 import {proportionalCloudScale} from './proportionalCloudScale';
-export type MosaicItem={id:string;name:string;identifier?:string;imageUrl?:string;isImage?:boolean;percent:number;characters?:number;publishing?:string;annotation?:boolean;mediaAspect?:number};
+export type MosaicItem={id:string;name:string;identifier?:string;imageUrl?:string;isImage?:boolean;percent:number;characters?:number;publishing?:string;annotation?:boolean;mediaAspect?:number;iconEmphasis?:boolean};
 export function mosaicCloudLayout(items:MosaicItem[],width:number,height:number,measure:(text:string,size:number)=>number){
  items=items.filter(n=>!!n.name.trim()||!!n.isImage||!!n.imageUrl);
  if(!items.length)return{width,height,items:[],decorations:[],maxZoom:3};
  const counts=wholeTileCounts(items.map(n=>n.characters??0)),unit=96,proportions=proportionalCloudScale(items.map(n=>n.characters));
  const measured=items.map((item,i)=>{
-  const fontSize=68,captionSize=fontSize,printScale=proportions.scales[i],picture=!!(item.isImage||item.imageUrl),pictureSize=picture?144:0,logical=wholeTileFootprint(counts[i]),lines=tileTextLines(item.name,logical.bodyColumns),label=identifierFootprint(item.identifier);
+  const fontSize=item.iconEmphasis?32:68,captionSize=fontSize,printScale=proportions.scales[i],picture=!!(item.isImage||item.imageUrl),pictureSize=picture?(item.iconEmphasis?192:144):0,logical=wholeTileFootprint(counts[i]),lines=tileTextLines(item.name,logical.bodyColumns),label=identifierFootprint(item.identifier);
   const aspect=item.mediaAspect||1,pictureWidth=aspect<1?pictureSize*aspect:pictureSize,pictureHeight=aspect>1?pictureSize/aspect:pictureSize;
   const textWidth=Math.max(...lines.map(line=>measure(line,fontSize)),item.identifier?label.width:0,pictureWidth),blocks=Number(!!item.name.trim())+Number(picture)+Number(!!item.identifier)+Number(!!item.publishing)+Number(!!item.annotation),textHeight=(item.name.trim()?lines.length*fontSize*1.25:0)+(item.identifier?label.height:0)+(item.publishing?24:0)+(item.annotation?16:0)+pictureHeight+Math.max(0,blocks-1)*8;
   // Fit each occupied tile independently. One long label cannot inflate every

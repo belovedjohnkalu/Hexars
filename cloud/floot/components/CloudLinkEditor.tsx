@@ -9,7 +9,7 @@ import {PageControls} from './PageControls';
 import {Select as CloudScopeSelect,SelectTrigger,SelectValue,SelectContent,SelectItem} from './Select';
 import {Dialog,DialogContent,DialogTitle,DialogDescription} from './Dialog';
 import styles from './CloudLinkEditor.module.css';
-const scopeNames={private:'Journal',public:'Safari',chess:'Games',home:'ION',accounts:'Accounts',schedule:'Schedule'};
+const scopeNames={private:'Journal',public:'Hub',chess:'Games',home:'ION',accounts:'Accounts',schedule:'Schedule'};
 export function CloudLinkEditor({node,scope,nodes,busy,saveError,onClose,onSave,loadTarget}:{node:CloudNode;scope:CloudScope;nodes:CloudNode[];busy:boolean;saveError?:string;onClose:()=>void;onSave:(target:CloudRedirect|null,words?:number[])=>Promise<boolean>;loadTarget:(scope:CloudScope)=>Promise<OutputType>}){
  const [mode,setMode]=useState<'whole'|'words'|null>(null),[stage,setStage]=useState<'selection'|'destination'>('selection'),[words,setWords]=useState<number[]>(node.wordRedirect?.words||[]),[kind,setKind]=useState<'cloud'|'url'|'il'>('cloud'),[targetScope,setTargetScope]=useState(scope),[targetNodes,setTargetNodes]=useState(nodes),[chosen,setChosen]=useState(''),[url,setUrl]=useState(node.redirect?.kind==='url'?node.redirect.url:''),[il,setIL]=useState(node.redirect?.kind==='il'?node.redirect.il:''),[query,setQuery]=useState(''),[error,setError]=useState(''),[loading,setLoading]=useState(false),[resolving,setResolving]=useState(false),[page,setPage]=useState(0),[wordPage,setWordPage]=useState(0),[typing,setTyping]=useState(false),[choosingKind,setChoosingKind]=useState(true);
  const height=useViewportHeight(),condensed=typing&&height<500,perPage=height<650?1:2,wordsPerPage=height<550?3:6,queryInput=useRef<HTMLInputElement>(null);
