@@ -4,9 +4,9 @@ import { scheduleCalendar } from './scheduleCalendar';
 import { db } from './db';
 import { timeLedger } from './timeLedger';
 describe('Personal schedule privacy',()=>{
- it('keeps private entries account-bound while allowing dev edits to their own calendar scaffold',()=>{
+ it('allows dev edits within the resolved account workspace while keeping ordinary entries author-bound',()=>{
  const entry={id:'entry',parentId:'date',name:'Private',createdBy:7},date={id:'date',parentId:scheduleCalendar.root,name:'1',calendarDate:{year:2026,month:10,day:1}};
- expect(cloudPolicy.edit('schedule',entry,7,false)).toBeTrue();expect(cloudPolicy.edit('schedule',entry,8,true)).toBeFalse();expect(cloudPolicy.edit('schedule',entry,null,true)).toBeFalse();expect(cloudPolicy.edit('schedule',date,7,true)).toBeTrue();
+ expect(cloudPolicy.edit('schedule',entry,7,false)).toBeTrue();expect(cloudPolicy.edit('schedule',entry,8,true)).toBeTrue();expect(cloudPolicy.edit('schedule',entry,null,true)).toBeFalse();expect(cloudPolicy.edit('schedule',date,7,true)).toBeTrue();
  });
  it('selects a workspace by authenticated user ID, independent of dev flags or client credentials',async()=>{
  const conditions:unknown[][]=[],expected={id:'own-workspace',ownerId:7,nodes:[],version:0};

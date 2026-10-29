@@ -62,3 +62,19 @@ describe('Live word counter',()=>{
  it('counts whitespace-separated words as typed and hides pictures below the allowance',()=>{const view=render(<CloudComposer {...props}/>);expect(view.getByLabelText('0 words of 1')).toBeTruthy();fireEvent.change(view.getByLabelText('Add a word or name your file'),{target:{value:'One two'}});expect(view.getByLabelText('2 words of 1')).toBeTruthy();expect((view.getByRole('button',{name:'Add'}) as HTMLButtonElement).disabled).toBeTrue();expect(view.queryByRole('button',{name:'Choose media'})).toBeNull();});
  it('offers pictures only once another thousand words fit',()=>{const deep=[...nodes];for(let i=1;i<=10;i++)deep.push({id:'d'+i,parentId:i===1?'private':'d'+(i-1),name:'D'});const view=render(<CloudComposer {...props} nodes={deep} parentId="d10"/>);expect(view.getByRole('button',{name:'Choose media'})).toBeTruthy();fireEvent.change(view.getByLabelText('Add a word or name your file'),{target:{value:Array(25).fill('word').join(' ')}});expect(view.queryByRole('button',{name:'Choose media'})).toBeNull();});
 });
+
+
+describe('Dev composer allowance',()=>{
+ afterEach(cleanup);
+ it('accepts multi-word drafts and enables multimedia at the root for dev accounts',async()=>{
+  const saved=jasmine.createSpy('save').and.resolveTo(true),nodes=[{id:'private',parentId:null,name:'Journal'}];
+  const view=render(<CloudComposer dev parentId="private" scope="private" nodes={nodes} busy={false} disabled={false} draft={{name:''}} onDraft={()=>{}} onAdd={saved}/>);
+  expect(view.getByRole('button',{name:'Choose media'})).toBeTruthy();
+  const input=view.getByLabelText('Add a word or name your file');
+  const name=Array(100).fill('word').join(' ');fireEvent.change(input,{target:{value:name}});
+  expect(view.getByLabelText('100 words')).toBeTruthy();
+  expect((view.getByRole('button',{name:'Add'}) as HTMLButtonElement).disabled).toBeFalse();
+  await act(async()=>{fireEvent.submit(view.getByRole('form',{name:'Add to this cloud'}));});
+  expect(saved).toHaveBeenCalled();expect(saved.calls.mostRecent().args[0].name).toBe(name);
+ });
+});

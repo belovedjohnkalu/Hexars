@@ -61,7 +61,7 @@ export async function cloudService(request: Request,guestCatalog?:Pick<Awaited<R
     let version = row.version;
     const combine=(stored:CloudNode[])=>input.scope==='accounts'?accountDeviceNodes(context.seeds,stored):[...new Map([...context.seeds,...stored].map(n=>[n.id,n])).values()];
     const all=combine(nodes).filter(n=>!n.removedBy);
-    if(input.scope==='home'&&input.action!=='load'&&input.action!=='upload'){
+    if(input.scope==='home'&&!context.isDev&&input.action!=='load'&&input.action!=='upload'){
       const dates=new Set(all.filter(n=>n.id===scheduleCalendar.root||n.calendarDate).map(n=>n.id));
       if(('parentId' in input&&input.parentId&&dates.has(input.parentId))||('id' in input&&dates.has(input.id)&&input.action!=='rename'))cloudPolicy.fail('Open your private Schedule to add or change entries.',403);
     }
@@ -93,8 +93,8 @@ export async function cloudService(request: Request,guestCatalog?:Pick<Awaited<R
           const keys=await mapPhotos(input.images,image=>validateCloudPhoto("ion/"+row.id+"/"+context.userId+"/"+input.id+"/"+image.id+"."+extensions[image.contentType],image.contentType));
           node.imageKeys=keys;node.mediaTypes=input.images.map(i=>i.contentType);node.mediaDimensions=input.images.map(i=>i.dimensions||null);node.isImage=true;
         }
-        uniqueCloudNames(all,[...all,node]);assertCloudWordLimits(all,[...all,node],input.scope);
-        assertCloudCapacity([...context.seeds,...nodes],[...context.seeds,...nodes,node]);
+        uniqueCloudNames(all,[...all,node],context.isDev);assertCloudWordLimits(all,[...all,node],input.scope,context.isDev);
+        assertCloudCapacity([...context.seeds,...nodes],[...context.seeds,...nodes,node],context.isDev);
         nodes = [...nodes, node];
         const updated = await db.updateTable("ionWorkspaces").set({ nodes: nodes as unknown as Json, version: row.version + 1, updatedAt: new Date() })
           .where("id", "=", row.id).where("version", "=", row.version).returning("version").executeTakeFirst();
@@ -126,8 +126,8 @@ export async function cloudService(request: Request,guestCatalog?:Pick<Awaited<R
       let next=cloudChanges.apply(nodes,input,row.version,context.seeds,verifiedImages);
       if(input.action==='copy')next=next.map(n=>n.copyOperation===input.operationId?{...n,createdBy:context.userId!}:n);
       if(next!==nodes){
-        uniqueCloudNames([...context.seeds,...nodes],[...context.seeds,...next]);assertCloudWordLimits([...context.seeds,...nodes],[...context.seeds,...next],input.scope);
-        assertCloudCapacity([...context.seeds,...nodes],[...context.seeds,...next]);
+        uniqueCloudNames([...context.seeds,...nodes],[...context.seeds,...next],context.isDev);assertCloudWordLimits([...context.seeds,...nodes],[...context.seeds,...next],input.scope,context.isDev);
+        assertCloudCapacity([...context.seeds,...nodes],[...context.seeds,...next],context.isDev);
         const updated=(input.action==='rename'||input.action==='update')&&(input.scope==='home'||input.scope==='chess')&&input.id==='hexagonal-chess'?await saveSharedRootName(row.id,row.version,next):await db.updateTable("ionWorkspaces").set({nodes:next as unknown as Json,version:row.version+1,updatedAt:new Date()}).where("id","=",row.id).where("version","=",row.version).returning("version").executeTakeFirst();
         if(!updated)throw new CloudError("Your cloud changed. Try again.",409);
         nodes=next;version=updated.version;

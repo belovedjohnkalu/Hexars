@@ -18,5 +18,13 @@ describe('Authenticated Safari API protection',()=>{
  });
  async function request(body:unknown){const {SignJWT}=await import('jose');const token=await new SignJWT({id:'test-session',createdAt:Date.now(),lastAccessed:Date.now()}).setProtectedHeader({alg:'HS256'}).setExpirationTime('1h').sign(new TextEncoder().encode(process.env.JWT_SECRET));return new Request('https://example.invalid/_api/cloud',{method:'POST',headers:{cookie:'floot_built_app_session='+token,'Content-Type':'application/json'},body:JSON.stringify(body)});}
  it('recognizes any registered dev for Safari, allowing shared Home content editing',async()=>{const {cloudContext}=await import('./cloudContext');member=true;expect((await cloudContext(await request({}),{...credentials,action:'load'})).owner).toBeTrue();expect((await cloudContext(await request({}),{...credentials,scope:'home',action:'load'})).owner).toBeTrue();member=false;expect((await cloudContext(await request({}),{...credentials,action:'load'})).owner).toBeFalse();});
+ it('does not let caller-supplied dev flags bypass word or duplicate-name limits',async()=>{
+  const {handle}=await import('../endpoints/cloud_POST');
+  for(const name of ['Three separate words','Author word']){
+   const response=await handle(await request({...credentials,action:'add',id:'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb',parentId:'public',name,version:0,dev:true,owner:true}));
+   expect(response.status).toBe(422);
+  }
+  expect(writes).not.toContain('ionWorkspaces');
+ });
  it('rejects forged permissions before writing words for all four protected actions',async()=>{const {handle}=await import('../endpoints/cloud_POST');for(const input of [{action:'update',name:'Forged',note:'Forged',photoMode:'keep'},{action:'rename',name:'Forged'},{action:'link',target:{kind:'url',url:'https://example.invalid'}},{action:'move',parentId:'public'},{action:'remove',operationId:'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb',expectedCount:0}]){const response=await handle(await request({...credentials,...input,id:'foreign',version:0,owner:true,dev:true,canEdit:true,createdBy:8}));expect(response.status).withContext(input.action).toBe(403);}expect(writes).not.toContain('ionWorkspaces');});
 });

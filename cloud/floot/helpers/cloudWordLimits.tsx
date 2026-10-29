@@ -13,7 +13,8 @@ function resolver(nodes:CloudNode[]){
  };
 }
 export function cloudWordLimit(nodes:CloudNode[],parentId:string|null){return resolver(nodes)(parentId);}
-export function assertCloudWordLimits(before:CloudNode[],after:CloudNode[],scope:CloudScope){
+export function assertCloudWordLimits(before:CloudNode[],after:CloudNode[],scope:CloudScope,isDev=false){
+ if(isDev)return;
  if(scope!=='private'&&scope!=='public')return;
  const old=new Map(before.map(n=>[n.id,n])),previousLimit=resolver(before),nextLimit=resolver(after);
  for(const node of after){if(node.removedBy||!node.parentId)continue;const prior=old.get(node.id),limit=nextLimit(node.parentId);

@@ -18,3 +18,12 @@ describe('ION bounded clouds and recovery',()=>{
  it('gives Pre-Beginner exactly half of Beginner’s native time and node allowance',()=>{expect(tacticalLevels[0].level).toBe(0);expect(tacticalLevels[0].limits.timeMs*2).toBe(tacticalLevels[1].limits.timeMs);expect(tacticalLevels[0].limits.nodeLimit*2).toBe(tacticalLevels[1].limits.nodeLimit);});
  it('accepts only the shared color palette',()=>{const request={action:'add',scope:'private',workspaceId:'123e4567-e89b-42d3-a456-426614174000',accessToken:'a'.repeat(64),id:'123e4567-e89b-42d3-a456-426614174001',parentId:'private',name:'Blue',version:0};expect(schema.safeParse({...request,color:'blue'}).success).toBeTrue();expect(schema.safeParse({...request,color:'url(javascript:bad)'}).success).toBeFalse();});
 });
+
+
+describe('Dev droplet capacity',()=>{
+ it('allows verified devs to grow beyond the regular sibling limit',()=>{
+  const many=Array.from({length:1025},(_,i)=>({id:'dev-'+i,parentId:'parent',name:'Same'}));
+  expect(()=>assertCloudCapacity([],many,true)).not.toThrow();
+  expect(()=>assertCloudCapacity([],many,false)).toThrow();
+ });
+});

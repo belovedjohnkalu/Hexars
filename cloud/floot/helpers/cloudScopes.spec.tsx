@@ -12,3 +12,14 @@ describe('Scoped cloud permissions and navigation',()=>{
  it('uses a distinct illustrated paragraph cloud for each rule',()=>{const seeds=cloudTree.forScope('chess');for(const variant of ['glinski','mccooey','shafran']){const paragraphs=seeds.filter(n=>n.parentId===variant+'-rules');expect(paragraphs.length).toBeGreaterThanOrEqual(18);expect(paragraphs.every(n=>!!n.note&&!!n.illustration&&n.variant===variant)).toBeTrue();}expect(seeds.some(n=>n.name==='Complete Rules')).toBeFalse();expect(seeds.find(n=>n.id==='mccooey-rule-double-9')?.note).toContain('cannot advance twice');});
  it('offers six progressively larger native search budgets before choosing a board',()=>{expect(tacticalLevels.length).toBe(6);for(let i=1;i<6;i++){expect(tacticalLevels[i].limits.timeMs).toBeGreaterThan(tacticalLevels[i-1].limits.timeMs);expect(tacticalLevels[i].limits.depth).toBeGreaterThanOrEqual(tacticalLevels[i-1].limits.depth);expect(tacticalLevels[i].limits.nodeLimit).toBeGreaterThan(tacticalLevels[i-1].limits.nodeLimit);}expect(cloudTree.seed.filter(n=>n.parentId==='engines').map(n=>n.level)).toEqual([0,1,2,3,4,5]);});
 });
+
+
+describe('Dev editing coverage',()=>{
+ it('allows registered devs to edit built-in and custom Schedule clouds',()=>{
+  for(const node of [{id:'template',parentId:null,name:'Schedule'},{id:'entry',parentId:'template',name:'Entry',createdBy:7}]){
+   expect(cloudPolicy.edit('schedule',node,1,true)).toBeTrue();
+   expect(cloudPolicy.edit('schedule',node,1,false)).toBeFalse();
+   expect(cloudPolicy.edit('schedule',node,null,false)).toBeFalse();
+  }
+ });
+});

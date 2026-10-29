@@ -21,3 +21,13 @@ describe('Keep children preserves existing contents',()=>{it('grandfathers prese
  expect(()=>assertCloudWordLimits(before,after,'private')).not.toThrow();
  expect(()=>assertCloudWordLimits(before,after.map(n=>n.id==='words'?{...n,name:'Changed four words here'}:n),'private')).toThrow();
 });});
+
+
+describe('Dev word allowance',()=>{
+ it('allows unrestricted words and multimedia at any depth for verified devs',()=>{
+  const added={id:'dev-word',parentId:'private',name:Array(200).fill('words').join(' '),imageKeys:['clip'],mediaTypes:['video/mp4' as const]};
+  expect(()=>assertCloudWordLimits(nodes,[...nodes,added],'private',true)).not.toThrow();
+  expect(()=>assertCloudWordLimits(nodes,[...nodes,added],'private',false)).toThrow();
+  expect(()=>assertCloudWordLimits(nodes,[...nodes,{...added,parentId:'public'}],'public',true)).not.toThrow();
+ });
+});

@@ -33,9 +33,9 @@ export async function cloudTransfer(request:Request,raw:Extract<InputType,{actio
   const ids=transferNodeIds(group,input.id,input.operationId,input.mode==='copy',randomUUID);
   if(existing.some(n=>[...ids.values()].includes(n.id)))cloudPolicy.fail('This cloud is already in the destination.',409);
   const added=cloudTransferNodes(group,ids,input.id,input.targetParent,input.operationId,uid,input.mode==='copy');
-  uniqueCloudNames([...cloudTree.forScope(input.targetScope),...existing],[...cloudTree.forScope(input.targetScope),...existing,...added]);
-  assertCloudWordLimits([...cloudTree.forScope(input.targetScope),...existing],[...cloudTree.forScope(input.targetScope),...existing,...added],input.targetScope);
-  assertCloudCapacity([...cloudTree.forScope(input.targetScope),...existing],[...cloudTree.forScope(input.targetScope),...existing,...added]);
+  uniqueCloudNames([...cloudTree.forScope(input.targetScope),...existing],[...cloudTree.forScope(input.targetScope),...existing,...added],source.isDev);
+  assertCloudWordLimits([...cloudTree.forScope(input.targetScope),...existing],[...cloudTree.forScope(input.targetScope),...existing,...added],input.targetScope,source.isDev);
+  assertCloudCapacity([...cloudTree.forScope(input.targetScope),...existing],[...cloudTree.forScope(input.targetScope),...existing,...added],source.isDev);
   await tx.updateTable('ionWorkspaces').set({nodes:[...existing,...added] as unknown as Json,version:b.version+1,updatedAt:new Date()}).where('id','=',b.id).execute();
   if(input.mode==='move')await tx.updateTable('ionWorkspaces').set({nodes:stored.filter(n=>!ids.has(n.id)) as unknown as Json,version:a.version+1,updatedAt:new Date()}).where('id','=',a.id).execute();
   await tx.insertInto('ionCloudTransfers').values({operationId:input.operationId,userId:uid,sourceWorkspace:sourceId,targetWorkspace:targetId,sourceNode:input.id,targetParent:input.targetParent,kind:input.mode}).execute();

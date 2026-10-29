@@ -5,3 +5,14 @@ describe('Exact sibling words',()=>{
  it('permits different parents, case-sensitive words and separate picture-only clouds',()=>{expect(()=>uniqueCloudNames([a],[a,{...b,parentId:'other',name:'Hello'}])).not.toThrow();expect(()=>uniqueCloudNames([a],[a,{...b,name:'hello'}])).not.toThrow();expect(()=>uniqueCloudNames([],[{...a,name:'',isImage:true},{...b,name:'',isImage:true}])).not.toThrow();});
  it('does not rewrite old duplicates or mistake an overridden seed for a sibling',()=>{const before=[a,{...b,name:'Hello'}];expect(()=>uniqueCloudNames(before,before.map(n=>({...n,color:'blue' as const})))).not.toThrow();expect(()=>uniqueCloudNames([a],[a,{...a,name:'Edited'}])).not.toThrow();});
 });
+
+
+describe('Dev duplicate names',()=>{
+ it('permits identical siblings on add, rename, move, copy and restore for verified devs',()=>{
+  const first={id:'first',parentId:'parent',name:'Same'},same={id:'second',parentId:'parent',name:'Same'};
+  for(const before of [[first],[first,{...same,name:'Different'}],[first,{...same,parentId:'another'}],[first,{...same,removedBy:'operation'}]]){
+   expect(()=>uniqueCloudNames(before,[first,same],true)).not.toThrow();
+   expect(()=>uniqueCloudNames(before,[first,same],false)).toThrow();
+  }
+ });
+});

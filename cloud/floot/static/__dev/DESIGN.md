@@ -439,3 +439,8 @@ The visible navigation bubble now uses Up/Down: actual hierarchy ascent and the 
 ## Kruzno pass-and-play orientation
 
 Kruzno starts with Black at the lower left. In pass and play, the shared board turns 180 degrees after each completed turn so the next player faces the board; partial capture paths do not rotate it. History and undo follow the displayed position, while a manual flip remains an offset. Computer, online and puzzle viewpoints retain their existing behavior. The existing piece and board transitions and reduced-motion support remain in place.
+
+
+## Dev content editing
+
+Server-registered dev accounts have no depth-based word allowance, multimedia word allowance, sibling-count limit or duplicate sibling-name restriction. The web composer and editor follow the authenticated workspace's dev flag; server mutations and cross-workspace transfers derive the exemption from ionDevAccounts. The journal plugin reports no word limit for a verified dev and uses that same exemption on writes. Devs may edit built-in and custom clouds in every workspace they can access, including Schedule templates; ordinary account permissions and content limits remain. Permanent IDs, account isolation, version checks and acyclic hierarchy validation stay authoritative.

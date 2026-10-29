@@ -21,10 +21,10 @@ import styles from './CloudComposer.module.css';
 type Draft={name:string;file?:File;photos?:CloudPhotoDraft[];color?:CloudColor;retainMedia?:number[]};
 export type CloudSubmission=Draft&{id:string;parentId:string|null;uploaded?:boolean;openAfter?:boolean;retainMedia?:number[]};
 type Submission=CloudSubmission;
-export function CloudComposer({parentId,busy,disabled,onAdd,draft,onDraft,uploading=false,onCancelUpload,colors=false,scope='private',usedColors=[],nodes=[],className='',onSearch,storageKey,editNode,onCancel,onEnter}:{parentId:string|null;busy:boolean;disabled:boolean;draft:Draft;onDraft:(draft:Draft)=>void;onAdd:(value:Submission)=>Promise<boolean>;uploading?:boolean;onCancelUpload?:()=>void;colors?:boolean;scope?:CloudScope;usedColors?:(CloudColor|undefined)[];nodes?:CloudNode[];className?:string;onSearch?:()=>void;storageKey?:string;editNode?:CloudNode;onCancel?:()=>void;onEnter?:(value:Submission)=>void}){
+export function CloudComposer({parentId,busy,disabled,onAdd,draft,onDraft,uploading=false,onCancelUpload,colors=false,dev=false,scope='private',usedColors=[],nodes=[],className='',onSearch,storageKey,editNode,onCancel,onEnter}:{parentId:string|null;busy:boolean;disabled:boolean;draft:Draft;onDraft:(draft:Draft)=>void;onAdd:(value:Submission)=>Promise<boolean>;uploading?:boolean;onCancelUpload?:()=>void;colors?:boolean;dev?:boolean;scope?:CloudScope;usedColors?:(CloudColor|undefined)[];nodes?:CloudNode[];className?:string;onSearch?:()=>void;storageKey?:string;editNode?:CloudNode;onCancel?:()=>void;onEnter?:(value:Submission)=>void}){
  const navigation=useComposerNavigation(),countId=editNode?'cloud-edit-word-count':'cloud-word-count';
  const randomColors=useRandomWordColor();
- const limit=(scope==='public'||scope==='private')&&nodes.length?cloudWordLimit(nodes,parentId):undefined;
+ const limit=!dev&&(scope==='public'||scope==='private')&&nodes.length?cloudWordLimit(nodes,parentId):undefined;
  const form=useForm({defaultValues:{name:draft.name},schema:z.object({name:cloudNames.schema(scope,true,limit)})});
  const [retained,setRetained]=useState<number[]>(()=>draft.retainMedia??cloudPhotoUrls(editNode||{id:'',name:'',parentId:null}).map((_,i)=>i));
  const [editing,setEditing]=useState(!!editNode),[color,setColor]=useState<CloudColor>(()=>draft.color?unusedColor(draft.color,usedColors):randomColors.enabled?nextRandomWordColor(usedColors):unusedColor('white',usedColors));
