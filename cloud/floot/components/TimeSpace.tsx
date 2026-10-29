@@ -80,7 +80,7 @@ function TimeSpaceBody(){
  async function copyText(text:string){try{await navigator.clipboard.writeText(text);setMessage('Copied');}catch{setCopy(text);}}
  const activityFailed=activity&&activityQuery.isError&&!activityQuery.data;
  const error=time.error||activityQuery.error?.message||receiptQuery.error?.message||admin.error?.message;
- if(id==='time')return <Navigate to={route('time')} replace/>;
+ if(id==='time'||id==='time-activity'&&content.ready&&!content.nodes.some(n=>n.id===id))return <Navigate to={route('time')} replace/>;
  if(id==='time-product'&&snapshot&&!product)return <Navigate to={route('time-prices')} replace/>;
  nodes.push(...content.nodes.filter(n=>n.parentId===id&&!nodes.some(item=>item.id===n.id)));
  return <div className={styles.app} data-time-page={id}><AppHead title={title+' · ION'} iconUrl={content.nodes.find(n=>n.id==='time')?.imageUrl}/><header className={styles.header}><Button asChild variant="ghost" className={styles.home} size="icon"><Link to={id==='time'?'/':route('time')} aria-label={id==='time'?'Open ION':'Open Reserve'}><Home size={19}/></Link></Button><h1 ref={heading} tabIndex={-1} ><button type="button" {...refreshTitle.handlers} onClick={refreshTitle.handlers.onClick}>{title}</button></h1><span/></header>

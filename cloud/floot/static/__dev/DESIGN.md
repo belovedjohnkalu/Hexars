@@ -444,3 +444,8 @@ Kruzno starts with Black at the lower left. In pass and play, the shared board t
 ## Dev content editing
 
 Server-registered dev accounts have no depth-based word allowance, multimedia word allowance, sibling-count limit or duplicate sibling-name restriction. The web composer and editor follow the authenticated workspace's dev flag; server mutations and cross-workspace transfers derive the exemption from ionDevAccounts. The journal plugin reports no word limit for a verified dev and uses that same exemption on writes. Devs may edit built-in and custom clouds in every workspace they can access, including Schedule templates; ordinary account permissions and content limits remain. Permanent IDs, account isolation, version checks and acyclic hierarchy validation stay authoritative.
+
+
+## Reserve totals
+
+Activity has been removed from the shared Reserve using keep-droplets deletion. Added, Spent and Balance, and any custom direct droplets, retain their identities and stored presentation in Reserve. Live total projection preserves each stored parent instead of reparenting it; Reserve shows the existing eligible-earning display timer. Deleted Activity links return to Reserve. Ledger entries, balances and transactions are unchanged.
