@@ -445,6 +445,10 @@ Kruzno starts with Black at the lower left. In pass and play, the shared board t
 
 Server-registered dev accounts have no depth-based word allowance, multimedia word allowance, sibling-count limit or duplicate sibling-name restriction. The web composer and editor follow the authenticated workspace's dev flag; server mutations and cross-workspace transfers derive the exemption from ionDevAccounts. The journal plugin reports no word limit for a verified dev and uses that same exemption on writes. Devs may edit built-in and custom clouds in every workspace they can access, including Schedule templates; ordinary account permissions and content limits remain. Permanent IDs, account isolation, version checks and acyclic hierarchy validation stay authoritative.
 
+## ION home icons
+
+Home artwork retains its existing editable images and gains an independent, three-dimensional treatment: each icon counters the skew of its rhombus plane, receives a subtle perspective and silhouette shadow, and gently lifts on desktop hover or keyboard focus. The tiled layout, captions, hitboxes and image accessibility remain. On very narrow screens the initial camera fits the whole home layout; pinch and keyboard zoom remain available. Other pages remain unchanged. Reduced motion removes the transition; forced colors remove the shadow.
+
 
 ## Reserve totals
 

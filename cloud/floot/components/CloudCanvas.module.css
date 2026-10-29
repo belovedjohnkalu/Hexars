@@ -64,3 +64,32 @@
 /* Captured pointer events still arrive; descendants must leave drag hit testing. */
 .node[data-dragging=true],.node[data-dragging=true] *{pointer-events:none!important;}
 .node[data-drop-target=true] [data-rhombus-shape]{stroke:var(--word-mint);stroke-width:4;}
+
+/* Home artwork floats above its rhombus. Counter the printed-plane skew so
+   the existing three-dimensional illustrations keep their intended shape. */
+.canvas[data-home="true"] [data-node-id] [data-photo-count]{
+  --home-icon-face:matrix(1,0,0,1,0,0);
+  overflow:visible;
+  transform-origin:center;
+  transform:var(--home-icon-face) perspective(900px) rotateX(4deg) rotateY(-5deg);
+  filter:drop-shadow(0 7px 3px rgb(25 37 55 / .25)) drop-shadow(0 16px 12px rgb(25 37 55 / .16));
+  transition:transform 360ms var(--ease),filter 360ms var(--ease);
+}
+.canvas[data-home="true"] [data-plane="0"] ~ [data-printed-plane] [data-photo-count]{--home-icon-face:matrix(.519615,.519615,-.9,.9,0,0);}
+.canvas[data-home="true"] [data-plane="1"] ~ [data-printed-plane] [data-photo-count]{--home-icon-face:matrix(1.03923,-.519615,0,.9,0,0);}
+.canvas[data-home="true"] [data-plane="2"] ~ [data-printed-plane] [data-photo-count]{--home-icon-face:matrix(1.03923,.519615,0,.9,0,0);}
+@media(hover:hover) and (pointer:fine){
+  .canvas[data-home="true"] [data-node-id]:hover [data-photo-count]{
+    transform:var(--home-icon-face) perspective(900px) rotateX(1deg) rotateY(-2deg) translateY(-4px) scale(1.04);
+    filter:drop-shadow(0 10px 4px rgb(25 37 55 / .27)) drop-shadow(0 21px 15px rgb(25 37 55 / .19));
+  }
+}
+.canvas[data-home="true"] [data-node-id]:focus-visible [data-photo-count]{
+  transform:var(--home-icon-face) perspective(900px) rotateX(1deg) rotateY(-2deg) translateY(-4px) scale(1.04);
+  filter:drop-shadow(0 10px 4px rgb(25 37 55 / .27)) drop-shadow(0 21px 15px rgb(25 37 55 / .19));
+}
+:global(html[data-ion-theme="dark"]) .canvas[data-home="true"] [data-node-id] [data-photo-count]{
+  filter:drop-shadow(0 7px 3px rgb(0 0 0 / .6)) drop-shadow(0 16px 13px rgb(76 136 210 / .16));
+}
+@media(prefers-reduced-motion:reduce){.canvas[data-home="true"] [data-node-id] [data-photo-count]{transition:none;}}
+@media(forced-colors:active){.canvas[data-home="true"] [data-node-id] [data-photo-count]{filter:none!important;}}
