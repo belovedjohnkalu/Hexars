@@ -66,7 +66,7 @@ function LivePlay({variant}:{variant:VariantId}){
  const chat=useMatchChat(data?.gameId,authState.type==='authenticated'?authState.user.id:null,online&&!ended);
  useEffect(()=>{if(!online||!data||ended)return;const frame=requestAnimationFrame(()=>{if(matchMedia('(hover: hover) and (pointer: fine)').matches&&!document.querySelector('[role=dialog]'))chatInput.current?.focus({preventScroll:true});});return()=>cancelAnimationFrame(frame);},[online,data?.gameId,ended]);
  const basePlayer=data?.mode==='two_players'?(shown?.activePlayer??0):(data?.humanPlayer??0);
- const facing=useBoardFacing(data?.gameId,shown?.ply,gameFacing(variant,basePlayer,viewOffset));
+ const facing=useBoardFacing(data?.gameId,shown?.ply,gameFacing(variant,basePlayer,viewOffset,data?.mode==='two_players'));
  const selectedGame=!!gameSessions.fromHash()||!!data&&data.mode===mode&&(mode==='two_players'||data.difficulty===difficulty&&resolveEngineId(data.engineId)===engineId);
  const canPlay=selectedGame&&!!game&&!ended&&!cloud.offline&&!cloud.playingTurn&&!cloud.busy&&!cloud.switchingSide&&!cloud.error&&!thinking&&(data?.mode!=='online'||game.activePlayer===data.humanPlayer)&&!facing.turning&&!review&&!reviewBusy;
  const candidates=game?.legalMoves.filter(m=>selected&&key(m.from)===key(selected))||[];
