@@ -449,6 +449,10 @@ Server-registered dev accounts have no depth-based word allowance, multimedia wo
 
 Home artwork retains its existing editable images and gains an independent, three-dimensional treatment: each icon counters the skew of its rhombus plane, receives a subtle perspective and silhouette shadow, and gently lifts on desktop hover or keyboard focus. The tiled layout, captions, hitboxes and image accessibility remain. On very narrow screens the initial camera fits the whole home layout; pinch and keyboard zoom remain available. Other pages remain unchanged. Reduced motion removes the transition; forced colors remove the shadow.
 
+## Mobile cloud movement
+
+On touch-first mobile devices, dragging a cloud does not relocate it and Controls does not offer Move. Panning, zooming, opening, editing and duplicating remain available. Desktop retains drag-to-move and the Move action. A switch to touch-first input cancels any uncommitted drag.
+
 
 ## Reserve totals
 

@@ -40,7 +40,7 @@ export function useMediaQuery(
   }: UseMediaQueryOptions = {},
 ): boolean {
   const getMatches = (query: string): boolean => {
-    if (IS_SERVER) {
+    if (IS_SERVER || typeof window.matchMedia !== "function") {
       return defaultValue;
     }
     return window.matchMedia(query).matches;
@@ -59,6 +59,7 @@ export function useMediaQuery(
   }
 
   useLayoutEffect(() => {
+    if (typeof window.matchMedia !== "function") return;
     const matchMedia = window.matchMedia(query);
 
     // Triggered at the first client-side load and if query changes

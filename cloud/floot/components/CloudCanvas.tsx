@@ -1,5 +1,6 @@
 import {cloudEditRequest} from '../helpers/cloudEditRequest';
 import {useCloudDrag} from '../helpers/useCloudDrag';
+import {useMediaQuery} from '../helpers/useMediaQuery';
 import {cloudMediaAspect} from '../helpers/cloudMediaAspect';
 import {useTiledUI,layoutCloud} from '../helpers/useTiledUI';
 import {CloudPublishingStatus} from './CloudPublishingStatus';
@@ -52,7 +53,8 @@ export function CloudCanvas({tabularNumbers=false,fitOnChange=false,nodes,parent
   return {...packed,generation:(saved?.generation||0)+(removed?1:0)};
  },[siblings,size,fontReady,scope,square,boardGrid,layoutKey,showIdentifiers,parentId,tabularNumbers,coarsePointer,tiled]);
  useLayoutEffect(()=>{if(!fontReady||loading)return;lastLayout.current={key:layoutKey,viewportWidth:size.width,generation:layout.generation,layout};layoutCache.delete(layoutKey);layoutCache.set(layoutKey,lastLayout.current);if(layoutCache.size>128)layoutCache.delete(layoutCache.keys().next().value!);},[layout,size.width,fontReady,loading,layoutKey]);
- const dragging=useCloudDrag(nodes,onDropCloud,hold.cancel);
+ const touchMobile=useMediaQuery('(pointer: coarse) and (hover: none)');
+ const dragging=useCloudDrag(nodes,touchMobile?undefined:onDropCloud,hold.cancel);
  const bounds=layout.items.length?{x:Math.min(...layout.items.map(n=>n.x)),y:Math.min(...layout.items.map(n=>n.y)),width:0,height:0}:undefined;
  if(bounds){bounds.width=Math.max(...layout.items.map(n=>n.x+n.width))-bounds.x;bounds.height=Math.max(...layout.items.map(n=>n.y+n.height))-bounds.y;}
  const minimumFit=layout.minFitZoom??(siblings.length<=12?.05:Math.max(.08,Math.min(.28,Math.sqrt(8/Math.max(8,siblings.length))*.28)));
